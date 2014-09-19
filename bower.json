@@ -1,0 +1,22 @@
+{
+  "name": "MediaHound-JavaScript-API-Library",
+  "version": "0.01",
+  "description": "The ES6 based JavaScript library for interfacing with the RESTful MediaHound API.",
+  "private":true,
+  "moduleType": [
+    "amd",
+    "es6",
+    "globals",
+    "node"
+  ],
+  "license": "http://www.mediahound.com/license",
+  "homepage": "http://www.mediahound.com",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "src",
+    "test",
+    "tests"
+  ]
+}
