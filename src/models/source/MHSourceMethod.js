@@ -1,9 +1,10 @@
-/*global MHSourceFormat */
 
 //@property (strong, nonatomic, readonly) NSString<Ignore>* displayName;
 // ^^ not needed? don't see implementation in Obj-C version
 
 //- (SourceFormat*)formatForType:(NSString*)type;
+
+import { MHSourceFormat } from './MHSourceFormat.js';
 
 // MediaHound SourceMethod Object
 export class MHSourceMethod {
@@ -38,7 +39,7 @@ export class MHSourceMethod {
       try{
         args = JSON.parse(args);
       } catch(e) {
-        throw TypeError('Args typeof string but not JSON in MHSourceMethod', 'MHSourceMethod.js', 28);
+        throw new TypeError('Args typeof string but not JSON in MHSourceMethod', 'MHSourceMethod.js', 28);
       }
     }
 
@@ -46,7 +47,7 @@ export class MHSourceMethod {
         formats = args.formats  || null;
 
     if( type === null || formats === null ){
-      throw TypeError('Type or formats not defined on args array in MHSourceMethod', 'MHSourceMethod.js', 41);
+      throw new TypeError('Type or formats not defined on args array in MHSourceMethod', 'MHSourceMethod.js', 41);
     }
 
     // Map formats to be array of MHSourceFormats instead of object array

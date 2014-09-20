@@ -1,7 +1,8 @@
-/*global MHSourceMethod */
 
 // TODO
 //- (SourceMethod*)methodForType:(NSString*)type;
+
+import { MHSourceMethod } from './MHSourceMethod.js';
 
 // MediaHound SourceMedium Object
 export class MHSourceMedium {
@@ -37,7 +38,7 @@ export class MHSourceMedium {
       try{
         args = JSON.parse(args);
       } catch(e) {
-        throw TypeError('Args typeof string but not JSON in MHSourceMedium', 'MHSourceMedium.js', 28);
+        throw new TypeError('Args typeof string but not JSON in MHSourceMedium', 'MHSourceMedium.js', 28);
       }
     }
 

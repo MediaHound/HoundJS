@@ -33,7 +33,7 @@ export class MHSocial {
       try{
         args = JSON.parse(args);
       } catch(e) {
-        throw TypeError('Args typeof string but not JSON in MHSocial', 'MHSocial.js', 28);
+        throw new TypeError('Args typeof string but not JSON in MHSocial', 'MHSocial.js', 28);
       }
     }
 
@@ -77,10 +77,4 @@ export class MHSocial {
     return true;
   }
 }
-
-/*
-(function(){
-  MHObject.registerConstructor(MHSocial);
-})();
-*/
 

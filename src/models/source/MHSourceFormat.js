@@ -25,7 +25,7 @@ export class MHSourceFormat {
       try{
         args = JSON.parse(args);
       } catch(e) {
-        throw TypeError('Args typeof string but not JSON in MHSourceFormat', 'MHSourceFormat.js', 28);
+        throw new TypeError('Args typeof string but not JSON in MHSourceFormat', 'MHSourceFormat.js', 28);
       }
     }
 
@@ -37,7 +37,7 @@ export class MHSourceFormat {
 
     if( type === null || price === null || launchInfo === null ){
       console.error(type, price, launchInfo);
-      throw TypeError('Required info not defined on argument map in MHSourceFormat', 'MHSourceFormat.js', 41);
+      throw new TypeError('Required info not defined on argument map in MHSourceFormat', 'MHSourceFormat.js', 41);
     }
 
     Object.defineProperties(this, {

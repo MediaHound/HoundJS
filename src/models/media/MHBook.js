@@ -1,6 +1,8 @@
-/*global MHMedia */
-// MediaHound Book (Track) Object
 
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+
+// MediaHound Book (Track) Object
 export class MHBook extends MHMedia {
   /* MHBook Constructor
    *

@@ -1,61 +1,37 @@
-(function( window, define ){
-define([
-    'hound/model-compiled',
-    'hound/hound-search',
-    'hound/hound-request',
-    'hound/hound-paged-request'
-  ],
-  function(
-    model,
-    houndSearch,
-    houndRequest,
-    houndPagedRequest
-  ){
-    'use strict';
+/* jshint -W098 */
+(function( /*window*/ ){
+  'use strict';
 
-    var apiExports = {
-          get models()        { return model;             },
-          get search()        { return houndSearch;       },
-          get request()       { return houndRequest;      },
-          get pagedRequest()  { return houndPagedRequest; }
-        };
+  // Import Request Helpers
+  import { request } from './request/hound-request.js';
+  import { pagedRequest } from './request/hound-paged-request.js';
 
-    // For testing
-    if( window.location.host === 'local.mediahound.com:2014' ){
-      window.houndapi = apiExports;
-      window.houndApi = apiExports;
-      window.houndAPI = apiExports;
+  // Import Models
+  import { models } from './models/all-models.js';
 
-      // Extra Mhids
-      window.MHIDS = {
-        // TV
-        'modernFamilySeries': 'mhtsr1000000001',
-        'modernFamilySeason': 'mhtvs1000003108',
-        'modernFamilyEpisode': 'mhtve1000039923',
-
-        // Movies
-        'skyfall':'mhmov1000017937',
-        'savingPrivateRyan': 'mhmov1000009260',
-        'ironMan3':'mhmov1000020539',
-        'spiderman':'mhmov1000000948',
-
-        // Albums
+  // Import Search Helpers
+  import { quickSearch } from './search/quick-search.js';
+  import { pagedSearch } from './search/paged-search.js';
 
 
-        // Songs
-        'metricGoldGunsGirls':'mhsng1007117726',
-        'justGazin':'mhsng1025234357',
-        'phoenix1901':'mhsng1007569202',
+  export var houndApiPackage = {
+    get models()        { return models;        },
+    get request()       { return request;       },
+    get pagedRequest()  { return pagedRequest;  },
+    get quickSearch()   { return quickSearch;   },
+    get pagedSearch()   { return pagedSearch;   }
+  };
 
-        // Collections
-        'joesMyNewCollection':'mhcol100000000004',
-        'tylerCoolSongs':'mhcol100000000063',
-        'tylerMoviesToSee':'mhcol100000000064'
 
-      };
-    }
-
-    return apiExports;
+  // TODO for testing
+  /*
+  if( window.location.host === 'local.mediahound.com:2014' ){
+    window.houndapi = houndApiPackage;
+    window.houndApi = houndApiPackage;
+    window.houndAPI = houndApiPackage;
   }
-);
-}( window, define ));
+  */
+
+}( window ));
+
+

@@ -1,7 +1,8 @@
-/*global MHContributor */
-/*global houndRequest */
-// MediaHound Contributor Object
 
+import { MHContributor } from './MHContributor.js';
+import { houndRequest } from '../../request/hound-request.js';
+
+// MediaHound Contributor Object
 export class MHFictionalIndividualContributor extends MHContributor {
   /* MHFictionalIndividualContributor Constructor
    *

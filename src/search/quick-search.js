@@ -1,12 +1,26 @@
-(function(define){
-define(['hound/model-compiled', 'hound/hound-request'], function(model, houndRequest){
+(function(){
   'use strict';
+
+  /***
+   * The scope of quick-search it to return the first n results only.
+   * There will be no paging concept to this search helper, it will be
+   * used for doing quick searches (ex: searching for posting mentions).
+   * This search will only ever hit the /autocomplete endpoint.
+   *
+   * For Filtered and paged searching use ./paged-search.js
+   *
+   *
+   *  TODO refactor to not take page number (page param)
+   *
+   */
+
+  import { houndRequest } from '../request/hound-request.js';
+  import { MHObject } from '../models/base/MHObject.js';
 
   var i, prop, buildSearchHelper, houndSearch,
       search        = {},
-      MHObject      = model.MHObject,
       extraEncode   = houndRequest.extraEncode,
-      types         = ['all', 'movie', 'song', 'album', 'tvseries', 'book', 'person', 'collection', 'user'], //'game' 
+      types         = ['all', 'movie', 'song', 'album', 'tvseries', 'book', 'game', 'person', 'collection', 'user'],
 
       makeEndpoint = function(searchType, query){
         return 'search/' + searchType + '/find/' + extraEncode(query) + '/autocomplete';
@@ -40,32 +54,9 @@ define(['hound/model-compiled', 'hound/hound-request'], function(model, houndReq
     //  returns promise created in makeSearchRequest defined above ^^^
     search[types[index]] = function(query, size, page){
       return makeSearchRequest(types[index], query, size, page)
-        // Clean Search Results TODO REMOVE
-        .then(function(parsed){
-          var newContent = parsed.content.map(function(v,i,a){
-                if( v.title && !v.name ){
-                  v.name = v.title;
-                  console.log('cleaned title: '+v.title);
-                }
-                if( v.id && !v.mhid ){
-                  v.mhid = v.id;
-                  console.log('cleaned id: '+v.id);
-                }
-                /*
-                if( v.imageURL && !v.primaryImageUrl ){
-                  v.primaryImageUrl = v.imageURL;
-                  console.log('cleaned primaryImageUrl: '+v.imageURL);
-                }
-                */
-                return v;
-              });
-          parsed.content = newContent;
-          return parsed;
-        })
-        // End Clean Search Results
-        .then(function(parsed){
+        .then((parsed) => {
           var mhObj;
-          return parsed.content.map(function(v,i,a){
+          return parsed.content.map((v) => {
             try{
               mhObj = MHObject.create(v);
               return mhObj;
@@ -134,5 +125,4 @@ define(['hound/model-compiled', 'hound/hound-request'], function(model, houndReq
 
   return houndSearch;
 
-});
-})( define );
+})();

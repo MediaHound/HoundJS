@@ -1,7 +1,8 @@
-/*global MHMedia */
-/*global houndRequest */
-// MediaHound ShowSeason (Track) Object
 
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+
+// MediaHound ShowSeason (Track) Object
 export class MHShowSeason extends MHMedia {
   /* MHShowSeason Constructor
    *

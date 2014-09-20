@@ -1,6 +1,7 @@
-/*global MHAction */
-// MediaHound Follow Object
 
+import { MHAction } from './MHAction.js';
+
+// MediaHound Follow Object
 export class MHFollow extends MHAction {
   /* MHFollow Constructor
    *

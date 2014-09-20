@@ -1,5 +1,7 @@
 /*global MHSourceMedium */
 
+import { MHSourceMedium } from './MHSourceMedium.js';
+
 // TODO
 //@property (strong, nonatomic, readonly) NSString* logoName;
 //@property (strong, nonatomic, readonly) NSString* smallLogoName;
@@ -42,7 +44,7 @@ export class MHSourceModel {
       try{
         args = JSON.parse(args);
       } catch(e) {
-        throw TypeError('Args typeof string but not JSON in MHSourceModel', 'MHSourceModel.js', 28);
+        throw new TypeError('Args typeof string but not JSON in MHSourceModel', 'MHSourceModel.js', 28);
       }
     }
 

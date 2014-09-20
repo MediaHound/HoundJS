@@ -1,7 +1,8 @@
-/*global MHAction */
-/*global houndRequest */
-// MediaHound Comment Object
 
+import { MHAction } from './MHAction.js';
+import { houndRequest } from '../../request/hound-request.js';
+
+// MediaHound Comment Object
 export class MHComment extends MHAction {
   /* MHComment Constructor
    *

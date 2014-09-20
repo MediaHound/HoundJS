@@ -1,4 +1,10 @@
-/*global MHObject, MHLoginSession, houndRequest, pagedRequest, mhidLRU, File, log */
+/*global File */
+
+import { MHObject, mhidLRU } from '../base/MHObject.js';
+import { MHLoginSession } from './MHLoginSession.js';
+
+import { houndRequest } from '../../request/hound-request.js';
+import { pagedRequest } from '../../request/hound-paged-request.js';
 
 // MediaHound User Object
 export class MHUser extends MHObject {

@@ -1,5 +1,9 @@
-/*global MHObject, MHUser, houndRequest, pagedRequest, mhidLRU */
-// MediaHound Login Session Singleton
+
+import { MHObject, mhidLRU } from '../base/MHObject.js';
+import { MHUser } from './MHUser.js';
+
+import { houndRequest } from '../../request/hound-request.js';
+import { pagedRequest } from '../../request/hound-paged-request.js';
 
 /* taken from iOS
  *
@@ -14,12 +18,13 @@
  *  mhUserLogout
  *  mhSessionUserProfileImageChange
  *
+ *  currently can't extend built in classes or else this would be:
+ *    'MHUserLoginEvent extends CustomEvent'
+ *
  */
-// this would be cool...
-/*
-class MHUserLoginEvent extends CustomEvent {
-  constructor(mhUserObj){
-    super('mhUserLogin', {
+class MHUserLoginEvent {
+  static create(mhUserObj){
+    return new CustomEvent('mhUserLogin', {
       bubbles: false,
       cancelable: false,
       detail: {
@@ -27,18 +32,38 @@ class MHUserLoginEvent extends CustomEvent {
       }
     });
   }
-  static initMHUserLoginEvent(mhUserObj){
-    super('mhUserLogin', false, false, {mhUser: mhUserObj});
+}
+
+class MHUserLogoutEvent {
+  static create(mhUserObj){
+    return new CustomEvent('mhUserLogout', {
+      bubbles: false,
+      cancelable: false,
+      detail: {
+        mhUser: mhUserObj
+      }
+    });
   }
 }
-*/
+
+class MHSessionUserProfileImageChange {
+  static create(mhUserObj){
+    return new CustomEvent('mhSessionUserProfileImageChange', {
+      bubbles: false,
+      cancelable: false,
+      detail: {
+        mhUser: mhUserObj
+      }
+    });
+  }
+}
 
 // Singleton Containers
 var loggedInUser  = null,
     onboarded     = false,
     access        = false;
 
-
+// MediaHound Login Session Singleton
 /** @class MHLoginSession */
 export class MHLoginSession {
 
@@ -93,6 +118,8 @@ export class MHLoginSession {
     loggedInUser.fetchOwnedCollections();
 
     // dispatch profile image changed event: 'mhUserProfileImageChanged'
+    window.dispatchEvent(MHSessionUserProfileImageChange.create(loggedInUser));
+    /*
     window.dispatchEvent(new CustomEvent('mhUserProfileImageChanged', {
       bubbles: false,
       cancelable: false,
@@ -100,6 +127,7 @@ export class MHLoginSession {
         mhUser: loggedInUser
       }
     }));
+    */
 
     return true;
   }
@@ -148,6 +176,8 @@ export class MHLoginSession {
         loggedInUser.fetchSocial();
 
         // dispatch logged in event: 'mhUserLogin'
+        window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
+        /*
         window.dispatchEvent(new CustomEvent('mhUserLogin', {
           bubbles: false,
           cancelable: false,
@@ -155,6 +185,7 @@ export class MHLoginSession {
             mhUser: loggedInUser
           }
         }));
+        */
 
         /*** SET UP LOGIN HACK ***/
         if( localStorage && (location.host === 'local.mediahound.com:2014' || location.host === 'localhost:2014') ){
@@ -188,6 +219,8 @@ export class MHLoginSession {
       document.cookie = newValue;
     });
 
+    window.dispatchEvent(MHUserLogoutEvent.create(loggedInUser));
+    /*
     window.dispatchEvent(new CustomEvent('mhUserLogout', {
       bubbles: false,
       cancelable: false,
@@ -195,6 +228,7 @@ export class MHLoginSession {
         mhUser: loggedInUser
       }
     }));
+    */
 
     /*** CLEAR LOGIN HACK ***/
     /*jshint -W069 */ // <-- turns off 'better in dot notation warning'

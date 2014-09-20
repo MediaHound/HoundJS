@@ -1,17 +1,17 @@
-/*globals MHSocial, MHCache, log */
 
 // Import Deps
-import houndRequest from 'hound/hound-request';
-import pagedRequest from 'hound/hound-paged-request';
+import { houndRequest } from '../../request/hound-request.js';
+import { pagedRequest } from '../../request/hound-paged-request.js';
+
+import { MHCache } from '../internal/MHCache.js';
 
 var childrenConstructors = {};
 
 // Create Cache
-var mhidLRU = new MHCache(1000);
+export var mhidLRU = new MHCache(1000);
 if( window.location.host === 'local.mediahound.com:2014' ){
   window.mhidLRU = mhidLRU;
 }
-
 
 // Base MediaHound Object
 export class MHObject {

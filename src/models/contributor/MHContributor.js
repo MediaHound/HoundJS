@@ -1,7 +1,8 @@
-/*global MHMedia */
-/*global houndRequest */
-// MediaHound Contributor Object
 
+import { MHMedia } from '../media/MHMedia.js';
+import { houndRequest } from '../../request/hound-request.js';
+
+// MediaHound Contributor Object
 export class MHContributor extends MHObject {
   /* MHContributor Constructor
    *

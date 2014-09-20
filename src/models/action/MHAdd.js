@@ -1,6 +1,7 @@
-/*global MHAction */
-// MediaHound Add Object
 
+import { MHAction } from './MHAction.js';
+
+// MediaHound Add Object
 export class MHAdd extends MHAction {
   /* MHAdd Constructor
    *

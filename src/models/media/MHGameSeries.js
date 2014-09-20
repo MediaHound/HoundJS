@@ -1,6 +1,8 @@
-/*global MHMedia */
-// MediaHound Game Series Object
 
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+
+// MediaHound Game Series Object
 export class MHGameSeries extends MHMedia {
   /* MHMedia Constructor
    *

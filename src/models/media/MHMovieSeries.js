@@ -1,6 +1,8 @@
-/*global MHMedia */
-// MediaHound Movie Series Object
 
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+
+// MediaHound Movie Series Object
 export class MHMovieSeries extends MHMedia {
   /* MHMedia Constructor
    *

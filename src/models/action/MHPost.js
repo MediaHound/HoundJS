@@ -1,7 +1,8 @@
-/*global MHAction */
-/*global houndRequest */
-// MediaHound Post Object
 
+import { MHAction } from './MHAction.js';
+import { houndRequest } from '../../request/hound-request.js';
+
+// MediaHound Post Object
 export class MHPost extends MHAction {
   /* MHPost Constructor
    *

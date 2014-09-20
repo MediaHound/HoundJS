@@ -1,6 +1,7 @@
-/*global MHAction */
-// MediaHound Like Object
 
+import { MHAction } from './MHAction.js';
+
+// MediaHound Like Object
 export class MHLike extends MHAction {
   /* MHLike Constructor
    *
@@ -38,7 +39,7 @@ export class MHLike extends MHAction {
     // No Unique Props
   }
 
-  static get mhidPrefix() { return 'mhlk'; }
+  static get mhidPrefix() { return 'mhlke'; }
   get displayableType()   { return 'Liked'; }
 
   // Could change as needed

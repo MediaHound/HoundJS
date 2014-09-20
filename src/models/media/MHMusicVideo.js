@@ -1,6 +1,8 @@
-/*global MHMedia */
-// MediaHound Music Video Object
 
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+
+// MediaHound Music Video Object
 export class MHMusicVideo extends MHMedia {
   /* MHMedia Constructor
    *

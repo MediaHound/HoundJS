@@ -1,6 +1,8 @@
-/*global MHMedia */
-// MediaHound Comic Book Object
 
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+
+// MediaHound Comic Book Object
 export class MHComicBook extends MHMedia {
   /* MHMedia Constructor
    *

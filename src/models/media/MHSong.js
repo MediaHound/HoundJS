@@ -1,6 +1,8 @@
-/*global MHMedia */
-// MediaHound Song (Track) Object
 
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+
+// MediaHound Song (Track) Object
 export class MHSong extends MHMedia {
   /* MHSong Constructor
    *

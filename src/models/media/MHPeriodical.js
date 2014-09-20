@@ -1,6 +1,8 @@
-/*global MHMedia */
-// MediaHound Periodical Object
 
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+
+// MediaHound Periodical Object
 export class MHPeriodical extends MHMedia {
   /* MHMedia Constructor
    *

@@ -1,6 +1,8 @@
-/*global MHMedia */
-// MediaHound Graphic Novel Series Object
 
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+
+// MediaHound Graphic Novel Series Object
 export class MHGraphicNovelSeries extends MHMedia {
   /* MHMedia Constructor
    *

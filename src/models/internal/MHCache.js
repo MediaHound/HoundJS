@@ -1,4 +1,3 @@
-/*global log */
 /**
  * A doubly linked list-based Least Recently Used (LRU) cache. Will keep most
  * recently used items while discarding least recently used items when its limit
@@ -19,8 +18,7 @@
  *
  */
 
-// No Export, this is just for internal use
-class MHCache {
+export class MHCache {
   constructor(limit){
     // Current size of the cache.
     this.size = 0;

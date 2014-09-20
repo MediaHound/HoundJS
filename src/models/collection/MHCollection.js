@@ -1,5 +1,8 @@
-/*global MHMedia, MHLoginSession */
-/*global houndRequest */
+
+import { MHMedia } from '../media/MHMedia.js';
+import { MHLoginSession } from '../user/MHLoginSession.js';
+
+import { houndRequest } from '../../request/hound-request.js';
 
 /**
  * @classdesc Mediahound Collection Object (MHCollection) inherits from MHObject

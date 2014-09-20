@@ -1,7 +1,9 @@
-/*global MHMedia */
+
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+
 // MediaHound Special Media Object
 // TV Special is the most common use case
-
 export class MHSpecial extends MHMedia {
   /* MHMedia Constructor
    *

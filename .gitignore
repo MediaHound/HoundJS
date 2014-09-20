@@ -1,6 +1,5 @@
 .idea
 .DS_Store
-\#.DS_Store#
 node_modules
 bower_components
 build
@@ -8,5 +7,3 @@ build
 *.swo
 *.bak
 *.log
-
-#.DS_Store#

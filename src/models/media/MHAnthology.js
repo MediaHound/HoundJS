@@ -1,6 +1,8 @@
-/*global MHMedia */
-// MediaHound Anthology Object
 
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+
+// MediaHound Anthology Object
 export class MHAnthology extends MHMedia {
   /* MHMedia Constructor
    *

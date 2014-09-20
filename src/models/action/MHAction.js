@@ -1,5 +1,6 @@
-/*global MHObject */
-/*global houndRequest */
+
+import { MHObject } from '../base/MHObject.js';
+import { houndRequest } from '../../request/hound-request.js';
 
 // MediaHound Action Object
 export class MHAction extends MHObject {

@@ -1,7 +1,8 @@
-/*global MHMedia */
-/*global houndRequest */
-// MediaHound ShowEpisode Object
 
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+
+// MediaHound ShowEpisode Object
 export class MHShowEpisode extends MHMedia {
   /* MHShowEpisode Constructor
    *

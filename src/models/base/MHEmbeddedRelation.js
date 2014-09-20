@@ -1,4 +1,5 @@
-/*global MHEmbeddedObject */
+
+import { MHEmbeddedObject } from './MHEmbeddedObject.js';
 
 // MediaHound Embedded Object
 export class MHEmbeddedRelation extends MHEmbeddedObject {
@@ -15,13 +16,13 @@ export class MHEmbeddedRelation extends MHEmbeddedObject {
    */
   constructor(args) {
     if( args == null ){
-      throw TypeError('Args is null or undefined in MHEmbeddedRelation constructor.');
+      throw new TypeError('Args is null or undefined in MHEmbeddedRelation constructor.');
     }
     if( typeof args === 'string' || args instanceof String ){
       try{
         args = JSON.parse(args);
       } catch(e) {
-        throw TypeError('Args typeof string but not JSON in MHEmbeddedRelation', 'MHEmbeddedRelation.js', 24);
+        throw new TypeError('Args typeof string but not JSON in MHEmbeddedRelation', 'MHEmbeddedRelation.js', 24);
       }
     }
 

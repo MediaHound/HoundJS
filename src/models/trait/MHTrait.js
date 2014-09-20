@@ -1,6 +1,7 @@
-/*global MHObject */
-// MediaHound Trait Object
 
+import { MHObject } from '../base/MHObject.js';
+
+// MediaHound Trait Object
 export class MHTrait extends MHObject {
   /* MHMedia Constructor
    *

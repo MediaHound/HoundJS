@@ -1,7 +1,9 @@
-/*global MHMedia */
-/*global houndRequest */
-// MediaHound Album Object
 
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+import { houndRequest } from '../../request/hound-request.js';
+
+// MediaHound Album Object
 export class MHAlbum extends MHMedia {
   /* MHAlbum Constructor
    *

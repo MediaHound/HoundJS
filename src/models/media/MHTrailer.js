@@ -1,6 +1,8 @@
-/*global MHMedia */
-// MediaHound Trailer Object
 
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
+
+// MediaHound Trailer Object
 export class MHTrailer extends MHMedia {
   /* MHMedia Constructor
    *

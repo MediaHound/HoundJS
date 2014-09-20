@@ -14,13 +14,13 @@ export class MHEmbeddedObject {
    */
   constructor(args) {
     if( args == null ){
-      throw TypeError('Args is null or undefined in MHEmbeddedObject constructor.');
+      throw new TypeError('Args is null or undefined in MHEmbeddedObject constructor.');
     }
     if( typeof args === 'string' || args instanceof String ){
       try{
         args = JSON.parse(args);
       } catch(e) {
-        throw TypeError('Args typeof string but not JSON in MHEmbeddedObject', 'MHEmbeddedObject.js', 24);
+        throw new TypeError('Args typeof string but not JSON in MHEmbeddedObject', 'MHEmbeddedObject.js', 24);
       }
     }
 
