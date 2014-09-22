@@ -1,5 +1,5 @@
 
-import { MHObject } from '../base/MHObject.js';
+import { MHObject } from '../base/MHObject';
 
 export class MHImage extends MHObject {
   /*  MHImage Constructor

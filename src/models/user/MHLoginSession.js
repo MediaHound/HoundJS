@@ -1,8 +1,8 @@
 
-import { MHObject/*, mhidLRU*/ } from '../base/MHObject.js';
-import { MHUser } from './MHUser.js';
+import { MHObject/*, mhidLRU*/ } from '../base/MHObject';
+import { MHUser } from './MHUser';
 
-import { houndRequest } from '../../request/hound-request.js';
+import { houndRequest } from '../../request/hound-request';
 
 /* taken from iOS
  *
@@ -118,15 +118,6 @@ export class MHLoginSession {
 
     // dispatch profile image changed event: 'mhUserProfileImageChanged'
     window.dispatchEvent(MHSessionUserProfileImageChange.create(loggedInUser));
-    /*
-    window.dispatchEvent(new CustomEvent('mhUserProfileImageChanged', {
-      bubbles: false,
-      cancelable: false,
-      detail: {
-        mhUser: loggedInUser
-      }
-    }));
-    */
 
     return true;
   }
@@ -176,24 +167,6 @@ export class MHLoginSession {
 
         // dispatch logged in event: 'mhUserLogin'
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
-        /*
-        window.dispatchEvent(new CustomEvent('mhUserLogin', {
-          bubbles: false,
-          cancelable: false,
-          detail: {
-            mhUser: loggedInUser
-          }
-        }));
-        */
-
-        /*** SET UP LOGIN HACK ***/
-        if( localStorage && (location.host === 'local.mediahound.com:2014' || location.host === 'localhost:2014') ){
-          /*jshint -W069 */ // <-- turns off 'better in dot notation warning'
-          if( !localStorage['mhLoginHack'] && confirm('Save Credentials to Local Storage to persist login?') ){
-            localStorage.setItem('mhLoginHack', JSON.stringify(data));
-          }
-        }
-        /*** END LOGIN HACK SET UP ***/
 
         return loggedInUser;
       })
@@ -218,23 +191,8 @@ export class MHLoginSession {
       document.cookie = newValue;
     });
 
+    // Dispatch logout event
     window.dispatchEvent(MHUserLogoutEvent.create(loggedInUser));
-    /*
-    window.dispatchEvent(new CustomEvent('mhUserLogout', {
-      bubbles: false,
-      cancelable: false,
-      detail:{
-        mhUser: loggedInUser
-      }
-    }));
-    */
-
-    /*** CLEAR LOGIN HACK ***/
-    /*jshint -W069 */ // <-- turns off 'better in dot notation warning'
-    if( localStorage && localStorage['mhLoginHack'] ){
-      localStorage.removeItem('mhLoginHack');
-    }
-    /*** END CLEAR LOGIN HACK ***/
 
     return Promise.resolve(loggedInUser)
       .then(function(mhUser){
@@ -248,30 +206,10 @@ export class MHLoginSession {
    * @returns {Promise} - resolves to the user that has an open session.
    */
   static validateOpenSession(){
-
-
-    /*** EXECUTE LOGIN HACK ***/
-    /*jshint -W069 */ // <-- turns off 'better in dot notation warning'
-    if( localStorage && localStorage['mhLoginHack'] && (location.host === 'local.mediahound.com:2014' || location.host === 'localhost:2014') ){
-      var creds = JSON.parse(localStorage['mhLoginHack']);
-      if( creds && creds.username && creds.password ){
-        console.warn('Executing Login Hack for: ', creds);
-        return MHLoginSession.login(creds.username, creds.password)
-          .then(u => { console.log('login hack successful for: ', u); return u; })
-          .catch(e => { console.error('login hack failure: ', e); throw e; });
-      }
-    } else {
-      return Promise.resolve(null);
-    }
-    /*** END EXECUTE LOGIN HACK ***/
-
-
-    /* will be this I think
     var path = MHUser.rootEndpoint + '/validateSession';
 
-
     return houndRequest({
-        method: 'GET',
+        method: 'POST',
         endpoint: path,
         withCredentials : true
       })
@@ -282,8 +220,13 @@ export class MHLoginSession {
       })
       .then(function(mhUserLoggedIn){
         loggedInUser = mhUserLoggedIn;
+        window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
+        return loggedInUser;
+      })
+      .catch(function(error){
+        console.log('Problem validating open session');
+        console.error(error.error.stack);
       });
-    */
   }
 }
 

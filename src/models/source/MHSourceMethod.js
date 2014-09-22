@@ -4,7 +4,7 @@
 
 //- (SourceFormat*)formatForType:(NSString*)type;
 
-import { MHSourceFormat } from './MHSourceFormat.js';
+import { MHSourceFormat } from './MHSourceFormat';
 
 // MediaHound SourceMethod Object
 export class MHSourceMethod {

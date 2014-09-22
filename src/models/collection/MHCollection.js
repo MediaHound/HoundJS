@@ -1,9 +1,9 @@
 
-import { MHObject } from '../base/MHObject.js';
-import { MHMedia } from '../media/MHMedia.js';
-import { MHLoginSession } from '../user/MHLoginSession.js';
+import { MHObject } from '../base/MHObject';
+import { MHMedia } from '../media/MHMedia';
+import { MHLoginSession } from '../user/MHLoginSession';
 
-import { houndRequest } from '../../request/hound-request.js';
+import { houndRequest } from '../../request/hound-request';
 
 /**
  * @classdesc Mediahound Collection Object (MHCollection) inherits from MHObject

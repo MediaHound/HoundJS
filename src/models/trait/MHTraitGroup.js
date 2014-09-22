@@ -1,5 +1,5 @@
 
-import { MHObject } from '../base/MHObject.js';
+import { MHObject } from '../base/MHObject';
 
 // MediaHound Trait Group Object
 export class MHTraitGroup extends MHObject {

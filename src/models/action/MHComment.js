@@ -1,7 +1,7 @@
 
-import { MHObject } from '../base/MHObject.js';
-import { MHAction } from './MHAction.js';
-import { houndRequest } from '../../request/hound-request.js';
+import { MHObject } from '../base/MHObject';
+import { MHAction } from './MHAction';
+import { houndRequest } from '../../request/hound-request';
 
 // MediaHound Comment Object
 export class MHComment extends MHAction {

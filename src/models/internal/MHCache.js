@@ -1,5 +1,5 @@
 
-import { log } from './debug-helpers.js';
+import { log } from './debug-helpers';
 /**
  * A doubly linked list-based Least Recently Used (LRU) cache. Will keep most
  * recently used items while discarding least recently used items when its limit
@@ -280,7 +280,8 @@ export class MHCache {
    * @param {string='mhLocalCache'} storageKey
    */
   restoreFromLocalStorage(storageKey='mhLocalCache'){
-    import { MHObject } from '../base/MHObject.js';
+    var MHObject = System.get('../base/MHObject').MHObject;
+
     if( !localStorage || typeof localStorage[storageKey] === 'undefined' ){
       log('nothing stored');
       return;

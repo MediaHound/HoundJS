@@ -1,12 +1,12 @@
 
-import { log } from '../internal/debug-helpers.js';
+import { log } from '../internal/debug-helpers';
 
 // Import Deps
-import { houndRequest } from '../../request/hound-request.js';
-import { pagedRequest } from '../../request/hound-paged-request.js';
+import { houndRequest } from '../../request/hound-request';
+import { pagedRequest } from '../../request/hound-paged-request';
 
-import { MHCache } from '../internal/MHCache.js';
-import { MHSocial } from '../social/MHSocial.js';
+import { MHCache } from '../internal/MHCache';
+import { MHSocial } from '../social/MHSocial';
 
 var childrenConstructors = {};
 
@@ -123,7 +123,7 @@ export class MHObject {
    *
    */
   static parseArgs(args){
-    let type = typeof args;
+    var type = typeof args;
     // If object with mhid return
     if( type === 'object' && !(args instanceof String) && args.mhid ){
       return args;
@@ -217,7 +217,7 @@ export class MHObject {
    */
   static registerConstructor(mhClass){
     //log('registering constructor: ' + mhClass.name);
-    let prefix = mhClass.mhidPrefix;
+    var prefix = mhClass.mhidPrefix;
     if( typeof prefix !== 'undefined' && prefix !== null && !(prefix in childrenConstructors) ){
       Object.defineProperty(childrenConstructors, prefix, {
         configurable: false,
@@ -250,7 +250,7 @@ export class MHObject {
    *
    */
   static getPrefixFromMhid(mhid){
-    for( let pfx in childrenConstructors ){
+    for( var pfx in childrenConstructors ){
       if( childrenConstructors.hasOwnProperty(pfx) && (new RegExp('^' + pfx)).test(mhid) ){
         return pfx;
       }
@@ -266,7 +266,7 @@ export class MHObject {
    *
    */
   static getClassNameFromMhid(mhid){
-    let pfx = MHObject.getPrefixFromMhid(mhid);
+    var pfx = MHObject.getPrefixFromMhid(mhid);
     if( childrenConstructors[pfx] ){
       return childrenConstructors[pfx].name;
     }

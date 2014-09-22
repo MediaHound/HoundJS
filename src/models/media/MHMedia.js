@@ -1,11 +1,11 @@
 
-import { MHObject } from '../base/MHObject.js';
-import { MHSourceModel } from '../source/MHSourceModel.js';
-import { MHEmbeddedObject } from '../base/MHEmbeddedObject.js';
-import { MHRelationalPair } from '../base/MHRelationalPair.js';
-//import { MHEmbeddedRelation } from '../base/MHEmbeddedRelation.js';
+import { MHObject } from '../base/MHObject';
+import { MHSourceModel } from '../source/MHSourceModel';
+import { MHEmbeddedObject } from '../base/MHEmbeddedObject';
+import { MHRelationalPair } from '../base/MHRelationalPair';
+//import { MHEmbeddedRelation } from '../base/MHEmbeddedRelation';
 
-import { houndRequest } from '../../request/hound-request.js';
+import { houndRequest } from '../../request/hound-request';
 
 // MediaHound Media Object
 export class MHMedia extends MHObject {

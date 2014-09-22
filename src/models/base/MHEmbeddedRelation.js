@@ -1,5 +1,5 @@
 
-import { MHEmbeddedObject } from './MHEmbeddedObject.js';
+import { MHEmbeddedObject } from './MHEmbeddedObject';
 
 // MediaHound Embedded Object
 export class MHEmbeddedRelation extends MHEmbeddedObject {

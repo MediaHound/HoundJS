@@ -1,5 +1,5 @@
 
-import { MHObject } from './MHObject.js';
+import { MHObject } from './MHObject';
 
 // MediaHound Relational Pair Object
 export class MHRelationalPair {

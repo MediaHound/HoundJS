@@ -1,6 +1,6 @@
 
-import { MHObject } from '../base/MHObject.js';
-import { MHAction } from './MHAction.js';
+import { MHObject } from '../base/MHObject';
+import { MHAction } from './MHAction';
 
 // MediaHound Add Object
 export class MHAdd extends MHAction {

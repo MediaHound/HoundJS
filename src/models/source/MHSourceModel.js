@@ -1,6 +1,6 @@
 /*global MHSourceMedium */
 
-import { MHSourceMedium } from './MHSourceMedium.js';
+import { MHSourceMedium } from './MHSourceMedium';
 
 // TODO
 //@property (strong, nonatomic, readonly) NSString* logoName;

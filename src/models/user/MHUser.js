@@ -1,12 +1,11 @@
 /*global File */
 
-import { log } from '../internal/debug-helpers.js';
+import { log } from '../internal/debug-helpers';
 
-import { MHObject, mhidLRU } from '../base/MHObject.js';
-import { MHLoginSession } from './MHLoginSession.js';
+import { MHObject, mhidLRU } from '../base/MHObject';
 
-import { houndRequest } from '../../request/hound-request.js';
-import { pagedRequest } from '../../request/hound-paged-request.js';
+import { houndRequest } from '../../request/hound-request';
+import { pagedRequest } from '../../request/hound-paged-request';
 
 // MediaHound User Object
 export class MHUser extends MHObject {
@@ -119,7 +118,8 @@ export class MHUser extends MHObject {
   get displayableType()   { return 'User';  }
 
   get isCurrentUser(){
-    return this.isEqualToMHObject(MHLoginSession.currentUser);
+    var currentUser = System.get('./MHLoginSession').MHLoginSession;
+    return this.isEqualToMHObject(currentUser);
   }
 
   /**
@@ -315,6 +315,7 @@ export class MHUser extends MHObject {
         data            : form
       })
       .then(function(userWithImage){
+        MHLoginSession = System.get('./MHLoginSession').MHLoginSession;
         MHLoginSession.updatedProfileImage(MHObject.create(userWithImage));
         return userWithImage;
       });

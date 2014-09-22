@@ -1,7 +1,7 @@
 
-import { MHObject } from '../base/MHObject.js';
-import { MHMedia } from '../media/MHMedia.js';
-import { houndRequest } from '../../request/hound-request.js';
+import { MHObject } from '../base/MHObject';
+import { MHMedia } from '../media/MHMedia';
+import { houndRequest } from '../../request/hound-request';
 
 // MediaHound Contributor Object
 export class MHContributor extends MHObject {
