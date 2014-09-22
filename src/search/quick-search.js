@@ -14,8 +14,8 @@
    *
    */
 
-  import { houndRequest } from '../request/hound-request.js';
-  import { MHObject } from '../models/base/MHObject.js';
+  import { houndRequest } from '../request/hound-request';
+  import { MHObject } from '../models/base/MHObject';
 
   var i, prop, buildSearchHelper, houndSearch,
       search        = {},

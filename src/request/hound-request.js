@@ -1,16 +1,16 @@
-/*globals XDomainRequest */
-(function(define){
-define(['hound/promise-request'], function(promiseRequest){
+(function(){
   'use strict';
 
-  var debug = false;
-  var log = function(){
-    if( console && (debug || window.mhDebug) ){
-      console.log.apply(console, arguments);
+  var log = (function(on){
+    if( on ){
+      return console.log.bind(console);
+    } else {
+      return function(){};
     }
-  };
+  })( true );
 
   // Start Module
+  import { promiseRequest } from './promise-request.js';
 
   var extraEncode = promiseRequest.extraEncode,
       requestMap  = {},
@@ -21,7 +21,7 @@ define(['hound/promise-request'], function(promiseRequest){
         withCredentials: false
       },
       responseThen = function(response){
-        //console.log('hound-request: ', response);
+        //log('hound-request: ', response);
         if( !!response ){
           // currently no XML support only JSON text else return status
           if( response.responseText != null && response.responseText !== ''){
@@ -63,9 +63,6 @@ define(['hound/promise-request'], function(promiseRequest){
         // Set/Add defaults for POST requests
         if( args.method && args.method === 'POST' ){
           defaults.withCredentials = true;
-
-          // Content-Type gets set by promise-request if it JSON.stringifies the data otherwise let browser handle content type
-          //defaults.headers['Content-Type'] = 'application/json';
         }
 
         // Set args.url via args.endpoint
@@ -82,7 +79,7 @@ define(['hound/promise-request'], function(promiseRequest){
         if( !args.headers ){
           args.headers = defaults.headers;
         } else {
-          // Merge Defaluts in
+          // Merge Defaults in
           var prop;
           for( prop in defaults.headers ){
             if( defaults.headers.hasOwnProperty(prop) && !(prop in args.headers) ){
@@ -108,7 +105,7 @@ define(['hound/promise-request'], function(promiseRequest){
 
           requestMap[args.url] = promiseRequest(args)
             .then(responseThen)
-            .then(function(res){ delete requestMap[args.url]; return res; });
+            .then(res => { delete requestMap[args.url]; return res; });
             //.then(x => {log(x); return x;});
 
           return requestMap[args.url];
@@ -129,6 +126,5 @@ define(['hound/promise-request'], function(promiseRequest){
     }
   });
 
-  return houndRequest;
-});
-})( define );
+  export default houndRequest;
+})();

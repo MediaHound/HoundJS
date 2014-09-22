@@ -3,18 +3,18 @@
   'use strict';
 
   // Import Request Helpers
-  import { request } from './request/hound-request.js';
-  import { pagedRequest } from './request/hound-paged-request.js';
+  import { request } from './request/hound-request';
+  import { pagedRequest } from './request/hound-paged-request';
 
   // Import Models
-  import { models } from './models/all-models.js';
+  import { models } from './models/all-models';
 
   // Import Search Helpers
-  import { quickSearch } from './search/quick-search.js';
-  import { pagedSearch } from './search/paged-search.js';
+  import { quickSearch } from './search/quick-search';
+  import { pagedSearch } from './search/paged-search';
 
 
-  export var houndApiPackage = {
+  export default {
     get models()        { return models;        },
     get request()       { return request;       },
     get pagedRequest()  { return pagedRequest;  },

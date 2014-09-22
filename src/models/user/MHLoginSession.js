@@ -1,9 +1,8 @@
 
-import { MHObject, mhidLRU } from '../base/MHObject.js';
+import { MHObject/*, mhidLRU*/ } from '../base/MHObject.js';
 import { MHUser } from './MHUser.js';
 
 import { houndRequest } from '../../request/hound-request.js';
-import { pagedRequest } from '../../request/hound-paged-request.js';
 
 /* taken from iOS
  *
@@ -213,7 +212,7 @@ export class MHLoginSession {
     var currentCookieKeys = document.cookie.split('; ').map(v => v.split('=')[0]);
 
     // Clear cookies for now, with oAuth will invalidate token?
-    currentCookieKeys.filter(v => (v === 'AWSELB' || v === 'JSESSIONID')).forEach(function(v,i,a){
+    currentCookieKeys.filter(v => (v === 'AWSELB' || v === 'JSESSIONID')).forEach(function(v){
       var newValue = v + '=""; expires=' + (new Date(0)).toGMTString() + '; domain=mediahound.com';
       //console.log('current cookie: ', v, newValue);
       document.cookie = newValue;

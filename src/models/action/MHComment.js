@@ -1,4 +1,5 @@
 
+import { MHObject } from '../base/MHObject.js';
 import { MHAction } from './MHAction.js';
 import { houndRequest } from '../../request/hound-request.js';
 

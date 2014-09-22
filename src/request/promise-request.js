@@ -1,4 +1,3 @@
-/*globals XDomainRequest */
 /**
  * API Request Object
  * Takes single config obj, returns Promise
@@ -33,8 +32,7 @@
  *
  *
  **/
-(function(define){
-define([], function(){
+(function(){
   'use strict';
 
   // Start Module
@@ -59,7 +57,7 @@ define([], function(){
   /* Promise around an XMLHttpRequest
    *  @param args - {Object} see definition above, not all props are supported yet
    *  @returns {Promise}
-  */
+   */
       promiseRequest = function(args){
         // Prelim work
         // method {GET,POST,OPTION,...}
@@ -217,6 +215,6 @@ define([], function(){
     }
   });
 
-  return promiseRequest;
-});
-})( define );
+  export default promiseRequest;
+
+})();

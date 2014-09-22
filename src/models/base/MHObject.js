@@ -1,9 +1,12 @@
 
+import { log } from '../internal/debug-helpers.js';
+
 // Import Deps
 import { houndRequest } from '../../request/hound-request.js';
 import { pagedRequest } from '../../request/hound-paged-request.js';
 
 import { MHCache } from '../internal/MHCache.js';
+import { MHSocial } from '../social/MHSocial.js';
 
 var childrenConstructors = {};
 

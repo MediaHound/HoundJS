@@ -1,5 +1,7 @@
 /*global File */
 
+import { log } from '../internal/debug-helpers.js';
+
 import { MHObject, mhidLRU } from '../base/MHObject.js';
 import { MHLoginSession } from './MHLoginSession.js';
 

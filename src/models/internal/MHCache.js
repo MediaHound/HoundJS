@@ -1,3 +1,5 @@
+
+import { log } from './debug-helpers.js';
 /**
  * A doubly linked list-based Least Recently Used (LRU) cache. Will keep most
  * recently used items while discarding least recently used items when its limit
@@ -17,7 +19,6 @@
  * head(oldest) <--older.-- entry <--older.-- tail(newest)
  *
  */
-
 export class MHCache {
   constructor(limit){
     // Current size of the cache.
@@ -279,6 +280,7 @@ export class MHCache {
    * @param {string='mhLocalCache'} storageKey
    */
   restoreFromLocalStorage(storageKey='mhLocalCache'){
+    import { MHObject } from '../base/MHObject.js';
     if( !localStorage || typeof localStorage[storageKey] === 'undefined' ){
       log('nothing stored');
       return;
@@ -289,8 +291,8 @@ export class MHCache {
     for( ; i < stored.length ; i++ ){
       curr = MHObject.create(stored[i]);
       if( curr && !this.has(curr.mhid) ){
-        log('adding to cache: ', MHObject.create(curr));
-        this.putMHObj(MHObject.create(curr));
+        log('adding to cache: ', curr);
+        this.putMHObj(curr);
       }
     }
   }

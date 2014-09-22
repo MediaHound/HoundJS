@@ -1,4 +1,5 @@
 
+import { MHObject } from '../base/MHObject.js';
 import { MHMedia } from '../media/MHMedia.js';
 import { MHLoginSession } from '../user/MHLoginSession.js';
 

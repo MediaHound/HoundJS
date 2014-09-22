@@ -1,4 +1,5 @@
 
+import { MHObject } from '../base/MHObject.js';
 import { MHContributor } from './MHContributor.js';
 import { houndRequest } from '../../request/hound-request.js';
 

@@ -1,4 +1,5 @@
 
+import { MHObject } from '../base/MHObject.js';
 import { MHMedia } from '../media/MHMedia.js';
 import { houndRequest } from '../../request/hound-request.js';
 

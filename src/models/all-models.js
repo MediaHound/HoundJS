@@ -12,80 +12,80 @@
    */
 
   // Base Models
-  import { MHObject }           from './base/MHObject.js';
-  import { MHEmbeddedObject }   from './base/MHEmbeddedObject.js';
-  import { MHEmbeddedRelation } from './base/MHEmbeddedRelation.js';
-  import { MHRelationalPair }   from './base/MHRelationalPair.js';
+  import { MHObject }           from './base/MHObject';
+  import { MHEmbeddedObject }   from './base/MHEmbeddedObject';
+  import { MHEmbeddedRelation } from './base/MHEmbeddedRelation';
+  import { MHRelationalPair }   from './base/MHRelationalPair';
 
 
   // Action Models
-  import { MHAction }   from './action/MHAction.js';
-  import { MHAdd }      from './action/MHAdd.js';
-  import { MHComment }  from './action/MHComment.js';
-  import { MHCreate }   from './action/MHCreate.js';
-  import { MHLike }     from './action/MHLike.js';
-  import { MHFollow }   from './action/MHFollow.js';
-  import { MHPost }     from './action/MHPost.js';
+  import { MHAction }   from './action/MHAction';
+  import { MHAdd }      from './action/MHAdd';
+  import { MHComment }  from './action/MHComment';
+  import { MHCreate }   from './action/MHCreate';
+  import { MHLike }     from './action/MHLike';
+  import { MHFollow }   from './action/MHFollow';
+  import { MHPost }     from './action/MHPost';
 
   // User Models
-  import { MHUser }         from './user/MHUser.js';
-  import { MHLoginSession } from './user/MHLoginSession.js';
+  import { MHUser }         from './user/MHUser';
+  import { MHLoginSession } from './user/MHLoginSession';
 
-  import { MHSocial } from './social/MHSocial.js';
+  import { MHSocial } from './social/MHSocial';
 
 
   // Media Models
-  import { MHMedia }              from './media/MHMedia.js';
-  import { MHAlbum }              from './media/MHAlbum.js';
-  import { MHAlbumSeries }        from './media/MHAlbumSeries.js';
-  import { MHAnthology }          from './media/MHAnthology.js';
-  import { MHBook }               from './media/MHBook.js';
-  import { MHBookSeries }         from './media/MHBookSeries.js';
-  import { MHComicBook }          from './media/MHComicBook.js';
-  import { MHComicBookSeries }    from './media/MHComicBookSeries.js';
-  import { MHGame }               from './media/MHGame.js';
-  import { MHGameSeries }         from './media/MHGameSeries.js';
-  import { MHGraphicNovel }       from './media/MHGraphicNovel.js';
-  import { MHGraphicNovelSeries } from './media/MHGraphicNovelSeries.js';
-  import { MHMovie }              from './media/MHMovie.js';
-  import { MHMovieSeries }        from './media/MHMovieSeries.js';
-  import { MHMusicVideo }         from './media/MHMusicVideo.js';
-  import { MHNovella }            from './media/MHNovella.js';
-  import { MHPeriodical }         from './media/MHPeriodical.js';
-  import { MHPeriodicalSeries }   from './media/MHPeriodicalSeries.js';
-  import { MHShowEpisode }        from './media/MHShowEpisode.js';
-  import { MHShowSeason }         from './media/MHShowSeason.js';
-  import { MHShowSeries }         from './media/MHShowSeries.js';
-  import { MHSong }               from './media/MHSong.js';
-  import { MHSpecial }            from './media/MHSpecial.js';
-  import { MHSpecialSeries }      from './media/MHSpecialSeries.js';
-  import { MHTrailer }            from './media/MHTrailer.js';
+  import { MHMedia }              from './media/MHMedia';
+  import { MHAlbum }              from './media/MHAlbum';
+  import { MHAlbumSeries }        from './media/MHAlbumSeries';
+  import { MHAnthology }          from './media/MHAnthology';
+  import { MHBook }               from './media/MHBook';
+  import { MHBookSeries }         from './media/MHBookSeries';
+  import { MHComicBook }          from './media/MHComicBook';
+  import { MHComicBookSeries }    from './media/MHComicBookSeries';
+  import { MHGame }               from './media/MHGame';
+  import { MHGameSeries }         from './media/MHGameSeries';
+  import { MHGraphicNovel }       from './media/MHGraphicNovel';
+  import { MHGraphicNovelSeries } from './media/MHGraphicNovelSeries';
+  import { MHMovie }              from './media/MHMovie';
+  import { MHMovieSeries }        from './media/MHMovieSeries';
+  import { MHMusicVideo }         from './media/MHMusicVideo';
+  import { MHNovella }            from './media/MHNovella';
+  import { MHPeriodical }         from './media/MHPeriodical';
+  import { MHPeriodicalSeries }   from './media/MHPeriodicalSeries';
+  import { MHShowEpisode }        from './media/MHShowEpisode';
+  import { MHShowSeason }         from './media/MHShowSeason';
+  import { MHShowSeries }         from './media/MHShowSeries';
+  import { MHSong }               from './media/MHSong';
+  import { MHSpecial }            from './media/MHSpecial';
+  import { MHSpecialSeries }      from './media/MHSpecialSeries';
+  import { MHTrailer }            from './media/MHTrailer';
 
-  import { MHCollection } from './collection/MHCollection.js';
+  import { MHCollection } from './collection/MHCollection';
 
-  import { MHImage } from './image/MHImage.js';
+  import { MHImage } from './image/MHImage';
 
 
   // Trait Models
-  import { MHTrait }      from './trait/MHTrait.js';
-  import { MHTraitGroup } from './trait/MHTraitGroup.js';
+  import { MHTrait }      from './trait/MHTrait';
+  import { MHTraitGroup } from './trait/MHTraitGroup';
 
 
   // Contributor Models
-  import { MHContributor }                    from './contributor/MHContributor.js';
-  import { MHRealIndividualContributor }      from './contributor/MHRealIndividualContributor.js';
-  import { MHRealGroupContributor }           from './contributor/MHRealGroupContributor.js';
-  import { MHFictionalIndividualContributor } from './contributor/MHFictionalIndividualContributor.js';
-  import { MHFictionalGroupContributor }      from './contributor/MHFictionalGroupContributor.js';
+  import { MHContributor }                    from './contributor/MHContributor';
+  import { MHRealIndividualContributor }      from './contributor/MHRealIndividualContributor';
+  import { MHRealGroupContributor }           from './contributor/MHRealGroupContributor';
+  import { MHFictionalIndividualContributor } from './contributor/MHFictionalIndividualContributor';
+  import { MHFictionalGroupContributor }      from './contributor/MHFictionalGroupContributor';
 
 
   // Source Models
-  import { MHSourceFormat } from './source/MHSourceFormat.js';
-  import { MHSourceMethod } from './source/MHSourceMethod.js';
-  import { MHSourceMedium } from './source/MHSourceMedium.js';
-  import { MHSourceModel }  from './source/MHSourceModel.js';
+  import { MHSourceFormat } from './source/MHSourceFormat';
+  import { MHSourceMethod } from './source/MHSourceMethod';
+  import { MHSourceMedium } from './source/MHSourceMedium';
+  import { MHSourceModel }  from './source/MHSourceModel';
 
-  export var models = {
+  var models = {
     get MHObject(){ return MHObject; },
     get MHEmbeddedObject(){ return MHEmbeddedObject; },
     get MHEmbeddedRelation(){ return MHEmbeddedRelation; },
@@ -139,5 +139,7 @@
     get MHSourceMedium(){ return MHSourceMedium; },
     get MHSourceModel(){ return MHSourceModel; }
   };
+
+  export default models;
 
 }());

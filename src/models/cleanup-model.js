@@ -1,4 +1,5 @@
-/* globals MHObject, mhidLRU */
+
+import { MHObject } from './base/MHObject.js';
 
 // Remove register constructor
 delete MHObject.registerConstructor;

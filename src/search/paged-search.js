@@ -9,6 +9,7 @@
    * TODO ... everything
    */
 
-  export var pagedSearch = function(){ /* 'nope' function */ };
+  var pagedSearch = function(){ /* 'nope' function */ };
+  export default pagedSearch;
 
 }());
