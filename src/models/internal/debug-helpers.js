@@ -7,4 +7,3 @@ export var log = function(){
   }
 };
 
-export default log;

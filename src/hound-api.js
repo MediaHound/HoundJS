@@ -12,7 +12,7 @@ import { quickSearch } from './search/quick-search';
 import { pagedSearch } from './search/paged-search';
 
 
-export default {
+export var houndApi = {
   get models()        { return models;        },
   get request()       { return request;       },
   get pagedRequest()  { return pagedRequest;  },
@@ -24,9 +24,9 @@ export default {
 // TODO for testing
 /*
 if( window.location.host === 'local.mediahound.com:2014' ){
-  window.houndapi = houndApiPackage;
-  window.houndApi = houndApiPackage;
-  window.houndAPI = houndApiPackage;
+  window.houndapi = houndApi;
+  window.houndApi = houndApi;
+  window.houndAPI = houndApi;
 }
 */
 

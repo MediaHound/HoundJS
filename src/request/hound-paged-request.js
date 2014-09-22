@@ -230,9 +230,6 @@ class PagedRequest {
 
 }
 
-// Create factory function
+// Create and export factory function
 export var pagedRequest = function(a){ return new PagedRequest(a); };
-
-// Return factory function that returns new PagedRequest
-export default pagedRequest;
 
