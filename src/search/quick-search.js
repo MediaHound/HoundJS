@@ -7,15 +7,12 @@
  *
  * For Filtered and paged searching use ./paged-search.js
  *
- *
- *  TODO refactor to not take page number (page param)
- *
  */
 
 import { houndRequest } from '../request/hound-request';
 import { MHObject } from '../models/base/MHObject';
 
-var i, prop, buildSearchHelper, houndSearch,
+var i, prop, buildSearchHelper, quickSearch,
     search        = {},
     extraEncode   = houndRequest.extraEncode,
     types         = ['all', 'movie', 'song', 'album', 'tvseries', 'book', 'game', 'person', 'collection', 'user'],
@@ -24,22 +21,21 @@ var i, prop, buildSearchHelper, houndSearch,
       return 'search/' + searchType + '/find/' + extraEncode(query) + '/autocomplete';
     },
 
-    makeParams = function(size, page){
-      var params = {};
-      params['page.size'] = (typeof size === 'number') ? size : 8;
+    makeParams = function(size){
+      var params = {
+        page: 0
+      };
 
-      if(typeof page === 'number'){
-        params.page = page;
-      }
+      params['page.size'] = (typeof size === 'number') ? size : 8;
 
       return params;
     },
 
-    makeSearchRequest = function(searchType, query, size, page){
+    makeSearchRequest = function(searchType, query, size){
       return houndRequest({
           method: 'GET',
           endpoint: makeEndpoint(searchType, query),
-          params: makeParams(size, page),
+          params: makeParams(size)
           /*onprogress:function(responseText){
             console.log(searchType + ' progress: ', responseText);
           }*/
@@ -48,10 +44,10 @@ var i, prop, buildSearchHelper, houndSearch,
 
 // search specific
 buildSearchHelper = function(index){
-  // search.type = function( searchQuery, pageSize, pageNumber
+  // search.type = function( searchQuery, pageSize
   //  returns promise created in makeSearchRequest defined above ^^^
-  search[types[index]] = function(query, size, page){
-    return makeSearchRequest(types[index], query, size, page)
+  search[types[index]] = function(query, size){
+    return makeSearchRequest(types[index], query, size)
       .then((parsed) => {
         var mhObj;
         return parsed.content.map((v) => {
@@ -73,7 +69,7 @@ for( i = 0 ; i < types.length ; i++ ){
 }
 
 /*
- * houndSearch(query, size, page)
+ * quickSearch(query, size)
  *
  * returns a map of search results
  *  all: [results]
@@ -82,11 +78,11 @@ for( i = 0 ; i < types.length ; i++ ){
  *  etc...
  *
  */
-houndSearch = function(query, size, page){
+quickSearch = function(query, size){
   var j, typeMap = {};
   return Promise.all(
       types.map(function(v){
-        return search[v](query, size, page);
+        return search[v](query, size);
       })
     )
     .then(function(results){
@@ -99,28 +95,27 @@ houndSearch = function(query, size, page){
 
 for( prop in search ){
   if( search.hasOwnProperty(prop) ){
-    houndSearch[prop] = search[prop];
+    quickSearch[prop] = search[prop];
   }
 }
 
 /*
- * houndSearch.everything(query, size, page)
+ * quickSearch.everything(query, size)
  *
  *  returns a map of search promises
  *
  */
-houndSearch.everything = function(query, size, page){
+quickSearch.everything = function(query, size){
   var currType,
       i = 0,
       rtn = {};
 
   for( currType = types[i] ; i < types.length ; currType = types[++i] ){
-    rtn[currType] = search[currType](query, size, page);
+    rtn[currType] = search[currType](query, size);
   }
 
   return rtn;
 };
 
-export { houndSearch as quickSearch };
-export default houndSearch;
+export { quickSearch };
 
