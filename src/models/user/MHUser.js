@@ -118,7 +118,8 @@ export class MHUser extends MHObject {
   get displayableType()   { return 'User';  }
 
   get isCurrentUser(){
-    var currentUser = System.get('./MHLoginSession').MHLoginSession;
+    var currentUser = System.get('./MHLoginSession').MHLoginSession.currentUser;
+    console.warn('circular dep: (currentUser) ', currentUser);
     return this.isEqualToMHObject(currentUser);
   }
 
@@ -316,6 +317,7 @@ export class MHUser extends MHObject {
       })
       .then(function(userWithImage){
         MHLoginSession = System.get('./MHLoginSession').MHLoginSession;
+        console.warn('circular dep: ', MHLoginSession);
         MHLoginSession.updatedProfileImage(MHObject.create(userWithImage));
         return userWithImage;
       });

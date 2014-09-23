@@ -50,6 +50,8 @@ var defaults = {
     setContentArray = function(response){
       //import { MHObject } from '../models/base/MHObject';
       var MHObject = System.get('../models/base/MHObject').MHObject;
+      console.warn('circular dep: ', MHObject);
+
       var self = this, newContent;
 
       if( (this.args.params.view && this.args.params.view === 'id') || typeof response.content[0] === 'string' ){
