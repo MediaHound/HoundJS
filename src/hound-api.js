@@ -11,8 +11,9 @@ import { models } from './models/all-models';
 import { quickSearch } from './search/quick-search';
 import { pagedSearch } from './search/paged-search';
 
+export { request, pagedRequest, models, quickSearch, pagedSearch };
 
-export var houndApi = {
+export default {
   get models()        { return models;        },
   get request()       { return request;       },
   get pagedRequest()  { return pagedRequest;  },
@@ -29,6 +30,5 @@ if( window.location.host === 'local.mediahound.com:2014' ){
   window.houndAPI = houndApi;
 }
 */
-
 
 
