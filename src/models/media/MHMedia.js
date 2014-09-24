@@ -230,8 +230,7 @@ export class MHMedia extends MHObject {
           method  : 'GET',
           endpoint: path,
           params: {
-            'view':view,
-            'fullView': (view === 'full') // TODO deprecate
+            'view':view
           }
         })
         .then(function(parsed){
@@ -261,7 +260,6 @@ export class MHMedia extends MHObject {
           endpoint: path,
           params: {
             'view':view,
-            'fullView': (view === 'full'), // TODO deprecate
             'excludeMinors': excludeMinors
           }
         })
