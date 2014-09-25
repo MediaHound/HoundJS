@@ -15,7 +15,7 @@
     "url": "https://bitbucket.org/mediahound/hound-js-api"
   },
   "dependencies": {
-    "traceur": "=0.0.65"
+    "traceur": "=0.0.66"
   },
   "devDependencies": {
     "bower": "=1.3.11",
