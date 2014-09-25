@@ -1,7 +1,9 @@
 
 var gulp    = require('gulp'),
+    gulpif  = require('gulp-if'),
     jshint  = require('gulp-jshint'),
-    replace = require('gulp-replace'),
+    concat  = require('gulp-concat'),
+    uglify  = require('gulp-uglify'),
     exec    = require('child_process').exec;
 
 var paths = {
@@ -13,16 +15,40 @@ var paths = {
 
 };
 
+paths.srcGlob = paths.src + '/**/*.js';
+
+var uglifyOpts = {
+
+  mangle: false,
+  warnings: false
+
+};
+
 // JSHint Task
 gulp.task('jshint', function(){
 
-  return gulp.src(paths.src + '/**/*.js')
+  return gulp.src(paths.srcGlob)
     .pipe(jshint('./.jshintrc'))
     .pipe(jshint.reporter('jshint-stylish'));
 
 });
+// JSHint Watch
+gulp.task('jshint:watch', function(done){
 
-var traceur = {
+  gulp.watch(paths.srcGlob, ['jshint']);
+  done();
+
+});
+
+// Watch src/ do 'jshint', 'dist'
+gulp.task('watch', function(done){
+
+  gulp.watch(paths.srcGlob, ['dist', 'jshint']);
+  done();
+
+});
+
+var traceurCmds = {
   dir: {
     'amd'         : './node_modules/traceur/traceur --dir src build/amd --modules=amd',
     'cjs'         : './node_modules/traceur/traceur --dir src build/cjs --modules=commonjs',
@@ -51,21 +77,12 @@ var execHelper = function(command, callback){
 
 // Compile Traceur tasks
 // Single File Compile
-gulp.task('traceur:out:amd', function(done){
-  execHelper(traceur.single.amd, done);
-});
-gulp.task('traceur:out:cjs', function(done){
-  execHelper(traceur.single.cjs, done);
-});
-gulp.task('traceur:out:instantiate', function(done){
-  execHelper(traceur.single.instantiate, done);
-});
-gulp.task('traceur:out:inline', function(done){
-  execHelper(traceur.single.inline, done);
-});
-gulp.task('traceur:out:register', function(done){
-  execHelper(traceur.single.register, done);
-});
+gulp.task('traceur:out:amd',          function(done){ execHelper(traceurCmds.single.amd, done); });
+gulp.task('traceur:out:cjs',          function(done){ execHelper(traceurCmds.single.cjs, done); });
+gulp.task('traceur:out:instantiate',  function(done){ execHelper(traceurCmds.single.instantiate, done); });
+gulp.task('traceur:out:inline',       function(done){ execHelper(traceurCmds.single.inline, done); });
+gulp.task('traceur:out:register',     function(done){ execHelper(traceurCmds.single.register, done); });
+// Aggregate for above tasks
 gulp.task('traceur:out',
   [
     'traceur:out:amd',
@@ -77,45 +94,67 @@ gulp.task('traceur:out',
 );
 
 // Directory Compile
-gulp.task('traceur:amd', function(done){
-  execHelper(traceur.dir.amd, done);
-});
-gulp.task('traceur:cjs', function(done){
-  execHelper(traceur.dir.cjs, done);
-});
-gulp.task('traceur:instantiate', function(done){
-  execHelper(traceur.dir.instantiate, done);
-});
-gulp.task('traceur:build', ['traceur:amd', 'traceur:cjs', 'traceur:instantiate']);
+gulp.task('traceur:amd',          function(done){ execHelper(traceurCmds.dir.amd, done); });
+gulp.task('traceur:cjs',          function(done){ execHelper(traceurCmds.dir.cjs, done); });
+gulp.task('traceur:instantiate',  function(done){ execHelper(traceurCmds.dir.instantiate, done); });
+// Aggregate for above tasks
+gulp.task('traceur:build',
+  [
+    'traceur:amd',
+    'traceur:cjs',
+    'traceur:instantiate'
+  ]
+);
 
+// Run All Above Compile Tasks
 gulp.task('build', ['traceur:build', 'traceur:out']);
-
-
-
-
-gulp.task('replace:test', function(){
-
-  return gulp.src('./build/compiled/hound-api.amd.js', {base:'./build/compiled/'})
-    .pipe(replace(/(\.\.\/)*?src\/hound-api/g, 'hound-api'))
-    .pipe(gulp.dest('./build/stripped/'));
-
+gulp.task('build:watch', function(done){
+  gulp.watch(paths.srcGlob, ['build']);
+  done();
 });
 
 
+// Distribution Tasks
+// Compile-Concat-Write helper
+var concatCompiled = function(minify, done){
+  gulp.src([
+      './node_modules/traceur/bin/traceur-runtime.js',
+      './build/compiled/hound-api.register.js'
+    ])
+      .pipe(gulpif(minify, concat('hound-api.min.js'), concat('hound-api.js')))
+      .pipe(gulpif(minify, uglify(uglifyOpts)))
+      .pipe(gulp.dest(paths.dist));
+  done();
+};
 
-
-// Concat-Replace-Compile
-gulp.task('dist', function(done){
-
-  // Concat files
-  // remove imports
-
+gulp.task('dist:browser:full', function(done){
+  execHelper(traceurCmds.single.register, function(){
+    concatCompiled(false, done);
+  });
 });
 
+gulp.task('dist:browser:min', function(done){
+  execHelper(traceurCmds.single.register, function(){
+    concatCompiled(true, done);
+  });
+});
+
+// Calls traceur command once, then compiles both min and non-min dist versions
+gulp.task('dist:browser', function(done){
+  var count = 0;
+  execHelper(traceurCmds.single.register, function(){
+    concatCompiled(false, function(){ count == 2 ? done() : ++count; });
+    concatCompiled(true, function(){  count == 2 ? done() : ++count; });
+  });
+});
+
+
+// TODO Add compile for Node Distribution (requires removing window calls in api)
+gulp.task('dist', ['dist:browser']);
 
 
 /*
-
+FROM ORIGINAL REPO
 
  var gulp      = require('gulp'),
  plumber   = require('gulp-plumber'),
@@ -247,8 +286,5 @@ traceur: {
   ])
   )
 }
-
-
-
 
  */

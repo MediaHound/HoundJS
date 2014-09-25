@@ -1,3 +1,4 @@
+/*global System */
 
 import { houndRequest } from './hound-request';
 
@@ -48,9 +49,8 @@ var defaults = {
       return response;
     },
     setContentArray = function(response){
-      //import { MHObject } from '../models/base/MHObject';
-      var MHObject = System.get('../models/base/MHObject').MHObject;
-      console.warn('circular dep: ', MHObject);
+      var MHObject = System.get('../../src/models/base/MHObject').MHObject;
+      //console.warn('circular dep: ', MHObject);
 
       var self = this, newContent;
 
@@ -214,7 +214,7 @@ class PagedRequest {
       // needs request
       var self = this;
       return this.currentPromise
-        .then(function(response){
+        .then(function(){
           self.page = n;
           self.args.params.page = self.page;
           self.pagePromises[self.page] = houndRequest(self.args)

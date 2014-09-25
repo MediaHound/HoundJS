@@ -1,6 +1,5 @@
 
 import { MHObject } from '../base/MHObject';
-import { MHMedia } from '../media/MHMedia';
 import { houndRequest } from '../../request/hound-request';
 
 // MediaHound Contributor Object

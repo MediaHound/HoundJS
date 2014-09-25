@@ -1,6 +1,5 @@
 
 import { MHObject } from '../base/MHObject';
-import { MHMedia } from '../media/MHMedia';
 import { MHLoginSession } from '../user/MHLoginSession';
 
 import { houndRequest } from '../../request/hound-request';
@@ -190,7 +189,7 @@ export class MHCollection extends MHObject {
 
     var path = this.subendpoint(sub),
         contentPromise,
-        mhids = contents.map(function(v,i,a){
+        mhids = contents.map(function(v){
 
           if( v instanceof MHObject ){
             return v.mhid;

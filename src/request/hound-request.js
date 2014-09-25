@@ -92,7 +92,7 @@ export var houndRequest = function(args){
   if( args.method == null || args.method === 'GET' ){
 
     if( requestMap.hasOwnProperty(args.url) ){
-      //log('request is in map: ', args.url);
+      log('request is in map: ', args.url);
       return requestMap[args.url];
     }
 
@@ -104,7 +104,7 @@ export var houndRequest = function(args){
     return requestMap[args.url];
   }
 
-  //log( 'bypassed requestMap', args.url);
+  log( 'bypassed requestMap', args.url);
   // else POST request
   return promiseRequest(args)
     .then(responseThen);

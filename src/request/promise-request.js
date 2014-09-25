@@ -183,7 +183,7 @@ var extraEncode = function(str){
         };
       */
 
-        xhr.addEventListener('abort', function(evt){
+        xhr.addEventListener('abort', function(){
           console.log('Request to ' + url + ' aborted with status: ' + this.status + ', ' + this.statusText);
         }, false);
 

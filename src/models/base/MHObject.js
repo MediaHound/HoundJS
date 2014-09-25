@@ -1,3 +1,4 @@
+/*global System */
 
 import { log } from '../internal/debug-helpers';
 
@@ -284,23 +285,30 @@ export class MHObject {
     return null;
   }
 
+  // TODO: Update these checks for cross site scripting cases
+  // case:
+  //    instanceof only works if the object being checked was created
+  //    in the same global scope as the constructor function it is being checked against
   static isMedia(toCheck){
-    // TODO
+    return toCheck instanceof System.get('../../src/models/media/MHMedia').MHMedia;
   }
   static isContributor(toCheck){
-    // TODO
+    return toCheck instanceof System.get('../../src/models/contributor/MHContributor').MHContributor;
   }
   static isAction(toCheck){
-    // TODO
+    return toCheck instanceof System.get('../../src/models/action/MHAction').MHAction;
   }
   static isUser(toCheck){
-    // TODO
+    return toCheck instanceof System.get('../../src/models/user/MHUser').MHUser;
   }
   static isCollection(toCheck){
-    // TODO
+    return toCheck instanceof System.get('../../src/models/collection/MHCollection').MHCollection;
   }
   static isImage(toCheck){
-    // TODO
+    return toCheck instanceof System.get('../../src/models/image/MHImage').MHImage;
+  }
+  static isTrait(toCheck){
+    return toCheck instanceof System.get('../../src/models/trait/MHTrait').MHTrait;
   }
 
   /**
@@ -546,6 +554,7 @@ export class MHObject {
   /** TODO remove console debug statements
    * TODO Change to store social object and auto update on call
    * TODO Only update on final returned response
+   *
    * mhObj.takeAction(action)
    *
    * @param   { String }  - action to take
