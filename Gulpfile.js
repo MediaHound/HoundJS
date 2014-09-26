@@ -3,25 +3,48 @@ var gulp    = require('gulp'),
     gulpif  = require('gulp-if'),
     jshint  = require('gulp-jshint'),
     concat  = require('gulp-concat'),
+    replace = require('gulp-replace'),
     uglify  = require('gulp-uglify'),
     exec    = require('child_process').exec;
 
+// Paths for tasks
 var paths = {
 
   src:   './src',
   build: './build',
   dist:  './dist',
-  tests: './test'
+  test: './test',
+
+  traceur: './node_modules/traceur/traceur'
 
 };
+// More paths, using above paths
+paths.srcGlob       = paths.src   + '/**/*.js';
+paths.houndApiJs    = paths.src   + '/hound-api.js';
+paths.buildCompiled = paths.build + '/compiled';
 
-paths.srcGlob = paths.src + '/**/*.js';
-
+// Options for Uglify Task
 var uglifyOpts = {
 
   mangle: false,
   warnings: false
 
+};
+
+// Traceur command line commands
+var traceurCmds = {
+  dir: {
+    'amd'         : paths.traceur + ' --dir ' + paths.src + ' ' + paths.build + '/amd --modules=amd',
+    'cjs'         : paths.traceur + ' --dir ' + paths.src + ' ' + paths.build + '/cjs --modules=commonjs',
+    'instantiate' : paths.traceur + ' --dir ' + paths.src + ' ' + paths.build + '/instantiate --modules=instantiate'
+  },
+  single: {
+    'amd'         : paths.traceur + ' ' + paths.houndApiJs + ' --out ' + paths.buildCompiled + '/hound-api.amd.js --modules=amd',
+    'cjs'         : paths.traceur + ' ' + paths.houndApiJs + ' --out ' + paths.buildCompiled + '/hound-api.cjs.js --modules=commonjs',
+    'instantiate' : paths.traceur + ' ' + paths.houndApiJs + ' --out ' + paths.buildCompiled + '/hound-api.sysjs.js --modules=instantiate',
+    'inline'      : paths.traceur + ' ' + paths.houndApiJs + ' --out ' + paths.buildCompiled + '/hound-api.inline.js --modules=inline',
+    'register'    : paths.traceur + ' ' + paths.houndApiJs + ' --out ' + paths.buildCompiled + '/hound-api.register.js --modules=register' // <-- this is the important one that is used to build distribution right now
+  }
 };
 
 // JSHint Task
@@ -40,7 +63,7 @@ gulp.task('jshint:watch', function(done){
 
 });
 
-// Watch src/ do 'jshint', 'dist'
+// Watch srcGlob do 'jshint', 'dist'
 gulp.task('watch', function(done){
 
   gulp.watch(paths.srcGlob, ['dist', 'jshint']);
@@ -48,26 +71,15 @@ gulp.task('watch', function(done){
 
 });
 
-var traceurCmds = {
-  dir: {
-    'amd'         : './node_modules/traceur/traceur --dir src build/amd --modules=amd',
-    'cjs'         : './node_modules/traceur/traceur --dir src build/cjs --modules=commonjs',
-    'instantiate' : './node_modules/traceur/traceur --dir src build/instantiate --modules=instantiate'
-  },
-  single: {
-    'amd'         :'./node_modules/traceur/traceur --out build/compiled/hound-api.amd.js src/hound-api.js --modules=amd',
-    'cjs'         :'./node_modules/traceur/traceur --out build/compiled/hound-api.cjs.js src/hound-api.js --modules=commonjs',
-    'instantiate' :'./node_modules/traceur/traceur --out build/compiled/hound-api.sysjs.js src/hound-api.js --modules=instantiate',
-    'inline'      :'./node_modules/traceur/traceur --out build/compiled/hound-api.inline.js src/hound-api.js --modules=inline',
-    'register'    :'./node_modules/traceur/traceur --out build/compiled/hound-api.register.js src/hound-api.js --modules=register'
-  }
-};
-
 // Helper for executing traceur compiles
 var execHelper = function(command, callback){
   exec(command, function(error, stdout, stderr){
-    console.log('stdout: ' + stdout);
-    console.log('stderr: ' + stderr);
+    if( stdout ){
+      console.log('stdout: ' + stdout);
+    }
+    if( stderr ){
+      console.log('stderr: ' + stderr);
+    }
     if( error !== null ){
       console.log(error);
     }
@@ -94,20 +106,20 @@ gulp.task('traceur:out',
 );
 
 // Directory Compile
-gulp.task('traceur:amd',          function(done){ execHelper(traceurCmds.dir.amd, done); });
-gulp.task('traceur:cjs',          function(done){ execHelper(traceurCmds.dir.cjs, done); });
-gulp.task('traceur:instantiate',  function(done){ execHelper(traceurCmds.dir.instantiate, done); });
+gulp.task('traceur:dir:amd',          function(done){ execHelper(traceurCmds.dir.amd, done); });
+gulp.task('traceur:dir:cjs',          function(done){ execHelper(traceurCmds.dir.cjs, done); });
+gulp.task('traceur:dir:instantiate',  function(done){ execHelper(traceurCmds.dir.instantiate, done); });
 // Aggregate for above tasks
-gulp.task('traceur:build',
+gulp.task('traceur:dir',
   [
-    'traceur:amd',
-    'traceur:cjs',
-    'traceur:instantiate'
+    'traceur:dir:amd',
+    'traceur:dir:cjs',
+    'traceur:dir:instantiate'
   ]
 );
 
 // Run All Above Compile Tasks
-gulp.task('build', ['traceur:build', 'traceur:out']);
+gulp.task('build', ['traceur:dir', 'traceur:out']);
 gulp.task('build:watch', function(done){
   gulp.watch(paths.srcGlob, ['build']);
   done();
@@ -121,6 +133,7 @@ var concatCompiled = function(minify, done){
       './node_modules/traceur/bin/traceur-runtime.js',
       './build/compiled/hound-api.register.js'
     ])
+      .pipe(replace(/\.\.\/\.\.\/src\//g, ''))
       .pipe(gulpif(minify, concat('hound-api.min.js'), concat('hound-api.js')))
       .pipe(gulpif(minify, uglify(uglifyOpts)))
       .pipe(gulp.dest(paths.dist));
@@ -151,7 +164,7 @@ gulp.task('dist:browser', function(done){
 
 // TODO Add compile for Node Distribution (requires removing window calls in api)
 gulp.task('dist', ['dist:browser']);
-
+gulp.task('default', ['jshint', 'dist']);
 
 /*
 FROM ORIGINAL REPO

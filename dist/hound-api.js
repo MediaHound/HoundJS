@@ -918,9 +918,9 @@
     return instantiator && instantiator.getUncoatedModule();
   };
 })(typeof global !== 'undefined' ? global : this);
-System.register("traceur-runtime@0.0.65/src/runtime/polyfills/utils", [], function() {
+System.register("traceur-runtime@0.0.66/src/runtime/polyfills/utils", [], function() {
   "use strict";
-  var __moduleName = "traceur-runtime@0.0.65/src/runtime/polyfills/utils";
+  var __moduleName = "traceur-runtime@0.0.66/src/runtime/polyfills/utils";
   var $ceil = Math.ceil;
   var $floor = Math.floor;
   var $isFinite = isFinite;
@@ -1078,10 +1078,10 @@ System.register("traceur-runtime@0.0.65/src/runtime/polyfills/utils", [], functi
     }
   };
 });
-System.register("traceur-runtime@0.0.65/src/runtime/polyfills/Map", [], function() {
+System.register("traceur-runtime@0.0.66/src/runtime/polyfills/Map", [], function() {
   "use strict";
-  var __moduleName = "traceur-runtime@0.0.65/src/runtime/polyfills/Map";
-  var $__3 = System.get("traceur-runtime@0.0.65/src/runtime/polyfills/utils"),
+  var __moduleName = "traceur-runtime@0.0.66/src/runtime/polyfills/Map";
+  var $__3 = System.get("traceur-runtime@0.0.66/src/runtime/polyfills/utils"),
       isObject = $__3.isObject,
       maybeAddIterator = $__3.maybeAddIterator,
       registerPolyfill = $__3.registerPolyfill;
@@ -1341,15 +1341,15 @@ System.register("traceur-runtime@0.0.65/src/runtime/polyfills/Map", [], function
     }
   };
 });
-System.get("traceur-runtime@0.0.65/src/runtime/polyfills/Map" + '');
-System.register("traceur-runtime@0.0.65/src/runtime/polyfills/Set", [], function() {
+System.get("traceur-runtime@0.0.66/src/runtime/polyfills/Map" + '');
+System.register("traceur-runtime@0.0.66/src/runtime/polyfills/Set", [], function() {
   "use strict";
-  var __moduleName = "traceur-runtime@0.0.65/src/runtime/polyfills/Set";
-  var $__11 = System.get("traceur-runtime@0.0.65/src/runtime/polyfills/utils"),
+  var __moduleName = "traceur-runtime@0.0.66/src/runtime/polyfills/Set";
+  var $__11 = System.get("traceur-runtime@0.0.66/src/runtime/polyfills/utils"),
       isObject = $__11.isObject,
       maybeAddIterator = $__11.maybeAddIterator,
       registerPolyfill = $__11.registerPolyfill;
-  var Map = System.get("traceur-runtime@0.0.65/src/runtime/polyfills/Map").Map;
+  var Map = System.get("traceur-runtime@0.0.66/src/runtime/polyfills/Map").Map;
   var getOwnHashObject = $traceurRuntime.getOwnHashObject;
   var $hasOwnProperty = Object.prototype.hasOwnProperty;
   function initSet(set) {
@@ -1494,10 +1494,10 @@ System.register("traceur-runtime@0.0.65/src/runtime/polyfills/Set", [], function
     }
   };
 });
-System.get("traceur-runtime@0.0.65/src/runtime/polyfills/Set" + '');
-System.register("traceur-runtime@0.0.65/node_modules/rsvp/lib/rsvp/asap", [], function() {
+System.get("traceur-runtime@0.0.66/src/runtime/polyfills/Set" + '');
+System.register("traceur-runtime@0.0.66/node_modules/rsvp/lib/rsvp/asap", [], function() {
   "use strict";
-  var __moduleName = "traceur-runtime@0.0.65/node_modules/rsvp/lib/rsvp/asap";
+  var __moduleName = "traceur-runtime@0.0.66/node_modules/rsvp/lib/rsvp/asap";
   var len = 0;
   function asap(callback, arg) {
     queue[len] = callback;
@@ -1562,11 +1562,11 @@ System.register("traceur-runtime@0.0.65/node_modules/rsvp/lib/rsvp/asap", [], fu
       return $__default;
     }};
 });
-System.register("traceur-runtime@0.0.65/src/runtime/polyfills/Promise", [], function() {
+System.register("traceur-runtime@0.0.66/src/runtime/polyfills/Promise", [], function() {
   "use strict";
-  var __moduleName = "traceur-runtime@0.0.65/src/runtime/polyfills/Promise";
-  var async = System.get("traceur-runtime@0.0.65/node_modules/rsvp/lib/rsvp/asap").default;
-  var registerPolyfill = System.get("traceur-runtime@0.0.65/src/runtime/polyfills/utils").registerPolyfill;
+  var __moduleName = "traceur-runtime@0.0.66/src/runtime/polyfills/Promise";
+  var async = System.get("traceur-runtime@0.0.66/node_modules/rsvp/lib/rsvp/asap").default;
+  var registerPolyfill = System.get("traceur-runtime@0.0.66/src/runtime/polyfills/utils").registerPolyfill;
   var promiseRaw = {};
   function isPromise(x) {
     return x && typeof x === 'object' && x.status_ !== undefined;
@@ -1803,12 +1803,12 @@ System.register("traceur-runtime@0.0.65/src/runtime/polyfills/Promise", [], func
     }
   };
 });
-System.get("traceur-runtime@0.0.65/src/runtime/polyfills/Promise" + '');
-System.register("traceur-runtime@0.0.65/src/runtime/polyfills/StringIterator", [], function() {
+System.get("traceur-runtime@0.0.66/src/runtime/polyfills/Promise" + '');
+System.register("traceur-runtime@0.0.66/src/runtime/polyfills/StringIterator", [], function() {
   "use strict";
   var $__29;
-  var __moduleName = "traceur-runtime@0.0.65/src/runtime/polyfills/StringIterator";
-  var $__27 = System.get("traceur-runtime@0.0.65/src/runtime/polyfills/utils"),
+  var __moduleName = "traceur-runtime@0.0.66/src/runtime/polyfills/StringIterator";
+  var $__27 = System.get("traceur-runtime@0.0.66/src/runtime/polyfills/utils"),
       createIteratorResultObject = $__27.createIteratorResultObject,
       isObject = $__27.isObject;
   var $__30 = $traceurRuntime,
@@ -1870,11 +1870,11 @@ System.register("traceur-runtime@0.0.65/src/runtime/polyfills/StringIterator", [
       return createStringIterator;
     }};
 });
-System.register("traceur-runtime@0.0.65/src/runtime/polyfills/String", [], function() {
+System.register("traceur-runtime@0.0.66/src/runtime/polyfills/String", [], function() {
   "use strict";
-  var __moduleName = "traceur-runtime@0.0.65/src/runtime/polyfills/String";
-  var createStringIterator = System.get("traceur-runtime@0.0.65/src/runtime/polyfills/StringIterator").createStringIterator;
-  var $__32 = System.get("traceur-runtime@0.0.65/src/runtime/polyfills/utils"),
+  var __moduleName = "traceur-runtime@0.0.66/src/runtime/polyfills/String";
+  var createStringIterator = System.get("traceur-runtime@0.0.66/src/runtime/polyfills/StringIterator").createStringIterator;
+  var $__32 = System.get("traceur-runtime@0.0.66/src/runtime/polyfills/utils"),
       maybeAddFunctions = $__32.maybeAddFunctions,
       maybeAddIterator = $__32.maybeAddIterator,
       registerPolyfill = $__32.registerPolyfill;
@@ -2064,12 +2064,12 @@ System.register("traceur-runtime@0.0.65/src/runtime/polyfills/String", [], funct
     }
   };
 });
-System.get("traceur-runtime@0.0.65/src/runtime/polyfills/String" + '');
-System.register("traceur-runtime@0.0.65/src/runtime/polyfills/ArrayIterator", [], function() {
+System.get("traceur-runtime@0.0.66/src/runtime/polyfills/String" + '');
+System.register("traceur-runtime@0.0.66/src/runtime/polyfills/ArrayIterator", [], function() {
   "use strict";
   var $__36;
-  var __moduleName = "traceur-runtime@0.0.65/src/runtime/polyfills/ArrayIterator";
-  var $__34 = System.get("traceur-runtime@0.0.65/src/runtime/polyfills/utils"),
+  var __moduleName = "traceur-runtime@0.0.66/src/runtime/polyfills/ArrayIterator";
+  var $__34 = System.get("traceur-runtime@0.0.66/src/runtime/polyfills/utils"),
       toObject = $__34.toObject,
       toUint32 = $__34.toUint32,
       createIteratorResultObject = $__34.createIteratorResultObject;
@@ -2138,14 +2138,14 @@ System.register("traceur-runtime@0.0.65/src/runtime/polyfills/ArrayIterator", []
     }
   };
 });
-System.register("traceur-runtime@0.0.65/src/runtime/polyfills/Array", [], function() {
+System.register("traceur-runtime@0.0.66/src/runtime/polyfills/Array", [], function() {
   "use strict";
-  var __moduleName = "traceur-runtime@0.0.65/src/runtime/polyfills/Array";
-  var $__37 = System.get("traceur-runtime@0.0.65/src/runtime/polyfills/ArrayIterator"),
+  var __moduleName = "traceur-runtime@0.0.66/src/runtime/polyfills/Array";
+  var $__37 = System.get("traceur-runtime@0.0.66/src/runtime/polyfills/ArrayIterator"),
       entries = $__37.entries,
       keys = $__37.keys,
       values = $__37.values;
-  var $__38 = System.get("traceur-runtime@0.0.65/src/runtime/polyfills/utils"),
+  var $__38 = System.get("traceur-runtime@0.0.66/src/runtime/polyfills/utils"),
       checkIterable = $__38.checkIterable,
       isCallable = $__38.isCallable,
       isConstructor = $__38.isConstructor,
@@ -2284,11 +2284,11 @@ System.register("traceur-runtime@0.0.65/src/runtime/polyfills/Array", [], functi
     }
   };
 });
-System.get("traceur-runtime@0.0.65/src/runtime/polyfills/Array" + '');
-System.register("traceur-runtime@0.0.65/src/runtime/polyfills/Object", [], function() {
+System.get("traceur-runtime@0.0.66/src/runtime/polyfills/Array" + '');
+System.register("traceur-runtime@0.0.66/src/runtime/polyfills/Object", [], function() {
   "use strict";
-  var __moduleName = "traceur-runtime@0.0.65/src/runtime/polyfills/Object";
-  var $__43 = System.get("traceur-runtime@0.0.65/src/runtime/polyfills/utils"),
+  var __moduleName = "traceur-runtime@0.0.66/src/runtime/polyfills/Object";
+  var $__43 = System.get("traceur-runtime@0.0.66/src/runtime/polyfills/utils"),
       maybeAddFunctions = $__43.maybeAddFunctions,
       registerPolyfill = $__43.registerPolyfill;
   var $__44 = $traceurRuntime,
@@ -2351,11 +2351,11 @@ System.register("traceur-runtime@0.0.65/src/runtime/polyfills/Object", [], funct
     }
   };
 });
-System.get("traceur-runtime@0.0.65/src/runtime/polyfills/Object" + '');
-System.register("traceur-runtime@0.0.65/src/runtime/polyfills/Number", [], function() {
+System.get("traceur-runtime@0.0.66/src/runtime/polyfills/Object" + '');
+System.register("traceur-runtime@0.0.66/src/runtime/polyfills/Number", [], function() {
   "use strict";
-  var __moduleName = "traceur-runtime@0.0.65/src/runtime/polyfills/Number";
-  var $__46 = System.get("traceur-runtime@0.0.65/src/runtime/polyfills/utils"),
+  var __moduleName = "traceur-runtime@0.0.66/src/runtime/polyfills/Number";
+  var $__46 = System.get("traceur-runtime@0.0.66/src/runtime/polyfills/utils"),
       isNumber = $__46.isNumber,
       maybeAddConsts = $__46.maybeAddConsts,
       maybeAddFunctions = $__46.maybeAddFunctions,
@@ -2419,11 +2419,11 @@ System.register("traceur-runtime@0.0.65/src/runtime/polyfills/Number", [], funct
     }
   };
 });
-System.get("traceur-runtime@0.0.65/src/runtime/polyfills/Number" + '');
-System.register("traceur-runtime@0.0.65/src/runtime/polyfills/polyfills", [], function() {
+System.get("traceur-runtime@0.0.66/src/runtime/polyfills/Number" + '');
+System.register("traceur-runtime@0.0.66/src/runtime/polyfills/polyfills", [], function() {
   "use strict";
-  var __moduleName = "traceur-runtime@0.0.65/src/runtime/polyfills/polyfills";
-  var polyfillAll = System.get("traceur-runtime@0.0.65/src/runtime/polyfills/utils").polyfillAll;
+  var __moduleName = "traceur-runtime@0.0.66/src/runtime/polyfills/polyfills";
+  var polyfillAll = System.get("traceur-runtime@0.0.66/src/runtime/polyfills/utils").polyfillAll;
   polyfillAll(this);
   var setupGlobals = $traceurRuntime.setupGlobals;
   $traceurRuntime.setupGlobals = function(global) {
@@ -2432,11 +2432,11 @@ System.register("traceur-runtime@0.0.65/src/runtime/polyfills/polyfills", [], fu
   };
   return {};
 });
-System.get("traceur-runtime@0.0.65/src/runtime/polyfills/polyfills" + '');
+System.get("traceur-runtime@0.0.66/src/runtime/polyfills/polyfills" + '');
 
-System.register("../../src/models/internal/debug-helpers", [], function() {
+System.register("models/internal/debug-helpers", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/internal/debug-helpers";
+  var __moduleName = "models/internal/debug-helpers";
   var debug = false;
   var log = function() {
     if (console && (debug || window.mhDebug)) {
@@ -2447,9 +2447,9 @@ System.register("../../src/models/internal/debug-helpers", [], function() {
       return log;
     }};
 });
-System.register("../../src/request/promise-request", [], function() {
+System.register("request/promise-request", [], function() {
   "use strict";
-  var __moduleName = "../../src/request/promise-request";
+  var __moduleName = "request/promise-request";
   if (!window.XMLHttpRequest || !("withCredentials" in new XMLHttpRequest())) {
     throw new Error("No XMLHttpRequest 2 Object found, please update your browser.");
   }
@@ -2551,11 +2551,11 @@ System.register("../../src/request/promise-request", [], function() {
     }
   };
 });
-System.register("../../src/request/hound-request", [], function() {
+System.register("request/hound-request", [], function() {
   "use strict";
-  var __moduleName = "../../src/request/hound-request";
-  var log = System.get("../../src/models/internal/debug-helpers").log;
-  var promiseRequest = System.get("../../src/request/promise-request").promiseRequest;
+  var __moduleName = "request/hound-request";
+  var log = System.get("models/internal/debug-helpers").log;
+  var promiseRequest = System.get("request/promise-request").promiseRequest;
   var extraEncode = promiseRequest.extraEncode,
       requestMap = {},
       defaults = {
@@ -2632,10 +2632,10 @@ System.register("../../src/request/hound-request", [], function() {
     }
   };
 });
-System.register("../../src/request/hound-paged-request", [], function() {
+System.register("request/hound-paged-request", [], function() {
   "use strict";
-  var __moduleName = "../../src/request/hound-paged-request";
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
+  var __moduleName = "request/hound-paged-request";
+  var houndRequest = System.get("request/hound-request").houndRequest;
   var defaults = {
     headers: {'Accept': 'application/json'},
     pageSize: 10,
@@ -2677,7 +2677,7 @@ System.register("../../src/request/hound-paged-request", [], function() {
         return response;
       },
       setContentArray = function(response) {
-        var MHObject = System.get('../../src/models/base/MHObject').MHObject;
+        var MHObject = System.get('models/base/MHObject').MHObject;
         var self = this,
             newContent;
         if ((this.args.params.view && this.args.params.view === 'id') || typeof response.content[0] === 'string') {
@@ -2784,10 +2784,10 @@ System.register("../../src/request/hound-paged-request", [], function() {
       return pagedRequest;
     }};
 });
-System.register("../../src/models/internal/MHCache", [], function() {
+System.register("models/internal/MHCache", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/internal/MHCache";
-  var log = System.get("../../src/models/internal/debug-helpers").log;
+  var __moduleName = "models/internal/MHCache";
+  var log = System.get("models/internal/debug-helpers").log;
   var MHCache = function MHCache(limit) {
     this.size = 0;
     this.limit = limit;
@@ -2951,7 +2951,7 @@ System.register("../../src/models/internal/MHCache", [], function() {
     },
     restoreFromLocalStorage: function() {
       var storageKey = arguments[0] !== (void 0) ? arguments[0] : 'mhLocalCache';
-      var MHObject = System.get('../../src/models/base/MHObject').MHObject;
+      var MHObject = System.get('models/base/MHObject').MHObject;
       if (!localStorage || typeof localStorage[storageKey] === 'undefined') {
         log('nothing stored');
         return;
@@ -2972,9 +2972,9 @@ System.register("../../src/models/internal/MHCache", [], function() {
       return MHCache;
     }};
 });
-System.register("../../src/models/social/MHSocial", [], function() {
+System.register("models/social/MHSocial", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/social/MHSocial";
+  var __moduleName = "models/social/MHSocial";
   var MHSocial = function MHSocial(args) {
     if (typeof args === 'string' || args instanceof String) {
       try {
@@ -3018,14 +3018,14 @@ System.register("../../src/models/social/MHSocial", [], function() {
       return MHSocial;
     }};
 });
-System.register("../../src/models/base/MHObject", [], function() {
+System.register("models/base/MHObject", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/base/MHObject";
-  var log = System.get("../../src/models/internal/debug-helpers").log;
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
-  var pagedRequest = System.get("../../src/request/hound-paged-request").pagedRequest;
-  var MHCache = System.get("../../src/models/internal/MHCache").MHCache;
-  var MHSocial = System.get("../../src/models/social/MHSocial").MHSocial;
+  var __moduleName = "models/base/MHObject";
+  var log = System.get("models/internal/debug-helpers").log;
+  var houndRequest = System.get("request/hound-request").houndRequest;
+  var pagedRequest = System.get("request/hound-paged-request").pagedRequest;
+  var MHCache = System.get("models/internal/MHCache").MHCache;
+  var MHSocial = System.get("models/social/MHSocial").MHSocial;
   var childrenConstructors = {};
   var mhidLRU = new MHCache(1000);
   if (window.location.host === 'local.mediahound.com:2014') {
@@ -3287,25 +3287,25 @@ System.register("../../src/models/base/MHObject", [], function() {
       return null;
     },
     isMedia: function(toCheck) {
-      return toCheck instanceof System.get('../../src/models/media/MHMedia').MHMedia;
+      return toCheck instanceof System.get('models/media/MHMedia').MHMedia;
     },
     isContributor: function(toCheck) {
-      return toCheck instanceof System.get('../../src/models/contributor/MHContributor').MHContributor;
+      return toCheck instanceof System.get('models/contributor/MHContributor').MHContributor;
     },
     isAction: function(toCheck) {
-      return toCheck instanceof System.get('../../src/models/action/MHAction').MHAction;
+      return toCheck instanceof System.get('models/action/MHAction').MHAction;
     },
     isUser: function(toCheck) {
-      return toCheck instanceof System.get('../../src/models/user/MHUser').MHUser;
+      return toCheck instanceof System.get('models/user/MHUser').MHUser;
     },
     isCollection: function(toCheck) {
-      return toCheck instanceof System.get('../../src/models/collection/MHCollection').MHCollection;
+      return toCheck instanceof System.get('models/collection/MHCollection').MHCollection;
     },
     isImage: function(toCheck) {
-      return toCheck instanceof System.get('../../src/models/image/MHImage').MHImage;
+      return toCheck instanceof System.get('models/image/MHImage').MHImage;
     },
     isTrait: function(toCheck) {
-      return toCheck instanceof System.get('../../src/models/trait/MHTrait').MHTrait;
+      return toCheck instanceof System.get('models/trait/MHTrait').MHTrait;
     },
     fetchByMhid: function(mhid) {
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
@@ -3374,11 +3374,11 @@ System.register("../../src/models/base/MHObject", [], function() {
     }
   };
 });
-System.register("../../src/models/action/MHAction", [], function() {
+System.register("models/action/MHAction", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/action/MHAction";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
+  var __moduleName = "models/action/MHAction";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var houndRequest = System.get("request/hound-request").houndRequest;
   var MHAction = function MHAction(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHAction.prototype, "constructor", [args]);
@@ -3528,11 +3528,11 @@ System.register("../../src/models/action/MHAction", [], function() {
       return MHAction;
     }};
 });
-System.register("../../src/models/action/MHAdd", [], function() {
+System.register("models/action/MHAdd", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/action/MHAdd";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHAction = System.get("../../src/models/action/MHAction").MHAction;
+  var __moduleName = "models/action/MHAdd";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHAction = System.get("models/action/MHAction").MHAction;
   var MHAdd = function MHAdd(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHAdd.prototype, "constructor", [args]);
@@ -3555,12 +3555,12 @@ System.register("../../src/models/action/MHAdd", [], function() {
       return MHAdd;
     }};
 });
-System.register("../../src/models/action/MHComment", [], function() {
+System.register("models/action/MHComment", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/action/MHComment";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHAction = System.get("../../src/models/action/MHAction").MHAction;
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
+  var __moduleName = "models/action/MHComment";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHAction = System.get("models/action/MHAction").MHAction;
+  var houndRequest = System.get("request/hound-request").houndRequest;
   var MHComment = function MHComment(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHComment.prototype, "constructor", [args]);
@@ -3605,11 +3605,11 @@ System.register("../../src/models/action/MHComment", [], function() {
       return MHComment;
     }};
 });
-System.register("../../src/models/action/MHCreate", [], function() {
+System.register("models/action/MHCreate", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/action/MHCreate";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHAction = System.get("../../src/models/action/MHAction").MHAction;
+  var __moduleName = "models/action/MHCreate";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHAction = System.get("models/action/MHAction").MHAction;
   var MHCreate = function MHCreate(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHCreate.prototype, "constructor", [args]);
@@ -3632,11 +3632,11 @@ System.register("../../src/models/action/MHCreate", [], function() {
       return MHCreate;
     }};
 });
-System.register("../../src/models/action/MHFollow", [], function() {
+System.register("models/action/MHFollow", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/action/MHFollow";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHAction = System.get("../../src/models/action/MHAction").MHAction;
+  var __moduleName = "models/action/MHFollow";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHAction = System.get("models/action/MHAction").MHAction;
   var MHFollow = function MHFollow(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHFollow.prototype, "constructor", [args]);
@@ -3659,11 +3659,11 @@ System.register("../../src/models/action/MHFollow", [], function() {
       return MHFollow;
     }};
 });
-System.register("../../src/models/action/MHLike", [], function() {
+System.register("models/action/MHLike", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/action/MHLike";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHAction = System.get("../../src/models/action/MHAction").MHAction;
+  var __moduleName = "models/action/MHLike";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHAction = System.get("models/action/MHAction").MHAction;
   var MHLike = function MHLike(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHLike.prototype, "constructor", [args]);
@@ -3686,12 +3686,12 @@ System.register("../../src/models/action/MHLike", [], function() {
       return MHLike;
     }};
 });
-System.register("../../src/models/action/MHPost", [], function() {
+System.register("models/action/MHPost", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/action/MHPost";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHAction = System.get("../../src/models/action/MHAction").MHAction;
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
+  var __moduleName = "models/action/MHPost";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHAction = System.get("models/action/MHAction").MHAction;
+  var houndRequest = System.get("request/hound-request").houndRequest;
   var MHPost = function MHPost(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHPost.prototype, "constructor", [args]);
@@ -3741,9 +3741,9 @@ System.register("../../src/models/action/MHPost", [], function() {
       return MHPost;
     }};
 });
-System.register("../../src/models/base/MHEmbeddedObject", [], function() {
+System.register("models/base/MHEmbeddedObject", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/base/MHEmbeddedObject";
+  var __moduleName = "models/base/MHEmbeddedObject";
   var MHEmbeddedObject = function MHEmbeddedObject(args) {
     if (args == null) {
       throw new TypeError('Args is null or undefined in MHEmbeddedObject constructor.');
@@ -3800,10 +3800,10 @@ System.register("../../src/models/base/MHEmbeddedObject", [], function() {
       return MHEmbeddedObject;
     }};
 });
-System.register("../../src/models/base/MHEmbeddedRelation", [], function() {
+System.register("models/base/MHEmbeddedRelation", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/base/MHEmbeddedRelation";
-  var MHEmbeddedObject = System.get("../../src/models/base/MHEmbeddedObject").MHEmbeddedObject;
+  var __moduleName = "models/base/MHEmbeddedRelation";
+  var MHEmbeddedObject = System.get("models/base/MHEmbeddedObject").MHEmbeddedObject;
   var MHEmbeddedRelation = function MHEmbeddedRelation(args) {
     if (args == null) {
       throw new TypeError('Args is null or undefined in MHEmbeddedRelation constructor.');
@@ -3845,10 +3845,10 @@ System.register("../../src/models/base/MHEmbeddedRelation", [], function() {
       return MHEmbeddedRelation;
     }};
 });
-System.register("../../src/models/base/MHRelationalPair", [], function() {
+System.register("models/base/MHRelationalPair", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/base/MHRelationalPair";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
+  var __moduleName = "models/base/MHRelationalPair";
+  var MHObject = System.get("models/base/MHObject").MHObject;
   var MHRelationalPair = function MHRelationalPair(args) {
     if (args == null) {
       throw new TypeError('Args is null or undefined in MHRelationalPair constructor.');
@@ -3907,15 +3907,15 @@ System.register("../../src/models/base/MHRelationalPair", [], function() {
       return MHRelationalPair;
     }};
 });
-System.register("../../src/models/user/MHUser", [], function() {
+System.register("models/user/MHUser", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/user/MHUser";
-  var log = System.get("../../src/models/internal/debug-helpers").log;
-  var $__46 = System.get("../../src/models/base/MHObject"),
+  var __moduleName = "models/user/MHUser";
+  var log = System.get("models/internal/debug-helpers").log;
+  var $__46 = System.get("models/base/MHObject"),
       MHObject = $__46.MHObject,
       mhidLRU = $__46.mhidLRU;
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
-  var pagedRequest = System.get("../../src/request/hound-paged-request").pagedRequest;
+  var houndRequest = System.get("request/hound-request").houndRequest;
+  var pagedRequest = System.get("request/hound-paged-request").pagedRequest;
   var MHUser = function MHUser(args) {
     args = MHObject.parseArgs(args);
     if (typeof args.username === 'undefined' || args.username === null) {
@@ -3990,7 +3990,7 @@ System.register("../../src/models/user/MHUser", [], function() {
       return 'User';
     },
     get isCurrentUser() {
-      var currentUser = System.get('../../src/models/user/MHLoginSession').MHLoginSession.currentUser;
+      var currentUser = System.get('models/user/MHLoginSession').MHLoginSession.currentUser;
       return this.isEqualToMHObject(currentUser);
     },
     setProfileImage: function(image) {
@@ -4021,7 +4021,7 @@ System.register("../../src/models/user/MHUser", [], function() {
         withCredentials: true,
         data: form
       }).then(function(userWithImage) {
-        var MHLoginSession = System.get('../../src/models/user/MHLoginSession').MHLoginSession;
+        var MHLoginSession = System.get('models/user/MHLoginSession').MHLoginSession;
         MHLoginSession.updatedProfileImage(MHObject.create(userWithImage));
         return userWithImage;
       });
@@ -4227,12 +4227,12 @@ System.register("../../src/models/user/MHUser", [], function() {
       return MHUser;
     }};
 });
-System.register("../../src/models/user/MHLoginSession", [], function() {
+System.register("models/user/MHLoginSession", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/user/MHLoginSession";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHUser = System.get("../../src/models/user/MHUser").MHUser;
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
+  var __moduleName = "models/user/MHLoginSession";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHUser = System.get("models/user/MHUser").MHUser;
+  var houndRequest = System.get("request/hound-request").houndRequest;
   var MHUserLoginEvent = function MHUserLoginEvent() {};
   ($traceurRuntime.createClass)(MHUserLoginEvent, {}, {create: function(mhUserObj) {
       return new CustomEvent('mhUserLogin', {
@@ -4357,12 +4357,12 @@ System.register("../../src/models/user/MHLoginSession", [], function() {
       return MHLoginSession;
     }};
 });
-System.register("../../src/models/collection/MHCollection", [], function() {
+System.register("models/collection/MHCollection", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/collection/MHCollection";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHLoginSession = System.get("../../src/models/user/MHLoginSession").MHLoginSession;
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
+  var __moduleName = "models/collection/MHCollection";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHLoginSession = System.get("models/user/MHLoginSession").MHLoginSession;
+  var houndRequest = System.get("request/hound-request").houndRequest;
   var MHCollection = function MHCollection(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHCollection.prototype, "constructor", [args]);
@@ -4603,11 +4603,11 @@ System.register("../../src/models/collection/MHCollection", [], function() {
       return MHCollection;
     }};
 });
-System.register("../../src/models/contributor/MHContributor", [], function() {
+System.register("models/contributor/MHContributor", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/contributor/MHContributor";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
+  var __moduleName = "models/contributor/MHContributor";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var houndRequest = System.get("request/hound-request").houndRequest;
   var MHContributor = function MHContributor(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHContributor.prototype, "constructor", [args]);
@@ -4680,12 +4680,12 @@ System.register("../../src/models/contributor/MHContributor", [], function() {
       return MHContributor;
     }};
 });
-System.register("../../src/models/contributor/MHFictionalGroupContributor", [], function() {
+System.register("models/contributor/MHFictionalGroupContributor", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/contributor/MHFictionalGroupContributor";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHContributor = System.get("../../src/models/contributor/MHContributor").MHContributor;
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
+  var __moduleName = "models/contributor/MHFictionalGroupContributor";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHContributor = System.get("models/contributor/MHContributor").MHContributor;
+  var houndRequest = System.get("request/hound-request").houndRequest;
   var MHFictionalGroupContributor = function MHFictionalGroupContributor(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHFictionalGroupContributor.prototype, "constructor", [args]);
@@ -4735,12 +4735,12 @@ System.register("../../src/models/contributor/MHFictionalGroupContributor", [], 
       return MHFictionalGroupContributor;
     }};
 });
-System.register("../../src/models/contributor/MHFictionalIndividualContributor", [], function() {
+System.register("models/contributor/MHFictionalIndividualContributor", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/contributor/MHFictionalIndividualContributor";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHContributor = System.get("../../src/models/contributor/MHContributor").MHContributor;
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
+  var __moduleName = "models/contributor/MHFictionalIndividualContributor";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHContributor = System.get("models/contributor/MHContributor").MHContributor;
+  var houndRequest = System.get("request/hound-request").houndRequest;
   var MHFictionalIndividualContributor = function MHFictionalIndividualContributor(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHFictionalIndividualContributor.prototype, "constructor", [args]);
@@ -4790,12 +4790,12 @@ System.register("../../src/models/contributor/MHFictionalIndividualContributor",
       return MHFictionalIndividualContributor;
     }};
 });
-System.register("../../src/models/contributor/MHRealGroupContributor", [], function() {
+System.register("models/contributor/MHRealGroupContributor", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/contributor/MHRealGroupContributor";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHContributor = System.get("../../src/models/contributor/MHContributor").MHContributor;
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
+  var __moduleName = "models/contributor/MHRealGroupContributor";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHContributor = System.get("models/contributor/MHContributor").MHContributor;
+  var houndRequest = System.get("request/hound-request").houndRequest;
   var MHRealGroupContributor = function MHRealGroupContributor(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHRealGroupContributor.prototype, "constructor", [args]);
@@ -4845,12 +4845,12 @@ System.register("../../src/models/contributor/MHRealGroupContributor", [], funct
       return MHRealGroupContributor;
     }};
 });
-System.register("../../src/models/contributor/MHRealIndividualContributor", [], function() {
+System.register("models/contributor/MHRealIndividualContributor", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/contributor/MHRealIndividualContributor";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHContributor = System.get("../../src/models/contributor/MHContributor").MHContributor;
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
+  var __moduleName = "models/contributor/MHRealIndividualContributor";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHContributor = System.get("models/contributor/MHContributor").MHContributor;
+  var houndRequest = System.get("request/hound-request").houndRequest;
   var MHRealIndividualContributor = function MHRealIndividualContributor(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHRealIndividualContributor.prototype, "constructor", [args]);
@@ -4900,10 +4900,10 @@ System.register("../../src/models/contributor/MHRealIndividualContributor", [], 
       return MHRealIndividualContributor;
     }};
 });
-System.register("../../src/models/image/MHImage", [], function() {
+System.register("models/image/MHImage", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/image/MHImage";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
+  var __moduleName = "models/image/MHImage";
+  var MHObject = System.get("models/base/MHObject").MHObject;
   var MHImage = function MHImage(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHImage.prototype, "constructor", [args]);
@@ -4954,9 +4954,9 @@ System.register("../../src/models/image/MHImage", [], function() {
       return MHImage;
     }};
 });
-System.register("../../src/models/source/MHSourceFormat", [], function() {
+System.register("models/source/MHSourceFormat", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/source/MHSourceFormat";
+  var __moduleName = "models/source/MHSourceFormat";
   var MHSourceFormat = function MHSourceFormat(args) {
     var method = arguments[1] !== (void 0) ? arguments[1] : null;
     if (typeof args === 'string' || args instanceof String) {
@@ -5021,10 +5021,10 @@ System.register("../../src/models/source/MHSourceFormat", [], function() {
       return MHSourceFormat;
     }};
 });
-System.register("../../src/models/source/MHSourceMethod", [], function() {
+System.register("models/source/MHSourceMethod", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/source/MHSourceMethod";
-  var MHSourceFormat = System.get("../../src/models/source/MHSourceFormat").MHSourceFormat;
+  var __moduleName = "models/source/MHSourceMethod";
+  var MHSourceFormat = System.get("models/source/MHSourceFormat").MHSourceFormat;
   var MHSourceMethod = function MHSourceMethod(args) {
     var medium = arguments[1] !== (void 0) ? arguments[1] : null;
     var $__81 = this;
@@ -5071,10 +5071,10 @@ System.register("../../src/models/source/MHSourceMethod", [], function() {
       return MHSourceMethod;
     }};
 });
-System.register("../../src/models/source/MHSourceMedium", [], function() {
+System.register("models/source/MHSourceMedium", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/source/MHSourceMedium";
-  var MHSourceMethod = System.get("../../src/models/source/MHSourceMethod").MHSourceMethod;
+  var __moduleName = "models/source/MHSourceMedium";
+  var MHSourceMethod = System.get("models/source/MHSourceMethod").MHSourceMethod;
   var MHSourceMedium = function MHSourceMedium(args) {
     var source = arguments[1] !== (void 0) ? arguments[1] : null;
     var $__84 = this;
@@ -5121,10 +5121,10 @@ System.register("../../src/models/source/MHSourceMedium", [], function() {
       return MHSourceMedium;
     }};
 });
-System.register("../../src/models/source/MHSourceModel", [], function() {
+System.register("models/source/MHSourceModel", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/source/MHSourceModel";
-  var MHSourceMedium = System.get("../../src/models/source/MHSourceMedium").MHSourceMedium;
+  var __moduleName = "models/source/MHSourceModel";
+  var MHSourceMedium = System.get("models/source/MHSourceMedium").MHSourceMedium;
   var MHSourceModel = function MHSourceModel(args) {
     var content = arguments[1] !== (void 0) ? arguments[1] : null;
     var $__87 = this;
@@ -5185,14 +5185,14 @@ System.register("../../src/models/source/MHSourceModel", [], function() {
       return MHSourceModel;
     }};
 });
-System.register("../../src/models/media/MHMedia", [], function() {
+System.register("models/media/MHMedia", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHMedia";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHSourceModel = System.get("../../src/models/source/MHSourceModel").MHSourceModel;
-  var MHEmbeddedObject = System.get("../../src/models/base/MHEmbeddedObject").MHEmbeddedObject;
-  var MHRelationalPair = System.get("../../src/models/base/MHRelationalPair").MHRelationalPair;
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
+  var __moduleName = "models/media/MHMedia";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHSourceModel = System.get("models/source/MHSourceModel").MHSourceModel;
+  var MHEmbeddedObject = System.get("models/base/MHEmbeddedObject").MHEmbeddedObject;
+  var MHRelationalPair = System.get("models/base/MHRelationalPair").MHRelationalPair;
+  var houndRequest = System.get("request/hound-request").houndRequest;
   var MHMedia = function MHMedia(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHMedia.prototype, "constructor", [args]);
@@ -5381,11 +5381,11 @@ System.register("../../src/models/media/MHMedia", [], function() {
       return MHMedia;
     }};
 });
-System.register("../../src/models/media/MHAlbum", [], function() {
+System.register("models/media/MHAlbum", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHAlbum";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHAlbum";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHAlbum = function MHAlbum(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHAlbum.prototype, "constructor", [args]);
@@ -5408,11 +5408,11 @@ System.register("../../src/models/media/MHAlbum", [], function() {
       return MHAlbum;
     }};
 });
-System.register("../../src/models/media/MHAlbumSeries", [], function() {
+System.register("models/media/MHAlbumSeries", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHAlbumSeries";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHAlbumSeries";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHAlbumSeries = function MHAlbumSeries(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHAlbumSeries.prototype, "constructor", [args]);
@@ -5435,11 +5435,11 @@ System.register("../../src/models/media/MHAlbumSeries", [], function() {
       return MHAlbumSeries;
     }};
 });
-System.register("../../src/models/media/MHAnthology", [], function() {
+System.register("models/media/MHAnthology", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHAnthology";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHAnthology";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHAnthology = function MHAnthology(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHAnthology.prototype, "constructor", [args]);
@@ -5462,11 +5462,11 @@ System.register("../../src/models/media/MHAnthology", [], function() {
       return MHAnthology;
     }};
 });
-System.register("../../src/models/media/MHBook", [], function() {
+System.register("models/media/MHBook", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHBook";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHBook";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHBook = function MHBook(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHBook.prototype, "constructor", [args]);
@@ -5489,11 +5489,11 @@ System.register("../../src/models/media/MHBook", [], function() {
       return MHBook;
     }};
 });
-System.register("../../src/models/media/MHBookSeries", [], function() {
+System.register("models/media/MHBookSeries", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHBookSeries";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHBookSeries";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHBookSeries = function MHBookSeries(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHBookSeries.prototype, "constructor", [args]);
@@ -5516,11 +5516,11 @@ System.register("../../src/models/media/MHBookSeries", [], function() {
       return MHBookSeries;
     }};
 });
-System.register("../../src/models/media/MHComicBook", [], function() {
+System.register("models/media/MHComicBook", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHComicBook";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHComicBook";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHComicBook = function MHComicBook(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHComicBook.prototype, "constructor", [args]);
@@ -5543,11 +5543,11 @@ System.register("../../src/models/media/MHComicBook", [], function() {
       return MHComicBook;
     }};
 });
-System.register("../../src/models/media/MHComicBookSeries", [], function() {
+System.register("models/media/MHComicBookSeries", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHComicBookSeries";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHComicBookSeries";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHComicBookSeries = function MHComicBookSeries(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHComicBookSeries.prototype, "constructor", [args]);
@@ -5570,11 +5570,11 @@ System.register("../../src/models/media/MHComicBookSeries", [], function() {
       return MHComicBookSeries;
     }};
 });
-System.register("../../src/models/media/MHGame", [], function() {
+System.register("models/media/MHGame", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHGame";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHGame";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHGame = function MHGame(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHGame.prototype, "constructor", [args]);
@@ -5597,11 +5597,11 @@ System.register("../../src/models/media/MHGame", [], function() {
       return MHGame;
     }};
 });
-System.register("../../src/models/media/MHGameSeries", [], function() {
+System.register("models/media/MHGameSeries", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHGameSeries";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHGameSeries";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHGameSeries = function MHGameSeries(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHGameSeries.prototype, "constructor", [args]);
@@ -5624,11 +5624,11 @@ System.register("../../src/models/media/MHGameSeries", [], function() {
       return MHGameSeries;
     }};
 });
-System.register("../../src/models/media/MHGraphicNovel", [], function() {
+System.register("models/media/MHGraphicNovel", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHGraphicNovel";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHGraphicNovel";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHGraphicNovel = function MHGraphicNovel(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHGraphicNovel.prototype, "constructor", [args]);
@@ -5651,11 +5651,11 @@ System.register("../../src/models/media/MHGraphicNovel", [], function() {
       return MHGraphicNovel;
     }};
 });
-System.register("../../src/models/media/MHGraphicNovelSeries", [], function() {
+System.register("models/media/MHGraphicNovelSeries", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHGraphicNovelSeries";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHGraphicNovelSeries";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHGraphicNovelSeries = function MHGraphicNovelSeries(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHGraphicNovelSeries.prototype, "constructor", [args]);
@@ -5678,11 +5678,11 @@ System.register("../../src/models/media/MHGraphicNovelSeries", [], function() {
       return MHGraphicNovelSeries;
     }};
 });
-System.register("../../src/models/media/MHMovie", [], function() {
+System.register("models/media/MHMovie", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHMovie";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHMovie";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHMovie = function MHMovie(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHMovie.prototype, "constructor", [args]);
@@ -5705,11 +5705,11 @@ System.register("../../src/models/media/MHMovie", [], function() {
       return MHMovie;
     }};
 });
-System.register("../../src/models/media/MHMovieSeries", [], function() {
+System.register("models/media/MHMovieSeries", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHMovieSeries";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHMovieSeries";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHMovieSeries = function MHMovieSeries(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHMovieSeries.prototype, "constructor", [args]);
@@ -5732,11 +5732,11 @@ System.register("../../src/models/media/MHMovieSeries", [], function() {
       return MHMovieSeries;
     }};
 });
-System.register("../../src/models/media/MHMusicVideo", [], function() {
+System.register("models/media/MHMusicVideo", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHMusicVideo";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHMusicVideo";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHMusicVideo = function MHMusicVideo(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHMusicVideo.prototype, "constructor", [args]);
@@ -5759,11 +5759,11 @@ System.register("../../src/models/media/MHMusicVideo", [], function() {
       return MHMusicVideo;
     }};
 });
-System.register("../../src/models/media/MHNovella", [], function() {
+System.register("models/media/MHNovella", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHNovella";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHNovella";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHNovella = function MHNovella(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHNovella.prototype, "constructor", [args]);
@@ -5786,11 +5786,11 @@ System.register("../../src/models/media/MHNovella", [], function() {
       return MHNovella;
     }};
 });
-System.register("../../src/models/media/MHPeriodical", [], function() {
+System.register("models/media/MHPeriodical", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHPeriodical";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHPeriodical";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHPeriodical = function MHPeriodical(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHPeriodical.prototype, "constructor", [args]);
@@ -5813,11 +5813,11 @@ System.register("../../src/models/media/MHPeriodical", [], function() {
       return MHPeriodical;
     }};
 });
-System.register("../../src/models/media/MHPeriodicalSeries", [], function() {
+System.register("models/media/MHPeriodicalSeries", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHPeriodicalSeries";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHPeriodicalSeries";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHPeriodicalSeries = function MHPeriodicalSeries(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHPeriodicalSeries.prototype, "constructor", [args]);
@@ -5840,11 +5840,11 @@ System.register("../../src/models/media/MHPeriodicalSeries", [], function() {
       return MHPeriodicalSeries;
     }};
 });
-System.register("../../src/models/media/MHShowEpisode", [], function() {
+System.register("models/media/MHShowEpisode", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHShowEpisode";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHShowEpisode";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHShowEpisode = function MHShowEpisode(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHShowEpisode.prototype, "constructor", [args]);
@@ -5867,11 +5867,11 @@ System.register("../../src/models/media/MHShowEpisode", [], function() {
       return MHShowEpisode;
     }};
 });
-System.register("../../src/models/media/MHShowSeason", [], function() {
+System.register("models/media/MHShowSeason", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHShowSeason";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHShowSeason";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHShowSeason = function MHShowSeason(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHShowSeason.prototype, "constructor", [args]);
@@ -5894,11 +5894,11 @@ System.register("../../src/models/media/MHShowSeason", [], function() {
       return MHShowSeason;
     }};
 });
-System.register("../../src/models/media/MHShowSeries", [], function() {
+System.register("models/media/MHShowSeries", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHShowSeries";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHShowSeries";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHShowSeries = function MHShowSeries(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHShowSeries.prototype, "constructor", [args]);
@@ -5921,11 +5921,11 @@ System.register("../../src/models/media/MHShowSeries", [], function() {
       return MHShowSeries;
     }};
 });
-System.register("../../src/models/media/MHSong", [], function() {
+System.register("models/media/MHSong", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHSong";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHSong";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHSong = function MHSong(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHSong.prototype, "constructor", [args]);
@@ -5948,11 +5948,11 @@ System.register("../../src/models/media/MHSong", [], function() {
       return MHSong;
     }};
 });
-System.register("../../src/models/media/MHSpecial", [], function() {
+System.register("models/media/MHSpecial", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHSpecial";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHSpecial";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHSpecial = function MHSpecial(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHSpecial.prototype, "constructor", [args]);
@@ -5975,11 +5975,11 @@ System.register("../../src/models/media/MHSpecial", [], function() {
       return MHSpecial;
     }};
 });
-System.register("../../src/models/media/MHSpecialSeries", [], function() {
+System.register("models/media/MHSpecialSeries", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHSpecialSeries";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHSpecialSeries";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHSpecialSeries = function MHSpecialSeries(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHSpecialSeries.prototype, "constructor", [args]);
@@ -6002,11 +6002,11 @@ System.register("../../src/models/media/MHSpecialSeries", [], function() {
       return MHSpecialSeries;
     }};
 });
-System.register("../../src/models/media/MHTrailer", [], function() {
+System.register("models/media/MHTrailer", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/media/MHTrailer";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
+  var __moduleName = "models/media/MHTrailer";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
   var MHTrailer = function MHTrailer(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHTrailer.prototype, "constructor", [args]);
@@ -6029,10 +6029,10 @@ System.register("../../src/models/media/MHTrailer", [], function() {
       return MHTrailer;
     }};
 });
-System.register("../../src/models/trait/MHTrait", [], function() {
+System.register("models/trait/MHTrait", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/trait/MHTrait";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
+  var __moduleName = "models/trait/MHTrait";
+  var MHObject = System.get("models/base/MHObject").MHObject;
   var MHTrait = function MHTrait(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHTrait.prototype, "constructor", [args]);
@@ -6055,10 +6055,10 @@ System.register("../../src/models/trait/MHTrait", [], function() {
       return MHTrait;
     }};
 });
-System.register("../../src/models/trait/MHTraitGroup", [], function() {
+System.register("models/trait/MHTraitGroup", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/trait/MHTraitGroup";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
+  var __moduleName = "models/trait/MHTraitGroup";
+  var MHObject = System.get("models/base/MHObject").MHObject;
   var MHTraitGroup = function MHTraitGroup(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHTraitGroup.prototype, "constructor", [args]);
@@ -6081,61 +6081,61 @@ System.register("../../src/models/trait/MHTraitGroup", [], function() {
       return MHTraitGroup;
     }};
 });
-System.register("../../src/models/all-models", [], function() {
+System.register("models/all-models", [], function() {
   "use strict";
-  var __moduleName = "../../src/models/all-models";
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
-  var MHEmbeddedObject = System.get("../../src/models/base/MHEmbeddedObject").MHEmbeddedObject;
-  var MHEmbeddedRelation = System.get("../../src/models/base/MHEmbeddedRelation").MHEmbeddedRelation;
-  var MHRelationalPair = System.get("../../src/models/base/MHRelationalPair").MHRelationalPair;
-  var MHAction = System.get("../../src/models/action/MHAction").MHAction;
-  var MHAdd = System.get("../../src/models/action/MHAdd").MHAdd;
-  var MHComment = System.get("../../src/models/action/MHComment").MHComment;
-  var MHCreate = System.get("../../src/models/action/MHCreate").MHCreate;
-  var MHLike = System.get("../../src/models/action/MHLike").MHLike;
-  var MHFollow = System.get("../../src/models/action/MHFollow").MHFollow;
-  var MHPost = System.get("../../src/models/action/MHPost").MHPost;
-  var MHUser = System.get("../../src/models/user/MHUser").MHUser;
-  var MHLoginSession = System.get("../../src/models/user/MHLoginSession").MHLoginSession;
-  var MHSocial = System.get("../../src/models/social/MHSocial").MHSocial;
-  var MHMedia = System.get("../../src/models/media/MHMedia").MHMedia;
-  var MHAlbum = System.get("../../src/models/media/MHAlbum").MHAlbum;
-  var MHAlbumSeries = System.get("../../src/models/media/MHAlbumSeries").MHAlbumSeries;
-  var MHAnthology = System.get("../../src/models/media/MHAnthology").MHAnthology;
-  var MHBook = System.get("../../src/models/media/MHBook").MHBook;
-  var MHBookSeries = System.get("../../src/models/media/MHBookSeries").MHBookSeries;
-  var MHComicBook = System.get("../../src/models/media/MHComicBook").MHComicBook;
-  var MHComicBookSeries = System.get("../../src/models/media/MHComicBookSeries").MHComicBookSeries;
-  var MHGame = System.get("../../src/models/media/MHGame").MHGame;
-  var MHGameSeries = System.get("../../src/models/media/MHGameSeries").MHGameSeries;
-  var MHGraphicNovel = System.get("../../src/models/media/MHGraphicNovel").MHGraphicNovel;
-  var MHGraphicNovelSeries = System.get("../../src/models/media/MHGraphicNovelSeries").MHGraphicNovelSeries;
-  var MHMovie = System.get("../../src/models/media/MHMovie").MHMovie;
-  var MHMovieSeries = System.get("../../src/models/media/MHMovieSeries").MHMovieSeries;
-  var MHMusicVideo = System.get("../../src/models/media/MHMusicVideo").MHMusicVideo;
-  var MHNovella = System.get("../../src/models/media/MHNovella").MHNovella;
-  var MHPeriodical = System.get("../../src/models/media/MHPeriodical").MHPeriodical;
-  var MHPeriodicalSeries = System.get("../../src/models/media/MHPeriodicalSeries").MHPeriodicalSeries;
-  var MHShowEpisode = System.get("../../src/models/media/MHShowEpisode").MHShowEpisode;
-  var MHShowSeason = System.get("../../src/models/media/MHShowSeason").MHShowSeason;
-  var MHShowSeries = System.get("../../src/models/media/MHShowSeries").MHShowSeries;
-  var MHSong = System.get("../../src/models/media/MHSong").MHSong;
-  var MHSpecial = System.get("../../src/models/media/MHSpecial").MHSpecial;
-  var MHSpecialSeries = System.get("../../src/models/media/MHSpecialSeries").MHSpecialSeries;
-  var MHTrailer = System.get("../../src/models/media/MHTrailer").MHTrailer;
-  var MHCollection = System.get("../../src/models/collection/MHCollection").MHCollection;
-  var MHImage = System.get("../../src/models/image/MHImage").MHImage;
-  var MHTrait = System.get("../../src/models/trait/MHTrait").MHTrait;
-  var MHTraitGroup = System.get("../../src/models/trait/MHTraitGroup").MHTraitGroup;
-  var MHContributor = System.get("../../src/models/contributor/MHContributor").MHContributor;
-  var MHRealIndividualContributor = System.get("../../src/models/contributor/MHRealIndividualContributor").MHRealIndividualContributor;
-  var MHRealGroupContributor = System.get("../../src/models/contributor/MHRealGroupContributor").MHRealGroupContributor;
-  var MHFictionalIndividualContributor = System.get("../../src/models/contributor/MHFictionalIndividualContributor").MHFictionalIndividualContributor;
-  var MHFictionalGroupContributor = System.get("../../src/models/contributor/MHFictionalGroupContributor").MHFictionalGroupContributor;
-  var MHSourceFormat = System.get("../../src/models/source/MHSourceFormat").MHSourceFormat;
-  var MHSourceMethod = System.get("../../src/models/source/MHSourceMethod").MHSourceMethod;
-  var MHSourceMedium = System.get("../../src/models/source/MHSourceMedium").MHSourceMedium;
-  var MHSourceModel = System.get("../../src/models/source/MHSourceModel").MHSourceModel;
+  var __moduleName = "models/all-models";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHEmbeddedObject = System.get("models/base/MHEmbeddedObject").MHEmbeddedObject;
+  var MHEmbeddedRelation = System.get("models/base/MHEmbeddedRelation").MHEmbeddedRelation;
+  var MHRelationalPair = System.get("models/base/MHRelationalPair").MHRelationalPair;
+  var MHAction = System.get("models/action/MHAction").MHAction;
+  var MHAdd = System.get("models/action/MHAdd").MHAdd;
+  var MHComment = System.get("models/action/MHComment").MHComment;
+  var MHCreate = System.get("models/action/MHCreate").MHCreate;
+  var MHLike = System.get("models/action/MHLike").MHLike;
+  var MHFollow = System.get("models/action/MHFollow").MHFollow;
+  var MHPost = System.get("models/action/MHPost").MHPost;
+  var MHUser = System.get("models/user/MHUser").MHUser;
+  var MHLoginSession = System.get("models/user/MHLoginSession").MHLoginSession;
+  var MHSocial = System.get("models/social/MHSocial").MHSocial;
+  var MHMedia = System.get("models/media/MHMedia").MHMedia;
+  var MHAlbum = System.get("models/media/MHAlbum").MHAlbum;
+  var MHAlbumSeries = System.get("models/media/MHAlbumSeries").MHAlbumSeries;
+  var MHAnthology = System.get("models/media/MHAnthology").MHAnthology;
+  var MHBook = System.get("models/media/MHBook").MHBook;
+  var MHBookSeries = System.get("models/media/MHBookSeries").MHBookSeries;
+  var MHComicBook = System.get("models/media/MHComicBook").MHComicBook;
+  var MHComicBookSeries = System.get("models/media/MHComicBookSeries").MHComicBookSeries;
+  var MHGame = System.get("models/media/MHGame").MHGame;
+  var MHGameSeries = System.get("models/media/MHGameSeries").MHGameSeries;
+  var MHGraphicNovel = System.get("models/media/MHGraphicNovel").MHGraphicNovel;
+  var MHGraphicNovelSeries = System.get("models/media/MHGraphicNovelSeries").MHGraphicNovelSeries;
+  var MHMovie = System.get("models/media/MHMovie").MHMovie;
+  var MHMovieSeries = System.get("models/media/MHMovieSeries").MHMovieSeries;
+  var MHMusicVideo = System.get("models/media/MHMusicVideo").MHMusicVideo;
+  var MHNovella = System.get("models/media/MHNovella").MHNovella;
+  var MHPeriodical = System.get("models/media/MHPeriodical").MHPeriodical;
+  var MHPeriodicalSeries = System.get("models/media/MHPeriodicalSeries").MHPeriodicalSeries;
+  var MHShowEpisode = System.get("models/media/MHShowEpisode").MHShowEpisode;
+  var MHShowSeason = System.get("models/media/MHShowSeason").MHShowSeason;
+  var MHShowSeries = System.get("models/media/MHShowSeries").MHShowSeries;
+  var MHSong = System.get("models/media/MHSong").MHSong;
+  var MHSpecial = System.get("models/media/MHSpecial").MHSpecial;
+  var MHSpecialSeries = System.get("models/media/MHSpecialSeries").MHSpecialSeries;
+  var MHTrailer = System.get("models/media/MHTrailer").MHTrailer;
+  var MHCollection = System.get("models/collection/MHCollection").MHCollection;
+  var MHImage = System.get("models/image/MHImage").MHImage;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHTraitGroup = System.get("models/trait/MHTraitGroup").MHTraitGroup;
+  var MHContributor = System.get("models/contributor/MHContributor").MHContributor;
+  var MHRealIndividualContributor = System.get("models/contributor/MHRealIndividualContributor").MHRealIndividualContributor;
+  var MHRealGroupContributor = System.get("models/contributor/MHRealGroupContributor").MHRealGroupContributor;
+  var MHFictionalIndividualContributor = System.get("models/contributor/MHFictionalIndividualContributor").MHFictionalIndividualContributor;
+  var MHFictionalGroupContributor = System.get("models/contributor/MHFictionalGroupContributor").MHFictionalGroupContributor;
+  var MHSourceFormat = System.get("models/source/MHSourceFormat").MHSourceFormat;
+  var MHSourceMethod = System.get("models/source/MHSourceMethod").MHSourceMethod;
+  var MHSourceMedium = System.get("models/source/MHSourceMedium").MHSourceMedium;
+  var MHSourceModel = System.get("models/source/MHSourceModel").MHSourceModel;
   var models = {
     get MHObject() {
       return MHObject;
@@ -6298,9 +6298,9 @@ System.register("../../src/models/all-models", [], function() {
       return models;
     }};
 });
-System.register("../../src/search/paged-search", [], function() {
+System.register("search/paged-search", [], function() {
   "use strict";
-  var __moduleName = "../../src/search/paged-search";
+  var __moduleName = "search/paged-search";
   var pagedSearch = function() {};
   var $__default = pagedSearch;
   return {
@@ -6312,11 +6312,11 @@ System.register("../../src/search/paged-search", [], function() {
     }
   };
 });
-System.register("../../src/search/quick-search", [], function() {
+System.register("search/quick-search", [], function() {
   "use strict";
-  var __moduleName = "../../src/search/quick-search";
-  var houndRequest = System.get("../../src/request/hound-request").houndRequest;
-  var MHObject = System.get("../../src/models/base/MHObject").MHObject;
+  var __moduleName = "search/quick-search";
+  var houndRequest = System.get("request/hound-request").houndRequest;
+  var MHObject = System.get("models/base/MHObject").MHObject;
   var i,
       prop,
       buildSearchHelper,
@@ -6390,14 +6390,14 @@ System.register("../../src/search/quick-search", [], function() {
       return quickSearch;
     }};
 });
-System.register("../../src/hound-api", [], function() {
+System.register("hound-api", [], function() {
   "use strict";
-  var __moduleName = "../../src/hound-api";
-  var request = System.get("../../src/request/hound-request").houndRequest;
-  var pagedRequest = System.get("../../src/request/hound-paged-request").pagedRequest;
-  var models = System.get("../../src/models/all-models").models;
-  var quickSearch = System.get("../../src/search/quick-search").quickSearch;
-  var pagedSearch = System.get("../../src/search/paged-search").pagedSearch;
+  var __moduleName = "hound-api";
+  var request = System.get("request/hound-request").houndRequest;
+  var pagedRequest = System.get("request/hound-paged-request").pagedRequest;
+  var models = System.get("models/all-models").models;
+  var quickSearch = System.get("search/quick-search").quickSearch;
+  var pagedSearch = System.get("search/paged-search").pagedSearch;
   ;
   var $__default = {
     get models() {
@@ -6437,4 +6437,4 @@ System.register("../../src/hound-api", [], function() {
     }
   };
 });
-System.get("../../src/hound-api" + '');
+System.get("hound-api" + '');
