@@ -64,10 +64,9 @@ gulp.task('jshint:watch', function(done){
 });
 
 // Watch srcGlob do 'jshint', 'dist'
-gulp.task('watch', function(done){
+gulp.task('watch', function(){
 
   gulp.watch(paths.srcGlob, ['dist', 'jshint']);
-  done();
 
 });
 
@@ -154,10 +153,17 @@ gulp.task('dist:browser:min', function(done){
 
 // Calls traceur command once, then compiles both min and non-min dist versions
 gulp.task('dist:browser', function(done){
-  var count = 0;
+  var trulyDone = (function(){
+    var count = 0;
+    return function(){
+      if( ++count >= 2 ){
+        done();
+      }
+    };
+  })();
   execHelper(traceurCmds.single.register, function(){
-    concatCompiled(false, function(){ count == 2 ? done() : ++count; });
-    concatCompiled(true, function(){  count == 2 ? done() : ++count; });
+    concatCompiled(false, trulyDone);
+    concatCompiled(true, trulyDone);
   });
 });
 

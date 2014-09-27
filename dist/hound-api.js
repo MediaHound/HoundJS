@@ -2680,7 +2680,7 @@ System.register("request/hound-paged-request", [], function() {
         var MHObject = System.get('models/base/MHObject').MHObject;
         var self = this,
             newContent;
-        if ((this.args.params.view && this.args.params.view === 'id') || typeof response.content[0] === 'string') {
+        if ((this._args.params.view && this._args.params.view === 'id') || typeof response.content[0] === 'string') {
           newContent = Promise.all(MHObject.fetchByMhids(response.content));
         } else {
           newContent = Promise.resolve(MHObject.create(response.content));
@@ -2712,8 +2712,8 @@ System.register("request/hound-paged-request", [], function() {
     this.content = [];
     this.pagePromises = [];
     this.page = startingPage;
-    this.args = myArgs;
-    this.pagePromises[this.page] = houndRequest(this.args).then(setInfo.bind(this)).then(setContentArray.bind(this));
+    this._args = myArgs;
+    this.pagePromises[this.page] = houndRequest(this._args).then(setInfo.bind(this)).then(setContentArray.bind(this));
     Object.defineProperties(this, {'pageSize': {
         configurable: false,
         enumerable: true,
@@ -2730,9 +2730,9 @@ System.register("request/hound-paged-request", [], function() {
       return this.currentPromise.then(function(response) {
         if (!self.lastPage) {
           self.page += 1;
-          self.args.params.page = self.page;
+          self._args.params.page = self.page;
           if (self.pagePromises[self.page] == null) {
-            self.pagePromises[self.page] = houndRequest(self.args).then(setInfo.bind(self)).then(setContentArray.bind(self));
+            self.pagePromises[self.page] = houndRequest(self._args).then(setInfo.bind(self)).then(setContentArray.bind(self));
           }
           return self.pagePromises[self.page];
         }
@@ -2744,9 +2744,9 @@ System.register("request/hound-paged-request", [], function() {
       return this.currentPromise.then(function(response) {
         if (!self.firstPage) {
           self.page -= 1;
-          self.args.params.page = self.page;
+          self._args.params.page = self.page;
           if (self.pagePromises[self.page] == null) {
-            self.pagePromises[self.page] = houndRequest(self.args).then(setInfo.bind(self)).then(setContentArray.bind(self));
+            self.pagePromises[self.page] = houndRequest(self._args).then(setInfo.bind(self)).then(setContentArray.bind(self));
           }
           return self.pagePromises[self.page];
         }
@@ -2764,8 +2764,8 @@ System.register("request/hound-paged-request", [], function() {
         var self = this;
         return this.currentPromise.then(function() {
           self.page = n;
-          self.args.params.page = self.page;
-          self.pagePromises[self.page] = houndRequest(self.args).then(setInfo.bind(self)).then(setContentArray.bind(self));
+          self._args.params.page = self.page;
+          self.pagePromises[self.page] = houndRequest(self._args).then(setInfo.bind(self)).then(setContentArray.bind(self));
           return self.pagePromises[self.page];
         });
       } else if (this.page !== n) {
@@ -2985,19 +2985,21 @@ System.register("models/social/MHSocial", [], function() {
     }
     for (var $__7 = $MHSocial.members[Symbol.iterator](),
         $__8; !($__8 = $__7.next()).done; ) {
-      var curr = $__8.value;
+      var prop = $__8.value;
       {
-        Object.defineProperty(this, curr, {
+        var curr = typeof args[prop] === 'undefined' ? null : args[prop];
+        Object.defineProperty(this, prop, {
           configurable: false,
           enumerable: true,
           writable: false,
-          value: args[curr]
+          value: curr
         });
       }
     }
   };
   var $MHSocial = MHSocial;
-  ($traceurRuntime.createClass)(MHSocial, {isEqualToMHSocial: function(otherObj) {
+  ($traceurRuntime.createClass)(MHSocial, {
+    isEqualToMHSocial: function(otherObj) {
       for (var $__7 = $MHSocial.members[Symbol.iterator](),
           $__8; !($__8 = $__7.next()).done; ) {
         var prop = $__8.value;
@@ -3011,9 +3013,94 @@ System.register("models/social/MHSocial", [], function() {
         }
       }
       return true;
-    }}, {get members() {
-      return ['followers', 'likers', 'collectors', 'mentioners', 'following', 'ownedCollections', 'userLikes', 'userDislikes', 'userFollows', 'items'];
-    }});
+    },
+    newWithAction: function(action) {
+      var newValue,
+          toChange,
+          alsoFlip,
+          newArgs = {};
+      switch (action) {
+        case $MHSocial.LIKE:
+          toChange = 'likers';
+          newValue = this.likers + 1;
+          alsoFlip = 'userLikes';
+          break;
+        case $MHSocial.UNLIKE:
+          toChange = 'likers';
+          newValue = this.likers - 1;
+          alsoFlip = 'userLikes';
+          break;
+        case $MHSocial.DISLIKE:
+        case $MHSocial.UNDISLIKE:
+          alsoFlip = 'userDislikes';
+          break;
+        case $MHSocial.FOLLOW:
+          toChange = 'followers';
+          newValue = this.followers + 1;
+          alsoFlip = 'userFollows';
+          break;
+        case $MHSocial.UNFOLLOW:
+          toChange = 'followers';
+          newValue = this.followers - 1;
+          alsoFlip = 'userFollows';
+          break;
+        case $MHSocial.COLLECT:
+          toChange = 'collectors';
+          newValue = this.collectors + 1;
+          break;
+        default:
+          break;
+      }
+      for (var $__7 = $MHSocial.members[Symbol.iterator](),
+          $__8; !($__8 = $__7.next()).done; ) {
+        var prop = $__8.value;
+        {
+          if (prop === toChange) {
+            newArgs[prop] = newValue;
+          } else if (prop === alsoFlip) {
+            newArgs[prop] = !this[prop];
+          } else {
+            newArgs[prop] = this[prop];
+          }
+        }
+      }
+      return new $MHSocial(newArgs);
+    }
+  }, {
+    get LIKE() {
+      return 'like';
+    },
+    get UNLIKE() {
+      return 'unlike';
+    },
+    get DISLIKE() {
+      return 'dislike';
+    },
+    get UNDISLIKE() {
+      return 'undislike';
+    },
+    get FOLLOW() {
+      return 'follow';
+    },
+    get UNFOLLOW() {
+      return 'unfollow';
+    },
+    get SOCIAL_ACTIONS() {
+      return [$MHSocial.LIKE, $MHSocial.UNLIKE, $MHSocial.DISLIKE, $MHSocial.UNDISLIKE, $MHSocial.FOLLOW, $MHSocial.UNFOLLOW];
+    },
+    get POST() {
+      return 'post';
+    },
+    get COLLECT() {
+      return 'collect';
+    },
+    get COMMENT() {
+      return 'comment';
+    },
+    get members() {
+      return ['likers', 'followers', 'collectors', 'mentioners', 'following', 'ownedCollections', 'items', 'userLikes', 'userDislikes', 'userFollows'];
+    }
+  });
   return {get MHSocial() {
       return MHSocial;
     }};
@@ -3082,9 +3169,9 @@ System.register("models/base/MHObject", [], function() {
         writable: false,
         value: createdDate
       },
-      'socialPromise': {
+      'social': {
         configurable: false,
-        enumerable: false,
+        enumerable: true,
         writable: true,
         value: null
       },
@@ -3126,17 +3213,14 @@ System.register("models/base/MHObject", [], function() {
       return this.endpoint + '/' + sub;
     },
     fetchSocial: function() {
-      var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var path = this.subendpoint('social');
-      if (force || this.socialPromise === null) {
-        this.socialPromise = houndRequest({
-          method: 'GET',
-          endpoint: path
-        }).then(function(parsed) {
-          return new MHSocial(parsed);
-        });
-      } else {}
-      return this.socialPromise;
+      var path = this.subendpoint('social'),
+          self = this;
+      return houndRequest({
+        method: 'GET',
+        endpoint: path
+      }).then((function(parsed) {
+        return (self.social = new MHSocial(parsed));
+      }));
     },
     fetchFeed: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
@@ -3165,35 +3249,31 @@ System.register("models/base/MHObject", [], function() {
       return this.fetchFeed(view, page, size, force).currentPromise;
     },
     takeAction: function(action) {
+      var $__14 = this;
       if (typeof action !== 'string' && !(action instanceof String)) {
         throw new TypeError('Action not of type String or undefined');
       }
-      log('in takeAction, action: ' + action, 'obj: ' + this);
-      var curr,
-          check = false;
-      for (var $__15 = ['like', 'unlike', 'follow', 'unfollow'][Symbol.iterator](),
-          $__16; !($__16 = $__15.next()).done; ) {
-        curr = $__16.value;
-        {
-          if (action === curr) {
-            check = true;
-            break;
-          }
-        }
+      if (!MHSocial.SOCIAL_ACTIONS.some((function(a) {
+        return action === a;
+      }))) {
+        throw new TypeError('Action is not of an accepted type in mhObj.takeAction');
       }
-      if (!check) {
-        throw new TypeError('Action not of proper type in (MHObject).takeAction');
-      }
+      log(("in takeAction, action: " + action + ", obj: " + this.toString()));
       var path = this.subendpoint(action),
+          requestId = Math.random(),
           self = this;
+      this.social = this.social.newWithAction(action);
+      this._lastSocialRequestId = requestId;
       return houndRequest({
         method: 'POST',
         endpoint: path
-      }).then(function(socialRes) {
+      }).then((function(socialRes) {
         var newSocial = new MHSocial(socialRes);
-        self.socialPromise = Promise.resolve(newSocial);
+        if ($__14._lastSocialRequestId === requestId) {
+          self.social = newSocial;
+        }
         return newSocial;
-      });
+      }));
     }
   }, {
     parseArgs: function(args) {
@@ -3911,9 +3991,9 @@ System.register("models/user/MHUser", [], function() {
   "use strict";
   var __moduleName = "models/user/MHUser";
   var log = System.get("models/internal/debug-helpers").log;
-  var $__46 = System.get("models/base/MHObject"),
-      MHObject = $__46.MHObject,
-      mhidLRU = $__46.mhidLRU;
+  var $__45 = System.get("models/base/MHObject"),
+      MHObject = $__45.MHObject,
+      mhidLRU = $__45.mhidLRU;
   var houndRequest = System.get("request/hound-request").houndRequest;
   var pagedRequest = System.get("request/hound-paged-request").pagedRequest;
   var MHUser = function MHUser(args) {
@@ -5027,7 +5107,7 @@ System.register("models/source/MHSourceMethod", [], function() {
   var MHSourceFormat = System.get("models/source/MHSourceFormat").MHSourceFormat;
   var MHSourceMethod = function MHSourceMethod(args) {
     var medium = arguments[1] !== (void 0) ? arguments[1] : null;
-    var $__81 = this;
+    var $__80 = this;
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5041,7 +5121,7 @@ System.register("models/source/MHSourceMethod", [], function() {
       throw new TypeError('Type or formats not defined on args array in MHSourceMethod', 'MHSourceMethod.js', 41);
     }
     formats = formats.map((function(v) {
-      return new MHSourceFormat(v, $__81);
+      return new MHSourceFormat(v, $__80);
     }));
     Object.defineProperties(this, {
       'type': {
@@ -5077,7 +5157,7 @@ System.register("models/source/MHSourceMedium", [], function() {
   var MHSourceMethod = System.get("models/source/MHSourceMethod").MHSourceMethod;
   var MHSourceMedium = function MHSourceMedium(args) {
     var source = arguments[1] !== (void 0) ? arguments[1] : null;
-    var $__84 = this;
+    var $__83 = this;
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5091,7 +5171,7 @@ System.register("models/source/MHSourceMedium", [], function() {
       throw new TypeError('Type or methods not defined on args in MHSourceMedium');
     }
     methods = methods.map((function(v) {
-      return new MHSourceMethod(v, $__84);
+      return new MHSourceMethod(v, $__83);
     }));
     Object.defineProperties(this, {
       'type': {
@@ -5127,7 +5207,7 @@ System.register("models/source/MHSourceModel", [], function() {
   var MHSourceMedium = System.get("models/source/MHSourceMedium").MHSourceMedium;
   var MHSourceModel = function MHSourceModel(args) {
     var content = arguments[1] !== (void 0) ? arguments[1] : null;
-    var $__87 = this;
+    var $__86 = this;
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5143,7 +5223,7 @@ System.register("models/source/MHSourceModel", [], function() {
       throw new TypeError('Name, consumable, or mediums null in args in MHSourceModel');
     }
     mediums = mediums.map((function(v) {
-      return new MHSourceMedium(v, $__87);
+      return new MHSourceMedium(v, $__86);
     }));
     Object.defineProperties(this, {
       'name': {
@@ -6323,7 +6403,7 @@ System.register("search/quick-search", [], function() {
       quickSearch,
       search = {},
       extraEncode = houndRequest.extraEncode,
-      types = ['all', 'movie', 'song', 'album', 'tvseries', 'book', 'game', 'person', 'collection', 'user'],
+      types = ['all', 'movie', 'song', 'album', 'tvseries', 'book', 'person', 'collection', 'user'],
       makeEndpoint = function(searchType, query) {
         return 'search/' + searchType + '/find/' + extraEncode(query) + '/autocomplete';
       },

@@ -54,7 +54,7 @@ var defaults = {
 
       var self = this, newContent;
 
-      if( (this.args.params.view && this.args.params.view === 'id') || typeof response.content[0] === 'string' ){
+      if( (this._args.params.view && this._args.params.view === 'id') || typeof response.content[0] === 'string' ){
         newContent = Promise.all(MHObject.fetchByMhids(response.content));
       } else {
         newContent = Promise.resolve(MHObject.create(response.content));
@@ -131,9 +131,9 @@ class PagedRequest {
     this.content = [];
     this.pagePromises = [];
     this.page = startingPage;
-    this.args = myArgs;
+    this._args = myArgs;
 
-    this.pagePromises[this.page] = houndRequest(this.args)
+    this.pagePromises[this.page] = houndRequest(this._args)
                                     .then(setInfo.bind(this))
                                     .then(setContentArray.bind(this));
 
@@ -168,10 +168,10 @@ class PagedRequest {
       .then(function(response){
         if( !self.lastPage ){
           self.page += 1;
-          self.args.params.page = self.page;
+          self._args.params.page = self.page;
 
           if( self.pagePromises[self.page] == null ){
-            self.pagePromises[self.page] = houndRequest(self.args)
+            self.pagePromises[self.page] = houndRequest(self._args)
                                             .then(setInfo.bind(self))
                                             .then(setContentArray.bind(self));
           }
@@ -188,10 +188,10 @@ class PagedRequest {
       .then(function(response){
         if( !self.firstPage ){
           self.page -= 1;
-          self.args.params.page = self.page;
+          self._args.params.page = self.page;
 
           if( self.pagePromises[self.page] == null ){
-            self.pagePromises[self.page] = houndRequest(self.args)
+            self.pagePromises[self.page] = houndRequest(self._args)
                                             .then(setInfo.bind(self))
                                             .then(setContentArray.bind(self));
           }
@@ -216,8 +216,8 @@ class PagedRequest {
       return this.currentPromise
         .then(function(){
           self.page = n;
-          self.args.params.page = self.page;
-          self.pagePromises[self.page] = houndRequest(self.args)
+          self._args.params.page = self.page;
+          self.pagePromises[self.page] = houndRequest(self._args)
                                           .then(setInfo.bind(self))
                                           .then(setContentArray.bind(self));
           return self.pagePromises[self.page];
@@ -229,8 +229,7 @@ class PagedRequest {
     return this.currentPromise;
   }
 
-
-}
+} // end class
 
 // Create and export factory function
 export var pagedRequest = function(a){ return new PagedRequest(a); };

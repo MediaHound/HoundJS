@@ -98,13 +98,13 @@ export class MHObject {
         writable:     false,
         value:        createdDate
       },
-      // Promises
-      'socialPromise':{
+      'social':{
         configurable: false,
-        enumerable:   false,
+        enumerable:   true,
         writable:     true,
         value:        null
       },
+      // Promises
       'feedPagedRequest':{
         configurable: false,
         enumerable:   false,
@@ -478,41 +478,30 @@ export class MHObject {
   }
 
 
-  /** TODO: remove log
+  /**
    * mhObj.fetchSocial()
-   *
-   * @param   { boolean } [force] - force new request if Social has already been fetched
-   *
+   * Always calls server for new social stats
    * @return  { Promise }  - resolves to Social stats as returned by the server
    *
    */
-  fetchSocial(force=false){
-    var path = this.subendpoint('social');
+  fetchSocial(){
+    var path = this.subendpoint('social'),
+        self = this;
 
-    if( force || this.socialPromise === null ){
-      //log('force: '+force, 'socialPromise: ', socialPromise);
-      this.socialPromise = houndRequest({
-          method: 'GET',
-          endpoint: path
-        })
-        .then(function(parsed){
-          return new MHSocial(parsed);
-        });
-
-    } else {
-      //log('already fetched social: ', this.socialPromise);
-    }
-
-    return this.socialPromise;
+    return houndRequest({
+        method: 'GET',
+        endpoint: path
+      })
+      .then( parsed => (self.social = new MHSocial(parsed)) );
   }
 
   /**
    * mhObj.fetchFeed(view, page, size)
    *
-   * @param { string=full } view - the view param
+   * @param { string=full   } view - the view param
    * @param { number=0      } page - the zero indexed page number to return
    * @param { number=12     } size  - the number of items to return per page
-   * @param { boolean=false } force
+   * @param { Boolean=false } force
    *
    * @return { houndPagedRequest }  - MediaHound paged request object for this feed
    *
@@ -551,14 +540,12 @@ export class MHObject {
     return this.fetchFeed(view, page, size, force).currentPromise;
   }
 
-  /** TODO remove console debug statements
-   * TODO Change to store social object and auto update on call
-   * TODO Only update on final returned response
+  /**
+   * TODO remove console debug statements
    *
    * mhObj.takeAction(action)
    *
-   * @param   { String }  - action to take
-   *    possible actions: like, unlike, follow, unfollow
+   * @param   { string } action - The action to take, should be accessed from MHSocial.LIKE, MHSocial.FOLLOW, etc.
    *
    * @return  { Promise } - resolves to server response of action call
    *
@@ -567,35 +554,38 @@ export class MHObject {
     if( typeof action !== 'string' && !(action instanceof String) ){
       throw new TypeError('Action not of type String or undefined');
     }
-
-    log('in takeAction, action: ' + action, 'obj: ' + this);
-
-    var curr, check = false;
-    for( curr of ['like', 'unlike', 'follow', 'unfollow'] ){
-      if( action === curr ){
-        check = true;
-        break;
-      }
-    }
-    if( !check ){
-      throw new TypeError('Action not of proper type in (MHObject).takeAction');
+    if( !MHSocial.SOCIAL_ACTIONS.some( a => action === a ) ){
+      throw new TypeError('Action is not of an accepted type in mhObj.takeAction');
     }
 
-    var path = this.subendpoint(action),
-        self = this;
+    log(`in takeAction, action: ${action}, obj: ${this.toString()}`);
 
+    var path      = this.subendpoint(action),
+        requestId = Math.random(),
+        self      = this;
+
+    // Expected outcome
+    this.social = this.social.newWithAction(action);
+
+    // Save request id to check against later
+    this._lastSocialRequestId = requestId;
+
+    // Return promise to new Social as returned from the server
     return houndRequest({
         method: 'POST',
         endpoint: path
       })
-      .then(function(socialRes){
+      .then(socialRes => {
         var newSocial = new MHSocial(socialRes);
-        self.socialPromise = Promise.resolve(newSocial);
 
-        //log('in take action response, newSocial: ', newSocial, self.socialPromise);
+        // only update if this is the last request returning
+        if( this._lastSocialRequestId === requestId ){
+          self.social = newSocial;
+        }
+
+        //log('in take action response, newSocial: ', newSocial);
         return newSocial;
       });
   }
-
 }
 
