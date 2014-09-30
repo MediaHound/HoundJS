@@ -225,7 +225,8 @@ export class MHLoginSession {
       })
       .catch(function(error){
         console.log('Problem validating open session');
-        console.error(error.error.stack);
+        //console.error(error.error.stack);
+        return error;
       });
   }
 }

@@ -3213,8 +3213,12 @@ System.register("models/base/MHObject", [], function() {
       return this.endpoint + '/' + sub;
     },
     fetchSocial: function() {
+      var force = arguments[0] !== (void 0) ? arguments[0] : false;
       var path = this.subendpoint('social'),
           self = this;
+      if (!force && this.social !== null) {
+        return Promise.resolve(this.social);
+      }
       return houndRequest({
         method: 'GET',
         endpoint: path
@@ -4429,7 +4433,7 @@ System.register("models/user/MHLoginSession", [], function() {
         return loggedInUser;
       }).catch(function(error) {
         console.log('Problem validating open session');
-        console.error(error.error.stack);
+        return error;
       });
     }
   });

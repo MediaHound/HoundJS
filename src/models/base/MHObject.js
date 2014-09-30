@@ -1,4 +1,4 @@
-/*global System */
+/*global System, Promise */
 
 import { log } from '../internal/debug-helpers';
 
@@ -480,13 +480,18 @@ export class MHObject {
 
   /**
    * mhObj.fetchSocial()
-   * Always calls server for new social stats
-   * @return  { Promise }  - resolves to Social stats as returned by the server
+   * Calls server for new social stats
+   * @param {boolean} force - Forces an http request if set to true
+   * @return  { Promise }  - Resolves to Social stats as returned by the server
    *
    */
-  fetchSocial(){
+  fetchSocial(force=false){
     var path = this.subendpoint('social'),
         self = this;
+
+    if( !force && this.social !== null ){
+      return Promise.resolve(this.social);
+    }
 
     return houndRequest({
         method: 'GET',
