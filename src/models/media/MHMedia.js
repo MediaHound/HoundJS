@@ -156,32 +156,33 @@ export class MHMedia extends MHObject {
    * TODO: DocJS comments
    */
   fetchContent(view='ids', force=false){
-    var path = this.subendpoint('content');
+    var path = this.subendpoint('content'),
+        self = this;
 
     if( force || this.contentPromise === null ){
       this.contentPromise = houndRequest({
           method: 'GET',
           endpoint: path,
-          params: {
-            'view':view
-          }
+          params: { view }
         })
         .then(function(parsed){
           if( view === 'full' && Array.isArray(parsed) ){
             parsed = MHRelationalPair.createFromArray(parsed).sort( (a,b) => a.position - b.position );
-            //parsed = MHObject.create(parsed);
           }
           return parsed;
         });
     }
 
-    return this.contentPromise.then(function(parsed){
-      if( view === 'full' && Array.isArray(parsed) && typeof parsed[0] === 'string'){
-        return Promise.all(MHObject.fetchByMhids(parsed));
-      } else if( view === 'ids' && Array.isArray(parsed) && parsed[0] instanceof MHObject ){
-        return parsed.map(mhObj => mhObj.mhid);
+    return this.contentPromise.then(res => {
+      // if asking for 'full' but cached is 'ids'
+      if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
+        return self.fetchContent(view, true);
       }
-      return parsed;
+      // if asking for 'ids' but cached is 'full'
+      if( view === 'ids' && Array.isArray(res) && res[0].object instanceof MHObject ){
+        return res.map(pair => pair.object.mhid);
+      }
+      return res;
     });
   }
 

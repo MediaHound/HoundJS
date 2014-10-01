@@ -73,8 +73,26 @@ export class MHCollection extends MHObject {
         enumerable:   true,
         writable:     false,
         value:        description
-      }
+      },
       //TODO add promises
+      'ownersPromise': {
+        configurable: false,
+        enumerable:   true,
+        writable:     true,
+        value:        null
+      },
+      'contentPromise': {
+        configurable: false,
+        enumerable:   true,
+        writable:     true,
+        value:        null
+      },
+      'mixlistPromise': {
+        configurable: false,
+        enumerable:   true,
+        writable:     true,
+        value:        null
+      }
     });
   }
 
@@ -188,9 +206,7 @@ export class MHCollection extends MHObject {
     }
 
     var path = this.subendpoint(sub),
-        contentPromise,
-        mhids = contents.map(function(v){
-
+        mhids = contents.map(v => {
           if( v instanceof MHObject ){
             return v.mhid;
           } else if ( typeof v === 'string' && MHObject.prefixes.indexOf(MHObject.getPrefixFromMhid(v)) > -1 ){
@@ -200,9 +216,13 @@ export class MHCollection extends MHObject {
           return null;
         }).filter(v => v !== null);
 
+    // invalidate mixlistPromise
+    if( this.hasOwnProperty('mixlistPromise') ){
+      this.mixlistPromise = null;
+    }
 
-    console.log(mhids);
-    contentPromise = houndRequest({
+    console.log('content array to be submitted: ', mhids);
+    return (this.contentPromise = houndRequest({
         method: 'POST',
         endpoint: path,
         data: {
@@ -210,91 +230,65 @@ export class MHCollection extends MHObject {
         }
       }).then(function(response){
         // fetch social for original passed in mhobjs
-        contents.forEach(v => v.fetchSocial());
+        contents.forEach(v => v.fetchSocial(true));
         return response;
-      });
-
-    if( this.hasOwnProperty('contentPromise') ){
-      this.contentPromise = contentPromise;
-    } else {
-      Object.defineProperty(this, 'contentPromise', {
-        configurable: false,
-        enumerable: true,
-        writable: true,
-        value: contentPromise
-      });
-    }
-
-    // invalidate mixlistPromise
-    if( this.hasOwnProperty('mixlistPromise') ){
-      this.mixlistPromise = null;
-    }
-    return this.contentPromise;
+      }));
   }
 
 
   /**
    * @param {boolean} force - whether to force a call to the server instead of using the cached ownersPromise
-   * @returns {Promise} - a promise that resolves to the owners for this MHCollection
+   * @returns {Promise} - a promise that resolves to a list of mhids for the owners of this MHCollection
    */
   fetchOwners(force=false){
-    var path = this.subendpoint('owners'),
-        ownersPromise = this.ownersPromise || null;
+    var path = this.subendpoint('owners');
 
-    if( force || ownersPromise === null ){
-      ownersPromise = houndRequest({
+    if( force || this.ownersPromise === null ){
+      this.ownersPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        })
-        .then(function(response){
-          return Promise.all(response.map(v => MHObject.fetchByMhid(v)));
         });
-
-      if( this.hasOwnProperty('ownersPromise') ){
-        this.ownersPromise = ownersPromise;
-      } else {
-        Object.defineProperty(this, 'ownersPromise', {
-          configurable: false,
-          enumerable: true,
-          writable: true,
-          value: ownersPromise
-        });
-      }
     }
 
     return this.ownersPromise;
   }
 
   /**
+   * @param view {string} view - the view paramater, 'full' or 'ids'
    * @param {boolean} force - whether to force a call to the server instead of using the cached contentPromise
    * @returns {Promise} - a promise that resolves to the list of content for this MHCollection
    */
-  fetchContent(force=false){
+  fetchContent(view='ids', force=false){
     var path = this.subendpoint('content'),
-        contentPromise = this.contentPromise || null;
+        self = this;
 
-    if( force || contentPromise === null ){
-      contentPromise = houndRequest({
+    if( force || this.contentPromise === null ){
+      this.contentPromise = houndRequest({
           method: 'GET',
-          endpoint: path
+          endpoint: path,
+          params: { view }
         })
-        .then(function(response){
-          return Promise.all(response.map(v => MHObject.fetchByMhid(v)));
+        .then(res => {
+          if( view === 'full' && Array.isArray(res) ){
+            res = MHObject.create(res);
+            // if collections become ordered MHRelationalPairs like media content:
+            //res = MHRelationalPair.createFromArray(res).sort( (a,b) => a.position - b.position );
+          }
+          return res;
         });
-
-      if( this.hasOwnProperty('contentPromise') ){
-        this.contentPromise = contentPromise;
-      } else {
-        Object.defineProperty(this, 'contentPromise', {
-          configurable: false,
-          enumerable: true,
-          writable: true,
-          value: contentPromise
-        });
-      }
     }
 
-    return this.contentPromise;
+    return this.contentPromise.then(res => {
+      // if asking for 'full' but cached is 'ids'
+      if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
+        return self.fetchContent(view, true);
+      }
+      // if asking for 'ids' but cached is 'full'
+      if( view === 'ids' && Array.isArray(res) && res[0].object instanceof MHObject ){
+        return res.map(pair => pair.object.mhid);
+      }
+      return res;
+    });
   }
 
   /**
@@ -302,28 +296,13 @@ export class MHCollection extends MHObject {
    * @returns {Promise} - a promise that resolves to the list of mixlist content for this MHCollection
    */
   fetchMixlist(force=false){
-    var path = this.subendpoint('mixlist'),
-        mixlistPromise = this.mixlistPromise || null;
+    var path = this.subendpoint('mixlist');
 
-    if( force || mixlistPromise === null ){
-      mixlistPromise = houndRequest({
+    if( force || this.mixlistPromise === null ){
+      this.mixlistPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        })
-        .then(function(response){
-          return Promise.all(response.map(v => MHObject.fetchByMhid(v)));
         });
-
-      if( this.hasOwnProperty('mixlistPromise') ){
-        this.mixlistPromise = mixlistPromise;
-      } else {
-        Object.defineProperty(this, 'mixlistPromise', {
-          configurable: false,
-          enumerable: true,
-          writable: true,
-          value: mixlistPromise
-        });
-      }
     }
 
     return this.mixlistPromise;
@@ -338,9 +317,6 @@ export class MHCollection extends MHObject {
     return houndRequest({
         method: 'GET',
         endpoint: path
-      })
-      .then(function(response){
-        return Promise.all(response.map(v => MHObject.fetchByMhid(v)));
       });
   }
 

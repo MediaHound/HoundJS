@@ -153,7 +153,7 @@ export class MHObject {
     }
     // Shound never get here
     console.warn('how did you do that? args: ', args);
-    throw new TypeError('Args was obejct without mhid!', 'MHObject.js', 189);
+    throw new TypeError('Args was object without mhid!', 'MHObject.js', 189);
   }
 
   /**
@@ -177,6 +177,7 @@ export class MHObject {
       });
     }
     try{
+      // TODO if parseArgs error return args?
       args = MHObject.parseArgs(args);
       if( typeof args.mhid !== 'undefined' && args.mhid !== null ){
         var prefix = MHObject.getPrefixFromMhid(args.mhid),
@@ -189,8 +190,13 @@ export class MHObject {
         return mhObj;
       }
     } catch (err) {
-      if( err instanceof TypeError && err.message === 'undefined is not a function' ){
-        console.warn('Unknown mhid prefix, see args object: ', args);
+      if( err instanceof TypeError ) {
+        if( err.message === 'undefined is not a function' ) {
+          console.warn('Unknown mhid prefix, see args object: ', args);
+        }
+        if( err.message === 'Args was object without mhid!'){
+          console.warn('Incomplete Object passed to create function: ', args);
+        }
       }
       console.error(err.stack);
       return null;

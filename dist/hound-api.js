@@ -3304,7 +3304,7 @@ System.register("models/base/MHObject", [], function() {
         throw (args.error || args.Error || args);
       }
       console.warn('how did you do that? args: ', args);
-      throw new TypeError('Args was obejct without mhid!', 'MHObject.js', 189);
+      throw new TypeError('Args was object without mhid!', 'MHObject.js', 189);
     },
     create: function(args) {
       if (args instanceof Array) {
@@ -3328,8 +3328,13 @@ System.register("models/base/MHObject", [], function() {
           return mhObj;
         }
       } catch (err) {
-        if (err instanceof TypeError && err.message === 'undefined is not a function') {
-          console.warn('Unknown mhid prefix, see args object: ', args);
+        if (err instanceof TypeError) {
+          if (err.message === 'undefined is not a function') {
+            console.warn('Unknown mhid prefix, see args object: ', args);
+          }
+          if (err.message === 'Args was object without mhid!') {
+            console.warn('Incomplete Object passed to create function: ', args);
+          }
         }
         console.error(err.stack);
         return null;
@@ -4478,6 +4483,24 @@ System.register("models/collection/MHCollection", [], function() {
         enumerable: true,
         writable: false,
         value: description
+      },
+      'ownersPromise': {
+        configurable: false,
+        enumerable: true,
+        writable: true,
+        value: null
+      },
+      'contentPromise': {
+        configurable: false,
+        enumerable: true,
+        writable: true,
+        value: null
+      },
+      'mixlistPromise': {
+        configurable: false,
+        enumerable: true,
+        writable: true,
+        value: null
       }
     });
   };
@@ -4522,118 +4545,79 @@ System.register("models/collection/MHCollection", [], function() {
         throw new TypeError('Subendpoint must be add or remove');
       }
       var path = this.subendpoint(sub),
-          contentPromise,
-          mhids = contents.map(function(v) {
+          mhids = contents.map((function(v) {
             if (v instanceof MHObject) {
               return v.mhid;
             } else if (typeof v === 'string' && MHObject.prefixes.indexOf(MHObject.getPrefixFromMhid(v)) > -1) {
               return v;
             }
             return null;
-          }).filter((function(v) {
+          })).filter((function(v) {
             return v !== null;
           }));
-      console.log(mhids);
-      contentPromise = houndRequest({
+      if (this.hasOwnProperty('mixlistPromise')) {
+        this.mixlistPromise = null;
+      }
+      console.log('content array to be submitted: ', mhids);
+      return (this.contentPromise = houndRequest({
         method: 'POST',
         endpoint: path,
         data: {'content': mhids}
       }).then(function(response) {
         contents.forEach((function(v) {
-          return v.fetchSocial();
+          return v.fetchSocial(true);
         }));
         return response;
-      });
-      if (this.hasOwnProperty('contentPromise')) {
-        this.contentPromise = contentPromise;
-      } else {
-        Object.defineProperty(this, 'contentPromise', {
-          configurable: false,
-          enumerable: true,
-          writable: true,
-          value: contentPromise
-        });
-      }
-      if (this.hasOwnProperty('mixlistPromise')) {
-        this.mixlistPromise = null;
-      }
-      return this.contentPromise;
+      }));
     },
     fetchOwners: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var path = this.subendpoint('owners'),
-          ownersPromise = this.ownersPromise || null;
-      if (force || ownersPromise === null) {
-        ownersPromise = houndRequest({
+      var path = this.subendpoint('owners');
+      if (force || this.ownersPromise === null) {
+        this.ownersPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        }).then(function(response) {
-          return Promise.all(response.map((function(v) {
-            return MHObject.fetchByMhid(v);
-          })));
         });
-        if (this.hasOwnProperty('ownersPromise')) {
-          this.ownersPromise = ownersPromise;
-        } else {
-          Object.defineProperty(this, 'ownersPromise', {
-            configurable: false,
-            enumerable: true,
-            writable: true,
-            value: ownersPromise
-          });
-        }
       }
       return this.ownersPromise;
     },
     fetchContent: function() {
-      var force = arguments[0] !== (void 0) ? arguments[0] : false;
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
+      var force = arguments[1] !== (void 0) ? arguments[1] : false;
       var path = this.subendpoint('content'),
-          contentPromise = this.contentPromise || null;
-      if (force || contentPromise === null) {
-        contentPromise = houndRequest({
+          self = this;
+      if (force || this.contentPromise === null) {
+        this.contentPromise = houndRequest({
           method: 'GET',
-          endpoint: path
-        }).then(function(response) {
-          return Promise.all(response.map((function(v) {
-            return MHObject.fetchByMhid(v);
-          })));
-        });
-        if (this.hasOwnProperty('contentPromise')) {
-          this.contentPromise = contentPromise;
-        } else {
-          Object.defineProperty(this, 'contentPromise', {
-            configurable: false,
-            enumerable: true,
-            writable: true,
-            value: contentPromise
-          });
-        }
+          endpoint: path,
+          params: {view: view}
+        }).then((function(res) {
+          if (view === 'full' && Array.isArray(res)) {
+            res = MHObject.create(res);
+          }
+          return res;
+        }));
       }
-      return this.contentPromise;
+      return this.contentPromise.then((function(res) {
+        if (view === 'full' && Array.isArray(res) && typeof res[0] === 'string') {
+          return self.fetchContent(view, true);
+        }
+        if (view === 'ids' && Array.isArray(res) && res[0].object instanceof MHObject) {
+          return res.map((function(pair) {
+            return pair.object.mhid;
+          }));
+        }
+        return res;
+      }));
     },
     fetchMixlist: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var path = this.subendpoint('mixlist'),
-          mixlistPromise = this.mixlistPromise || null;
-      if (force || mixlistPromise === null) {
-        mixlistPromise = houndRequest({
+      var path = this.subendpoint('mixlist');
+      if (force || this.mixlistPromise === null) {
+        this.mixlistPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        }).then(function(response) {
-          return Promise.all(response.map((function(v) {
-            return MHObject.fetchByMhid(v);
-          })));
         });
-        if (this.hasOwnProperty('mixlistPromise')) {
-          this.mixlistPromise = mixlistPromise;
-        } else {
-          Object.defineProperty(this, 'mixlistPromise', {
-            configurable: false,
-            enumerable: true,
-            writable: true,
-            value: mixlistPromise
-          });
-        }
       }
       return this.mixlistPromise;
     }
@@ -4673,10 +4657,6 @@ System.register("models/collection/MHCollection", [], function() {
       return houndRequest({
         method: 'GET',
         endpoint: path
-      }).then(function(response) {
-        return Promise.all(response.map((function(v) {
-          return MHObject.fetchByMhid(v);
-        })));
       });
     }
   }, MHObject);
@@ -5370,12 +5350,13 @@ System.register("models/media/MHMedia", [], function() {
     fetchContent: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var path = this.subendpoint('content');
+      var path = this.subendpoint('content'),
+          self = this;
       if (force || this.contentPromise === null) {
         this.contentPromise = houndRequest({
           method: 'GET',
           endpoint: path,
-          params: {'view': view}
+          params: {view: view}
         }).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
             parsed = MHRelationalPair.createFromArray(parsed).sort((function(a, b) {
@@ -5385,16 +5366,17 @@ System.register("models/media/MHMedia", [], function() {
           return parsed;
         });
       }
-      return this.contentPromise.then(function(parsed) {
-        if (view === 'full' && Array.isArray(parsed) && typeof parsed[0] === 'string') {
-          return Promise.all(MHObject.fetchByMhids(parsed));
-        } else if (view === 'ids' && Array.isArray(parsed) && parsed[0] instanceof MHObject) {
-          return parsed.map((function(mhObj) {
-            return mhObj.mhid;
+      return this.contentPromise.then((function(res) {
+        if (view === 'full' && Array.isArray(res) && typeof res[0] === 'string') {
+          return self.fetchContent(view, true);
+        }
+        if (view === 'ids' && Array.isArray(res) && res[0].object instanceof MHObject) {
+          return res.map((function(pair) {
+            return pair.object.mhid;
           }));
         }
-        return parsed;
-      });
+        return res;
+      }));
     },
     fetchSources: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
