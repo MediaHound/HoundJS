@@ -83,6 +83,8 @@ import { MHSourceMethod } from './source/MHSourceMethod';
 import { MHSourceMedium } from './source/MHSourceMedium';
 import { MHSourceModel }  from './source/MHSourceModel';
 
+delete MHObject.registerConstructor;
+
 export var models = {
   get MHObject(){ return MHObject; },
   get MHEmbeddedObject(){ return MHEmbeddedObject; },

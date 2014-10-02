@@ -6202,6 +6202,7 @@ System.register("models/all-models", [], function() {
   var MHSourceMethod = System.get("models/source/MHSourceMethod").MHSourceMethod;
   var MHSourceMedium = System.get("models/source/MHSourceMedium").MHSourceMedium;
   var MHSourceModel = System.get("models/source/MHSourceModel").MHSourceModel;
+  delete MHObject.registerConstructor;
   var models = {
     get MHObject() {
       return MHObject;
