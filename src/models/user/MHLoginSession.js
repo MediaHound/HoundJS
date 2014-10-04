@@ -10,6 +10,25 @@ import { houndRequest } from '../../request/hound-request';
  *
  */
 
+var makeEvent = function(name, options){
+  var evt;
+  options.bubbles     = options.bubbles     || false;
+  options.cancelable  = options.cancelable  || false;
+  options.detail      = options.detail      || (void 0);
+
+  try{
+
+    evt = new CustomEvent(name, options);
+
+  } catch (err) {
+
+    evt = document.createEvent('CustomEvent');
+    evt.initCustomEvent( name, options.bubbles, options.cancelable, options.detail );
+
+  }
+  return evt;
+};
+
 /**
  *
  * Class Events
@@ -23,8 +42,8 @@ import { houndRequest } from '../../request/hound-request';
  */
 class MHUserLoginEvent {
   static create(mhUserObj){
-    return new CustomEvent('mhUserLogin', {
-      bubbles: false,
+    return makeEvent('mhUserLogin', {
+      bubbles:    false,
       cancelable: false,
       detail: {
         mhUser: mhUserObj
@@ -35,8 +54,8 @@ class MHUserLoginEvent {
 
 class MHUserLogoutEvent {
   static create(mhUserObj){
-    return new CustomEvent('mhUserLogout', {
-      bubbles: false,
+    return makeEvent('mhUserLogout', {
+      bubbles:    false,
       cancelable: false,
       detail: {
         mhUser: mhUserObj
@@ -47,8 +66,8 @@ class MHUserLogoutEvent {
 
 class MHSessionUserProfileImageChange {
   static create(mhUserObj){
-    return new CustomEvent('mhSessionUserProfileImageChange', {
-      bubbles: false,
+    return makeEvent('mhSessionUserProfileImageChange', {
+      bubbles:    false,
       cancelable: false,
       detail: {
         mhUser: mhUserObj

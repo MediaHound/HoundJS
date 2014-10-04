@@ -74,8 +74,6 @@ var extraEncode = function(str){
           onprogress  = args.onprogress       || args.onProgress || null,
           xhr         = new XMLHttpRequest();
 
-      // Wasn't working in ie11...
-      xhr.withCredentials = withCreds;
 
       // Check for url
       if( url === null ){
@@ -123,6 +121,9 @@ var extraEncode = function(str){
 
       // Open Request
       xhr.open(method, url, true);
+
+      // Set Credentials, spec says can be done in UNSENT or OPENED states
+      xhr.withCredentials = withCreds;
 
       // NOT SUPPORTED ACROSS THE BOARD... :/
       //xhr.responseType = 'json';

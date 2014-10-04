@@ -2467,7 +2467,6 @@ System.register("request/promise-request", [], function() {
             withCreds = args.withCredentials || false,
             onprogress = args.onprogress || args.onProgress || null,
             xhr = new XMLHttpRequest();
-        xhr.withCredentials = withCreds;
         if (url === null) {
           throw new TypeError('url was null or undefined in arguments object', 'promiseRequest.js', 70);
         }
@@ -2498,6 +2497,7 @@ System.register("request/promise-request", [], function() {
           }
         }
         xhr.open(method, url, true);
+        xhr.withCredentials = withCreds;
         if (headers !== null) {
           for (prop in headers) {
             if (headers.hasOwnProperty(prop)) {
@@ -4322,9 +4322,22 @@ System.register("models/user/MHLoginSession", [], function() {
   var MHObject = System.get("models/base/MHObject").MHObject;
   var MHUser = System.get("models/user/MHUser").MHUser;
   var houndRequest = System.get("request/hound-request").houndRequest;
+  var makeEvent = function(name, options) {
+    var evt;
+    options.bubbles = options.bubbles || false;
+    options.cancelable = options.cancelable || false;
+    options.detail = options.detail || (void 0);
+    try {
+      evt = new CustomEvent(name, options);
+    } catch (err) {
+      evt = document.createEvent('CustomEvent');
+      evt.initCustomEvent(name, options.bubbles, options.cancelable, options.detail);
+    }
+    return evt;
+  };
   var MHUserLoginEvent = function MHUserLoginEvent() {};
   ($traceurRuntime.createClass)(MHUserLoginEvent, {}, {create: function(mhUserObj) {
-      return new CustomEvent('mhUserLogin', {
+      return makeEvent('mhUserLogin', {
         bubbles: false,
         cancelable: false,
         detail: {mhUser: mhUserObj}
@@ -4332,7 +4345,7 @@ System.register("models/user/MHLoginSession", [], function() {
     }});
   var MHUserLogoutEvent = function MHUserLogoutEvent() {};
   ($traceurRuntime.createClass)(MHUserLogoutEvent, {}, {create: function(mhUserObj) {
-      return new CustomEvent('mhUserLogout', {
+      return makeEvent('mhUserLogout', {
         bubbles: false,
         cancelable: false,
         detail: {mhUser: mhUserObj}
@@ -4340,7 +4353,7 @@ System.register("models/user/MHLoginSession", [], function() {
     }});
   var MHSessionUserProfileImageChange = function MHSessionUserProfileImageChange() {};
   ($traceurRuntime.createClass)(MHSessionUserProfileImageChange, {}, {create: function(mhUserObj) {
-      return new CustomEvent('mhSessionUserProfileImageChange', {
+      return makeEvent('mhSessionUserProfileImageChange', {
         bubbles: false,
         cancelable: false,
         detail: {mhUser: mhUserObj}
