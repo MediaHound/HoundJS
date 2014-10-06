@@ -2612,7 +2612,7 @@ System.register("request/hound-request", [], function() {
       }));
       return requestMap[args.url];
     }
-    log('bypassed requestMap', args.url);
+    log('bypassing requestMap for POST: ', args.url);
     return promiseRequest(args).then(responseThen);
   };
   Object.defineProperty(houndRequest, 'extraEncode', {
@@ -4464,6 +4464,7 @@ System.register("models/user/MHLoginSession", [], function() {
 System.register("models/collection/MHCollection", [], function() {
   "use strict";
   var __moduleName = "models/collection/MHCollection";
+  var log = System.get("models/internal/debug-helpers").log;
   var MHObject = System.get("models/base/MHObject").MHObject;
   var MHLoginSession = System.get("models/user/MHLoginSession").MHLoginSession;
   var houndRequest = System.get("request/hound-request").houndRequest;
@@ -4471,6 +4472,7 @@ System.register("models/collection/MHCollection", [], function() {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHCollection.prototype, "constructor", [args]);
     var mixlist = (typeof args.mixlist === 'string') ? args.mixlist.toLowerCase() : null,
+        firstContentImage = (args.firstContentImage != null) ? MHObject.create(args.firstContentImage) : null,
         description = args.description || null;
     switch (mixlist) {
       case 'none':
@@ -4492,6 +4494,12 @@ System.register("models/collection/MHCollection", [], function() {
         enumerable: true,
         writable: false,
         value: mixlist
+      },
+      'firstContentImage': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: firstContentImage
       },
       'description': {
         configurable: false,
@@ -4573,14 +4581,14 @@ System.register("models/collection/MHCollection", [], function() {
       if (this.hasOwnProperty('mixlistPromise')) {
         this.mixlistPromise = null;
       }
-      console.log('content array to be submitted: ', mhids);
+      log('content array to be submitted: ', mhids);
       return (this.contentPromise = houndRequest({
         method: 'POST',
         endpoint: path,
         data: {'content': mhids}
       }).then(function(response) {
         contents.forEach((function(v) {
-          return v.fetchSocial(true);
+          return typeof v.fetchSocial === 'function' && v.fetchSocial(true);
         }));
         return response;
       }));
@@ -5106,7 +5114,7 @@ System.register("models/source/MHSourceMethod", [], function() {
   var MHSourceFormat = System.get("models/source/MHSourceFormat").MHSourceFormat;
   var MHSourceMethod = function MHSourceMethod(args) {
     var medium = arguments[1] !== (void 0) ? arguments[1] : null;
-    var $__80 = this;
+    var $__81 = this;
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5120,7 +5128,7 @@ System.register("models/source/MHSourceMethod", [], function() {
       throw new TypeError('Type or formats not defined on args array in MHSourceMethod', 'MHSourceMethod.js', 41);
     }
     formats = formats.map((function(v) {
-      return new MHSourceFormat(v, $__80);
+      return new MHSourceFormat(v, $__81);
     }));
     Object.defineProperties(this, {
       'type': {
@@ -5156,7 +5164,7 @@ System.register("models/source/MHSourceMedium", [], function() {
   var MHSourceMethod = System.get("models/source/MHSourceMethod").MHSourceMethod;
   var MHSourceMedium = function MHSourceMedium(args) {
     var source = arguments[1] !== (void 0) ? arguments[1] : null;
-    var $__83 = this;
+    var $__84 = this;
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5170,7 +5178,7 @@ System.register("models/source/MHSourceMedium", [], function() {
       throw new TypeError('Type or methods not defined on args in MHSourceMedium');
     }
     methods = methods.map((function(v) {
-      return new MHSourceMethod(v, $__83);
+      return new MHSourceMethod(v, $__84);
     }));
     Object.defineProperties(this, {
       'type': {
@@ -5206,7 +5214,7 @@ System.register("models/source/MHSourceModel", [], function() {
   var MHSourceMedium = System.get("models/source/MHSourceMedium").MHSourceMedium;
   var MHSourceModel = function MHSourceModel(args) {
     var content = arguments[1] !== (void 0) ? arguments[1] : null;
-    var $__86 = this;
+    var $__87 = this;
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5222,7 +5230,7 @@ System.register("models/source/MHSourceModel", [], function() {
       throw new TypeError('Name, consumable, or mediums null in args in MHSourceModel');
     }
     mediums = mediums.map((function(v) {
-      return new MHSourceMedium(v, $__86);
+      return new MHSourceMedium(v, $__87);
     }));
     Object.defineProperties(this, {
       'name': {

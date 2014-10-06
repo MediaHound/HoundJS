@@ -104,7 +104,7 @@ export var houndRequest = function(args){
     return requestMap[args.url];
   }
 
-  log( 'bypassed requestMap', args.url);
+  log('bypassing requestMap for POST: ', args.url);
   // else POST request
   return promiseRequest(args)
     .then(responseThen);
