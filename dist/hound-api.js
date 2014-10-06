@@ -2585,7 +2585,7 @@ System.register("request/hound-request", [], function() {
       defaults.withCredentials = true;
     }
     if (args.endpoint) {
-      args.url = 'https://stag-api.mediahound.com/' + args.endpoint;
+      args.url = 'https://api.mediahound.com/' + args.endpoint;
       delete args.endpoint;
     }
     if (!args.headers) {
