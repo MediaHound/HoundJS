@@ -243,8 +243,9 @@ export class MHLoginSession {
         return loggedInUser;
       })
       .catch(function(error){
-        console.log('Problem validating open session');
-        //console.error(error.error.stack);
+        if( error.xhr.status === 401 ){
+          console.log('No open MediaHound session');
+        }
         return error;
       });
   }

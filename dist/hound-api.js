@@ -4450,7 +4450,9 @@ System.register("models/user/MHLoginSession", [], function() {
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         return loggedInUser;
       }).catch(function(error) {
-        console.log('Problem validating open session');
+        if (error.xhr.status === 401) {
+          console.log('No open MediaHound session');
+        }
         return error;
       });
     }
