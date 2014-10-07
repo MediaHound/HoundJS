@@ -1,4 +1,6 @@
 
+import { log } from '../internal/debug-helpers';
+
 import { MHObject } from '../base/MHObject';
 import { MHLoginSession } from '../user/MHLoginSession';
 
@@ -44,6 +46,7 @@ export class MHCollection extends MHObject {
     // mixlist = 'none', 'partial', 'full'
 
     var mixlist = (typeof args.mixlist === 'string') ? args.mixlist.toLowerCase() : null,
+        firstContentImage = (args.firstContentImage != null) ? MHObject.create(args.firstContentImage) : null,
         description = args.description || null;
 
     switch(mixlist){
@@ -67,6 +70,12 @@ export class MHCollection extends MHObject {
         enumerable:   true,
         writable:     false,
         value:        mixlist
+      },
+      'firstContentImage':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        firstContentImage
       },
       'description':{
         configurable: false,
@@ -221,7 +230,7 @@ export class MHCollection extends MHObject {
       this.mixlistPromise = null;
     }
 
-    console.log('content array to be submitted: ', mhids);
+    log('content array to be submitted: ', mhids);
     return (this.contentPromise = houndRequest({
         method: 'POST',
         endpoint: path,
@@ -230,7 +239,7 @@ export class MHCollection extends MHObject {
         }
       }).then(function(response){
         // fetch social for original passed in mhobjs
-        contents.forEach(v => v.fetchSocial(true));
+        contents.forEach(v => typeof v.fetchSocial === 'function' && v.fetchSocial(true));
         return response;
       }));
   }

@@ -61,8 +61,8 @@ export var houndRequest = function(args){
   // Set args.url via args.endpoint
   //  delete endpoint from args
   if( args.endpoint ){
-    args.url = 'https://stag-api.mediahound.com/' + args.endpoint;
-    //args.url = 'https://api.mediahound.com/' + args.endpoint;
+    //args.url = 'https://stag-api.mediahound.com/' + args.endpoint;
+    args.url = 'https://api.mediahound.com/' + args.endpoint;
     delete args.endpoint;
   }
 
@@ -104,7 +104,7 @@ export var houndRequest = function(args){
     return requestMap[args.url];
   }
 
-  log( 'bypassed requestMap', args.url);
+  log('bypassing requestMap for POST: ', args.url);
   // else POST request
   return promiseRequest(args)
     .then(responseThen);
