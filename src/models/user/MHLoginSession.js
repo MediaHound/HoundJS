@@ -96,7 +96,7 @@ export class MHLoginSession {
 
   /**
    * True or False, is there an open session?
-   * @property {boolean}
+   * @property {Boolean}
    * @static
    */
   static get openSession(){
@@ -104,16 +104,16 @@ export class MHLoginSession {
   }
 
   /**
-   *
-   * @returns {boolean|null}
+   * If the currently logged in user has gone through the onboarding process.
+   * @property {Boolean|null} onboarded
    */
   static get onboarded(){
     return onboarded;
   }
 
   /**
-   *
-   * @returns {boolean|null}
+   * If the currently logged in user has access to the application.
+   * @property {Boolean|null} access
    */
   static get access(){
     return access;
@@ -123,7 +123,7 @@ export class MHLoginSession {
    * When A user updates their profile picture this will fire the event
    * and update the currentUser property.
    * @param  {MHUser} updatedUser
-   * @returns {boolean}
+   * @returns {Boolean}
    */
   static updatedProfileImage(updatedUser){
     console.log('updatedUploadImage: ', updatedUser);
@@ -139,6 +139,20 @@ export class MHLoginSession {
     window.dispatchEvent(MHSessionUserProfileImageChange.create(loggedInUser));
 
     return true;
+  }
+
+  static completedOnboarding(){
+    var path = MHUser.rootEndpoint + '/onboard';
+    return houndRequest({
+        method            : 'POST',
+        endpoint          : path,
+        'withCredentials' : true
+      })
+      .then(loginMap => {
+        access    = loginMap.access;
+        onboarded = loginMap.onboarded;
+        return loginMap;
+      });
   }
 
   /**
@@ -171,12 +185,12 @@ export class MHLoginSession {
         withCredentials : true,
         headers: {}
       })
-      .then(function(loginMap){
+      .then(loginMap => {
         access    = loginMap.access;
         onboarded = loginMap.onboarded;
         return MHObject.fetchByMhid(loginMap.mhid);
       })
-      .then(function(mhUserLoggedIn){
+      .then(mhUserLoggedIn => {
         loggedInUser = mhUserLoggedIn;
         //mhidLRU.putMHObj(loggedInUser);
 
@@ -221,7 +235,6 @@ export class MHLoginSession {
   }
 
   /**
-   * TODO set endpoint when avaliable
    * @returns {Promise} - resolves to the user that has an open session.
    */
   static validateOpenSession(){

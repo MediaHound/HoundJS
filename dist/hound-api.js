@@ -4387,6 +4387,18 @@ System.register("models/user/MHLoginSession", [], function() {
       window.dispatchEvent(MHSessionUserProfileImageChange.create(loggedInUser));
       return true;
     },
+    completedOnboarding: function() {
+      var path = MHUser.rootEndpoint + '/onboard';
+      return houndRequest({
+        method: 'POST',
+        endpoint: path,
+        'withCredentials': true
+      }).then((function(loginMap) {
+        access = loginMap.access;
+        onboarded = loginMap.onboarded;
+        return loginMap;
+      }));
+    },
     login: function(username, password) {
       if (typeof username !== 'string' && !(username instanceof String)) {
         throw new TypeError('Username not of type string in MHUser.login');
@@ -4405,17 +4417,17 @@ System.register("models/user/MHLoginSession", [], function() {
         'data': data,
         withCredentials: true,
         headers: {}
-      }).then(function(loginMap) {
+      }).then((function(loginMap) {
         access = loginMap.access;
         onboarded = loginMap.onboarded;
         return MHObject.fetchByMhid(loginMap.mhid);
-      }).then(function(mhUserLoggedIn) {
+      })).then((function(mhUserLoggedIn) {
         loggedInUser = mhUserLoggedIn;
         loggedInUser.fetchOwnedCollections();
         loggedInUser.fetchSocial();
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         return loggedInUser;
-      }).catch(function(error) {
+      })).catch(function(error) {
         throw new Error('Problem during login: ' + error.error.message, 'MHLoginSession.js');
       });
     },
