@@ -6425,7 +6425,7 @@ System.register("search/quick-search", [], function() {
       quickSearch,
       search = {},
       extraEncode = houndRequest.extraEncode,
-      types = ['all', 'movie', 'song', 'album', 'tvseries', 'book', 'person', 'collection', 'user'],
+      types = ['all', 'movie', 'song', 'album', 'tvseries', 'book', 'game', 'person', 'collection', 'user'],
       makeEndpoint = function(searchType, query) {
         return 'search/' + searchType + '/find/' + extraEncode(query) + '/autocomplete';
       },
