@@ -20,6 +20,10 @@ import { log } from './debug-helpers';
  * head(oldest) <--older.-- entry <--older.-- tail(newest)
  *
  */
+
+
+var keymapSym = Symbol('keymap');
+
 export class MHCache {
   constructor(limit){
     // Current size of the cache.
@@ -27,7 +31,7 @@ export class MHCache {
 
     // Maximum number of items this cache can hold.
     this.limit = limit;
-    this._keymap = {};
+    this[keymapSym] = {};
   }
 
   /**
@@ -41,7 +45,7 @@ export class MHCache {
     var entry = {key:key, value:value, altId:altId};
     log('putting: ', entry);
     // Note: No protection against replacing, and thus orphan entries. By design.
-    this._keymap[key] = entry;
+    this[keymapSym][key] = entry;
     if (this.tail) {
       // link previous tail to the new tail (entry)
       this.tail.newer = entry;
@@ -99,7 +103,7 @@ export class MHCache {
       // entry being returned:
       entry.newer = entry.older = undefined;
       // delete is slow, but we need to do this to avoid uncontrollable growth:
-      delete this._keymap[entry.key];
+      delete this[keymapSym][entry.key];
     }
     return entry;
   }
@@ -111,7 +115,7 @@ export class MHCache {
    */
   get(key){
     // First, find our cache entry
-    var entry = this._keymap[key];
+    var entry = this[keymapSym][key];
     if (entry === undefined) { return; } // Not cached. Sorry.
     // As <key> was found in the cache, register it as being requested recently
     if (entry === this.tail) {
@@ -164,7 +168,7 @@ export class MHCache {
    * Returns the entry associated with <key> if found, or undefined if not found.
    */
   find(key){
-    return this._keymap[key];
+    return this[keymapSym][key];
   }
 
   /**
@@ -172,7 +176,7 @@ export class MHCache {
    * Returns true if key exists.
    */
   has(key){
-    return this._keymap[key] !== undefined;
+    return this[keymapSym][key] !== undefined;
   }
 
   /**
@@ -196,9 +200,9 @@ export class MHCache {
    * found.
    */
   remove(key){
-    var entry = this._keymap[key];
+    var entry = this[keymapSym][key];
     if (!entry) { return; }
-    delete this._keymap[entry.key];
+    delete this[keymapSym][entry.key];
     if (entry.newer && entry.older) {
       // link the older entry with the newer entry
       entry.older.newer = entry.newer;
@@ -226,7 +230,7 @@ export class MHCache {
     // This should be safe, as we never expose strong references to the outside
     this.head = this.tail = undefined;
     this.size = 0;
-    this._keymap = {};
+    this[keymapSym] = {};
   }
 
   /**
@@ -234,7 +238,7 @@ export class MHCache {
    * Array returned is in an arbitrary order
    */
   keys(){
-    return Object.keys(this._keymap);
+    return Object.keys(this[keymapSym]);
   }
 
   forEach(callback){

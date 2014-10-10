@@ -1,4 +1,3 @@
-/*global System, Promise */
 
 import { log } from '../internal/debug-helpers';
 
@@ -16,6 +15,12 @@ export var mhidLRU = new MHCache(1000);
 if( window.location.host === 'local.mediahound.com:2014' ){
   window.mhidLRU = mhidLRU;
 }
+
+// Symbols for Element hiding
+var lastSocialRequestIdSym = Symbol('lastSocialRequestId'),
+    socialSym = Symbol('social');
+
+// TODO: editable primary and secondary image properties using Symbols
 
 // Base MediaHound Object
 export class MHObject {
@@ -98,12 +103,6 @@ export class MHObject {
         writable:     false,
         value:        createdDate
       },
-      'social':{
-        configurable: false,
-        enumerable:   true,
-        writable:     true,
-        value:        null
-      },
       // Promises
       'feedPagedRequest':{
         configurable: false,
@@ -112,6 +111,17 @@ export class MHObject {
         value:        null
       }
     });
+  }
+
+  /** @property {MHSocial} social */
+  get social(){
+    return this[socialSym] || null;
+  }
+  set social(newSocial){
+    if( newSocial instanceof MHSocial ){
+      this[socialSym] = newSocial;
+    }
+    return this.social;
   }
 
   /**
@@ -183,7 +193,9 @@ export class MHObject {
         var prefix = MHObject.getPrefixFromMhid(args.mhid),
             mhObj = new childrenConstructors[prefix](args);
 
-        if( mhidLRU.has(mhObj.mhid) ){
+        if( prefix === 'mhimg' ){
+          // bypass cache
+        } else {
           mhidLRU.putMHObj(mhObj);
         }
 
@@ -397,12 +409,8 @@ export class MHObject {
         endpoint: mhClass.rootEndpoint + '/' + mhid
       })
       .then(function(response){
-        //return MHObject.create(response);
-        // or ?
-        var mhObj = new mhClass(response);
-        log('fetched: ', mhObj.name);
-        mhidLRU.putMHObj(mhObj);
-        return mhObj;
+        log('fetched: ', response.name);
+        return MHObject.create(response);
       });
   }
 
@@ -495,7 +503,7 @@ export class MHObject {
     var path = this.subendpoint('social'),
         self = this;
 
-    if( !force && this.social !== null ){
+    if( !force && this.social instanceof MHSocial ){
       return Promise.resolve(this.social);
     }
 
@@ -579,7 +587,7 @@ export class MHObject {
     this.social = this.social.newWithAction(action);
 
     // Save request id to check against later
-    this._lastSocialRequestId = requestId;
+    this[lastSocialRequestIdSym] = requestId;
 
     // Return promise to new Social as returned from the server
     return houndRequest({
@@ -590,7 +598,7 @@ export class MHObject {
         var newSocial = new MHSocial(socialRes);
 
         // only update if this is the last request returning
-        if( this._lastSocialRequestId === requestId ){
+        if( this[lastSocialRequestIdSym] === requestId ){
           self.social = newSocial;
         }
 

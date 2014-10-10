@@ -192,7 +192,6 @@ export class MHLoginSession {
       })
       .then(mhUserLoggedIn => {
         loggedInUser = mhUserLoggedIn;
-        //mhidLRU.putMHObj(loggedInUser);
 
         // pre-fetch some user content
         loggedInUser.fetchOwnedCollections();

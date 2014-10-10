@@ -32,6 +32,7 @@ var uglifyOpts = {
 };
 
 // Traceur command line commands
+var traceurOpts = '--symbols';
 var traceurCmds = {
   dir: {
     'amd'         : paths.traceur + ' --dir ' + paths.src + ' ' + paths.build + '/amd --modules=amd',

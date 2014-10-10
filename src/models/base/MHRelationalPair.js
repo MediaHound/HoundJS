@@ -1,5 +1,5 @@
 
-import { MHObject } from './MHObject';
+import { MHObject, mhidLRU } from './MHObject';
 
 // MediaHound Relational Pair Object
 export class MHRelationalPair {
@@ -26,7 +26,7 @@ export class MHRelationalPair {
     }
 
     var position  = args.position || null,
-        object    = MHObject.create(args.object) || null;
+        object    = mhidLRU.has(args.object.mhid) ? mhidLRU.get(args.object.mhid) : MHObject.create(args.object) || null;
 
     if( position == null || object == null ){
       throw new TypeError('Either position or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);

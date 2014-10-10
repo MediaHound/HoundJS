@@ -391,9 +391,7 @@ export class MHUser extends MHObject {
         withCredentials : true
       })
       .then(function(response){
-        var mhUsr = new MHUser(response);
-        mhidLRU.putMHObj(mhUsr);
-        return mhUsr;
+        return MHObject.create(response);
       });
   }
 

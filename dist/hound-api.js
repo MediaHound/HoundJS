@@ -2788,10 +2788,11 @@ System.register("models/internal/MHCache", [], function() {
   "use strict";
   var __moduleName = "models/internal/MHCache";
   var log = System.get("models/internal/debug-helpers").log;
+  var keymapSym = Symbol('keymap');
   var MHCache = function MHCache(limit) {
     this.size = 0;
     this.limit = limit;
-    this._keymap = {};
+    this[keymapSym] = {};
   };
   ($traceurRuntime.createClass)(MHCache, {
     put: function(key, value, altId) {
@@ -2801,7 +2802,7 @@ System.register("models/internal/MHCache", [], function() {
         altId: altId
       };
       log('putting: ', entry);
-      this._keymap[key] = entry;
+      this[keymapSym][key] = entry;
       if (this.tail) {
         this.tail.newer = entry;
         entry.older = this.tail;
@@ -2833,12 +2834,12 @@ System.register("models/internal/MHCache", [], function() {
           this.head = undefined;
         }
         entry.newer = entry.older = undefined;
-        delete this._keymap[entry.key];
+        delete this[keymapSym][entry.key];
       }
       return entry;
     },
     get: function(key) {
-      var entry = this._keymap[key];
+      var entry = this[keymapSym][key];
       if (entry === undefined) {
         return;
       }
@@ -2875,10 +2876,10 @@ System.register("models/internal/MHCache", [], function() {
       }
     },
     find: function(key) {
-      return this._keymap[key];
+      return this[keymapSym][key];
     },
     has: function(key) {
-      return this._keymap[key] !== undefined;
+      return this[keymapSym][key] !== undefined;
     },
     hasAltId: function(altId) {
       var entry = this.tail;
@@ -2891,11 +2892,11 @@ System.register("models/internal/MHCache", [], function() {
       return false;
     },
     remove: function(key) {
-      var entry = this._keymap[key];
+      var entry = this[keymapSym][key];
       if (!entry) {
         return;
       }
-      delete this._keymap[entry.key];
+      delete this[keymapSym][entry.key];
       if (entry.newer && entry.older) {
         entry.older.newer = entry.newer;
         entry.newer.older = entry.older;
@@ -2914,10 +2915,10 @@ System.register("models/internal/MHCache", [], function() {
     removeAll: function() {
       this.head = this.tail = undefined;
       this.size = 0;
-      this._keymap = {};
+      this[keymapSym] = {};
     },
     keys: function() {
-      return Object.keys(this._keymap);
+      return Object.keys(this[keymapSym]);
     },
     forEach: function(callback) {
       if (typeof callback === 'function') {
@@ -3118,6 +3119,8 @@ System.register("models/base/MHObject", [], function() {
   if (window.location.host === 'local.mediahound.com:2014') {
     window.mhidLRU = mhidLRU;
   }
+  var lastSocialRequestIdSym = Symbol('lastSocialRequestId'),
+      socialSym = Symbol('social');
   var MHObject = function MHObject(args) {
     args = $MHObject.parseArgs(args);
     if (typeof args.mhid === 'undefined' || args.mhid === null) {
@@ -3169,12 +3172,6 @@ System.register("models/base/MHObject", [], function() {
         writable: false,
         value: createdDate
       },
-      'social': {
-        configurable: false,
-        enumerable: true,
-        writable: true,
-        value: null
-      },
       'feedPagedRequest': {
         configurable: false,
         enumerable: false,
@@ -3185,6 +3182,15 @@ System.register("models/base/MHObject", [], function() {
   };
   var $MHObject = MHObject;
   ($traceurRuntime.createClass)(MHObject, {
+    get social() {
+      return this[socialSym] || null;
+    },
+    set social(newSocial) {
+      if (newSocial instanceof MHSocial) {
+        this[socialSym] = newSocial;
+      }
+      return this.social;
+    },
     get displayableType() {
       return '';
     },
@@ -3216,7 +3222,7 @@ System.register("models/base/MHObject", [], function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
       var path = this.subendpoint('social'),
           self = this;
-      if (!force && this.social !== null) {
+      if (!force && this.social instanceof MHSocial) {
         return Promise.resolve(this.social);
       }
       return houndRequest({
@@ -3267,13 +3273,13 @@ System.register("models/base/MHObject", [], function() {
           requestId = Math.random(),
           self = this;
       this.social = this.social.newWithAction(action);
-      this._lastSocialRequestId = requestId;
+      this[lastSocialRequestIdSym] = requestId;
       return houndRequest({
         method: 'POST',
         endpoint: path
       }).then((function(socialRes) {
         var newSocial = new MHSocial(socialRes);
-        if ($__14._lastSocialRequestId === requestId) {
+        if ($__14[lastSocialRequestIdSym] === requestId) {
           self.social = newSocial;
         }
         return newSocial;
@@ -3322,7 +3328,7 @@ System.register("models/base/MHObject", [], function() {
         if (typeof args.mhid !== 'undefined' && args.mhid !== null) {
           var prefix = $MHObject.getPrefixFromMhid(args.mhid),
               mhObj = new childrenConstructors[prefix](args);
-          if (mhidLRU.has(mhObj.mhid)) {
+          if (prefix === 'mhimg') {} else {
             mhidLRU.putMHObj(mhObj);
           }
           return mhObj;
@@ -3418,10 +3424,7 @@ System.register("models/base/MHObject", [], function() {
         method: 'GET',
         endpoint: mhClass.rootEndpoint + '/' + mhid
       }).then(function(response) {
-        var mhObj = new mhClass(response);
-        log('fetched: ', mhObj.name);
-        mhidLRU.putMHObj(mhObj);
-        return mhObj;
+        return $MHObject.create(response);
       });
     },
     fetchByMhids: function(mhids) {
@@ -3937,7 +3940,9 @@ System.register("models/base/MHEmbeddedRelation", [], function() {
 System.register("models/base/MHRelationalPair", [], function() {
   "use strict";
   var __moduleName = "models/base/MHRelationalPair";
-  var MHObject = System.get("models/base/MHObject").MHObject;
+  var $__42 = System.get("models/base/MHObject"),
+      MHObject = $__42.MHObject,
+      mhidLRU = $__42.mhidLRU;
   var MHRelationalPair = function MHRelationalPair(args) {
     if (args == null) {
       throw new TypeError('Args is null or undefined in MHRelationalPair constructor.');
@@ -3950,7 +3955,7 @@ System.register("models/base/MHRelationalPair", [], function() {
       }
     }
     var position = args.position || null,
-        object = MHObject.create(args.object) || null;
+        object = mhidLRU.has(args.object.mhid) ? mhidLRU.get(args.object.mhid) : MHObject.create(args.object) || null;
     if (position == null || object == null) {
       throw new TypeError('Either position or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);
     }
@@ -4294,9 +4299,7 @@ System.register("models/user/MHUser", [], function() {
         endpoint: path,
         withCredentials: true
       }).then(function(response) {
-        var mhUsr = new $MHUser(response);
-        mhidLRU.putMHObj(mhUsr);
-        return mhUsr;
+        return MHObject.create(response);
       });
     },
     fetchFeaturedUsers: function() {

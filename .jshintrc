@@ -81,5 +81,5 @@
     "white"         : false,    // true: Check against strict whitespace and indentation rules
 
     // Custom Globals
-    "globals"       : {}       // additional predefined global variables
+    "predef"       : [ "Symbol", "System", "Promise" ]       // additional predefined global variables
 }
