@@ -1,4 +1,3 @@
-/*global MHSourceMedium */
 
 import { MHSourceMedium } from './MHSourceMedium';
 
@@ -48,41 +47,55 @@ export class MHSourceModel {
       }
     }
 
-    var name = args.name || null,
-        consumable = (typeof args.consumable === 'boolean') ? args.consumable : null,
-        mediums = args.mediums || null;
+    var name        = args.name     || null,
+        logo        = args.logo     || null, // not created as MHImage because it has a different set of possible properties
+        mediums     = args.mediums  || null,
+        consumable  = (typeof args.consumable === 'boolean') ? args.consumable : null;
 
+    // Required Props Check
     if( name === null || consumable === null || mediums === null ){
       console.warn('errored args: ', args);
       throw new TypeError('Name, consumable, or mediums null in args in MHSourceModel');
     }
 
+    // Transform logo.url
+    if( typeof logo.url === 'string' ){
+      logo.url = logo.url.replace(/http:|https:/gi, '');
+    }
+
+    // Create MHSourceMediums
     mediums = mediums.map( v => new MHSourceMedium(v, this) );
 
     Object.defineProperties(this, {
       'name':{
-        configurable:false,
-        enumerable:true,
-        writable:false,
-        value:name
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        name
       },
       'consumable':{
-        configurable:false,
-        enumerable:true,
-        writable:false,
-        value:consumable
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        consumable
       },
       'mediums':{
-        configurable:false,
-        enumerable:true,
-        writable:false,
-        value:mediums
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        mediums
+      },
+      'logo':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        logo
       },
       'content':{
-        configurable:false,
-        enumerable:true,
-        writable:false,
-        value:content
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        content
       }
     });
   }

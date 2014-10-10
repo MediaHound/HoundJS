@@ -3424,6 +3424,7 @@ System.register("models/base/MHObject", [], function() {
         method: 'GET',
         endpoint: mhClass.rootEndpoint + '/' + mhid
       }).then(function(response) {
+        log('fetched: ', response.name);
         return $MHObject.create(response);
       });
     },
@@ -5009,7 +5010,7 @@ System.register("models/image/MHImage", [], function() {
   var MHImage = function MHImage(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHImage.prototype, "constructor", [args]);
-    var url = args.url || null,
+    var url = (typeof args.url === 'string') ? args.url.replace(/http:|https:/gi, '') : null,
         width = args.width || null,
         height = args.height || null,
         isDefault = (typeof args.isDefault === 'boolean') ? args.isDefault : null;
@@ -5238,11 +5239,15 @@ System.register("models/source/MHSourceModel", [], function() {
       }
     }
     var name = args.name || null,
-        consumable = (typeof args.consumable === 'boolean') ? args.consumable : null,
-        mediums = args.mediums || null;
+        logo = args.logo || null,
+        mediums = args.mediums || null,
+        consumable = (typeof args.consumable === 'boolean') ? args.consumable : null;
     if (name === null || consumable === null || mediums === null) {
       console.warn('errored args: ', args);
       throw new TypeError('Name, consumable, or mediums null in args in MHSourceModel');
+    }
+    if (typeof logo.url === 'string') {
+      logo.url = logo.url.replace(/http:|https:/gi, '');
     }
     mediums = mediums.map((function(v) {
       return new MHSourceMedium(v, $__87);
@@ -5265,6 +5270,12 @@ System.register("models/source/MHSourceModel", [], function() {
         enumerable: true,
         writable: false,
         value: mediums
+      },
+      'logo': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: logo
       },
       'content': {
         configurable: false,
