@@ -39,7 +39,6 @@ export class MHPeriodicalSeries extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhpds'; }
-  get displayableType()   { return 'Periodical Series'; }
 
   // Could change as needed
   toString(){

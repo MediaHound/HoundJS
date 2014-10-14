@@ -216,15 +216,6 @@ export class MHObject {
     return null;
   }
 
-/*
- * Probably not needed, left for testing reasons
- */
-/*
-  static get childConstructors(){
-    return childrenConstructors;
-  }
-*/
-
   /***
    * Register Child Constructors
    *
@@ -235,7 +226,13 @@ export class MHObject {
    *
    */
   static registerConstructor(mhClass){
-    //log('registering constructor: ' + mhClass.name);
+    // Add class name if function.name is not native
+    if( mhClass.name === undefined ){
+      mhClass.name = mhClass.toString().match(/function (MH[A-Za-z]*)\(args\)/)[1];
+      log('shimmed mhClass.name to: ' + mhClass.name);
+    }
+    log('registering constructor: ' + mhClass.name);
+
     var prefix = mhClass.mhidPrefix;
     if( typeof prefix !== 'undefined' && prefix !== null && !(prefix in childrenConstructors) ){
       Object.defineProperty(childrenConstructors, prefix, {
@@ -303,6 +300,7 @@ export class MHObject {
     return null;
   }
 
+  // Type Checking
   // TODO: Update these checks for cross site scripting cases
   // case:
   //    instanceof only works if the object being checked was created
@@ -310,33 +308,59 @@ export class MHObject {
   static isMedia(toCheck){
     return toCheck instanceof System.get('../../src/models/media/MHMedia').MHMedia;
   }
+  get isMedia(){
+    return MHObject.isMedia(this);
+  }
+
   static isContributor(toCheck){
     return toCheck instanceof System.get('../../src/models/contributor/MHContributor').MHContributor;
   }
+  get isContributor(){
+    return MHObject.isContributor(this);
+  }
+
   static isAction(toCheck){
     return toCheck instanceof System.get('../../src/models/action/MHAction').MHAction;
   }
+  get isAction(){
+    return MHObject.isAction(this);
+  }
+
   static isUser(toCheck){
     return toCheck instanceof System.get('../../src/models/user/MHUser').MHUser;
   }
+  get isUser(){
+    return MHObject.isUser(this);
+  }
+
   static isCollection(toCheck){
     return toCheck instanceof System.get('../../src/models/collection/MHCollection').MHCollection;
   }
+  get isCollection(){
+    return MHObject.isCollection(this);
+  }
+
   static isImage(toCheck){
     return toCheck instanceof System.get('../../src/models/image/MHImage').MHImage;
   }
+  get isImage(){
+    return MHObject.isImage(this);
+  }
+
   static isTrait(toCheck){
     return toCheck instanceof System.get('../../src/models/trait/MHTrait').MHTrait;
   }
+  get isTrait(){
+    return MHObject.isTrait(this);
+  }
 
   /**
-   * mhObj.displayableType
-   *
-   * @return { String } - view ready display name of MediaHound Type
-   *
-   * Note: Overridden at child class level
+   * This uses the function.name feature which is shimmed if it doesn't exist during the child constructor registration process.
+   * @property {string} className - the string class name for this object, ie: MHUser, MHMovie, MHPost, etc.
    */
-  get displayableType(){ return ''; }
+  get className(){
+    return this.constructor.name;
+  }
 
   /**
    * mhObj.isEqualToMHObject(otherObj)
@@ -369,7 +393,7 @@ export class MHObject {
 
   // TODO Could change as needed
   toString(){
-    return (this.displayableType ? this.displayableType : this.constructor.name) + " with mhid " + this.mhid + " and name " + this.name;
+    return this.className + " with mhid " + this.mhid + " and name " + this.name;
   }
 
   /**

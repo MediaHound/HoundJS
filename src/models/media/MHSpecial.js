@@ -40,7 +40,6 @@ export class MHSpecial extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhspc'; }
-  get displayableType()   { return 'Special'; }
 
   // Could change as needed
   toString(){

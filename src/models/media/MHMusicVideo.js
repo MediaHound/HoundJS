@@ -35,7 +35,6 @@ export class MHMusicVideo extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhmsv'; }
-  get displayableType()   { return 'Music Video'; }
 
   // Could change as needed
   toString(){

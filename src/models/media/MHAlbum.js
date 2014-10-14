@@ -36,8 +36,6 @@ export class MHAlbum extends MHMedia {
 
   /** @property {string} mhidPrefix - the mhid prefix for this class **/
   static get mhidPrefix() { return 'mhalb'; }
-  get displayableType()   { return 'Album'; }
-
 
   // Could change as needed
   toString(){

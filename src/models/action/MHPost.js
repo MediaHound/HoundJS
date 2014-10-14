@@ -42,7 +42,6 @@ export class MHPost extends MHAction {
   }
 
   static get mhidPrefix() { return 'mhpst'; }
-  get displayableType()   { return 'Posted'; }
 
   // Could change as needed
   toString(){

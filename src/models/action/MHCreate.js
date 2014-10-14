@@ -41,7 +41,6 @@ export class MHCreate extends MHAction {
   }
 
   static get mhidPrefix() { return 'mhcrt'; }
-  get displayableType()   { return 'Created'; }
 
   // Could change as needed
   toString(){

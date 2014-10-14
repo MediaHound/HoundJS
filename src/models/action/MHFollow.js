@@ -41,7 +41,6 @@ export class MHFollow extends MHAction {
   }
 
   static get mhidPrefix() { return 'mhflw'; }
-  get displayableType()   { return 'Followed'; }
 
   // Could change as needed
   toString(){

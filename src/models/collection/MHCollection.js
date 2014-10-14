@@ -127,9 +127,6 @@ export class MHCollection extends MHObject {
   /** @property {string} - the prefix for MHCollection mhids */
   static get mhidPrefix() { return 'mhcol'; }
 
-  /** @property {string} - a view friendly name for the MHCollection class */
-  get displayableType() { return 'Collection'; }
-
   /**
    * @property {string} - the api endpoint for the MHCollection class
    * @static

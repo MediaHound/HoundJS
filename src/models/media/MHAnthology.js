@@ -39,7 +39,6 @@ export class MHAnthology extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhath'; }
-  get displayableType()   { return 'Anthology'; }
 
   // Could change as needed
   toString(){

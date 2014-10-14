@@ -39,7 +39,6 @@ export class MHComicBookSeries extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhcbs'; }
-  get displayableType()   { return 'Comic Book Series'; }
 
   // Could change as needed
   toString(){

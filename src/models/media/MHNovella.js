@@ -39,7 +39,6 @@ export class MHNovella extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhnov'; }
-  get displayableType()   { return 'Novella'; }
 
   // Could change as needed
   toString(){

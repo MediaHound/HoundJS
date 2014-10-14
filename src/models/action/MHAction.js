@@ -64,8 +64,6 @@ export class MHAction extends MHObject {
     });
   }
 
-  //get displayableType(){ return ''; }
-
   static get rootEndpoint(){ return 'graph/action'; }
 
   // Could change as needed

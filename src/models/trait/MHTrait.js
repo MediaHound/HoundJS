@@ -33,7 +33,6 @@ export class MHTrait extends MHObject {
   }
 
   static get mhidPrefix() { return 'mhtrt'; }
-  get displayableType()   { return 'Trait'; }
 
   // Could change as needed
   toString(){

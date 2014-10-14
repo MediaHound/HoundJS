@@ -118,8 +118,6 @@ export class MHMedia extends MHObject {
     });
   }
 
-  //get displayableType(){ return ''; }
-
   /*
    * MHMedia.rootEndpoint
    *

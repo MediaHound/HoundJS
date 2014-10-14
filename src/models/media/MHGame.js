@@ -35,7 +35,6 @@ export class MHGame extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhgam'; }
-  get displayableType()   { return 'Game'; }
 
   // Could change as needed
   toString(){

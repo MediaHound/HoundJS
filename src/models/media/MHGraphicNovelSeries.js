@@ -39,7 +39,6 @@ export class MHGraphicNovelSeries extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhgns'; }
-  get displayableType()   { return 'Graphic Novel Series'; }
 
   // Could change as needed
   toString(){

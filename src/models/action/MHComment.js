@@ -42,7 +42,6 @@ export class MHComment extends MHAction {
   }
 
   static get mhidPrefix() { return 'mhcmt'; }
-  get displayableType()   { return 'Commented'; }
 
   // Could change as needed
   toString(){

@@ -41,7 +41,6 @@ export class MHAdd extends MHAction {
   }
 
   static get mhidPrefix() { return 'mhadd'; }
-  get displayableType()   { return 'Added'; }
 
   // Could change as needed
   toString(){

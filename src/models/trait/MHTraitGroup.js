@@ -32,7 +32,6 @@ export class MHTraitGroup extends MHObject {
   }
 
   static get mhidPrefix() { return 'mhtrg'; }
-  get displayableType()   { return 'Trait Group'; }
 
   // Could change as needed
   toString(){

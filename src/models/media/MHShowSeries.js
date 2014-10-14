@@ -35,7 +35,6 @@ export class MHShowSeries extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhsss'; }
-  get displayableType()   { return 'TV Series'; }
 
   // Could change as needed
   toString(){

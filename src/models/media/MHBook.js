@@ -35,7 +35,6 @@ export class MHBook extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhbok'; }
-  get displayableType()   { return 'Book'; }
 
   // Could change as needed
   toString(){

@@ -39,7 +39,6 @@ export class MHPeriodical extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhpdc'; }
-  get displayableType()   { return 'Periodical'; }
 
   // Could change as needed
   toString(){

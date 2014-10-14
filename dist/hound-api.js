@@ -3191,8 +3191,29 @@ System.register("models/base/MHObject", [], function() {
       }
       return this.social;
     },
-    get displayableType() {
-      return '';
+    get isMedia() {
+      return $MHObject.isMedia(this);
+    },
+    get isContributor() {
+      return $MHObject.isContributor(this);
+    },
+    get isAction() {
+      return $MHObject.isAction(this);
+    },
+    get isUser() {
+      return $MHObject.isUser(this);
+    },
+    get isCollection() {
+      return $MHObject.isCollection(this);
+    },
+    get isImage() {
+      return $MHObject.isImage(this);
+    },
+    get isTrait() {
+      return $MHObject.isTrait(this);
+    },
+    get className() {
+      return this.constructor.name;
     },
     isEqualToMHObject: function(otherObj) {
       if (otherObj && otherObj.mhid) {
@@ -3207,7 +3228,7 @@ System.register("models/base/MHObject", [], function() {
       return false;
     },
     toString: function() {
-      return (this.displayableType ? this.displayableType : this.constructor.name) + " with mhid " + this.mhid + " and name " + this.name;
+      return this.className + " with mhid " + this.mhid + " and name " + this.name;
     },
     get endpoint() {
       return this.constructor.rootEndpoint + '/' + this.mhid;
@@ -3348,6 +3369,11 @@ System.register("models/base/MHObject", [], function() {
       return null;
     },
     registerConstructor: function(mhClass) {
+      if (mhClass.name === undefined) {
+        mhClass.name = mhClass.toString().match(/function (MH[A-Za-z]*)\(args\)/)[1];
+        log('shimmed mhClass.name to: ' + mhClass.name);
+      }
+      log('registering constructor: ' + mhClass.name);
       var prefix = mhClass.mhidPrefix;
       if (typeof prefix !== 'undefined' && prefix !== null && !(prefix in childrenConstructors)) {
         Object.defineProperty(childrenConstructors, prefix, {
@@ -3631,14 +3657,9 @@ System.register("models/action/MHAdd", [], function() {
     $traceurRuntime.superCall(this, $MHAdd.prototype, "constructor", [args]);
   };
   var $MHAdd = MHAdd;
-  ($traceurRuntime.createClass)(MHAdd, {
-    get displayableType() {
-      return 'Added';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHAdd, {toString: function() {
       return $traceurRuntime.superCall(this, $MHAdd.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhadd';
     }}, MHAction);
   (function() {
@@ -3660,9 +3681,6 @@ System.register("models/action/MHComment", [], function() {
   };
   var $MHComment = MHComment;
   ($traceurRuntime.createClass)(MHComment, {
-    get displayableType() {
-      return 'Commented';
-    },
     toString: function() {
       return $traceurRuntime.superCall(this, $MHComment.prototype, "toString", []);
     },
@@ -3708,14 +3726,9 @@ System.register("models/action/MHCreate", [], function() {
     $traceurRuntime.superCall(this, $MHCreate.prototype, "constructor", [args]);
   };
   var $MHCreate = MHCreate;
-  ($traceurRuntime.createClass)(MHCreate, {
-    get displayableType() {
-      return 'Created';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHCreate, {toString: function() {
       return $traceurRuntime.superCall(this, $MHCreate.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhcrt';
     }}, MHAction);
   (function() {
@@ -3735,14 +3748,9 @@ System.register("models/action/MHFollow", [], function() {
     $traceurRuntime.superCall(this, $MHFollow.prototype, "constructor", [args]);
   };
   var $MHFollow = MHFollow;
-  ($traceurRuntime.createClass)(MHFollow, {
-    get displayableType() {
-      return 'Followed';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHFollow, {toString: function() {
       return $traceurRuntime.superCall(this, $MHFollow.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhflw';
     }}, MHAction);
   (function() {
@@ -3762,14 +3770,9 @@ System.register("models/action/MHLike", [], function() {
     $traceurRuntime.superCall(this, $MHLike.prototype, "constructor", [args]);
   };
   var $MHLike = MHLike;
-  ($traceurRuntime.createClass)(MHLike, {
-    get displayableType() {
-      return 'Liked';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHLike, {toString: function() {
       return $traceurRuntime.superCall(this, $MHLike.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhlke';
     }}, MHAction);
   (function() {
@@ -3790,14 +3793,9 @@ System.register("models/action/MHPost", [], function() {
     $traceurRuntime.superCall(this, $MHPost.prototype, "constructor", [args]);
   };
   var $MHPost = MHPost;
-  ($traceurRuntime.createClass)(MHPost, {
-    get displayableType() {
-      return 'Posted';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHPost, {toString: function() {
       return $traceurRuntime.superCall(this, $MHPost.prototype, "toString", []);
-    }
-  }, {
+    }}, {
     get mhidPrefix() {
       return 'mhpst';
     },
@@ -4081,9 +4079,6 @@ System.register("models/user/MHUser", [], function() {
   };
   var $MHUser = MHUser;
   ($traceurRuntime.createClass)(MHUser, {
-    get displayableType() {
-      return 'User';
-    },
     get isCurrentUser() {
       var currentUser = System.get('models/user/MHLoginSession').MHLoginSession.currentUser;
       return this.isEqualToMHObject(currentUser);
@@ -4557,9 +4552,6 @@ System.register("models/collection/MHCollection", [], function() {
           return 'none';
       }
       return '';
-    },
-    get displayableType() {
-      return 'Collection';
     },
     toString: function() {
       return $traceurRuntime.superCall(this, $MHCollection.prototype, "toString", []) + ' and description ' + this.description;
@@ -5506,14 +5498,9 @@ System.register("models/media/MHAlbum", [], function() {
     $traceurRuntime.superCall(this, $MHAlbum.prototype, "constructor", [args]);
   };
   var $MHAlbum = MHAlbum;
-  ($traceurRuntime.createClass)(MHAlbum, {
-    get displayableType() {
-      return 'Album';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHAlbum, {toString: function() {
       return $traceurRuntime.superCall(this, $MHAlbum.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhalb';
     }}, MHMedia);
   (function() {
@@ -5533,14 +5520,9 @@ System.register("models/media/MHAlbumSeries", [], function() {
     $traceurRuntime.superCall(this, $MHAlbumSeries.prototype, "constructor", [args]);
   };
   var $MHAlbumSeries = MHAlbumSeries;
-  ($traceurRuntime.createClass)(MHAlbumSeries, {
-    get displayableType() {
-      return 'Album Series';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHAlbumSeries, {toString: function() {
       return $traceurRuntime.superCall(this, $MHAlbumSeries.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhals';
     }}, MHMedia);
   (function() {
@@ -5560,14 +5542,9 @@ System.register("models/media/MHAnthology", [], function() {
     $traceurRuntime.superCall(this, $MHAnthology.prototype, "constructor", [args]);
   };
   var $MHAnthology = MHAnthology;
-  ($traceurRuntime.createClass)(MHAnthology, {
-    get displayableType() {
-      return 'Anthology';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHAnthology, {toString: function() {
       return $traceurRuntime.superCall(this, $MHAnthology.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhath';
     }}, MHMedia);
   (function() {
@@ -5587,14 +5564,9 @@ System.register("models/media/MHBook", [], function() {
     $traceurRuntime.superCall(this, $MHBook.prototype, "constructor", [args]);
   };
   var $MHBook = MHBook;
-  ($traceurRuntime.createClass)(MHBook, {
-    get displayableType() {
-      return 'Book';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHBook, {toString: function() {
       return $traceurRuntime.superCall(this, $MHBook.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhbok';
     }}, MHMedia);
   (function() {
@@ -5614,14 +5586,9 @@ System.register("models/media/MHBookSeries", [], function() {
     $traceurRuntime.superCall(this, $MHBookSeries.prototype, "constructor", [args]);
   };
   var $MHBookSeries = MHBookSeries;
-  ($traceurRuntime.createClass)(MHBookSeries, {
-    get displayableType() {
-      return 'Book Series';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHBookSeries, {toString: function() {
       return $traceurRuntime.superCall(this, $MHBookSeries.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhbks';
     }}, MHMedia);
   (function() {
@@ -5641,14 +5608,9 @@ System.register("models/media/MHComicBook", [], function() {
     $traceurRuntime.superCall(this, $MHComicBook.prototype, "constructor", [args]);
   };
   var $MHComicBook = MHComicBook;
-  ($traceurRuntime.createClass)(MHComicBook, {
-    get displayableType() {
-      return 'Comic Book';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHComicBook, {toString: function() {
       return $traceurRuntime.superCall(this, $MHComicBook.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhcbk';
     }}, MHMedia);
   (function() {
@@ -5668,14 +5630,9 @@ System.register("models/media/MHComicBookSeries", [], function() {
     $traceurRuntime.superCall(this, $MHComicBookSeries.prototype, "constructor", [args]);
   };
   var $MHComicBookSeries = MHComicBookSeries;
-  ($traceurRuntime.createClass)(MHComicBookSeries, {
-    get displayableType() {
-      return 'Comic Book Series';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHComicBookSeries, {toString: function() {
       return $traceurRuntime.superCall(this, $MHComicBookSeries.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhcbs';
     }}, MHMedia);
   (function() {
@@ -5695,14 +5652,9 @@ System.register("models/media/MHGame", [], function() {
     $traceurRuntime.superCall(this, $MHGame.prototype, "constructor", [args]);
   };
   var $MHGame = MHGame;
-  ($traceurRuntime.createClass)(MHGame, {
-    get displayableType() {
-      return 'Game';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHGame, {toString: function() {
       return $traceurRuntime.superCall(this, $MHGame.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhgam';
     }}, MHMedia);
   (function() {
@@ -5722,14 +5674,9 @@ System.register("models/media/MHGameSeries", [], function() {
     $traceurRuntime.superCall(this, $MHGameSeries.prototype, "constructor", [args]);
   };
   var $MHGameSeries = MHGameSeries;
-  ($traceurRuntime.createClass)(MHGameSeries, {
-    get displayableType() {
-      return 'Game Series';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHGameSeries, {toString: function() {
       return $traceurRuntime.superCall(this, $MHGameSeries.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhgms';
     }}, MHMedia);
   (function() {
@@ -5749,14 +5696,9 @@ System.register("models/media/MHGraphicNovel", [], function() {
     $traceurRuntime.superCall(this, $MHGraphicNovel.prototype, "constructor", [args]);
   };
   var $MHGraphicNovel = MHGraphicNovel;
-  ($traceurRuntime.createClass)(MHGraphicNovel, {
-    get displayableType() {
-      return 'Graphic Novel';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHGraphicNovel, {toString: function() {
       return $traceurRuntime.superCall(this, $MHGraphicNovel.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhgnl';
     }}, MHMedia);
   (function() {
@@ -5776,14 +5718,9 @@ System.register("models/media/MHGraphicNovelSeries", [], function() {
     $traceurRuntime.superCall(this, $MHGraphicNovelSeries.prototype, "constructor", [args]);
   };
   var $MHGraphicNovelSeries = MHGraphicNovelSeries;
-  ($traceurRuntime.createClass)(MHGraphicNovelSeries, {
-    get displayableType() {
-      return 'Graphic Novel Series';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHGraphicNovelSeries, {toString: function() {
       return $traceurRuntime.superCall(this, $MHGraphicNovelSeries.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhgns';
     }}, MHMedia);
   (function() {
@@ -5803,14 +5740,9 @@ System.register("models/media/MHMovie", [], function() {
     $traceurRuntime.superCall(this, $MHMovie.prototype, "constructor", [args]);
   };
   var $MHMovie = MHMovie;
-  ($traceurRuntime.createClass)(MHMovie, {
-    get displayableType() {
-      return 'Movie';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHMovie, {toString: function() {
       return $traceurRuntime.superCall(this, $MHMovie.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhmov';
     }}, MHMedia);
   (function() {
@@ -5830,14 +5762,9 @@ System.register("models/media/MHMovieSeries", [], function() {
     $traceurRuntime.superCall(this, $MHMovieSeries.prototype, "constructor", [args]);
   };
   var $MHMovieSeries = MHMovieSeries;
-  ($traceurRuntime.createClass)(MHMovieSeries, {
-    get displayableType() {
-      return 'Movie Series';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHMovieSeries, {toString: function() {
       return $traceurRuntime.superCall(this, $MHMovieSeries.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhmvs';
     }}, MHMedia);
   (function() {
@@ -5857,14 +5784,9 @@ System.register("models/media/MHMusicVideo", [], function() {
     $traceurRuntime.superCall(this, $MHMusicVideo.prototype, "constructor", [args]);
   };
   var $MHMusicVideo = MHMusicVideo;
-  ($traceurRuntime.createClass)(MHMusicVideo, {
-    get displayableType() {
-      return 'Music Video';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHMusicVideo, {toString: function() {
       return $traceurRuntime.superCall(this, $MHMusicVideo.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhmsv';
     }}, MHMedia);
   (function() {
@@ -5884,14 +5806,9 @@ System.register("models/media/MHNovella", [], function() {
     $traceurRuntime.superCall(this, $MHNovella.prototype, "constructor", [args]);
   };
   var $MHNovella = MHNovella;
-  ($traceurRuntime.createClass)(MHNovella, {
-    get displayableType() {
-      return 'Novella';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHNovella, {toString: function() {
       return $traceurRuntime.superCall(this, $MHNovella.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhnov';
     }}, MHMedia);
   (function() {
@@ -5911,14 +5828,9 @@ System.register("models/media/MHPeriodical", [], function() {
     $traceurRuntime.superCall(this, $MHPeriodical.prototype, "constructor", [args]);
   };
   var $MHPeriodical = MHPeriodical;
-  ($traceurRuntime.createClass)(MHPeriodical, {
-    get displayableType() {
-      return 'Periodical';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHPeriodical, {toString: function() {
       return $traceurRuntime.superCall(this, $MHPeriodical.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhpdc';
     }}, MHMedia);
   (function() {
@@ -5938,14 +5850,9 @@ System.register("models/media/MHPeriodicalSeries", [], function() {
     $traceurRuntime.superCall(this, $MHPeriodicalSeries.prototype, "constructor", [args]);
   };
   var $MHPeriodicalSeries = MHPeriodicalSeries;
-  ($traceurRuntime.createClass)(MHPeriodicalSeries, {
-    get displayableType() {
-      return 'Periodical Series';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHPeriodicalSeries, {toString: function() {
       return $traceurRuntime.superCall(this, $MHPeriodicalSeries.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhpds';
     }}, MHMedia);
   (function() {
@@ -5965,14 +5872,9 @@ System.register("models/media/MHShowEpisode", [], function() {
     $traceurRuntime.superCall(this, $MHShowEpisode.prototype, "constructor", [args]);
   };
   var $MHShowEpisode = MHShowEpisode;
-  ($traceurRuntime.createClass)(MHShowEpisode, {
-    get displayableType() {
-      return 'TV Episode';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHShowEpisode, {toString: function() {
       return $traceurRuntime.superCall(this, $MHShowEpisode.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhsep';
     }}, MHMedia);
   (function() {
@@ -5992,14 +5894,9 @@ System.register("models/media/MHShowSeason", [], function() {
     $traceurRuntime.superCall(this, $MHShowSeason.prototype, "constructor", [args]);
   };
   var $MHShowSeason = MHShowSeason;
-  ($traceurRuntime.createClass)(MHShowSeason, {
-    get displayableType() {
-      return 'TV Season';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHShowSeason, {toString: function() {
       return $traceurRuntime.superCall(this, $MHShowSeason.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhssn';
     }}, MHMedia);
   (function() {
@@ -6019,14 +5916,9 @@ System.register("models/media/MHShowSeries", [], function() {
     $traceurRuntime.superCall(this, $MHShowSeries.prototype, "constructor", [args]);
   };
   var $MHShowSeries = MHShowSeries;
-  ($traceurRuntime.createClass)(MHShowSeries, {
-    get displayableType() {
-      return 'TV Series';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHShowSeries, {toString: function() {
       return $traceurRuntime.superCall(this, $MHShowSeries.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhsss';
     }}, MHMedia);
   (function() {
@@ -6046,14 +5938,9 @@ System.register("models/media/MHSong", [], function() {
     $traceurRuntime.superCall(this, $MHSong.prototype, "constructor", [args]);
   };
   var $MHSong = MHSong;
-  ($traceurRuntime.createClass)(MHSong, {
-    get displayableType() {
-      return 'Song';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHSong, {toString: function() {
       return $traceurRuntime.superCall(this, $MHSong.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhsng';
     }}, MHMedia);
   (function() {
@@ -6073,14 +5960,9 @@ System.register("models/media/MHSpecial", [], function() {
     $traceurRuntime.superCall(this, $MHSpecial.prototype, "constructor", [args]);
   };
   var $MHSpecial = MHSpecial;
-  ($traceurRuntime.createClass)(MHSpecial, {
-    get displayableType() {
-      return 'Special';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHSpecial, {toString: function() {
       return $traceurRuntime.superCall(this, $MHSpecial.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhspc';
     }}, MHMedia);
   (function() {
@@ -6100,14 +5982,9 @@ System.register("models/media/MHSpecialSeries", [], function() {
     $traceurRuntime.superCall(this, $MHSpecialSeries.prototype, "constructor", [args]);
   };
   var $MHSpecialSeries = MHSpecialSeries;
-  ($traceurRuntime.createClass)(MHSpecialSeries, {
-    get displayableType() {
-      return 'Special Series';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHSpecialSeries, {toString: function() {
       return $traceurRuntime.superCall(this, $MHSpecialSeries.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhsps';
     }}, MHMedia);
   (function() {
@@ -6127,14 +6004,9 @@ System.register("models/media/MHTrailer", [], function() {
     $traceurRuntime.superCall(this, $MHTrailer.prototype, "constructor", [args]);
   };
   var $MHTrailer = MHTrailer;
-  ($traceurRuntime.createClass)(MHTrailer, {
-    get displayableType() {
-      return 'Trailer';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHTrailer, {toString: function() {
       return $traceurRuntime.superCall(this, $MHTrailer.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhtrl';
     }}, MHMedia);
   (function() {
@@ -6153,14 +6025,9 @@ System.register("models/trait/MHTrait", [], function() {
     $traceurRuntime.superCall(this, $MHTrait.prototype, "constructor", [args]);
   };
   var $MHTrait = MHTrait;
-  ($traceurRuntime.createClass)(MHTrait, {
-    get displayableType() {
-      return 'Trait';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHTrait, {toString: function() {
       return $traceurRuntime.superCall(this, $MHTrait.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhtrt';
     }}, MHObject);
   (function() {
@@ -6179,14 +6046,9 @@ System.register("models/trait/MHTraitGroup", [], function() {
     $traceurRuntime.superCall(this, $MHTraitGroup.prototype, "constructor", [args]);
   };
   var $MHTraitGroup = MHTraitGroup;
-  ($traceurRuntime.createClass)(MHTraitGroup, {
-    get displayableType() {
-      return 'Trait Group';
-    },
-    toString: function() {
+  ($traceurRuntime.createClass)(MHTraitGroup, {toString: function() {
       return $traceurRuntime.superCall(this, $MHTraitGroup.prototype, "toString", []);
-    }
-  }, {get mhidPrefix() {
+    }}, {get mhidPrefix() {
       return 'mhtrg';
     }}, MHObject);
   (function() {

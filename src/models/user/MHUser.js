@@ -115,7 +115,6 @@ export class MHUser extends MHObject {
   }
 
   static get mhidPrefix() { return 'mhusr'; }
-  get displayableType()   { return 'User';  }
 
   get isCurrentUser(){
     var currentUser = System.get('../../src/models/user/MHLoginSession').MHLoginSession.currentUser;

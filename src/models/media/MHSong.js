@@ -41,7 +41,6 @@ export class MHSong extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhsng'; }
-  get displayableType()   { return 'Song'; }
 
   // Could change as needed
   toString(){

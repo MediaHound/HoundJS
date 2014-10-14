@@ -39,7 +39,6 @@ export class MHTrailer extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhtrl'; }
-  get displayableType()   { return 'Trailer'; }
 
   // Could change as needed
   toString(){

@@ -41,7 +41,6 @@ export class MHLike extends MHAction {
   }
 
   static get mhidPrefix() { return 'mhlke'; }
-  get displayableType()   { return 'Liked'; }
 
   // Could change as needed
   toString(){

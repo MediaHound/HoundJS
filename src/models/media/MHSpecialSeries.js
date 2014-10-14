@@ -39,7 +39,6 @@ export class MHSpecialSeries extends MHMedia {
   }
 
   static get mhidPrefix() { return 'mhsps'; }
-  get displayableType()   { return 'Special Series'; }
 
   // Could change as needed
   toString(){
