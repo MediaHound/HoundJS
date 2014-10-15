@@ -97,8 +97,11 @@ export var houndRequest = function(args){
     }
 
     requestMap[args.url] = promiseRequest(args)
-      .then(responseThen)
-      .then(res => { delete requestMap[args.url]; return res; });
+      .then(
+        res => { delete requestMap[args.url]; return res; },
+        err => { delete requestMap[args.url]; throw err; }
+      )
+      .then(responseThen);
       //.then(x => {log(x); return x;});
 
     return requestMap[args.url];

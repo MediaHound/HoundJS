@@ -383,14 +383,18 @@ export class MHUser extends MHObject {
       return Promise.resolve(mhidLRU.getByAltId(username));
     }
 
-    var path = MHUser.rootEndpoint + '/lookup/' + username;
+    var path = MHUser.rootEndpoint + '/lookup/' + username,
+        newObj;
+
     return houndRequest({
         method          : 'GET',
         endpoint        : path,
         withCredentials : true
       })
       .then(function(response){
-        return MHObject.create(response);
+        newObj = MHObject.create(response);
+        mhidLRU.putMHObj(newObj);
+        return newObj;
       });
   }
 

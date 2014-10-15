@@ -265,8 +265,7 @@ export class MHCollection extends MHObject {
    * @returns {Promise} - a promise that resolves to the list of content for this MHCollection
    */
   fetchContent(view='ids', force=false){
-    var path = this.subendpoint('content'),
-        self = this;
+    var path = this.subendpoint('content');
 
     if( force || this.contentPromise === null ){
       this.contentPromise = houndRequest({
@@ -277,7 +276,9 @@ export class MHCollection extends MHObject {
         .then(res => {
           if( view === 'full' && Array.isArray(res) ){
             res = MHObject.create(res);
+            log('fetched content of collection: ', res);
             // if collections become ordered MHRelationalPairs like media content:
+            //  also update logic in return statement below
             //res = MHRelationalPair.createFromArray(res).sort( (a,b) => a.position - b.position );
           }
           return res;
@@ -287,11 +288,11 @@ export class MHCollection extends MHObject {
     return this.contentPromise.then(res => {
       // if asking for 'full' but cached is 'ids'
       if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
-        return self.fetchContent(view, true);
+        return Promise.all(MHObject.fetchByMhids(res));
       }
       // if asking for 'ids' but cached is 'full'
-      if( view === 'ids' && Array.isArray(res) && res[0].object instanceof MHObject ){
-        return res.map(pair => pair.object.mhid);
+      if( view === 'ids' && Array.isArray(res) && res[0] instanceof MHObject ){
+        return res.map(obj => obj.mhid);
       }
       return res;
     });

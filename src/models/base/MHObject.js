@@ -162,7 +162,7 @@ export class MHObject {
       throw (args.error || args.Error || args);
     }
     // Shound never get here
-    console.warn('how did you do that? args: ', args);
+    //console.warn('how did you do that? args: ', args);
     throw new TypeError('Args was object without mhid!', 'MHObject.js', 189);
   }
 
@@ -187,17 +187,25 @@ export class MHObject {
       });
     }
     try{
-      // TODO if parseArgs error return args?
       args = MHObject.parseArgs(args);
       if( typeof args.mhid !== 'undefined' && args.mhid !== null ){
+        // check cache
+        if( mhidLRU.has(args.mhid) ){
+          log('getting from cache in create: ' + args.mhid);
+          return mhidLRU.get(args.mhid);
+        }
+
         var prefix = MHObject.getPrefixFromMhid(args.mhid),
             mhObj = new childrenConstructors[prefix](args);
 
+        /*
         if( prefix === 'mhimg' ){
           // bypass cache
         } else {
+          log('putting from create');
           mhidLRU.putMHObj(mhObj);
         }
+        */
 
         return mhObj;
       }
@@ -421,7 +429,8 @@ export class MHObject {
     }
 
     var prefix  = MHObject.getPrefixFromMhid(mhid),
-        mhClass = childrenConstructors[prefix];
+        mhClass = childrenConstructors[prefix],
+        newObj;
 
     if( prefix === null || typeof mhClass === 'undefined' ){
       console.warn('Error in MHObject.fetchByMhid', mhid, prefix, mhClass);
@@ -433,8 +442,14 @@ export class MHObject {
         endpoint: mhClass.rootEndpoint + '/' + mhid
       })
       .then(function(response){
-        log('fetched: ', response.name);
-        return MHObject.create(response);
+        newObj = MHObject.create(response);
+        log('fetched: ', newObj);
+        if( prefix === 'mhimg' ){
+          // bypass cache
+        } else {
+          mhidLRU.putMHObj(newObj);
+        }
+        return newObj;
       });
   }
 
@@ -605,10 +620,13 @@ export class MHObject {
 
     var path      = this.subendpoint(action),
         requestId = Math.random(),
+        original  = this.social,
         self      = this;
 
     // Expected outcome
-    this.social = this.social.newWithAction(action);
+    if( this.social instanceof MHSocial ){
+      this.social = this.social.newWithAction(action);
+    }
 
     // Save request id to check against later
     this[lastSocialRequestIdSym] = requestId;
@@ -628,6 +646,12 @@ export class MHObject {
 
         //log('in take action response, newSocial: ', newSocial);
         return newSocial;
+      })
+      .catch(err => {
+        if( this[lastSocialRequestIdSym] === requestId ){
+          self.social = original;
+        }
+        throw err;
       });
   }
 }
