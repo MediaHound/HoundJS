@@ -4581,7 +4581,6 @@ System.register("models/collection/MHCollection", [], function() {
         default:
           return 'none';
       }
-      return '';
     },
     toString: function() {
       return $traceurRuntime.superCall(this, $MHCollection.prototype, "toString", []) + ' and description ' + this.description;
@@ -4716,7 +4715,9 @@ System.register("models/collection/MHCollection", [], function() {
       return houndRequest({
         method: 'GET',
         endpoint: path
-      });
+      }).then((function(res) {
+        return Promise.all(MHObject.fetchByMhids(res));
+      }));
     }
   }, MHObject);
   (function() {

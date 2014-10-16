@@ -121,7 +121,6 @@ export class MHCollection extends MHObject {
       default:
         return 'none';
     }
-    return '';
   }
 
   /** @property {string} - the prefix for MHCollection mhids */
@@ -322,6 +321,9 @@ export class MHCollection extends MHObject {
     return houndRequest({
         method: 'GET',
         endpoint: path
+      })
+      .then( res => {
+        return Promise.all(MHObject.fetchByMhids(res));
       });
   }
 
