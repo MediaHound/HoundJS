@@ -1,5 +1,5 @@
 
-import { MHObject/*, mhidLRU*/ } from '../base/MHObject';
+import { MHObject, mhidLRU } from '../base/MHObject';
 import { MHUser } from './MHUser';
 
 import { houndRequest } from '../../request/hound-request';
@@ -225,6 +225,8 @@ export class MHLoginSession {
 
     // Dispatch logout event
     window.dispatchEvent(MHUserLogoutEvent.create(loggedInUser));
+
+    mhidLRU.removeAll();
 
     return Promise.resolve(loggedInUser)
       .then(function(mhUser){

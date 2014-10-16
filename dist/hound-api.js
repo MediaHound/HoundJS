@@ -4345,7 +4345,9 @@ System.register("models/user/MHUser", [], function() {
 System.register("models/user/MHLoginSession", [], function() {
   "use strict";
   var __moduleName = "models/user/MHLoginSession";
-  var MHObject = System.get("models/base/MHObject").MHObject;
+  var $__0 = System.get("models/base/MHObject"),
+      MHObject = $__0.MHObject,
+      mhidLRU = $__0.mhidLRU;
   var MHUser = System.get("models/user/MHUser").MHUser;
   var houndRequest = System.get("request/hound-request").houndRequest;
   var makeEvent = function(name, options) {
@@ -4468,6 +4470,7 @@ System.register("models/user/MHLoginSession", [], function() {
         document.cookie = newValue;
       });
       window.dispatchEvent(MHUserLogoutEvent.create(loggedInUser));
+      mhidLRU.removeAll();
       return Promise.resolve(loggedInUser).then(function(mhUser) {
         loggedInUser = null;
         return mhUser;
@@ -4613,9 +4616,7 @@ System.register("models/collection/MHCollection", [], function() {
           })).filter((function(v) {
             return v !== null;
           }));
-      if (this.hasOwnProperty('mixlistPromise')) {
-        this.mixlistPromise = null;
-      }
+      this.mixlistPromise = null;
       log('content array to be submitted: ', mhids);
       return (this.contentPromise = houndRequest({
         method: 'POST',

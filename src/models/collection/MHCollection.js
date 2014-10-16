@@ -83,7 +83,7 @@ export class MHCollection extends MHObject {
         writable:     false,
         value:        description
       },
-      //TODO add promises
+      // Promises
       'ownersPromise': {
         configurable: false,
         enumerable:   true,
@@ -223,9 +223,7 @@ export class MHCollection extends MHObject {
         }).filter(v => v !== null);
 
     // invalidate mixlistPromise
-    if( this.hasOwnProperty('mixlistPromise') ){
-      this.mixlistPromise = null;
-    }
+    this.mixlistPromise = null;
 
     log('content array to be submitted: ', mhids);
     return (this.contentPromise = houndRequest({
