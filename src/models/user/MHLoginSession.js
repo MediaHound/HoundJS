@@ -1,4 +1,6 @@
 
+import { log } from '../internal/debug-helpers';
+
 import { MHObject, mhidLRU } from '../base/MHObject';
 import { MHUser } from './MHUser';
 

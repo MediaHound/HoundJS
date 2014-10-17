@@ -4353,9 +4353,10 @@ System.register("models/user/MHUser", [], function() {
 System.register("models/user/MHLoginSession", [], function() {
   "use strict";
   var __moduleName = "models/user/MHLoginSession";
-  var $__0 = System.get("models/base/MHObject"),
-      MHObject = $__0.MHObject,
-      mhidLRU = $__0.mhidLRU;
+  var log = System.get("models/internal/debug-helpers").log;
+  var $__1 = System.get("models/base/MHObject"),
+      MHObject = $__1.MHObject,
+      mhidLRU = $__1.mhidLRU;
   var MHUser = System.get("models/user/MHUser").MHUser;
   var houndRequest = System.get("request/hound-request").houndRequest;
   var makeEvent = function(name, options) {
