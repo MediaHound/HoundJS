@@ -126,7 +126,7 @@ export class MHLoginSession {
    * @returns {Boolean}
    */
   static updatedProfileImage(updatedUser){
-    console.log('updatedUploadImage: ', updatedUser);
+    log('updatedUploadImage: ', updatedUser);
     if( !(updatedUser instanceof MHUser) || !updatedUser.hasMhid(loggedInUser.mhid) ){
       throw new TypeError("Updated Profile Image must be passed a new MHUser Object that equals the currently logged in user");
     }
@@ -194,8 +194,8 @@ export class MHLoginSession {
         loggedInUser = mhUserLoggedIn;
 
         // pre-fetch some user content
-        loggedInUser.fetchOwnedCollections();
-        loggedInUser.fetchSocial();
+        //loggedInUser.fetchOwnedCollections();
+        //loggedInUser.fetchSocial();
 
         // dispatch logged in event: 'mhUserLogin'
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
@@ -214,13 +214,19 @@ export class MHLoginSession {
    * @returns {Promise} - resolves to user that just logged out.
    */
   static logout(){
-    var currentCookieKeys = document.cookie.split('; ').map(v => v.split('=')[0]);
+    var currentCookies = document.cookie.split(';').map(c => {
+      var keyVal = c.split('=');
+      return {
+        'key':  keyVal[0],
+        'value':keyVal[1]
+      };
+    });
 
-    // Clear cookies for now, with oAuth will invalidate token?
-    currentCookieKeys.filter(v => (v === 'AWSELB' || v === 'JSESSIONID')).forEach(function(v){
-      var newValue = v + '=""; expires=' + (new Date(0)).toGMTString() + '; domain=mediahound.com';
-      //console.log('current cookie: ', v, newValue);
-      document.cookie = newValue;
+    currentCookies.forEach(cookie => {
+      if( cookie.key === 'JSESSIONID' ){
+        var expires = (new Date(0)).toGMTString();
+        document.cookie = `${cookie.key}=${cookie.value}; expires=${expires}; domain=.mediahound.com`;
+      }
     });
 
     // Dispatch logout event
@@ -230,7 +236,9 @@ export class MHLoginSession {
 
     return Promise.resolve(loggedInUser)
       .then(function(mhUser){
-        loggedInUser = null;
+        loggedInUser  = null;
+        access        = false;
+        onboarded     = false;
         return mhUser;
       });
   }

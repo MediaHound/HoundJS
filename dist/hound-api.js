@@ -4413,7 +4413,7 @@ System.register("models/user/MHLoginSession", [], function() {
       return access;
     },
     updatedProfileImage: function(updatedUser) {
-      console.log('updatedUploadImage: ', updatedUser);
+      log('updatedUploadImage: ', updatedUser);
       if (!(updatedUser instanceof MHUser) || !updatedUser.hasMhid(loggedInUser.mhid)) {
         throw new TypeError("Updated Profile Image must be passed a new MHUser Object that equals the currently logged in user");
       }
@@ -4459,8 +4459,6 @@ System.register("models/user/MHLoginSession", [], function() {
         return MHObject.fetchByMhid(loginMap.mhid);
       })).then((function(mhUserLoggedIn) {
         loggedInUser = mhUserLoggedIn;
-        loggedInUser.fetchOwnedCollections();
-        loggedInUser.fetchSocial();
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         return loggedInUser;
       })).catch(function(error) {
@@ -4468,19 +4466,25 @@ System.register("models/user/MHLoginSession", [], function() {
       });
     },
     logout: function() {
-      var currentCookieKeys = document.cookie.split('; ').map((function(v) {
-        return v.split('=')[0];
+      var currentCookies = document.cookie.split(';').map((function(c) {
+        var keyVal = c.split('=');
+        return {
+          'key': keyVal[0],
+          'value': keyVal[1]
+        };
       }));
-      currentCookieKeys.filter((function(v) {
-        return (v === 'AWSELB' || v === 'JSESSIONID');
-      })).forEach(function(v) {
-        var newValue = v + '=""; expires=' + (new Date(0)).toGMTString() + '; domain=mediahound.com';
-        document.cookie = newValue;
-      });
+      currentCookies.forEach((function(cookie) {
+        if (cookie.key === 'JSESSIONID') {
+          var expires = (new Date(0)).toGMTString();
+          document.cookie = (cookie.key + "=" + cookie.value + "; expires=" + expires + "; domain=.mediahound.com");
+        }
+      }));
       window.dispatchEvent(MHUserLogoutEvent.create(loggedInUser));
       mhidLRU.removeAll();
       return Promise.resolve(loggedInUser).then(function(mhUser) {
         loggedInUser = null;
+        access = false;
+        onboarded = false;
         return mhUser;
       });
     },
