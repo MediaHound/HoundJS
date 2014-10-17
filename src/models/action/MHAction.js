@@ -60,6 +60,25 @@ export class MHAction extends MHObject {
         enumerable:   true,
         writable:     false,
         value:        primaryMention
+      },
+      // Promises
+      'ownersPromise':{
+        configurable: false,
+        enumerable:   false,
+        writable:     true,
+        value:        null
+      },
+      'commentsPromise':{
+        configurable: false,
+        enumerable:   false,
+        writable:     true,
+        value:        null
+      },
+      'mentionsPromise':{
+        configurable: false,
+        enumerable:   false,
+        writable:     true,
+        value:        null
       }
     });
   }
@@ -117,28 +136,17 @@ export class MHAction extends MHObject {
    *
    */
   fetchOwners(force=false){
-    var path = this.subendpoint('owners'),
-        ownersPromise = this.ownersPromise || null;
+    var path = this.subendpoint('owners');
 
     if( force || this.ownersPromise === null ){
-      ownersPromise = houndRequest({
+      this.ownersPromise = houndRequest({
           method: 'GET',
           endpoint: path
         })
+        .catch( (err => { this.ownersPromise = null; throw err; }).bind(this) )
         .then(function(res){
           return Promise.all(res.map(m => MHObject.fetchByMhid(m)));
         });
-
-      if( this.ownersPromise ){
-        this.ownersPromise = ownersPromise;
-      } else {
-        Object.defineProperty(this, 'ownersPromise', {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: ownersPromise
-        });
-      }
     }
 
     return this.ownersPromise;
@@ -148,28 +156,18 @@ export class MHAction extends MHObject {
    *
    */
   fetchComments(force=false){
-    var path = this.subendpoint('comments'),
-        commentsPromise = this.commentsPromise || null;
+    var path = this.subendpoint('comments');
 
     if( force || this.commentsPromise === null ){
-      commentsPromise = houndRequest({
+      this.commentsPromise = houndRequest({
           method: 'GET',
           endpoint: path
         })
+        .catch( (err => {this.commentsPromise = null; throw err; }).bind(this) )
         .then(function(res){
           return Promise.all(res.map(m => MHObject.fetchByMhid(m)));
         });
 
-      if( this.commentsPromise ){
-        this.commentsPromise = commentsPromise;
-      } else {
-        Object.defineProperty(this, 'commentsPromise', {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: commentsPromise
-        });
-      }
     }
 
     return this.commentsPromise;
@@ -179,28 +177,18 @@ export class MHAction extends MHObject {
    *
    */
   fetchMentions(force=false){
-    var path = this.subendpoint('mentions'),
-        mentionsPromise = this.mentionsPromise || null;
+    var path = this.subendpoint('mentions');
 
     if( force || this.mentionsPromise === null ){
-      mentionsPromise = houndRequest({
+      this.mentionsPromise = houndRequest({
           method: 'GET',
           endpoint: path
         })
+        .catch( (err => { this.mentionsPromise = null; throw err; }).bind(this) )
         .then(function(res){
           return Promise.all(res.map(m => MHObject.fetchByMhid(m)));
         });
 
-      if( this.mentionsPromise ){
-        this.mentionsPromise = mentionsPromise;
-      } else {
-        Object.defineProperty(this, 'mentionsPromise', {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: mentionsPromise
-        });
-      }
     }
 
     return this.mentionsPromise;

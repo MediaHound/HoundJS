@@ -142,9 +142,9 @@ export class MHMedia extends MHObject {
 
     if( force || this.collectionsPromise === null ){
       this.collectionsPromise = houndRequest({
-          method: 'GET',
-          endpoint: path
-        });
+          method    : 'GET',
+          endpoint  : path
+        }).catch( (err => { this.collectionsPromise = null; throw err; }).bind(this) );
     }
 
     return this.collectionsPromise;
@@ -163,6 +163,7 @@ export class MHMedia extends MHObject {
           endpoint: path,
           params: { view }
         })
+        .catch(err => { self.contentPromise = null; throw err; })
         .then(function(parsed){
           if( view === 'full' && Array.isArray(parsed) ){
             parsed = MHRelationalPair.createFromArray(parsed).sort( (a,b) => a.position - b.position );
@@ -201,6 +202,7 @@ export class MHMedia extends MHObject {
           method  : 'GET',
           endpoint: path
         })
+        .catch( err => { self.sourcesPromise = null; throw err; } )
         .then(function(parsed){
           return parsed.map( v => new MHSourceModel(v, self) );
         });
@@ -232,6 +234,7 @@ export class MHMedia extends MHObject {
             'view':view
           }
         })
+        .catch( (err => { this.contributorsPromise = null; throw err; }).bind(this) )
         .then(function(parsed){
           if( view === 'full' && Array.isArray(parsed) ){
             parsed = MHObject.create(parsed);
@@ -262,6 +265,7 @@ export class MHMedia extends MHObject {
             'excludeMinors': excludeMinors
           }
         })
+        .catch( (err => { this.charactersPromise = null; throw err; }).bind(this) )
         .then(function(parsed){
           if( view === 'full' && Array.isArray(parsed) ){
             parsed = MHObject.create(parsed);

@@ -94,6 +94,7 @@ export class MHContributor extends MHObject {
             'view':view
           }
         })
+        .catch( (err => { this.mediaPromise = null; throw err; }).bind(this) )
         .then(function(parsed){
           if( view === 'full' && Array.isArray(parsed) ){
             parsed = MHObject.create(parsed);
@@ -119,6 +120,7 @@ export class MHContributor extends MHObject {
           method: 'GET',
           endpoint: path
         })
+        .catch( (err => { this.collectionsPromise = null; throw err; }).bind(this) )
         .then(function(ids){
           // TODO, remove? fix? view=full?
           return Promise.all(ids.map(v => MHObject.fetchByMhid(v)));

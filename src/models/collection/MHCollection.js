@@ -231,7 +231,9 @@ export class MHCollection extends MHObject {
         data: {
           'content': mhids
         }
-      }).then(function(response){
+      })
+      .catch( (err => { this.contentPromise = null; throw err; }).bind(this) )
+      .then(function(response){
         // fetch social for original passed in mhobjs
         contents.forEach(v => typeof v.fetchSocial === 'function' && v.fetchSocial(true));
         return response;
@@ -248,9 +250,9 @@ export class MHCollection extends MHObject {
 
     if( force || this.ownersPromise === null ){
       this.ownersPromise = houndRequest({
-          method: 'GET',
-          endpoint: path
-        });
+          method    : 'GET',
+          endpoint  : path
+        }).catch( (err => { this.ownersPromise = null; throw err; }).bind(this) );
     }
 
     return this.ownersPromise;
@@ -266,10 +268,11 @@ export class MHCollection extends MHObject {
 
     if( force || this.contentPromise === null ){
       this.contentPromise = houndRequest({
-          method: 'GET',
-          endpoint: path,
-          params: { view }
+          method    : 'GET',
+          endpoint  : path,
+          params    : { view }
         })
+        .catch( (err => { this.contentPromise = null; throw err; }).bind(this) )
         .then(res => {
           if( view === 'full' && Array.isArray(res) ){
             res = MHObject.create(res);
@@ -304,9 +307,9 @@ export class MHCollection extends MHObject {
 
     if( force || this.mixlistPromise === null ){
       this.mixlistPromise = houndRequest({
-          method: 'GET',
-          endpoint: path
-        });
+          method    : 'GET',
+          endpoint  : path
+        }).catch( (err => { this.mixlistPromise = null; throw err; }).bind(this) );
     }
 
     return this.mixlistPromise;
@@ -319,8 +322,8 @@ export class MHCollection extends MHObject {
   static fetchFeaturedCollections(){
     var path = MHCollection.rootEndpoint + '/featured';
     return houndRequest({
-        method: 'GET',
-        endpoint: path
+        method    : 'GET',
+        endpoint  : path
       })
       .then( res => {
         return Promise.all(MHObject.fetchByMhids(res));

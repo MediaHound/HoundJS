@@ -68,6 +68,7 @@ export class MHRealGroupContributor extends MHContributor {
             'view':view
           }
         })
+        .catch( (err => { this.charactersPromise = null; throw err; }).bind(this) )
         .then(function(parsed){
           if( view === 'full' && Array.isArray(parsed) ){
             parsed = MHObject.create(parsed);

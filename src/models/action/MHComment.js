@@ -38,7 +38,16 @@ export class MHComment extends MHAction {
     // Call Super Constructor
     super(args);
 
-    // No Unique Props
+    Object.defineProperties(this, {
+     // Promises
+     'parentPromise': {
+       configurable:  false,
+       enumerable:    false,
+       writable:      true,
+       value:         null
+     }
+    });
+
   }
 
   static get mhidPrefix() { return 'mhcmt'; }
@@ -52,25 +61,14 @@ export class MHComment extends MHAction {
    * TODO docJS
    */
   fetchParentAction(force=false){
-    var path = this.subendpoint('parent'),
-        parentPromise = this.parentPromise || null;
+    var path = this.subendpoint('parent');
 
-    if( force || parentPromise === null ){
-      parentPromise = houndRequest({
+    if( force || this.parentPromise === null ){
+      this.parentPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        });
+        }).catch( (err => { this.parentPromise = null; throw err; }).bind(this) );
 
-      if( this.hasOwnProperty('parentPromise') ){
-        this.parentPromise = parentPromise;
-      } else {
-        Object.defineProperty(this, 'parentPromise', {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: parentPromise
-        });
-      }
     }
 
     return this.parentPromise;

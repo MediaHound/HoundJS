@@ -3252,17 +3252,17 @@ System.register("models/base/MHObject", [], function() {
     },
     fetchSocial: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var path = this.subendpoint('social'),
-          self = this;
+      var $__5 = this;
+      var path = this.subendpoint('social');
       if (!force && this.social instanceof MHSocial) {
         return Promise.resolve(this.social);
       }
       return houndRequest({
         method: 'GET',
         endpoint: path
-      }).then((function(parsed) {
-        return (self.social = new MHSocial(parsed));
-      }));
+      }).then(((function(parsed) {
+        return $__5.social = new MHSocial(parsed);
+      })).bind(this));
     },
     fetchFeed: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
@@ -3546,6 +3546,24 @@ System.register("models/action/MHAction", [], function() {
         enumerable: true,
         writable: false,
         value: primaryMention
+      },
+      'ownersPromise': {
+        configurable: false,
+        enumerable: false,
+        writable: true,
+        value: null
+      },
+      'commentsPromise': {
+        configurable: false,
+        enumerable: false,
+        writable: true,
+        value: null
+      },
+      'mentionsPromise': {
+        configurable: false,
+        enumerable: false,
+        writable: true,
+        value: null
       }
     });
   };
@@ -3588,79 +3606,58 @@ System.register("models/action/MHAction", [], function() {
     },
     fetchOwners: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var path = this.subendpoint('owners'),
-          ownersPromise = this.ownersPromise || null;
+      var $__2 = this;
+      var path = this.subendpoint('owners');
       if (force || this.ownersPromise === null) {
-        ownersPromise = houndRequest({
+        this.ownersPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        }).then(function(res) {
+        }).catch(((function(err) {
+          $__2.ownersPromise = null;
+          throw err;
+        })).bind(this)).then(function(res) {
           return Promise.all(res.map((function(m) {
             return MHObject.fetchByMhid(m);
           })));
         });
-        if (this.ownersPromise) {
-          this.ownersPromise = ownersPromise;
-        } else {
-          Object.defineProperty(this, 'ownersPromise', {
-            configurable: false,
-            enumerable: false,
-            writable: true,
-            value: ownersPromise
-          });
-        }
       }
       return this.ownersPromise;
     },
     fetchComments: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var path = this.subendpoint('comments'),
-          commentsPromise = this.commentsPromise || null;
+      var $__2 = this;
+      var path = this.subendpoint('comments');
       if (force || this.commentsPromise === null) {
-        commentsPromise = houndRequest({
+        this.commentsPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        }).then(function(res) {
+        }).catch(((function(err) {
+          $__2.commentsPromise = null;
+          throw err;
+        })).bind(this)).then(function(res) {
           return Promise.all(res.map((function(m) {
             return MHObject.fetchByMhid(m);
           })));
         });
-        if (this.commentsPromise) {
-          this.commentsPromise = commentsPromise;
-        } else {
-          Object.defineProperty(this, 'commentsPromise', {
-            configurable: false,
-            enumerable: false,
-            writable: true,
-            value: commentsPromise
-          });
-        }
       }
       return this.commentsPromise;
     },
     fetchMentions: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var path = this.subendpoint('mentions'),
-          mentionsPromise = this.mentionsPromise || null;
+      var $__2 = this;
+      var path = this.subendpoint('mentions');
       if (force || this.mentionsPromise === null) {
-        mentionsPromise = houndRequest({
+        this.mentionsPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        }).then(function(res) {
+        }).catch(((function(err) {
+          $__2.mentionsPromise = null;
+          throw err;
+        })).bind(this)).then(function(res) {
           return Promise.all(res.map((function(m) {
             return MHObject.fetchByMhid(m);
           })));
         });
-        if (this.mentionsPromise) {
-          this.mentionsPromise = mentionsPromise;
-        } else {
-          Object.defineProperty(this, 'mentionsPromise', {
-            configurable: false,
-            enumerable: false,
-            writable: true,
-            value: mentionsPromise
-          });
-        }
       }
       return this.mentionsPromise;
     }
@@ -3702,6 +3699,12 @@ System.register("models/action/MHComment", [], function() {
   var MHComment = function MHComment(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHComment.prototype, "constructor", [args]);
+    Object.defineProperties(this, {'parentPromise': {
+        configurable: false,
+        enumerable: false,
+        writable: true,
+        value: null
+      }});
   };
   var $MHComment = MHComment;
   ($traceurRuntime.createClass)(MHComment, {
@@ -3710,23 +3713,16 @@ System.register("models/action/MHComment", [], function() {
     },
     fetchParentAction: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var path = this.subendpoint('parent'),
-          parentPromise = this.parentPromise || null;
-      if (force || parentPromise === null) {
-        parentPromise = houndRequest({
+      var $__3 = this;
+      var path = this.subendpoint('parent');
+      if (force || this.parentPromise === null) {
+        this.parentPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        });
-        if (this.hasOwnProperty('parentPromise')) {
-          this.parentPromise = parentPromise;
-        } else {
-          Object.defineProperty(this, 'parentPromise', {
-            configurable: false,
-            enumerable: false,
-            writable: true,
-            value: parentPromise
-          });
-        }
+        }).catch(((function(err) {
+          $__3.parentPromise = null;
+          throw err;
+        })).bind(this));
       }
       return this.parentPromise;
     }
@@ -4180,30 +4176,39 @@ System.register("models/user/MHUser", [], function() {
     },
     fetchOwnedCollections: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
+      var $__4 = this;
       var path = this.subendpoint('ownedCollections');
       if (force || this.ownedCollectionsPromise === null) {
         this.ownedCollectionsPromise = houndRequest({
           method: 'GET',
           endpoint: path,
           withCredentials: true
-        });
+        }).catch(((function(err) {
+          $__4.ownedCollectionsPromise = null;
+          throw err;
+        })).bind(this));
       }
       return this.ownedCollectionsPromise;
     },
     fetchFollowed: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
+      var $__4 = this;
       var path = this.subendpoint('following');
       if (force || this.followedPromise === null) {
         this.followedPromise = houndRequest({
           method: 'GET',
           endpoint: path,
           withCredentials: true
-        });
+        }).catch(((function(err) {
+          $__4.followedPromise = null;
+          throw err;
+        })).bind(this));
       }
       return this.followedPromise;
     },
     fetchFollowedCollections: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
+      var $__4 = this;
       var path = this.subendpoint('following');
       if (force || this.followedCollectionsPromise === null) {
         this.followedCollectionsPromise = houndRequest({
@@ -4211,7 +4216,10 @@ System.register("models/user/MHUser", [], function() {
           endpoint: path,
           withCredentials: true,
           params: {type: 'collection'}
-        });
+        }).catch(((function(err) {
+          $__4.followedCollectionsPromise = null;
+          throw err;
+        })).bind(this));
       }
       return this.followedCollectionsPromise;
     },
@@ -4598,6 +4606,7 @@ System.register("models/collection/MHCollection", [], function() {
       return this.changeContents(contents, 'remove');
     },
     changeContents: function(contents, sub) {
+      var $__4 = this;
       if (!Array.isArray(contents)) {
         throw new TypeError('Contents must be an array in changeContents');
       }
@@ -4621,7 +4630,10 @@ System.register("models/collection/MHCollection", [], function() {
         method: 'POST',
         endpoint: path,
         data: {'content': mhids}
-      }).then(function(response) {
+      }).catch(((function(err) {
+        $__4.contentPromise = null;
+        throw err;
+      })).bind(this)).then(function(response) {
         contents.forEach((function(v) {
           return typeof v.fetchSocial === 'function' && v.fetchSocial(true);
         }));
@@ -4630,25 +4642,33 @@ System.register("models/collection/MHCollection", [], function() {
     },
     fetchOwners: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
+      var $__4 = this;
       var path = this.subendpoint('owners');
       if (force || this.ownersPromise === null) {
         this.ownersPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        });
+        }).catch(((function(err) {
+          $__4.ownersPromise = null;
+          throw err;
+        })).bind(this));
       }
       return this.ownersPromise;
     },
     fetchContent: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
+      var $__4 = this;
       var path = this.subendpoint('content');
       if (force || this.contentPromise === null) {
         this.contentPromise = houndRequest({
           method: 'GET',
           endpoint: path,
           params: {view: view}
-        }).then((function(res) {
+        }).catch(((function(err) {
+          $__4.contentPromise = null;
+          throw err;
+        })).bind(this)).then((function(res) {
           if (view === 'full' && Array.isArray(res)) {
             res = MHObject.create(res);
             log('fetched content of collection: ', res);
@@ -4670,12 +4690,16 @@ System.register("models/collection/MHCollection", [], function() {
     },
     fetchMixlist: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
+      var $__4 = this;
       var path = this.subendpoint('mixlist');
       if (force || this.mixlistPromise === null) {
         this.mixlistPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        });
+        }).catch(((function(err) {
+          $__4.mixlistPromise = null;
+          throw err;
+        })).bind(this));
       }
       return this.mixlistPromise;
     }
@@ -4764,13 +4788,17 @@ System.register("models/contributor/MHContributor", [], function() {
     fetchMedia: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
+      var $__2 = this;
       var path = this.subendpoint('media');
       if (force || this.mediaPromise === null) {
         this.mediaPromise = houndRequest({
           method: 'GET',
           endpoint: path,
           params: {'view': view}
-        }).then(function(parsed) {
+        }).catch(((function(err) {
+          $__2.mediaPromise = null;
+          throw err;
+        })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
             parsed = MHObject.create(parsed);
           }
@@ -4781,12 +4809,16 @@ System.register("models/contributor/MHContributor", [], function() {
     },
     fetchCollections: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
+      var $__2 = this;
       var path = this.subendpoint('collections');
       if (force || this.collectionsPromise === null) {
         this.collectionsPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        }).then(function(ids) {
+        }).catch(((function(err) {
+          $__2.collectionsPromise = null;
+          throw err;
+        })).bind(this)).then(function(ids) {
           return Promise.all(ids.map((function(v) {
             return MHObject.fetchByMhid(v);
           })));
@@ -4834,13 +4866,17 @@ System.register("models/contributor/MHFictionalGroupContributor", [], function()
     fetchContributors: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
+      var $__3 = this;
       var path = this.subendpoint('contributors');
       if (force || this.contributorsPromise === null) {
         this.contributorsPromise = houndRequest({
           method: 'GET',
           endpoint: path,
           params: {'view': view}
-        }).then(function(parsed) {
+        }).catch(((function(err) {
+          $__3.contributorsPromise = null;
+          throw err;
+        })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
             parsed = MHObject.create(parsed);
           }
@@ -4889,13 +4925,17 @@ System.register("models/contributor/MHFictionalIndividualContributor", [], funct
     fetchContributors: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
+      var $__3 = this;
       var path = this.subendpoint('contributors');
       if (force || this.contributorsPromise === null) {
         this.contributorsPromise = houndRequest({
           method: 'GET',
           endpoint: path,
           params: {'view': view}
-        }).then(function(parsed) {
+        }).catch(((function(err) {
+          $__3.contributorsPromise = null;
+          throw err;
+        })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
             parsed = MHObject.create(parsed);
           }
@@ -4944,13 +4984,17 @@ System.register("models/contributor/MHRealGroupContributor", [], function() {
     fetchCharacters: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
+      var $__3 = this;
       var path = this.subendpoint('characters');
       if (force || this.charactersPromise === null) {
         this.charactersPromise = houndRequest({
           method: 'GET',
           endpoint: path,
           params: {'view': view}
-        }).then(function(parsed) {
+        }).catch(((function(err) {
+          $__3.charactersPromise = null;
+          throw err;
+        })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
             parsed = MHObject.create(parsed);
           }
@@ -4999,13 +5043,17 @@ System.register("models/contributor/MHRealIndividualContributor", [], function()
     fetchCharacters: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
+      var $__3 = this;
       var path = this.subendpoint('characters');
       if (force || this.charactersPromise === null) {
         this.charactersPromise = houndRequest({
           method: 'GET',
           endpoint: path,
           params: {'view': view}
-        }).then(function(parsed) {
+        }).catch(((function(err) {
+          $__3.charactersPromise = null;
+          throw err;
+        })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
             parsed = MHObject.create(parsed);
           }
@@ -5408,12 +5456,16 @@ System.register("models/media/MHMedia", [], function() {
     },
     fetchCollections: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
+      var $__5 = this;
       var path = this.subendpoint('collections');
       if (force || this.collectionsPromise === null) {
         this.collectionsPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        });
+        }).catch(((function(err) {
+          $__5.collectionsPromise = null;
+          throw err;
+        })).bind(this));
       }
       return this.collectionsPromise;
     },
@@ -5427,7 +5479,10 @@ System.register("models/media/MHMedia", [], function() {
           method: 'GET',
           endpoint: path,
           params: {view: view}
-        }).then(function(parsed) {
+        }).catch((function(err) {
+          self.contentPromise = null;
+          throw err;
+        })).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
             parsed = MHRelationalPair.createFromArray(parsed).sort((function(a, b) {
               return a.position - b.position;
@@ -5456,7 +5511,10 @@ System.register("models/media/MHMedia", [], function() {
         this.sourcesPromise = houndRequest({
           method: 'GET',
           endpoint: path
-        }).then(function(parsed) {
+        }).catch((function(err) {
+          self.sourcesPromise = null;
+          throw err;
+        })).then(function(parsed) {
           return parsed.map((function(v) {
             return new MHSourceModel(v, self);
           }));
@@ -5473,13 +5531,17 @@ System.register("models/media/MHMedia", [], function() {
     fetchContributors: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
+      var $__5 = this;
       var path = this.subendpoint('contributors');
       if (force || this.contributorsPromise === null) {
         this.contributorsPromise = houndRequest({
           method: 'GET',
           endpoint: path,
           params: {'view': view}
-        }).then(function(parsed) {
+        }).catch(((function(err) {
+          $__5.contributorsPromise = null;
+          throw err;
+        })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
             parsed = MHObject.create(parsed);
           }
@@ -5492,6 +5554,7 @@ System.register("models/media/MHMedia", [], function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var excludeMinors = arguments[1] !== (void 0) ? arguments[1] : false;
       var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      var $__5 = this;
       var path = this.subendpoint('contributors');
       if (force || this.charactersPromise === null) {
         this.charactersPromise = houndRequest({
@@ -5501,7 +5564,10 @@ System.register("models/media/MHMedia", [], function() {
             'view': view,
             'excludeMinors': excludeMinors
           }
-        }).then(function(parsed) {
+        }).catch(((function(err) {
+          $__5.charactersPromise = null;
+          throw err;
+        })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
             parsed = MHObject.create(parsed);
           }

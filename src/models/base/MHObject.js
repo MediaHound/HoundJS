@@ -530,7 +530,6 @@ export class MHObject {
     return this.endpoint + '/' + sub;
   }
 
-
   /**
    * mhObj.fetchSocial()
    * Calls server for new social stats
@@ -539,8 +538,7 @@ export class MHObject {
    *
    */
   fetchSocial(force=false){
-    var path = this.subendpoint('social'),
-        self = this;
+    var path = this.subendpoint('social');
 
     if( !force && this.social instanceof MHSocial ){
       return Promise.resolve(this.social);
@@ -550,7 +548,7 @@ export class MHObject {
         method: 'GET',
         endpoint: path
       })
-      .then( parsed => (self.social = new MHSocial(parsed)) );
+      .then( (parsed => this.social = new MHSocial(parsed)).bind(this) );
   }
 
   /**

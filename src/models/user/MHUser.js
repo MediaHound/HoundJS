@@ -323,7 +323,7 @@ export class MHUser extends MHObject {
   }
 
   /**
-   * TODO should this be static?
+   *
    * Update single profile value
    * @param key
    * @param value
@@ -459,7 +459,7 @@ export class MHUser extends MHObject {
         method          : 'GET',
         endpoint        : path,
         withCredentials : true
-      });
+      }).catch( (err => { this.ownedCollectionsPromise = null; throw err; }).bind(this) );
     }
 
     return this.ownedCollectionsPromise;
@@ -479,7 +479,7 @@ export class MHUser extends MHObject {
           method          : 'GET',
           endpoint        : path,
           withCredentials : true
-        });
+        }).catch( (err => { this.followedPromise = null; throw err; }).bind(this) );
     }
 
     return this.followedPromise;
@@ -503,7 +503,7 @@ export class MHUser extends MHObject {
         params : {
           type : 'collection'
         }
-      });
+      }).catch( (err => { this.followedCollectionsPromise = null; throw err; }).bind(this) );
     }
 
     return this.followedCollectionsPromise;
