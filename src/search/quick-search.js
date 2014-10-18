@@ -9,6 +9,8 @@
  *
  */
 
+import { log, warn, error } from '../models/internal/debug-helpers';
+
 import { houndRequest } from '../request/hound-request';
 import { MHObject } from '../models/base/MHObject';
 
@@ -48,15 +50,30 @@ buildSearchHelper = function(index){
   //  returns promise created in makeSearchRequest defined above ^^^
   search[types[index]] = function(query, size){
     return makeSearchRequest(types[index], query, size)
-      .then((parsed) => {
+      // Cleanup
+      .then(parsed => {
+        parsed.content = parsed.content.map(v => {
+          if( typeof v.primaryImageUrl === 'string' ){
+            v.primaryImage = {
+              mhid: 'mhimgPlaceHolderSearchShim',
+              url: v.primaryImageUrl,
+              isDefault: false
+            };
+          }
+          return v;
+        });
+        return parsed;
+      })
+      // END Cleanup
+      .then(parsed => {
         var mhObj;
         return parsed.content.map((v) => {
           try{
             mhObj = MHObject.create(v);
             return mhObj;
           } catch(e) {
-            console.log('unrecognized mhid prefix: ', v.mhid);
-            console.log(e);
+            warn('unrecognized mhid prefix: ', v.mhid);
+            error(e);
             return v;
           }
         });

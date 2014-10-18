@@ -2445,15 +2445,61 @@ System.get("traceur-runtime@0.0.67/src/runtime/polyfills/polyfills" + '');
 System.register("models/internal/debug-helpers", [], function() {
   "use strict";
   var __moduleName = "models/internal/debug-helpers";
-  var debug = false;
-  var log = function() {
-    if (console && (debug || window.mhDebug)) {
+  var debug = {
+    log: false,
+    warn: (window.location.host === 'local.mediahound.com:2014'),
+    error: (window.location.host === 'local.mediahound.com:2014')
+  };
+  var isDevAndDebug = function() {
+    return window.mhDebug && (window.location.host === 'local.mediahound.com:2014');
+  };
+  var log = function(override) {
+    for (var args = [],
+        $__0 = 1; $__0 < arguments.length; $__0++)
+      args[$__0 - 1] = arguments[$__0];
+    if (typeof override !== 'boolean') {
+      args.unshift(override);
+      override = false;
+    }
+    if (console && console.log && (override || debug.log || isDevAndDebug())) {
       console.log.apply(console, arguments);
     }
   };
-  return {get log() {
+  var warn = function(override) {
+    for (var args = [],
+        $__1 = 1; $__1 < arguments.length; $__1++)
+      args[$__1 - 1] = arguments[$__1];
+    if (typeof override !== 'boolean') {
+      args.unshift(override);
+      override = false;
+    }
+    if (console && console.warn && (override || debug.warn || isDevAndDebug())) {
+      console.warn.apply(console, args);
+    }
+  };
+  var error = function(override) {
+    for (var args = [],
+        $__2 = 1; $__2 < arguments.length; $__2++)
+      args[$__2 - 1] = arguments[$__2];
+    if (typeof override !== 'boolean') {
+      args.unshift(override);
+      override = false;
+    }
+    if (console && console.error && (override || debug.error || isDevAndDebug())) {
+      console.error.apply(console, args);
+    }
+  };
+  return {
+    get log() {
       return log;
-    }};
+    },
+    get warn() {
+      return warn;
+    },
+    get error() {
+      return error;
+    }
+  };
 });
 System.register("request/promise-request", [], function() {
   "use strict";
@@ -3120,7 +3166,10 @@ System.register("models/social/MHSocial", [], function() {
 System.register("models/base/MHObject", [], function() {
   "use strict";
   var __moduleName = "models/base/MHObject";
-  var log = System.get("models/internal/debug-helpers").log;
+  var $__0 = System.get("models/internal/debug-helpers"),
+      log = $__0.log,
+      warn = $__0.warn,
+      error = $__0.error;
   var houndRequest = System.get("request/hound-request").houndRequest;
   var pagedRequest = System.get("request/hound-paged-request").pagedRequest;
   var MHCache = System.get("models/internal/MHCache").MHCache;
@@ -3276,7 +3325,7 @@ System.register("models/base/MHObject", [], function() {
           endpoint: path,
           pageSize: size,
           startingPage: page,
-          params: {'view': view}
+          params: {view: view}
         });
       } else if (this.feedPagedRequest.page !== page) {
         this.feedPagedRequest.jumpTo(page);
@@ -3336,7 +3385,7 @@ System.register("models/base/MHObject", [], function() {
           args = JSON.parse(args);
           return args;
         } catch (e) {
-          console.error('JSON.parse failed at MHObject.parseArgs:170. Exception to follow.');
+          error('JSON.parse failed at MHObject.parseArgs:170. Exception to follow.');
           throw e;
         }
       }
@@ -3357,7 +3406,7 @@ System.register("models/base/MHObject", [], function() {
           try {
             return $MHObject.create(value);
           } catch (e) {
-            console.error(e);
+            error(e);
             return value;
           }
         });
@@ -3376,13 +3425,13 @@ System.register("models/base/MHObject", [], function() {
       } catch (err) {
         if (err instanceof TypeError) {
           if (err.message === 'undefined is not a function') {
-            console.warn('Unknown mhid prefix, see args object: ', args);
+            warn('Unknown mhid prefix, see args object: ', args);
           }
           if (err.message === 'Args was object without mhid!') {
-            console.warn('Incomplete Object passed to create function: ', args);
+            warn('Incomplete Object passed to create function: ', args);
           }
         }
-        console.error(err.stack);
+        error(err.stack);
         return null;
       }
       return null;
@@ -3463,7 +3512,7 @@ System.register("models/base/MHObject", [], function() {
           mhClass = childrenConstructors[prefix],
           newObj;
       if (prefix === null || typeof mhClass === 'undefined') {
-        console.warn('Error in MHObject.fetchByMhid', mhid, prefix, mhClass);
+        warn('Error in MHObject.fetchByMhid', mhid, prefix, mhClass);
         throw Error('Could not find correct class, unknown mhid: ' + mhid);
       }
       return houndRequest({
@@ -3489,7 +3538,7 @@ System.register("models/base/MHObject", [], function() {
         }
         return mhObjs;
       }
-      console.warn('Reached fallback return statement in MHObject.fetchByMhids', mhids);
+      warn('Reached fallback return statement in MHObject.fetchByMhids', mhids);
       return mhids || null;
     },
     get rootEndpoint() {
@@ -3502,7 +3551,7 @@ System.register("models/base/MHObject", [], function() {
       var prefix = $MHObject.getPrefixFromMhid(mhid),
           mhClass = childrenConstructors[prefix];
       if (prefix === null || typeof mhClass === 'undefined') {
-        console.warn('Error in MHObject.rootEndpointForMhid', mhid, prefix, mhClass);
+        warn('Error in MHObject.rootEndpointForMhid', mhid, prefix, mhClass);
         throw new Error('Could not find correct class, unknown mhid: ' + mhid);
       }
       return mhClass.rootEndpoint;
@@ -5084,7 +5133,7 @@ System.register("models/image/MHImage", [], function() {
   var MHImage = function MHImage(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHImage.prototype, "constructor", [args]);
-    var url = (typeof args.url === 'string') ? args.url.replace(/http:|https:/gi, '') : null,
+    var url = (typeof args.url === 'string') ? args.url.replace(/^http:|^https:/i, '') : null,
         width = args.width || null,
         height = args.height || null,
         isDefault = (typeof args.isDefault === 'boolean') ? args.isDefault : null;
@@ -5451,6 +5500,12 @@ System.register("models/media/MHMedia", [], function() {
         enumerable: false,
         writable: true,
         value: null
+      },
+      'traitsPromise': {
+        configurable: false,
+        enumerable: false,
+        writable: true,
+        value: null
       }
     });
   };
@@ -5542,7 +5597,7 @@ System.register("models/media/MHMedia", [], function() {
         this.contributorsPromise = houndRequest({
           method: 'GET',
           endpoint: path,
-          params: {'view': view}
+          params: {view: view}
         }).catch(((function(err) {
           $__5.contributorsPromise = null;
           throw err;
@@ -5553,7 +5608,17 @@ System.register("models/media/MHMedia", [], function() {
           return parsed;
         });
       }
-      return this.contributorsPromise;
+      return this.contributorsPromise.then((function(res) {
+        if (view === 'full' && Array.isArray(res) && typeof res[0] === 'string') {
+          return Promise.all(MHObject.fetchByMhids(res));
+        }
+        if (view === 'ids' && Array.isArray(res) && typeof res[0] instanceof MHObject) {
+          return res.map((function(obj) {
+            return obj.mhid;
+          }));
+        }
+        return res;
+      }));
     },
     fetchCharacters: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
@@ -5566,8 +5631,8 @@ System.register("models/media/MHMedia", [], function() {
           method: 'GET',
           endpoint: path,
           params: {
-            'view': view,
-            'excludeMinors': excludeMinors
+            view: view,
+            excludeMinors: excludeMinors
           }
         }).catch(((function(err) {
           $__5.charactersPromise = null;
@@ -5579,7 +5644,49 @@ System.register("models/media/MHMedia", [], function() {
           return parsed;
         });
       }
-      return this.charactersPromise;
+      return this.charactersPromise.then((function(res) {
+        if (view === 'full' && Array.isArray(res) && typeof res[0] === 'string') {
+          return Promise.all(MHObject.fetchByMhids(res));
+        }
+        if (view === 'ids' && Array.isArray(res) && typeof res[0] instanceof MHObject) {
+          return res.map((function(obj) {
+            return obj.mhid;
+          }));
+        }
+        return res;
+      }));
+    },
+    fetchTraits: function() {
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
+      var force = arguments[1] !== (void 0) ? arguments[1] : false;
+      var $__5 = this;
+      var path = this.subendpoint('traits');
+      if (force || this.traitsPromise === null) {
+        this.traitsPromise = houndRequest({
+          method: 'GET',
+          endpoint: path,
+          params: {view: view}
+        }).catch(((function(err) {
+          $__5.traitsPromise = null;
+          throw err;
+        })).bind(this)).then(function(parsed) {
+          if (view === 'full' && Array.isArray(parsed)) {
+            parsed = MHObject.create(parsed);
+          }
+          return parsed;
+        });
+      }
+      return this.traitsPromise.then((function(res) {
+        if (view === 'full' && Array.isArray(res) && typeof res[0] === 'string') {
+          return Promise.all(MHObject.fetchByMhids(res));
+        }
+        if (view === 'ids' && Array.isArray(res) && res[0] instanceof MHObject) {
+          return res.map((function(obj) {
+            return obj.mhid;
+          }));
+        }
+        return res;
+      }));
     }
   }, {get rootEndpoint() {
       return 'graph/media';
@@ -6123,18 +6230,397 @@ System.register("models/trait/MHTrait", [], function() {
   var MHTrait = function MHTrait(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHTrait.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
   };
   var $MHTrait = MHTrait;
   ($traceurRuntime.createClass)(MHTrait, {toString: function() {
       return $traceurRuntime.superCall(this, $MHTrait.prototype, "toString", []);
-    }}, {get mhidPrefix() {
-      return 'mhtrt';
-    }}, MHObject);
-  (function() {
-    MHObject.registerConstructor(MHTrait);
-  })();
+    }}, {}, MHObject);
   return {get MHTrait() {
       return MHTrait;
+    }};
+});
+System.register("models/trait/MHAchievements", [], function() {
+  "use strict";
+  var __moduleName = "models/trait/MHAchievements";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHAchievements = function MHAchievements(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHAchievements.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
+  };
+  var $MHAchievements = MHAchievements;
+  ($traceurRuntime.createClass)(MHAchievements, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHAchievements.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhach';
+    }}, MHTrait);
+  (function() {
+    MHObject.registerConstructor(MHAchievements);
+  })();
+  return {get MHAchievements() {
+      return MHAchievements;
+    }};
+});
+System.register("models/trait/MHAudience", [], function() {
+  "use strict";
+  var __moduleName = "models/trait/MHAudience";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHAudience = function MHAudience(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHAudience.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
+  };
+  var $MHAudience = MHAudience;
+  ($traceurRuntime.createClass)(MHAudience, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHAudience.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhaud';
+    }}, MHTrait);
+  (function() {
+    MHObject.registerConstructor(MHAudience);
+  })();
+  return {get MHAudience() {
+      return MHAudience;
+    }};
+});
+System.register("models/trait/MHEra", [], function() {
+  "use strict";
+  var __moduleName = "models/trait/MHEra";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHEra = function MHEra(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHEra.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
+  };
+  var $MHEra = MHEra;
+  ($traceurRuntime.createClass)(MHEra, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHEra.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhera';
+    }}, MHTrait);
+  (function() {
+    MHObject.registerConstructor(MHEra);
+  })();
+  return {get MHEra() {
+      return MHEra;
+    }};
+});
+System.register("models/trait/MHFlag", [], function() {
+  "use strict";
+  var __moduleName = "models/trait/MHFlag";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHFlag = function MHFlag(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHFlag.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
+  };
+  var $MHFlag = MHFlag;
+  ($traceurRuntime.createClass)(MHFlag, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHFlag.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhflg';
+    }}, MHTrait);
+  (function() {
+    MHObject.registerConstructor(MHFlag);
+  })();
+  return {get MHFlag() {
+      return MHFlag;
+    }};
+});
+System.register("models/trait/MHGenre", [], function() {
+  "use strict";
+  var __moduleName = "models/trait/MHGenre";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHGenre = function MHGenre(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHGenre.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
+  };
+  var $MHGenre = MHGenre;
+  ($traceurRuntime.createClass)(MHGenre, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHGenre.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhgnr';
+    }}, MHTrait);
+  (function() {
+    MHObject.registerConstructor(MHGenre);
+  })();
+  return {get MHGenre() {
+      return MHGenre;
+    }};
+});
+System.register("models/trait/MHGraphGenre", [], function() {
+  "use strict";
+  var __moduleName = "models/trait/MHGraphGenre";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHGraphGenre = function MHGraphGenre(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHGraphGenre.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
+  };
+  var $MHGraphGenre = MHGraphGenre;
+  ($traceurRuntime.createClass)(MHGraphGenre, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHGraphGenre.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhgrg';
+    }}, MHTrait);
+  (function() {
+    MHObject.registerConstructor(MHGraphGenre);
+  })();
+  return {get MHGraphGenre() {
+      return MHGraphGenre;
+    }};
+});
+System.register("models/trait/MHMaterialSource", [], function() {
+  "use strict";
+  var __moduleName = "models/trait/MHMaterialSource";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHMaterialSource = function MHMaterialSource(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHMaterialSource.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
+  };
+  var $MHMaterialSource = MHMaterialSource;
+  ($traceurRuntime.createClass)(MHMaterialSource, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHMaterialSource.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhmts';
+    }}, MHTrait);
+  (function() {
+    MHObject.registerConstructor(MHMaterialSource);
+  })();
+  return {get MHMaterialSource() {
+      return MHMaterialSource;
+    }};
+});
+System.register("models/trait/MHMood", [], function() {
+  "use strict";
+  var __moduleName = "models/trait/MHMood";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHMood = function MHMood(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHMood.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
+  };
+  var $MHMood = MHMood;
+  ($traceurRuntime.createClass)(MHMood, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHMood.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhmod';
+    }}, MHTrait);
+  (function() {
+    MHObject.registerConstructor(MHMood);
+  })();
+  return {get MHMood() {
+      return MHMood;
+    }};
+});
+System.register("models/trait/MHQuality", [], function() {
+  "use strict";
+  var __moduleName = "models/trait/MHQuality";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHQuality = function MHQuality(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHQuality.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
+  };
+  var $MHQuality = MHQuality;
+  ($traceurRuntime.createClass)(MHQuality, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHQuality.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhqlt';
+    }}, MHTrait);
+  (function() {
+    MHObject.registerConstructor(MHQuality);
+  })();
+  return {get MHQuality() {
+      return MHQuality;
+    }};
+});
+System.register("models/trait/MHStoryElement", [], function() {
+  "use strict";
+  var __moduleName = "models/trait/MHStoryElement";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHStoryElement = function MHStoryElement(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHStoryElement.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
+  };
+  var $MHStoryElement = MHStoryElement;
+  ($traceurRuntime.createClass)(MHStoryElement, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHStoryElement.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhstr';
+    }}, MHTrait);
+  (function() {
+    MHObject.registerConstructor(MHStoryElement);
+  })();
+  return {get MHStoryElement() {
+      return MHStoryElement;
+    }};
+});
+System.register("models/trait/MHStyleElement", [], function() {
+  "use strict";
+  var __moduleName = "models/trait/MHStyleElement";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHStyleElement = function MHStyleElement(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHStyleElement.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
+  };
+  var $MHStyleElement = MHStyleElement;
+  ($traceurRuntime.createClass)(MHStyleElement, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHStyleElement.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhsty';
+    }}, MHTrait);
+  (function() {
+    MHObject.registerConstructor(MHStyleElement);
+  })();
+  return {get MHStyleElement() {
+      return MHStyleElement;
+    }};
+});
+System.register("models/trait/MHSubGenre", [], function() {
+  "use strict";
+  var __moduleName = "models/trait/MHSubGenre";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHSubGenre = function MHSubGenre(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHSubGenre.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
+  };
+  var $MHSubGenre = MHSubGenre;
+  ($traceurRuntime.createClass)(MHSubGenre, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHSubGenre.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhsgn';
+    }}, MHTrait);
+  (function() {
+    MHObject.registerConstructor(MHSubGenre);
+  })();
+  return {get MHSubGenre() {
+      return MHSubGenre;
+    }};
+});
+System.register("models/trait/MHTheme", [], function() {
+  "use strict";
+  var __moduleName = "models/trait/MHTheme";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHTrait = System.get("models/trait/MHTrait").MHTrait;
+  var MHTheme = function MHTheme(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHTheme.prototype, "constructor", [args]);
+    var description = args.description || null;
+    Object.defineProperties(this, {'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      }});
+  };
+  var $MHTheme = MHTheme;
+  ($traceurRuntime.createClass)(MHTheme, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHTheme.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhthm';
+    }}, MHTrait);
+  (function() {
+    MHObject.registerConstructor(MHTheme);
+  })();
+  return {get MHTheme() {
+      return MHTheme;
     }};
 });
 System.register("models/trait/MHTraitGroup", [], function() {
@@ -6204,6 +6690,19 @@ System.register("models/all-models", [], function() {
   var MHImage = System.get("models/image/MHImage").MHImage;
   var MHTrait = System.get("models/trait/MHTrait").MHTrait;
   var MHTraitGroup = System.get("models/trait/MHTraitGroup").MHTraitGroup;
+  var MHGenre = System.get("models/trait/MHGenre").MHGenre;
+  var MHSubGenre = System.get("models/trait/MHSubGenre").MHSubGenre;
+  var MHMood = System.get("models/trait/MHMood").MHMood;
+  var MHQuality = System.get("models/trait/MHQuality").MHQuality;
+  var MHStyleElement = System.get("models/trait/MHStyleElement").MHStyleElement;
+  var MHStoryElement = System.get("models/trait/MHStoryElement").MHStoryElement;
+  var MHMaterialSource = System.get("models/trait/MHMaterialSource").MHMaterialSource;
+  var MHTheme = System.get("models/trait/MHTheme").MHTheme;
+  var MHAchievements = System.get("models/trait/MHAchievements").MHAchievements;
+  var MHEra = System.get("models/trait/MHEra").MHEra;
+  var MHAudience = System.get("models/trait/MHAudience").MHAudience;
+  var MHFlag = System.get("models/trait/MHFlag").MHFlag;
+  var MHGraphGenre = System.get("models/trait/MHGraphGenre").MHGraphGenre;
   var MHContributor = System.get("models/contributor/MHContributor").MHContributor;
   var MHRealIndividualContributor = System.get("models/contributor/MHRealIndividualContributor").MHRealIndividualContributor;
   var MHRealGroupContributor = System.get("models/contributor/MHRealGroupContributor").MHRealGroupContributor;
@@ -6344,6 +6843,45 @@ System.register("models/all-models", [], function() {
     get MHTraitGroup() {
       return MHTraitGroup;
     },
+    get MHGenre() {
+      return MHGenre;
+    },
+    get MHSubGenre() {
+      return MHSubGenre;
+    },
+    get MHMood() {
+      return MHMood;
+    },
+    get MHQuality() {
+      return MHQuality;
+    },
+    get MHStyleElement() {
+      return MHStyleElement;
+    },
+    get MHStoryElement() {
+      return MHStoryElement;
+    },
+    get MHMaterialSource() {
+      return MHMaterialSource;
+    },
+    get MHTheme() {
+      return MHTheme;
+    },
+    get MHAchievements() {
+      return MHAchievements;
+    },
+    get MHEra() {
+      return MHEra;
+    },
+    get MHAudience() {
+      return MHAudience;
+    },
+    get MHFlag() {
+      return MHFlag;
+    },
+    get MHGraphGenre() {
+      return MHGraphGenre;
+    },
     get MHContributor() {
       return MHContributor;
     },
@@ -6393,6 +6931,10 @@ System.register("search/paged-search", [], function() {
 System.register("search/quick-search", [], function() {
   "use strict";
   var __moduleName = "search/quick-search";
+  var $__0 = System.get("models/internal/debug-helpers"),
+      log = $__0.log,
+      warn = $__0.warn,
+      error = $__0.error;
   var houndRequest = System.get("request/hound-request").houndRequest;
   var MHObject = System.get("models/base/MHObject").MHObject;
   var i,
@@ -6420,14 +6962,26 @@ System.register("search/quick-search", [], function() {
   buildSearchHelper = function(index) {
     search[types[index]] = function(query, size) {
       return makeSearchRequest(types[index], query, size).then((function(parsed) {
+        parsed.content = parsed.content.map((function(v) {
+          if (typeof v.primaryImageUrl === 'string') {
+            v.primaryImage = {
+              mhid: 'mhimgPlaceHolderSearchShim',
+              url: v.primaryImageUrl,
+              isDefault: false
+            };
+          }
+          return v;
+        }));
+        return parsed;
+      })).then((function(parsed) {
         var mhObj;
         return parsed.content.map((function(v) {
           try {
             mhObj = MHObject.create(v);
             return mhObj;
           } catch (e) {
-            console.log('unrecognized mhid prefix: ', v.mhid);
-            console.log(e);
+            warn('unrecognized mhid prefix: ', v.mhid);
+            error(e);
             return v;
           }
         }));

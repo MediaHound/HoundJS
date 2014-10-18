@@ -65,8 +65,21 @@ import { MHImage } from './image/MHImage';
 
 
 // Trait Models
-import { MHTrait }      from './trait/MHTrait';
-import { MHTraitGroup } from './trait/MHTraitGroup';
+import { MHTrait }          from './trait/MHTrait';
+import { MHTraitGroup }     from './trait/MHTraitGroup';
+import { MHGenre }          from './trait/MHGenre';
+import { MHSubGenre }       from './trait/MHSubGenre';
+import { MHMood }           from './trait/MHMood';
+import { MHQuality }        from './trait/MHQuality';
+import { MHStyleElement }   from './trait/MHStyleElement';
+import { MHStoryElement }   from './trait/MHStoryElement';
+import { MHMaterialSource } from './trait/MHMaterialSource';
+import { MHTheme }          from './trait/MHTheme';
+import { MHAchievements }   from './trait/MHAchievements';
+import { MHEra }            from './trait/MHEra';
+import { MHAudience }       from './trait/MHAudience';
+import { MHFlag }           from './trait/MHFlag';
+import { MHGraphGenre }     from './trait/MHGraphGenre';
 
 
 // Contributor Models
@@ -86,57 +99,79 @@ import { MHSourceModel }  from './source/MHSourceModel';
 delete MHObject.registerConstructor;
 
 export var models = {
-  get MHObject(){ return MHObject; },
-  get MHEmbeddedObject(){ return MHEmbeddedObject; },
+  get MHObject()          { return MHObject; },
+  get MHEmbeddedObject()  { return MHEmbeddedObject; },
   get MHEmbeddedRelation(){ return MHEmbeddedRelation; },
-  get MHRelationalPair(){ return MHRelationalPair; },
-  get MHAction(){ return MHAction; },
-  get MHAdd(){ return MHAdd; },
-  get MHComment(){ return MHComment; },
-  get MHCreate(){ return MHCreate; },
-  get MHLike(){ return MHLike; },
-  get MHFollow(){ return MHFollow; },
-  get MHPost(){ return MHPost; },
-  get MHUser(){ return MHUser; },
+  get MHRelationalPair()  { return MHRelationalPair; },
+
+  get MHAction()  { return MHAction; },
+  get MHAdd()     { return MHAdd; },
+  get MHComment() { return MHComment; },
+  get MHCreate()  { return MHCreate; },
+  get MHLike()    { return MHLike; },
+  get MHFollow()  { return MHFollow; },
+  get MHPost()    { return MHPost; },
+
+  get MHUser()        { return MHUser; },
   get MHLoginSession(){ return MHLoginSession; },
-  get MHSocial(){ return MHSocial; },
-  get MHMedia(){ return MHMedia; },
-  get MHAlbum(){ return MHAlbum; },
-  get MHAlbumSeries(){ return MHAlbumSeries; },
-  get MHAnthology(){ return MHAnthology; },
-  get MHBook(){ return MHBook; },
-  get MHBookSeries(){ return MHBookSeries; },
-  get MHComicBook(){ return MHComicBook; },
-  get MHComicBookSeries(){ return MHComicBookSeries; },
-  get MHGame(){ return MHGame; },
-  get MHGameSeries(){ return MHGameSeries; },
-  get MHGraphicNovel(){ return MHGraphicNovel; },
+
+  get MHSocial()      { return MHSocial; },
+
+  get MHMedia()             { return MHMedia; },
+  get MHAlbum()             { return MHAlbum; },
+  get MHAlbumSeries()       { return MHAlbumSeries; },
+  get MHAnthology()         { return MHAnthology; },
+  get MHBook()              { return MHBook; },
+  get MHBookSeries()        { return MHBookSeries; },
+  get MHComicBook()         { return MHComicBook; },
+  get MHComicBookSeries()   { return MHComicBookSeries; },
+  get MHGame()              { return MHGame; },
+  get MHGameSeries()        { return MHGameSeries; },
+  get MHGraphicNovel()      { return MHGraphicNovel; },
   get MHGraphicNovelSeries(){ return MHGraphicNovelSeries; },
-  get MHMovie(){ return MHMovie; },
-  get MHMovieSeries(){ return MHMovieSeries; },
-  get MHMusicVideo(){ return MHMusicVideo; },
-  get MHNovella(){ return MHNovella; },
-  get MHPeriodical(){ return MHPeriodical; },
-  get MHPeriodicalSeries(){ return MHPeriodicalSeries; },
-  get MHShowEpisode(){ return MHShowEpisode; },
-  get MHShowSeason(){ return MHShowSeason; },
-  get MHShowSeries(){ return MHShowSeries; },
-  get MHSong(){ return MHSong; },
-  get MHSpecial(){ return MHSpecial; },
-  get MHSpecialSeries(){ return MHSpecialSeries; },
-  get MHTrailer(){ return MHTrailer; },
+  get MHMovie()             { return MHMovie; },
+  get MHMovieSeries()       { return MHMovieSeries; },
+  get MHMusicVideo()        { return MHMusicVideo; },
+  get MHNovella()           { return MHNovella; },
+  get MHPeriodical()        { return MHPeriodical; },
+  get MHPeriodicalSeries()  { return MHPeriodicalSeries; },
+  get MHShowEpisode()       { return MHShowEpisode; },
+  get MHShowSeason()        { return MHShowSeason; },
+  get MHShowSeries()        { return MHShowSeries; },
+  get MHSong()              { return MHSong; },
+  get MHSpecial()           { return MHSpecial; },
+  get MHSpecialSeries()     { return MHSpecialSeries; },
+  get MHTrailer()           { return MHTrailer; },
+
   get MHCollection(){ return MHCollection; },
+
   get MHImage(){ return MHImage; },
-  get MHTrait(){ return MHTrait; },
-  get MHTraitGroup(){ return MHTraitGroup; },
-  get MHContributor(){ return MHContributor; },
-  get MHRealIndividualContributor(){ return MHRealIndividualContributor; },
-  get MHRealGroupContributor(){ return MHRealGroupContributor; },
+
+  get MHTrait()         { return MHTrait; },
+  get MHTraitGroup()    { return MHTraitGroup; },
+  get MHGenre()         { return MHGenre; },
+  get MHSubGenre()      { return MHSubGenre; },
+  get MHMood()          { return MHMood; },
+  get MHQuality()       { return MHQuality; },
+  get MHStyleElement()  { return MHStyleElement; },
+  get MHStoryElement()  { return MHStoryElement; },
+  get MHMaterialSource(){ return MHMaterialSource; },
+  get MHTheme()         { return MHTheme; },
+  get MHAchievements()  { return MHAchievements; },
+  get MHEra()           { return MHEra; },
+  get MHAudience()      { return MHAudience; },
+  get MHFlag()          { return MHFlag; },
+  get MHGraphGenre()    { return MHGraphGenre; },
+
+  get MHContributor()                   { return MHContributor; },
+  get MHRealIndividualContributor()     { return MHRealIndividualContributor; },
+  get MHRealGroupContributor()          { return MHRealGroupContributor; },
   get MHFictionalIndividualContributor(){ return MHFictionalIndividualContributor; },
-  get MHFictionalGroupContributor(){ return MHFictionalGroupContributor; },
+  get MHFictionalGroupContributor()     { return MHFictionalGroupContributor; },
+
   get MHSourceFormat(){ return MHSourceFormat; },
   get MHSourceMethod(){ return MHSourceMethod; },
   get MHSourceMedium(){ return MHSourceMedium; },
-  get MHSourceModel(){ return MHSourceModel; }
+  get MHSourceModel() { return MHSourceModel; }
 };
 

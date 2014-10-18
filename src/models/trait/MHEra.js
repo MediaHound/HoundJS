@@ -1,14 +1,17 @@
 
 import { MHObject } from '../base/MHObject';
+import { MHTrait } from './MHTrait';
 
 // MediaHound Trait Object
-export class MHTrait extends MHObject {
+export class MHEra extends MHTrait {
   /* MHMedia Constructor
    *
    * MediaHound Object constructors take a single parameter {Object | JSON String}
    * If the argument is an object properties will be read and placed properly
    *  if a prop doesn't exist and is optional it will be replaced with a null value.
    * If the argument is a string it will be passed through JSON.parse and then the constructor will continue as normal.
+   *
+   * TODO UPDATE
    *
    *  @constructor
    *    @param args - { Object | JSON String }
@@ -42,9 +45,16 @@ export class MHTrait extends MHObject {
     });
   }
 
+  static get mhidPrefix() { return 'mhera'; }
+
   // Could change as needed
   toString(){
     return super.toString();
   }
 
 }
+
+(function(){
+  MHObject.registerConstructor(MHEra);
+})();
+

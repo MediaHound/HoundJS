@@ -1,5 +1,5 @@
 
-import { log } from '../internal/debug-helpers';
+import { log, warn, error } from '../internal/debug-helpers';
 
 // Import Deps
 import { houndRequest } from '../../request/hound-request';
@@ -145,7 +145,7 @@ export class MHObject {
         args = JSON.parse(args);
         return args;
       } catch(e) {
-        console.error('JSON.parse failed at MHObject.parseArgs:170. Exception to follow.');
+        error('JSON.parse failed at MHObject.parseArgs:170. Exception to follow.');
         throw e;
       }
     }
@@ -162,7 +162,7 @@ export class MHObject {
       throw (args.error || args.Error || args);
     }
     // Shound never get here
-    //console.warn('how did you do that? args: ', args);
+    //warn('how did you do that? args: ', args);
     throw new TypeError('Args was object without mhid!', 'MHObject.js', 189);
   }
 
@@ -181,7 +181,7 @@ export class MHObject {
         try{
           return MHObject.create(value);
         } catch(e) {
-          console.error(e);
+          error(e);
           return value;
         }
       });
@@ -212,13 +212,13 @@ export class MHObject {
     } catch (err) {
       if( err instanceof TypeError ) {
         if( err.message === 'undefined is not a function' ) {
-          console.warn('Unknown mhid prefix, see args object: ', args);
+          warn('Unknown mhid prefix, see args object: ', args);
         }
         if( err.message === 'Args was object without mhid!'){
-          console.warn('Incomplete Object passed to create function: ', args);
+          warn('Incomplete Object passed to create function: ', args);
         }
       }
-      console.error(err.stack);
+      error(err.stack);
       return null;
     }
     return null;
@@ -229,7 +229,7 @@ export class MHObject {
    *
    * MHObject.registerConstructor(mhClass)
    *
-   * @param  { <MHObject>.constructor } - MediaHound Object constructor to be used within MHObject.create and other methods
+   * @param  { Function } mhClass - MediaHound Object constructor to be used within MHObject.create and other methods
    * @return { Boolean }                - Success(true) or Fail(false)
    *
    */
@@ -433,7 +433,7 @@ export class MHObject {
         newObj;
 
     if( prefix === null || typeof mhClass === 'undefined' ){
-      console.warn('Error in MHObject.fetchByMhid', mhid, prefix, mhClass);
+      warn('Error in MHObject.fetchByMhid', mhid, prefix, mhClass);
       throw Error('Could not find correct class, unknown mhid: ' + mhid);
     }
 
@@ -472,7 +472,7 @@ export class MHObject {
       }
       return mhObjs;
     }
-    console.warn('Reached fallback return statement in MHObject.fetchByMhids', mhids);
+    warn('Reached fallback return statement in MHObject.fetchByMhids', mhids);
     return mhids || null;
   }
 
@@ -498,7 +498,7 @@ export class MHObject {
         mhClass = childrenConstructors[prefix];
 
     if( prefix === null || typeof mhClass === 'undefined' ){
-      console.warn('Error in MHObject.rootEndpointForMhid', mhid, prefix, mhClass);
+      warn('Error in MHObject.rootEndpointForMhid', mhid, prefix, mhClass);
       throw new Error('Could not find correct class, unknown mhid: ' + mhid);
     }
 
@@ -571,9 +571,7 @@ export class MHObject {
         endpoint: path,
         pageSize: size,
         startingPage: page,
-        params: {
-          'view': view
-        }
+        params: { view }
       });
     } else if( this.feedPagedRequest.page !== page ){
       this.feedPagedRequest.jumpTo(page);
@@ -597,7 +595,6 @@ export class MHObject {
   }
 
   /**
-   * TODO remove console debug statements
    *
    * mhObj.takeAction(action)
    *

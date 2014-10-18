@@ -114,6 +114,12 @@ export class MHMedia extends MHObject {
         enumerable:   false,
         writable:     true,
         value:        null
+      },
+      'traitsPromise':{
+        configurable: false,
+        enumerable:   false,
+        writable:     true,
+        value:        null
       }
     });
   }
@@ -230,9 +236,7 @@ export class MHMedia extends MHObject {
       this.contributorsPromise = houndRequest({
           method  : 'GET',
           endpoint: path,
-          params: {
-            'view':view
-          }
+          params: { view }
         })
         .catch( (err => { this.contributorsPromise = null; throw err; }).bind(this) )
         .then(function(parsed){
@@ -244,7 +248,15 @@ export class MHMedia extends MHObject {
 
     }
 
-    return this.contributorsPromise;
+    return this.contributorsPromise.then( res => {
+      if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
+        return Promise.all(MHObject.fetchByMhids(res));
+      }
+      if( view === 'ids' && Array.isArray(res) && typeof res[0] instanceof MHObject ){
+        return res.map(obj => obj.mhid);
+      }
+      return res;
+    });
   }
 
   /* TODO: docJS
@@ -260,10 +272,7 @@ export class MHMedia extends MHObject {
       this.charactersPromise = houndRequest({
           method  : 'GET',
           endpoint: path,
-          params: {
-            'view':view,
-            'excludeMinors': excludeMinors
-          }
+          params: { view, excludeMinors }
         })
         .catch( (err => { this.charactersPromise = null; throw err; }).bind(this) )
         .then(function(parsed){
@@ -274,7 +283,46 @@ export class MHMedia extends MHObject {
         });
     }
 
-    return this.charactersPromise;
+    return this.charactersPromise.then(res => {
+      if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
+        return Promise.all(MHObject.fetchByMhids(res));
+      }
+      if( view === 'ids' && Array.isArray(res) && typeof res[0] instanceof MHObject ){
+        return res.map(obj => obj.mhid);
+      }
+      return res;
+    });
+  }
+
+  fetchTraits(view='ids', force=false){
+    var path = this.subendpoint('traits');
+
+    if( force || this.traitsPromise === null ){
+      this.traitsPromise = houndRequest({
+        method: 'GET',
+        endpoint: path,
+        params: { view }
+      })
+      .catch( (err => { this.traitsPromise = null; throw err; }).bind(this) )
+      .then(function(parsed){
+        if( view === 'full' && Array.isArray(parsed) ){
+          parsed = MHObject.create(parsed);
+        }
+        return parsed;
+      });
+    }
+
+    return this.traitsPromise.then(res => {
+      // if asking for 'full' but cached is 'ids'
+      if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
+        return Promise.all(MHObject.fetchByMhids(res));
+      }
+      // if asking for 'ids' but cached is 'full'
+      if( view === 'ids' && Array.isArray(res) && res[0] instanceof MHObject ){
+        return res.map(obj => obj.mhid);
+      }
+      return res;
+    });
   }
 
   /* TODO?
