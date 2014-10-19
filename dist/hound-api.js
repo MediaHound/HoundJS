@@ -3431,7 +3431,6 @@ System.register("models/base/MHObject", [], function() {
             warn('Incomplete Object passed to create function: ', args);
           }
         }
-        error(err.stack);
         return null;
       }
       return null;
@@ -4516,7 +4515,7 @@ System.register("models/user/MHLoginSession", [], function() {
       });
     },
     logout: function() {
-      var currentCookies = document.cookie.split(';').map((function(c) {
+      var currentCookies = document.cookie.split('; ').map((function(c) {
         var keyVal = c.split('=');
         return {
           'key': keyVal[0],

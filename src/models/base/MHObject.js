@@ -218,7 +218,7 @@ export class MHObject {
           warn('Incomplete Object passed to create function: ', args);
         }
       }
-      error(err.stack);
+      //error(err.stack); // turning off this error because it is really annoying!
       return null;
     }
     return null;

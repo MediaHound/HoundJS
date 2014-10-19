@@ -216,7 +216,7 @@ export class MHLoginSession {
    * @returns {Promise} - resolves to user that just logged out.
    */
   static logout(){
-    var currentCookies = document.cookie.split(';').map(c => {
+    var currentCookies = document.cookie.split('; ').map(c => {
       var keyVal = c.split('=');
       return {
         'key':  keyVal[0],
