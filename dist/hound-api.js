@@ -2447,8 +2447,8 @@ System.register("models/internal/debug-helpers", [], function() {
   var __moduleName = "models/internal/debug-helpers";
   var debug = {
     log: false,
-    warn: (window.location.host === 'local.mediahound.com:2014'),
-    error: (window.location.host === 'local.mediahound.com:2014')
+    warn: true,
+    error: true
   };
   var isDevAndDebug = function() {
     return window.mhDebug && (window.location.host === 'local.mediahound.com:2014');
@@ -4401,7 +4401,10 @@ System.register("models/user/MHUser", [], function() {
 System.register("models/user/MHLoginSession", [], function() {
   "use strict";
   var __moduleName = "models/user/MHLoginSession";
-  var log = System.get("models/internal/debug-helpers").log;
+  var $__0 = System.get("models/internal/debug-helpers"),
+      log = $__0.log,
+      warn = $__0.warn,
+      error = $__0.error;
   var $__1 = System.get("models/base/MHObject"),
       MHObject = $__1.MHObject,
       mhidLRU = $__1.mhidLRU;
@@ -4446,7 +4449,8 @@ System.register("models/user/MHLoginSession", [], function() {
     }});
   var loggedInUser = null,
       onboarded = false,
-      access = false;
+      access = false,
+      count = null;
   var MHLoginSession = function MHLoginSession() {};
   ($traceurRuntime.createClass)(MHLoginSession, {}, {
     get currentUser() {
@@ -4460,6 +4464,22 @@ System.register("models/user/MHLoginSession", [], function() {
     },
     get access() {
       return access;
+    },
+    get count() {
+      return count;
+    },
+    updateCount: function() {
+      return houndRequest({
+        method: 'GET',
+        endpoint: MHUser.rootEndpoint + '/count'
+      }).then((function(res) {
+        count = res.count;
+        return res;
+      })).catch((function(err) {
+        warn('Error fetching user count');
+        error(err.error.stack);
+        return count;
+      }));
     },
     updatedProfileImage: function(updatedUser) {
       log('updatedUploadImage: ', updatedUser);
@@ -4559,6 +4579,7 @@ System.register("models/user/MHLoginSession", [], function() {
       });
     }
   });
+  MHLoginSession.updateCount();
   return {get MHLoginSession() {
       return MHLoginSession;
     }};
@@ -6931,7 +6952,6 @@ System.register("search/quick-search", [], function() {
   "use strict";
   var __moduleName = "search/quick-search";
   var $__0 = System.get("models/internal/debug-helpers"),
-      log = $__0.log,
       warn = $__0.warn,
       error = $__0.error;
   var houndRequest = System.get("request/hound-request").houndRequest;

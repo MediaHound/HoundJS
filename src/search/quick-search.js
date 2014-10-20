@@ -9,7 +9,7 @@
  *
  */
 
-import { log, warn, error } from '../models/internal/debug-helpers';
+import { warn, error } from '../models/internal/debug-helpers';
 
 import { houndRequest } from '../request/hound-request';
 import { MHObject } from '../models/base/MHObject';

@@ -1,5 +1,5 @@
 
-import { log } from '../internal/debug-helpers';
+import { log, warn, error } from '../internal/debug-helpers';
 
 import { MHObject, mhidLRU } from '../base/MHObject';
 import { MHUser } from './MHUser';
@@ -81,7 +81,8 @@ class MHSessionUserProfileImageChange {
 // Singleton Containers
 var loggedInUser  = null,
     onboarded     = false,
-    access        = false;
+    access        = false,
+    count         = null;
 
 // MediaHound Login Session Singleton
 /** @class MHLoginSession */
@@ -119,6 +120,30 @@ export class MHLoginSession {
    */
   static get access(){
     return access;
+  }
+
+  /**
+   * The count of users in the system
+   * @returns {number}
+   */
+  static get count(){
+    return count;
+  }
+
+  static updateCount(){
+    return houndRequest({
+        method:   'GET',
+        endpoint: MHUser.rootEndpoint + '/count'
+      })
+      .then(res => {
+        count = res.count;
+        return res;
+      })
+      .catch(err => {
+        warn('Error fetching user count');
+        error(err.error.stack);
+        return count;
+      });
   }
 
   /**
@@ -275,3 +300,4 @@ export class MHLoginSession {
   }
 }
 
+MHLoginSession.updateCount();
