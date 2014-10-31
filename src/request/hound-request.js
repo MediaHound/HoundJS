@@ -1,4 +1,5 @@
 
+import { houndOrigin } from '../origin/hound-origin';
 import { log } from '../models/internal/debug-helpers';
 
 // Start Module
@@ -62,7 +63,8 @@ export var houndRequest = function(args){
   //  delete endpoint from args
   if( args.endpoint ){
     //args.url = 'https://stag-api.mediahound.com/' + args.endpoint;
-    args.url = 'https://api.mediahound.com/' + args.endpoint;
+    // houndOrigin defined in hound-origin.js before import, must be fully qualified domain name
+    args.url = houndOrigin + args.endpoint;
     delete args.endpoint;
   }
 

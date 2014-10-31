@@ -7,6 +7,8 @@ var gulp    = require('gulp'),
     uglify  = require('gulp-uglify'),
     exec    = require('child_process').exec;
 
+var env = process.env.NODE_ENV || 'prod';
+
 // Paths for tasks
 var paths = {
 
@@ -19,9 +21,11 @@ var paths = {
 
 };
 // More paths, using above paths
+paths.origin        = paths.src   + '/origin/'+env+'/hound-origin.js';
 paths.srcGlob       = paths.src   + '/**/*.js';
 paths.houndApiJs    = paths.src   + '/hound-api.js';
 paths.buildCompiled = paths.build + '/compiled';
+
 
 // Options for Uglify Task
 var uglifyOpts = {
@@ -72,6 +76,12 @@ var traceurCmds = {
   }
 };
 
+//copy the ENV var into the origin folder to be referenced by hound-request
+gulp.task('copy:origin', function(){
+  return gulp.src(paths.origin)
+    .pipe(gulp.dest(paths.src+'/origin'));
+});
+
 // JSHint Task
 gulp.task('jshint', function(){
 
@@ -91,7 +101,7 @@ gulp.task('jshint:watch', function(done){
 // Watch srcGlob do 'jshint', 'dist'
 gulp.task('watch', function(){
 
-  gulp.watch(paths.srcGlob, ['dist', 'jshint']);
+  gulp.watch(paths.srcGlob, ['copy:origin','dist', 'jshint']);
 
 });
 
@@ -195,7 +205,7 @@ gulp.task('dist:browser', function(done){
 
 // TODO Add compile for Node Distribution (requires removing window calls in api)
 gulp.task('dist', ['dist:browser']);
-gulp.task('default', ['jshint', 'dist']);
+gulp.task('default', ['copy:origin','dist', 'jshint']);
 
 /*
 FROM ORIGINAL REPO
