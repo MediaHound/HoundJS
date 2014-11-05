@@ -4158,8 +4158,8 @@ System.register("models/user/MHUser", [], function() {
       if (!image) {
         throw new TypeError('No Image passed to setProfileImage');
       }
-      if (!(image instanceof Blob)) {
-        throw new TypeError('Image was not of type Blob');
+      if (!(image instanceof Blob || image instanceof File)) {
+        throw new TypeError('Image was not of type Blob or File.');
       }
       if (!this.isCurrentUser) {
         throw (function() {
