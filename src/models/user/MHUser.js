@@ -1,4 +1,4 @@
-/*global System, File */
+/*global System, Blob */
 
 import { log } from '../internal/debug-helpers';
 
@@ -282,8 +282,8 @@ export class MHUser extends MHObject {
       throw new TypeError('No Image passed to setProfileImage');
       //return Promise.resolve(null);
     }
-    if( !(image instanceof File) ){
-      throw new TypeError('Image was not of type File');
+    if( !(image instanceof Blob) ){
+      throw new TypeError('Image was not of type Blob');
     }
 
     // If not current user throw error
