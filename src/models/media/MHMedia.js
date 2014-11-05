@@ -39,7 +39,7 @@ export class MHMedia extends MHObject {
     super(args);
 
     // Default MHMedia unique objects to null
-    var releaseDate       = new Date(args.releaseDate),
+    var releaseDate       = new Date(args.releaseDate)*1000, //convert to milliseconds
         suitabilityRating = args.suitabilityRating  || null,
         length            = args.length             || null,
         primaryGroup      = args.primaryGroup       || null,

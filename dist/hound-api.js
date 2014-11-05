@@ -5454,7 +5454,7 @@ System.register("models/media/MHMedia", [], function() {
   var MHMedia = function MHMedia(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHMedia.prototype, "constructor", [args]);
-    var releaseDate = new Date(args.releaseDate),
+    var releaseDate = new Date(args.releaseDate) * 1000,
         suitabilityRating = args.suitabilityRating || null,
         length = args.length || null,
         primaryGroup = args.primaryGroup || null,
