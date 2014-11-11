@@ -450,7 +450,7 @@ export class MHUser extends MHObject {
    * @return { Promise }
    *
    */
-  fetchOwnedCollections(force=false){
+  fetchOwnedCollections(view='full', page=0, size=12, force=false){
     var path = this.subendpoint('ownedCollections');
 
     if( force || this.ownedCollectionsPromise === null ){
@@ -458,10 +458,24 @@ export class MHUser extends MHObject {
       this.ownedCollectionsPromise = houndRequest({
         method          : 'GET',
         endpoint        : path,
-        withCredentials : true
-      }).catch( (err => { this.ownedCollectionsPromise = null; throw err; }).bind(this) );
+        withCredentials : true,
+        startingPage    : page,
+        pageSize        : size,
+        params: {
+          'view':view
+        }
+      }).catch( (err => { this.ownedCollectionsPromise = null; throw err; }).bind(this) )
+        .then(res => {
+          if( view === 'full' && Array.isArray(res) ){
+            res = MHObject.create(res);
+            //console.log('fetched owned collection: ', res);
+            // if collections become ordered MHRelationalPairs like media content:
+            //  also update logic in return statement below
+            //res = MHRelationalPair.createFromArray(res).sort( (a,b) => a.position - b.position );
+          }
+          return res;
+        });
     }
-
     return this.ownedCollectionsPromise;
   }
 

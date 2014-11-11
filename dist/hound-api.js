@@ -2496,7 +2496,7 @@ System.register("models/internal/debug-helpers", [], function() {
 System.register("origin/hound-origin", [], function() {
   "use strict";
   var __moduleName = "origin/hound-origin";
-  var houndOrigin = 'https://stag-api.mediahound.com/';
+  var houndOrigin = 'https://api.mediahound.com/';
   ;
   return {get houndOrigin() {
       return houndOrigin;
@@ -4225,18 +4225,29 @@ System.register("models/user/MHUser", [], function() {
       return this.interestFeedPromise;
     },
     fetchOwnedCollections: function() {
-      var force = arguments[0] !== (void 0) ? arguments[0] : false;
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+      var page = arguments[1] !== (void 0) ? arguments[1] : 0;
+      var size = arguments[2] !== (void 0) ? arguments[2] : 12;
+      var force = arguments[3] !== (void 0) ? arguments[3] : false;
       var $__54 = this;
       var path = this.subendpoint('ownedCollections');
       if (force || this.ownedCollectionsPromise === null) {
         this.ownedCollectionsPromise = houndRequest({
           method: 'GET',
           endpoint: path,
-          withCredentials: true
+          withCredentials: true,
+          startingPage: page,
+          pageSize: size,
+          params: {'view': view}
         }).catch(((function(err) {
           $__54.ownedCollectionsPromise = null;
           throw err;
-        })).bind(this));
+        })).bind(this)).then((function(res) {
+          if (view === 'full' && Array.isArray(res)) {
+            res = MHObject.create(res);
+          }
+          return res;
+        }));
       }
       return this.ownedCollectionsPromise;
     },
