@@ -4226,9 +4226,7 @@ System.register("models/user/MHUser", [], function() {
     },
     fetchOwnedCollections: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-      var page = arguments[1] !== (void 0) ? arguments[1] : 0;
-      var size = arguments[2] !== (void 0) ? arguments[2] : 12;
-      var force = arguments[3] !== (void 0) ? arguments[3] : false;
+      var force = arguments[1] !== (void 0) ? arguments[1] : false;
       var $__54 = this;
       var path = this.subendpoint('ownedCollections');
       if (force || this.ownedCollectionsPromise === null) {
@@ -4236,8 +4234,6 @@ System.register("models/user/MHUser", [], function() {
           method: 'GET',
           endpoint: path,
           withCredentials: true,
-          startingPage: page,
-          pageSize: size,
           params: {'view': view}
         }).catch(((function(err) {
           $__54.ownedCollectionsPromise = null;

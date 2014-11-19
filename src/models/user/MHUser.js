@@ -450,7 +450,7 @@ export class MHUser extends MHObject {
    * @return { Promise }
    *
    */
-  fetchOwnedCollections(view='full', page=0, size=12, force=false){
+  fetchOwnedCollections(view='full', force=false){
     var path = this.subendpoint('ownedCollections');
 
     if( force || this.ownedCollectionsPromise === null ){
@@ -459,8 +459,6 @@ export class MHUser extends MHObject {
         method          : 'GET',
         endpoint        : path,
         withCredentials : true,
-        startingPage    : page,
-        pageSize        : size,
         params: {
           'view':view
         }
