@@ -415,6 +415,22 @@ export class MHUser extends MHObject {
       });
   }
 
+  static linkTwitterAccount(){
+
+    return houndRequest({
+             method            : 'GET',
+             endpoint          : MHUser.rootEndpoint + '/accounts/twitter/link',
+             withCredentials: true,
+             data   : { 'successRedirectUrl' : 'http://www.mediahound.com',  'failureRedirectUrl' : 'http://www.mediahound.com'},
+             headers: {
+               'Accept':'application/json',
+               'Content-Type':'application/json'
+             }
+           }).then(function(response){
+             return response;
+           });
+  }
+
   /* TODO: add local cache
    * mhUsr.fetchInterestFeed(view, page, size)
    *
