@@ -2496,7 +2496,7 @@ System.register("models/internal/debug-helpers", [], function() {
 System.register("origin/hound-origin", [], function() {
   "use strict";
   var __moduleName = "origin/hound-origin";
-  var houndOrigin = 'https://api.mediahound.com/';
+  var houndOrigin = 'https://dev-api.mediahound.com/';
   ;
   return {get houndOrigin() {
       return houndOrigin;
@@ -4399,15 +4399,28 @@ System.register("models/user/MHUser", [], function() {
         return Promise.all(MHObject.fetchByMhids(response));
       });
     },
-    linkTwitterAccount: function() {
+    linkTwitterAccount: function(success, failure) {
       return houndRequest({
         method: 'GET',
-        endpoint: $MHUser.rootEndpoint + '/accounts/twitter/link',
+        endpoint: $MHUser.rootEndpoint + '/account/twitter/link',
         withCredentials: true,
         data: {
           'successRedirectUrl': 'http://www.mediahound.com',
           'failureRedirectUrl': 'http://www.mediahound.com'
         },
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      }).then(function(response) {
+        return response;
+      });
+    },
+    unlinkTwitterAccount: function() {
+      return houndRequest({
+        method: 'GET',
+        endpoint: $MHUser.rootEndpoint + '/account/twitter/unlink',
+        withCredentials: true,
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
