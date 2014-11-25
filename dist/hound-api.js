@@ -4402,12 +4402,8 @@ System.register("models/user/MHUser", [], function() {
     linkTwitterAccount: function(success, failure) {
       return houndRequest({
         method: 'GET',
-        endpoint: $MHUser.rootEndpoint + '/account/twitter/link',
+        endpoint: $MHUser.rootEndpoint + '/account/twitter/link?successRedirectUrl=http://www.mediahound.com&failureRedirectUrl=http://www.mediahound.com',
         withCredentials: true,
-        data: {
-          'successRedirectUrl': 'http://www.mediahound.com',
-          'failureRedirectUrl': 'http://www.mediahound.com'
-        },
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'

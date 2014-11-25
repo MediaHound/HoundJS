@@ -415,13 +415,16 @@ export class MHUser extends MHObject {
       });
   }
 
-  static linkTwitterAccount(success,failure){
+  static linkTwitterAccount(s,f){
+
+    var success = s || 'https://www.mediahound.com/',
+        failure = f || 'https://www.mediahound.com/';
 
     return houndRequest({
              method            : 'GET',
-             endpoint          : MHUser.rootEndpoint + '/account/twitter/link',
+             endpoint          : MHUser.rootEndpoint + '/account/twitter/link?successRedirectUrl='+success+'&failureRedirectUrl='+failure,
              withCredentials: true,
-             data   : { 'successRedirectUrl' : 'http://www.mediahound.com',  'failureRedirectUrl' : 'http://www.mediahound.com'},
+             //data   : { 'successRedirectUrl' : 'http://www.mediahound.com',  'failureRedirectUrl' : 'http://www.mediahound.com'},
              headers: {
                'Accept':'application/json',
                'Content-Type':'application/json'
