@@ -1,5 +1,6 @@
 /**
  * Created by Ryan Bogle on 9/19/14.
+ * Maintained by Steve Belovarich.
  */
 
 /*
@@ -14,6 +15,7 @@ import { MHObject }           from './base/MHObject';
 import { MHEmbeddedObject }   from './base/MHEmbeddedObject';
 import { MHEmbeddedRelation } from './base/MHEmbeddedRelation';
 import { MHRelationalPair }   from './base/MHRelationalPair';
+import { MHMetaData }         from './meta/MHMetaData';
 
 
 // Action Models

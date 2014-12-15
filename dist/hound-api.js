@@ -6252,6 +6252,116 @@ System.register("models/media/MHTrailer", [], function() {
       return MHTrailer;
     }};
 });
+System.register("models/meta/MHMetaData", [], function() {
+  "use strict";
+  var __moduleName = "models/meta/MHMetaData";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHMetaData = function MHMetaData(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHMetaData.prototype, "constructor", [args]);
+    var mhid = args.mhid || null,
+        altid = args.altid || null,
+        name = args.name || null,
+        description = args.description || null,
+        message = args.message || null,
+        mixlist = args.mixlist || null,
+        username = args.username || null,
+        email = args.email || null,
+        phoneNumber = args.phoneNumber || null,
+        isDefault = args.isDefault || null,
+        primaryColor = args.primaryColor || null,
+        createdDate = new Date(args.createdDate) * 1000 || null,
+        releaseDate = new Date(args.createdDate) * 1000 || null;
+    Object.defineProperties(this, {
+      'mhid': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: mhid
+      },
+      'altid': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: altid
+      },
+      'name': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: name
+      },
+      'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      },
+      'message': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: message
+      },
+      'mixlist': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: mixlist
+      },
+      'username': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: username
+      },
+      'email': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: email
+      },
+      'phoneNumber': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: phoneNumber
+      },
+      'isDefault': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: isDefault
+      },
+      'primaryColor': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: primaryColor
+      },
+      'createdDate': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: createdDate
+      },
+      'releaseDate': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: releaseDate
+      }
+    });
+  };
+  var $MHMetaData = MHMetaData;
+  ($traceurRuntime.createClass)(MHMetaData, {}, {}, MHObject);
+  (function() {
+    MHObject.registerConstructor(MHMetaData);
+  }());
+  return {get MHMetaData() {
+      return MHMetaData;
+    }};
+});
 System.register("models/trait/MHTrait", [], function() {
   "use strict";
   var __moduleName = "models/trait/MHTrait";
@@ -6680,6 +6790,7 @@ System.register("models/all-models", [], function() {
   var MHEmbeddedObject = System.get("models/base/MHEmbeddedObject").MHEmbeddedObject;
   var MHEmbeddedRelation = System.get("models/base/MHEmbeddedRelation").MHEmbeddedRelation;
   var MHRelationalPair = System.get("models/base/MHRelationalPair").MHRelationalPair;
+  var MHMetaData = System.get("models/meta/MHMetaData").MHMetaData;
   var MHAction = System.get("models/action/MHAction").MHAction;
   var MHAdd = System.get("models/action/MHAdd").MHAdd;
   var MHComment = System.get("models/action/MHComment").MHComment;
@@ -6960,9 +7071,9 @@ System.register("search/paged-search", [], function() {
 System.register("search/quick-search", [], function() {
   "use strict";
   var __moduleName = "search/quick-search";
-  var $__290 = System.get("models/internal/debug-helpers"),
-      warn = $__290.warn,
-      error = $__290.error;
+  var $__293 = System.get("models/internal/debug-helpers"),
+      warn = $__293.warn,
+      error = $__293.error;
   var houndRequest = System.get("request/hound-request").houndRequest;
   var MHObject = System.get("models/base/MHObject").MHObject;
   var i,
