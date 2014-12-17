@@ -4153,6 +4153,37 @@ System.register("models/user/MHUser", [], function() {
       var currentUser = System.get('models/user/MHLoginSession').MHLoginSession.currentUser;
       return this.isEqualToMHObject(currentUser);
     },
+    setPassword: function(password, newPassword) {
+      if (!password || (typeof password !== 'string' && !(password instanceof String))) {
+        throw new TypeError('password must be type string in MHUser.newPassword');
+      }
+      if (!newPassword || (typeof newPassword !== 'string' && !(newPassword instanceof String))) {
+        throw new TypeError('newPassword must be type string in MHUser.newPassword');
+      }
+      var path = $MHUser.rootEndpoint + '/forgotpassword/finish',
+          data = {};
+      data.oldPassword = password;
+      data.newPassword = newPassword;
+      return houndRequest({
+        method: 'POST',
+        endpoint: path,
+        withCredentials: true,
+        data: data
+      }).then(function(response) {
+        console.log('valid resetPassword: ', response);
+        return response;
+      }).catch(function(error) {
+        if (error.xhr.status === 400) {
+          console.error('The password ' + password + ' is an invalid password.');
+        } else if (error.xhr.status === 404) {
+          console.error('The newPassword ' + newPassword + ' was not found.');
+        } else {
+          console.log('error in setPassword: ', error.error.message);
+          console.error(error.error.stack);
+        }
+        return false;
+      });
+    },
     setProfileImage: function(image) {
       log('in setProfileImage with image: ', image);
       if (!image) {
@@ -4382,8 +4413,99 @@ System.register("models/user/MHUser", [], function() {
         console.log('valid forgotUsernameWithEmail: ', response);
         return response;
       }).catch(function(error) {
-        console.log('error in forgotUsernameWithEmail: ', error.error.message);
-        console.error(error.error.stack);
+        if (error.xhr.status === 400) {
+          console.error('The email ' + email + ' is missing or an invalid argument.');
+        } else if (error.xhr.status === 404) {
+          console.error('The user with the email address ' + email + ' was not found.');
+        } else {
+          console.log('error in new forgotUsernameWithEmail: ', error.error.message);
+          console.error(error.error.stack);
+        }
+        return false;
+      });
+    },
+    forgotPasswordWithEmail: function(email) {
+      if (!email || (typeof email !== 'string' && !(email instanceof String))) {
+        throw new TypeError('Email must be type string in MHUser.forgotPasswordWithEmail');
+      }
+      var path = $MHUser.rootEndpoint + '/forgotpassword',
+          data = {};
+      data.email = email;
+      return houndRequest({
+        method: 'POST',
+        endpoint: path,
+        withCredentials: false,
+        data: data
+      }).then(function(response) {
+        console.log('valid forgotPasswordWithEmail: ', response);
+        return response;
+      }).catch(function(error) {
+        if (error.xhr.status === 400) {
+          console.error('The email ' + email + ' is missing or an invalid argument.');
+        } else if (error.xhr.status === 404) {
+          console.error('The user with the email address ' + email + ' was not found.');
+        } else {
+          console.log('error in new forgotPasswordWithEmail: ', error.error.message);
+          console.error(error.error.stack);
+        }
+        return false;
+      });
+    },
+    forgotPasswordWithUsername: function(username) {
+      if (!username || (typeof username !== 'string' && !(username instanceof String))) {
+        throw new TypeError('username must be type string in MHUser.forgotPasswordWithUsername');
+      }
+      var path = $MHUser.rootEndpoint + '/forgotpassword',
+          data = {};
+      data.username = username;
+      return houndRequest({
+        method: 'POST',
+        endpoint: path,
+        withCredentials: false,
+        data: data
+      }).then(function(response) {
+        console.log('valid forgotPasswordWithUsername: ', response);
+        return response;
+      }).catch(function(error) {
+        if (error.xhr.status === 400) {
+          console.error('The username ' + username + ' is missing or an invalid argument.');
+        } else if (error.xhr.status === 404) {
+          console.error('The user ' + username + ' was not found.');
+        } else {
+          console.log('error in forgotPasswordWithUsername: ', error.error.message);
+          console.error(error.error.stack);
+        }
+        return false;
+      });
+    },
+    newPassword: function(password, ticket) {
+      if (!password || (typeof password !== 'string' && !(password instanceof String))) {
+        throw new TypeError('password must be type string in MHUser.newPassword');
+      }
+      if (!ticket || (typeof ticket !== 'string' && !(ticket instanceof String))) {
+        throw new TypeError('ticket must be type string in MHUser.newPassword');
+      }
+      var path = $MHUser.rootEndpoint + '/forgotpassword/finish',
+          data = {};
+      data.newPassword = password;
+      data.ticket = ticket;
+      return houndRequest({
+        method: 'POST',
+        endpoint: path,
+        withCredentials: false,
+        data: data
+      }).then(function(response) {
+        console.log('valid newPassword: ', response);
+        return response;
+      }).catch(function(error) {
+        if (error.xhr.status === 400) {
+          console.error('The password ' + password + ' is an invalid password.');
+        } else if (error.xhr.status === 404) {
+          console.error('The ticket ' + ticket + ' was not found.');
+        } else {
+          console.log('error in newPassword: ', error.error.message);
+          console.error(error.error.stack);
+        }
         return false;
       });
     },
