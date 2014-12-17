@@ -4366,6 +4366,27 @@ System.register("models/user/MHUser", [], function() {
         return false;
       });
     },
+    forgotUsernameWithEmail: function(email) {
+      if (!email || (typeof email !== 'string' && !(email instanceof String))) {
+        throw new TypeError('Email must be type string in MHUser.forgotUsernameWithEmail');
+      }
+      var path = $MHUser.rootEndpoint + '/forgotusername',
+          data = {};
+      data.email = email;
+      return houndRequest({
+        method: 'POST',
+        endpoint: path,
+        withCredentials: false,
+        data: data
+      }).then(function(response) {
+        console.log('valid forgotUsernameWithEmail: ', response);
+        return response;
+      }).catch(function(error) {
+        console.log('error in forgotUsernameWithEmail: ', error.error.message);
+        console.error(error.error.stack);
+        return false;
+      });
+    },
     fetchByUsername: function(username) {
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
       if (!username || (typeof username !== 'string' && !(username instanceof String))) {
@@ -4399,10 +4420,12 @@ System.register("models/user/MHUser", [], function() {
         return Promise.all(MHObject.fetchByMhids(response));
       });
     },
-    linkTwitterAccount: function(success, failure) {
+    linkTwitterAccount: function(s, f) {
+      var success = s || 'https://www.mediahound.com/',
+          failure = f || 'https://www.mediahound.com/';
       return houndRequest({
         method: 'GET',
-        endpoint: $MHUser.rootEndpoint + '/account/twitter/link?successRedirectUrl=http://www.mediahound.com&failureRedirectUrl=http://www.mediahound.com',
+        endpoint: $MHUser.rootEndpoint + '/account/twitter/link?successRedirectUrl=' + success + '&failureRedirectUrl=' + failure,
         withCredentials: true,
         headers: {
           'Accept': 'application/json',

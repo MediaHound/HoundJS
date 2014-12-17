@@ -270,6 +270,39 @@ export class MHUser extends MHObject {
         return false;
       });
   }
+  /*
+  * mhUser.forgotUsernameWithEmail()
+  *
+  * @return { Promise }
+  *
+  */
+  static forgotUsernameWithEmail(email){
+    if( !email || (typeof email !== 'string' && !(email instanceof String)) ){
+      throw new TypeError('Email must be type string in MHUser.forgotUsernameWithEmail');
+    }
+    var path = MHUser.rootEndpoint + '/forgotusername',
+    data = {};
+
+    data.email = email;
+
+    // returns 200 for acceptable user name
+    // returns 406 for taken user name
+    return houndRequest({
+      method          : 'POST',
+      endpoint        : path,
+      withCredentials : false,
+      data            : data
+    })
+    .then(function(response){
+      console.log('valid forgotUsernameWithEmail: ', response);
+      return response;
+    })
+    .catch(function(error){
+      console.log('error in forgotUsernameWithEmail: ', error.error.message);
+      console.error(error.error.stack);
+      return false;
+    });
+  }
 
   /* TODO: docJS
    *
@@ -415,40 +448,6 @@ export class MHUser extends MHObject {
       });
   }
 
-  static linkTwitterAccount(s,f){
-
-    var success = s || 'https://www.mediahound.com/',
-        failure = f || 'https://www.mediahound.com/';
-
-    return houndRequest({
-             method            : 'GET',
-             endpoint          : MHUser.rootEndpoint + '/account/twitter/link?successRedirectUrl='+success+'&failureRedirectUrl='+failure,
-             withCredentials: true,
-             //data   : { 'successRedirectUrl' : 'http://www.mediahound.com',  'failureRedirectUrl' : 'http://www.mediahound.com'},
-             headers: {
-               'Accept':'application/json',
-               'Content-Type':'application/json'
-             }
-           }).then(function(response){
-             return response;
-           });
-  }
-
-  static unlinkTwitterAccount(){
-
-    return houndRequest({
-             method            : 'GET',
-             endpoint          : MHUser.rootEndpoint + '/account/twitter/unlink',
-             withCredentials: true,
-             headers: {
-               'Accept':'application/json',
-               'Content-Type':'application/json'
-             }
-           }).then(function(response){
-             return response;
-           });
-  }
-
   /* TODO: add local cache
    * mhUsr.fetchInterestFeed(view, page, size)
    *
@@ -532,7 +531,7 @@ export class MHUser extends MHObject {
   }
 
   /* TODO: remove console.log debug stuffs
-   * mhUsr.fetchFollowedCollections()
+   * mhUser.fetchFollowedCollections()
    *
    * @return { Promise }
    *
@@ -554,6 +553,50 @@ export class MHUser extends MHObject {
 
     return this.followedCollectionsPromise;
   }
+  /*
+  * mhUser.linkTwitterAccount()
+  *
+  * @return { Promise }
+  *
+  */
+  static linkTwitterAccount(s,f){
+
+    var success = s || 'https://www.mediahound.com/',
+    failure = f || 'https://www.mediahound.com/';
+
+    return houndRequest({
+      method            : 'GET',
+      endpoint          : MHUser.rootEndpoint + '/account/twitter/link?successRedirectUrl='+success+'&failureRedirectUrl='+failure,
+      withCredentials: true,
+      //data   : { 'successRedirectUrl' : 'http://www.mediahound.com',  'failureRedirectUrl' : 'http://www.mediahound.com'},
+      headers: {
+        'Accept':'application/json',
+        'Content-Type':'application/json'
+      }
+    }).then(function(response){
+      return response;
+    });
+  }
+  /*
+  * mhUser.unlinkTwitterAccount()
+  *
+  * @return { Promise }
+  *
+  */
+  static unlinkTwitterAccount(){
+
+    return houndRequest({
+      method            : 'GET',
+      endpoint          : MHUser.rootEndpoint + '/account/twitter/unlink',
+      withCredentials: true,
+      headers: {
+        'Accept':'application/json',
+        'Content-Type':'application/json'
+      }
+    }).then(function(response){
+      return response;
+    });
+  }
 
   // Could change as needed
   toString(){
@@ -564,4 +607,3 @@ export class MHUser extends MHObject {
 (function(){
   MHObject.registerConstructor(MHUser);
 })();
-
