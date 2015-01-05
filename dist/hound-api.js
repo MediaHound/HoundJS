@@ -2496,7 +2496,7 @@ System.register("models/internal/debug-helpers", [], function() {
 System.register("origin/hound-origin", [], function() {
   "use strict";
   var __moduleName = "origin/hound-origin";
-  var houndOrigin = 'https://api.mediahound.com/';
+  var houndOrigin = 'https://dev-api.mediahound.com/';
   ;
   return {get houndOrigin() {
       return houndOrigin;
@@ -4153,6 +4153,37 @@ System.register("models/user/MHUser", [], function() {
       var currentUser = System.get('models/user/MHLoginSession').MHLoginSession.currentUser;
       return this.isEqualToMHObject(currentUser);
     },
+    setPassword: function(password, newPassword) {
+      if (!password || (typeof password !== 'string' && !(password instanceof String))) {
+        throw new TypeError('password must be type string in MHUser.newPassword');
+      }
+      if (!newPassword || (typeof newPassword !== 'string' && !(newPassword instanceof String))) {
+        throw new TypeError('newPassword must be type string in MHUser.newPassword');
+      }
+      var path = $MHUser.rootEndpoint + '/forgotpassword/finish',
+          data = {};
+      data.oldPassword = password;
+      data.newPassword = newPassword;
+      return houndRequest({
+        method: 'POST',
+        endpoint: path,
+        withCredentials: true,
+        data: data
+      }).then(function(response) {
+        console.log('valid resetPassword: ', response);
+        return response;
+      }).catch(function(error) {
+        if (error.xhr.status === 400) {
+          console.error('The password ' + password + ' is an invalid password.');
+        } else if (error.xhr.status === 404) {
+          console.error('The newPassword ' + newPassword + ' was not found.');
+        } else {
+          console.log('error in setPassword: ', error.error.message);
+          console.error(error.error.stack);
+        }
+        return false;
+      });
+    },
     setProfileImage: function(image) {
       log('in setProfileImage with image: ', image);
       if (!image) {
@@ -4366,6 +4397,118 @@ System.register("models/user/MHUser", [], function() {
         return false;
       });
     },
+    forgotUsernameWithEmail: function(email) {
+      if (!email || (typeof email !== 'string' && !(email instanceof String))) {
+        throw new TypeError('Email must be type string in MHUser.forgotUsernameWithEmail');
+      }
+      var path = $MHUser.rootEndpoint + '/forgotusername',
+          data = {};
+      data.email = email;
+      return houndRequest({
+        method: 'POST',
+        endpoint: path,
+        withCredentials: false,
+        data: data
+      }).then(function(response) {
+        console.log('valid forgotUsernameWithEmail: ', response);
+        return response;
+      }).catch(function(error) {
+        if (error.xhr.status === 400) {
+          console.error('The email ' + email + ' is missing or an invalid argument.');
+        } else if (error.xhr.status === 404) {
+          console.error('The user with the email address ' + email + ' was not found.');
+        } else {
+          console.log('error in new forgotUsernameWithEmail: ', error.error.message);
+          console.error(error.error.stack);
+        }
+        return false;
+      });
+    },
+    forgotPasswordWithEmail: function(email) {
+      if (!email || (typeof email !== 'string' && !(email instanceof String))) {
+        throw new TypeError('Email must be type string in MHUser.forgotPasswordWithEmail');
+      }
+      var path = $MHUser.rootEndpoint + '/forgotpassword',
+          data = {};
+      data.email = email;
+      return houndRequest({
+        method: 'POST',
+        endpoint: path,
+        withCredentials: false,
+        data: data
+      }).then(function(response) {
+        console.log('valid forgotPasswordWithEmail: ', response);
+        return response;
+      }).catch(function(error) {
+        if (error.xhr.status === 400) {
+          console.error('The email ' + email + ' is missing or an invalid argument.');
+        } else if (error.xhr.status === 404) {
+          console.error('The user with the email address ' + email + ' was not found.');
+        } else {
+          console.log('error in new forgotPasswordWithEmail: ', error.error.message);
+          console.error(error.error.stack);
+        }
+        return false;
+      });
+    },
+    forgotPasswordWithUsername: function(username) {
+      if (!username || (typeof username !== 'string' && !(username instanceof String))) {
+        throw new TypeError('username must be type string in MHUser.forgotPasswordWithUsername');
+      }
+      var path = $MHUser.rootEndpoint + '/forgotpassword',
+          data = {};
+      data.username = username;
+      return houndRequest({
+        method: 'POST',
+        endpoint: path,
+        withCredentials: false,
+        data: data
+      }).then(function(response) {
+        console.log('valid forgotPasswordWithUsername: ', response);
+        return response;
+      }).catch(function(error) {
+        if (error.xhr.status === 400) {
+          console.error('The username ' + username + ' is missing or an invalid argument.');
+        } else if (error.xhr.status === 404) {
+          console.error('The user ' + username + ' was not found.');
+        } else {
+          console.log('error in forgotPasswordWithUsername: ', error.error.message);
+          console.error(error.error.stack);
+        }
+        return false;
+      });
+    },
+    newPassword: function(password, ticket) {
+      if (!password || (typeof password !== 'string' && !(password instanceof String))) {
+        throw new TypeError('password must be type string in MHUser.newPassword');
+      }
+      if (!ticket || (typeof ticket !== 'string' && !(ticket instanceof String))) {
+        throw new TypeError('ticket must be type string in MHUser.newPassword');
+      }
+      var path = $MHUser.rootEndpoint + '/forgotpassword/finish',
+          data = {};
+      data.newPassword = password;
+      data.ticket = ticket;
+      return houndRequest({
+        method: 'POST',
+        endpoint: path,
+        withCredentials: false,
+        data: data
+      }).then(function(response) {
+        console.log('valid newPassword: ', response);
+        return response;
+      }).catch(function(error) {
+        if (error.xhr.status === 400) {
+          console.error('The password ' + password + ' is an invalid password.');
+        } else if (error.xhr.status === 404) {
+          console.error('The ticket ' + ticket + ' was not found.');
+        } else {
+          console.log('error in newPassword: ', error.error.message);
+          console.error(error.error.stack);
+        }
+        return false;
+      });
+    },
     fetchByUsername: function(username) {
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
       if (!username || (typeof username !== 'string' && !(username instanceof String))) {
@@ -4397,6 +4540,34 @@ System.register("models/user/MHUser", [], function() {
         endpoint: path
       }).then(function(response) {
         return Promise.all(MHObject.fetchByMhids(response));
+      });
+    },
+    linkTwitterAccount: function(s, f) {
+      var success = s || 'https://www.mediahound.com/',
+          failure = f || 'https://www.mediahound.com/';
+      return houndRequest({
+        method: 'GET',
+        endpoint: $MHUser.rootEndpoint + '/account/twitter/link?successRedirectUrl=' + success + '&failureRedirectUrl=' + failure,
+        withCredentials: true,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      }).then(function(response) {
+        return response;
+      });
+    },
+    unlinkTwitterAccount: function() {
+      return houndRequest({
+        method: 'GET',
+        endpoint: $MHUser.rootEndpoint + '/account/twitter/unlink',
+        withCredentials: true,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      }).then(function(response) {
+        return response;
       });
     }
   }, MHObject);
@@ -5222,13 +5393,15 @@ System.register("models/source/MHSourceFormat", [], function() {
       }
     }
     var type = args.type || null,
-        price = args.price || null,
+        price = args.price,
         launchInfo = args.launchInfo || null,
         timeperiod = args.timeperiod || null,
         subscriptionDescription = args.subscriptionDescription || null;
     if (type === null || price === null || launchInfo === null) {
-      console.error(type, price, launchInfo);
       throw new TypeError('Required info not defined on argument map in MHSourceFormat', 'MHSourceFormat.js', 41);
+    }
+    if (price === undefined) {
+      throw new TypeError('Price is undefined.', 'MHSourceFormat.js', 43);
     }
     Object.defineProperties(this, {
       'type': {
