@@ -1,4 +1,4 @@
 /* env variables */
-var houndOrigin = 'https://dev-api.mediahound.com/';
+var houndOrigin = 'https://stag-api.mediahound.com/';
 
 export { houndOrigin };

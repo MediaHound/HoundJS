@@ -2496,7 +2496,7 @@ System.register("models/internal/debug-helpers", [], function() {
 System.register("origin/hound-origin", [], function() {
   "use strict";
   var __moduleName = "origin/hound-origin";
-  var houndOrigin = 'https://dev-api.mediahound.com/';
+  var houndOrigin = 'https://stag-api.mediahound.com/';
   ;
   return {get houndOrigin() {
       return houndOrigin;
@@ -5393,13 +5393,15 @@ System.register("models/source/MHSourceFormat", [], function() {
       }
     }
     var type = args.type || null,
-        price = args.price || null,
+        price = args.price,
         launchInfo = args.launchInfo || null,
         timeperiod = args.timeperiod || null,
         subscriptionDescription = args.subscriptionDescription || null;
     if (type === null || price === null || launchInfo === null) {
-      console.error(type, price, launchInfo);
       throw new TypeError('Required info not defined on argument map in MHSourceFormat', 'MHSourceFormat.js', 41);
+    }
+    if (price === undefined) {
+      throw new TypeError('Price is undefined.', 'MHSourceFormat.js', 43);
     }
     Object.defineProperties(this, {
       'type': {
