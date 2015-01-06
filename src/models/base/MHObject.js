@@ -46,16 +46,18 @@ export class MHObject {
    */
   constructor(args) {
     args = MHObject.parseArgs(args);
-
+    //log(args);
     if( typeof args.metadata.mhid === 'undefined' || args.metadata.mhid === null ){
       throw new TypeError('mhid is null or undefined', 'MHObject.js', 89);
     }
 
-    var metadata        = args.metadata.altId || null,
+    var mhid            = args.metadata.mhid || null,
+        altId           = args.metadata.altId || null,
+        metadata        = args.metadata || null,
         // Optional (nullable) values
         primaryImage    = (args.primaryImage != null)   ? MHObject.create(args.primaryImage)    : null,
         secondaryImage  = (args.secondaryImage != null) ? MHObject.create(args.secondaryImage)  : null,
-        social  = (args.social != null) ? MHObject.fetchSocial(args.metadata.mhid) : null,
+        social  = (args.social != null) ? MHObject.fetchSocial(args.metadata.mhid)  : null,
         createdDate     = new Date(args.metadata.createdDate);
 
     // if invalid date reset to original value or null
@@ -66,6 +68,18 @@ export class MHObject {
     // Create imutable properties
     //  mhid, name, primaryImage, createdDate, etc...
     Object.defineProperties(this, {
+      'mhid':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        mhid
+      },
+      'altId':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        altId
+      },
       'metadata':{
         configurable: false,
         enumerable:   true,
@@ -122,6 +136,7 @@ export class MHObject {
    */
   static parseArgs(args){
     var type = typeof args;
+
     // If object with mhid return
     if( type === 'object' && !(args instanceof String) && args.metadata.mhid ){
       return args;
@@ -163,6 +178,7 @@ export class MHObject {
    */
   static create(args){
     if( args instanceof Array ){
+      log('trying to create MHObject that is new: ' + args);
       //return args.map(MHObject.create); // <-- should probably be this once all MHObjs are done
       return args.map(function(value){
         try{
@@ -174,10 +190,13 @@ export class MHObject {
       });
     }
     try{
+
       args = MHObject.parseArgs(args);
-      console.log(args);
+
       if( typeof args.metadata.mhid !== 'undefined' && args.metadata.mhid !== null ){
         // check cache
+        log('in create function trying to parseArgs: \n\n' + JSON.stringify(args));
+
         if( mhidLRU.has(args.metadata.mhid) ){
           log('getting from cache in create: ' + args.metadata.mhid);
           return mhidLRU.get(args.metadata.mhid);
@@ -185,7 +204,6 @@ export class MHObject {
 
         var prefix = MHObject.getPrefixFromMhid(args.metadata.mhid),
             mhObj = new childrenConstructors[prefix](args);
-
         /*
         if( prefix === 'mhimg' ){
           // bypass cache
@@ -194,10 +212,11 @@ export class MHObject {
           mhidLRU.putMHObj(mhObj);
         }
         */
-
+        log('trying to create ',prefix,': ', mhObj);
         return mhObj;
       }
     } catch (err) {
+      log(err);
       if( err instanceof TypeError ) {
         if( err.message === 'undefined is not a function' ) {
           warn('Unknown mhid prefix, see args object: ', args);
@@ -227,7 +246,7 @@ export class MHObject {
       mhClass.name = mhClass.toString().match(/function (MH[A-Za-z]*)\(args\)/)[1];
       log('shimmed mhClass.name to: ' + mhClass.name);
     }
-    log('registering constructor: ' + mhClass.name);
+    //log('registering constructor: ' + mhClass.name);
 
     var prefix = mhClass.mhidPrefix;
     if( typeof prefix !== 'undefined' && prefix !== null && !(prefix in childrenConstructors) ){
@@ -406,7 +425,7 @@ export class MHObject {
       throw TypeError('MHObject.fetchByMhid argument must be type string.');
     }
 
-    console.log('in fetchByMhid, looking for: ', mhid, 'with view=',view);
+    log('in fetchByMhid, looking for: ', mhid, 'with view = ',view);
 
     // Check LRU for mhid
     if( !force && mhidLRU.has(mhid) ){
@@ -432,7 +451,7 @@ export class MHObject {
       })
       .then(function(response){
         newObj = MHObject.create(response);
-        log('fetched: ', newObj);
+        log('fetched: ', newObj, 'with response: ', response);
         if( prefix === 'mhimg' ){
           // bypass cache
         } else {

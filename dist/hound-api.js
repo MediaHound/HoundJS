@@ -2438,7 +2438,7 @@ System.register("models/internal/debug-helpers", [], function() {
   "use strict";
   var __moduleName = "models/internal/debug-helpers";
   var debug = {
-    log: false,
+    log: true,
     warn: true,
     error: true
   };
@@ -3188,7 +3188,9 @@ System.register("models/base/MHObject", [], function() {
     if (typeof args.metadata.mhid === 'undefined' || args.metadata.mhid === null) {
       throw new TypeError('mhid is null or undefined', 'MHObject.js', 89);
     }
-    var metadata = args.metadata.altId || null,
+    var mhid = args.metadata.mhid || null,
+        altId = args.metadata.altId || null,
+        metadata = args.metadata || null,
         primaryImage = (args.primaryImage != null) ? $MHObject.create(args.primaryImage) : null,
         secondaryImage = (args.secondaryImage != null) ? $MHObject.create(args.secondaryImage) : null,
         social = (args.social != null) ? $MHObject.fetchSocial(args.metadata.mhid) : null,
@@ -3197,6 +3199,18 @@ System.register("models/base/MHObject", [], function() {
       createdDate = args.metadata.createdDate || null;
     }
     Object.defineProperties(this, {
+      'mhid': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: mhid
+      },
+      'altId': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: altId
+      },
       'metadata': {
         configurable: false,
         enumerable: true,
@@ -3370,6 +3384,7 @@ System.register("models/base/MHObject", [], function() {
     },
     create: function(args) {
       if (args instanceof Array) {
+        log('trying to create MHObject that is new: ' + args);
         return args.map(function(value) {
           try {
             return $MHObject.create(value);
@@ -3381,17 +3396,19 @@ System.register("models/base/MHObject", [], function() {
       }
       try {
         args = $MHObject.parseArgs(args);
-        console.log(args);
         if (typeof args.metadata.mhid !== 'undefined' && args.metadata.mhid !== null) {
+          log('in create function trying to parseArgs: \n\n' + JSON.stringify(args));
           if (mhidLRU.has(args.metadata.mhid)) {
             log('getting from cache in create: ' + args.metadata.mhid);
             return mhidLRU.get(args.metadata.mhid);
           }
           var prefix = $MHObject.getPrefixFromMhid(args.metadata.mhid),
               mhObj = new childrenConstructors[prefix](args);
+          log('trying to create ', prefix, ': ', mhObj);
           return mhObj;
         }
       } catch (err) {
+        log(err);
         if (err instanceof TypeError) {
           if (err.message === 'undefined is not a function') {
             warn('Unknown mhid prefix, see args object: ', args);
@@ -3409,7 +3426,6 @@ System.register("models/base/MHObject", [], function() {
         mhClass.name = mhClass.toString().match(/function (MH[A-Za-z]*)\(args\)/)[1];
         log('shimmed mhClass.name to: ' + mhClass.name);
       }
-      log('registering constructor: ' + mhClass.name);
       var prefix = mhClass.mhidPrefix;
       if (typeof prefix !== 'undefined' && prefix !== null && !(prefix in childrenConstructors)) {
         Object.defineProperty(childrenConstructors, prefix, {
@@ -3449,7 +3465,7 @@ System.register("models/base/MHObject", [], function() {
       if (typeof mhid !== 'string' && !(mhid instanceof String)) {
         throw TypeError('MHObject.fetchByMhid argument must be type string.');
       }
-      console.log('in fetchByMhid, looking for: ', mhid, 'with view=', view);
+      log('in fetchByMhid, looking for: ', mhid, 'with view = ', view);
       if (!force && mhidLRU.has(mhid)) {
         return Promise.resolve(mhidLRU.get(mhid));
       }
@@ -3468,7 +3484,7 @@ System.register("models/base/MHObject", [], function() {
         endpoint: mhClass.rootEndpoint + '/' + mhid + '?view=' + view
       }).then(function(response) {
         newObj = $MHObject.create(response);
-        log('fetched: ', newObj);
+        log('fetched: ', newObj, 'with response: ', response);
         if (prefix === 'mhimg') {} else {
           mhidLRU.putMHObj(newObj);
         }
@@ -4028,15 +4044,15 @@ System.register("models/user/MHUser", [], function() {
   var pagedRequest = System.get("request/hound-paged-request").pagedRequest;
   var MHUser = function MHUser(args) {
     args = MHObject.parseArgs(args);
-    if (typeof args.username === 'undefined' || args.username === null) {
+    if (typeof args.metadata.username === 'undefined' || args.metadata.username === null) {
       throw new TypeError('Username is null or undefined', 'MHUser.js', 39);
     }
     $traceurRuntime.superCall(this, $MHUser.prototype, "constructor", [args]);
-    var username = args.username,
-        email = args.email || null,
-        phonenumber = args.phonenumber || args.phoneNumber || null,
-        firstname = args.firstname || args.firstName || null,
-        lastname = args.lastname || args.lastName || null;
+    var username = args.metadata.username,
+        email = args.metadata.email || null,
+        phonenumber = args.metadata.phonenumber || args.metadata.phoneNumber || null,
+        firstname = args.metadata.firstname || args.metadata.firstName || null,
+        lastname = args.metadata.lastname || args.metadata.lastName || null;
     Object.defineProperties(this, {
       'username': {
         configurable: false,
@@ -4301,7 +4317,7 @@ System.register("models/user/MHUser", [], function() {
         withCredentials: true,
         headers: {}
       }).then(function(parsed) {
-        return MHObject.fetchByMhid(parsed.mhid);
+        return MHObject.fetchByMhid(parsed.metadata.mhid);
       });
     },
     validateUsername: function(username) {

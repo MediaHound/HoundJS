@@ -1,7 +1,7 @@
 
 // Logging Helper
 var debug = {
-  log:    false,
+  log:    true,
   warn:   true, //( (/(local\.mediahound\.com:2014)|(stag-www\.mediahound\.com)/).test(window.location.host) ),
   error:  true  //( (/(local\.mediahound\.com:2014)|(stag-www\.mediahound\.com)/).test(window.location.host) )
 };

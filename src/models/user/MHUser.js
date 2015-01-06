@@ -20,38 +20,38 @@ export class MHUser extends MHObject {
    *
    * Inherited From MHObject
    *    Require Param Props
-   *      mhid    - { MediaHound ID string }
+   *      metadata.mhid    - { MediaHound ID string }
    *
    *    Optional Param Props
-   *      name            - { String }
+   *      metadata.name   - { String }
    *      primaryImage    - { MHImage }
-   *      createdDate     - { String | Date }
+   *      metadata.createdDate     - { String | Date }
    *
    * MHUser Param Props
    *    Required
-   *      username        - { String }
+   *      metadata.username        - { String }
    *
    *    Optional
-   *      email           - { String<Email> }
-   *      phonenumber     - { String<phone> | Number? }
-   *      firstName       - { String }
-   *      lastName        - { String }
+   *      metadata.email           - { String<Email> }
+   *      metadata.phonenumber     - { String<phone> | Number? }
+   *      metadata.firstName       - { String }
+   *      metadata.lastName        - { String }
    *
    */
   constructor(args) {
     args = MHObject.parseArgs(args);
-    if( typeof args.username === 'undefined' || args.username === null ){
+    if( typeof args.metadata.username === 'undefined' || args.metadata.username === null ){
       throw new TypeError('Username is null or undefined', 'MHUser.js', 39);
     }
     // Call Super Constructor
     super(args);
 
     // Default MHUser unique non-required objects to null
-    var username    = args.username,
-        email       = args.email        || null,
-        phonenumber = args.phonenumber  || args.phoneNumber || null,
-        firstname   = args.firstname    || args.firstName   || null,
-        lastname    = args.lastname     || args.lastName    || null;
+    var username    = args.metadata.username,
+        email       = args.metadata.email        || null,
+        phonenumber = args.metadata.phonenumber  || args.metadata.phoneNumber || null,
+        firstname   = args.metadata.firstname    || args.metadata.firstName   || null,
+        lastname    = args.metadata.lastname     || args.metadata.lastName    || null;
 
     // Create imutable properties
     //  username, email, phonenumber, firstname, lastname
@@ -201,7 +201,7 @@ export class MHUser extends MHObject {
         }
       })
       .then(function(parsed){
-        return MHObject.fetchByMhid(parsed.mhid);
+        return MHObject.fetchByMhid(parsed.metadata.mhid);
       });
       /*
       .catch(function(error){
