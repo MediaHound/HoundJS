@@ -47,43 +47,30 @@ export class MHObject {
   constructor(args) {
     args = MHObject.parseArgs(args);
 
-    if( typeof args.mhid === 'undefined' || args.mhid === null ){
+    if( typeof args.metadata.mhid === 'undefined' || args.metadata.mhid === null ){
       throw new TypeError('mhid is null or undefined', 'MHObject.js', 89);
     }
 
-    var mhid            = args.mhid,
+    var metadata        = args.metadata.altId || null,
         // Optional (nullable) values
-        name            = (args.name != null) ? args.name : null,
-        altId           = args.altId || null,
         primaryImage    = (args.primaryImage != null)   ? MHObject.create(args.primaryImage)    : null,
         secondaryImage  = (args.secondaryImage != null) ? MHObject.create(args.secondaryImage)  : null,
-        createdDate     = new Date(args.createdDate);
+        social  = (args.social != null) ? MHObject.fetchSocial(args.metadata.mhid) : null,
+        createdDate     = new Date(args.metadata.createdDate);
 
     // if invalid date reset to original value or null
     if( isNaN(createdDate) ){
-      createdDate = args.createdDate || null;
+      createdDate = args.metadata.createdDate || null;
     }
 
     // Create imutable properties
     //  mhid, name, primaryImage, createdDate, etc...
     Object.defineProperties(this, {
-      'mhid':{
+      'metadata':{
         configurable: false,
         enumerable:   true,
         writable:     false,
-        value:        mhid
-      },
-      'name':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        name
-      },
-      'altId':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        altId
+        value:        metadata
       },
       'primaryImage':{
         configurable: false,
@@ -97,11 +84,11 @@ export class MHObject {
         writable:     false,
         value:        secondaryImage
       },
-      'createdDate':{
+      'social':{
         configurable: false,
         enumerable:   true,
         writable:     false,
-        value:        createdDate
+        value:        social
       },
       // Promises
       'feedPagedRequest':{
@@ -136,7 +123,7 @@ export class MHObject {
   static parseArgs(args){
     var type = typeof args;
     // If object with mhid return
-    if( type === 'object' && !(args instanceof String) && args.mhid ){
+    if( type === 'object' && !(args instanceof String) && args.metadata.mhid ){
       return args;
     }
     // if type string, parse
@@ -188,14 +175,15 @@ export class MHObject {
     }
     try{
       args = MHObject.parseArgs(args);
-      if( typeof args.mhid !== 'undefined' && args.mhid !== null ){
+      console.log(args);
+      if( typeof args.metadata.mhid !== 'undefined' && args.metadata.mhid !== null ){
         // check cache
-        if( mhidLRU.has(args.mhid) ){
-          log('getting from cache in create: ' + args.mhid);
-          return mhidLRU.get(args.mhid);
+        if( mhidLRU.has(args.metadata.mhid) ){
+          log('getting from cache in create: ' + args.metadata.mhid);
+          return mhidLRU.get(args.metadata.mhid);
         }
 
-        var prefix = MHObject.getPrefixFromMhid(args.mhid),
+        var prefix = MHObject.getPrefixFromMhid(args.metadata.mhid),
             mhObj = new childrenConstructors[prefix](args);
 
         /*
@@ -313,54 +301,54 @@ export class MHObject {
   // case:
   //    instanceof only works if the object being checked was created
   //    in the same global scope as the constructor function it is being checked against
-  static isMedia(toCheck){
-    return toCheck instanceof System.get('../../src/models/media/MHMedia').MHMedia;
-  }
-  get isMedia(){
-    return MHObject.isMedia(this);
-  }
-
-  static isContributor(toCheck){
-    return toCheck instanceof System.get('../../src/models/contributor/MHContributor').MHContributor;
-  }
-  get isContributor(){
-    return MHObject.isContributor(this);
-  }
-
-  static isAction(toCheck){
-    return toCheck instanceof System.get('../../src/models/action/MHAction').MHAction;
-  }
-  get isAction(){
-    return MHObject.isAction(this);
-  }
-
-  static isUser(toCheck){
-    return toCheck instanceof System.get('../../src/models/user/MHUser').MHUser;
-  }
-  get isUser(){
-    return MHObject.isUser(this);
-  }
-
-  static isCollection(toCheck){
-    return toCheck instanceof System.get('../../src/models/collection/MHCollection').MHCollection;
-  }
-  get isCollection(){
-    return MHObject.isCollection(this);
-  }
-
-  static isImage(toCheck){
-    return toCheck instanceof System.get('../../src/models/image/MHImage').MHImage;
-  }
-  get isImage(){
-    return MHObject.isImage(this);
-  }
-
-  static isTrait(toCheck){
-    return toCheck instanceof System.get('../../src/models/trait/MHTrait').MHTrait;
-  }
-  get isTrait(){
-    return MHObject.isTrait(this);
-  }
+  // static isMedia(toCheck){
+  //   return toCheck instanceof System.get('../../src/models/media/MHMedia').MHMedia;
+  // }
+  // get isMedia(){
+  //   return MHObject.isMedia(this);
+  // }
+  //
+  // static isContributor(toCheck){
+  //   return toCheck instanceof System.get('../../src/models/contributor/MHContributor').MHContributor;
+  // }
+  // get isContributor(){
+  //   return MHObject.isContributor(this);
+  // }
+  //
+  // static isAction(toCheck){
+  //   return toCheck instanceof System.get('../../src/models/action/MHAction').MHAction;
+  // }
+  // get isAction(){
+  //   return MHObject.isAction(this);
+  // }
+  //
+  // static isUser(toCheck){
+  //   return toCheck instanceof System.get('../../src/models/user/MHUser').MHUser;
+  // }
+  // get isUser(){
+  //   return MHObject.isUser(this);
+  // }
+  //
+  // static isCollection(toCheck){
+  //   return toCheck instanceof System.get('../../src/models/collection/MHCollection').MHCollection;
+  // }
+  // get isCollection(){
+  //   return MHObject.isCollection(this);
+  // }
+  //
+  // static isImage(toCheck){
+  //   return toCheck instanceof System.get('../../src/models/image/MHImage').MHImage;
+  // }
+  // get isImage(){
+  //   return MHObject.isImage(this);
+  // }
+  //
+  // static isTrait(toCheck){
+  //   return toCheck instanceof System.get('../../src/models/trait/MHTrait').MHTrait;
+  // }
+  // get isTrait(){
+  //   return MHObject.isTrait(this);
+  // }
 
   /**
    * This uses the function.name feature which is shimmed if it doesn't exist during the child constructor registration process.
@@ -408,16 +396,17 @@ export class MHObject {
    * MHObject.fetchByMhid(mhid)
    *
    * @param   { String        } mhid  - valid MediaHound ID
+   * @param   { String        } view  - set to basic, basic_social, extended, extended_social, full, defaults to basic.
    * @param   { boolean=false } force - set to true to re-request for the given mhid
    * @return  { Promise       } - resloves to specific MHObject sub class
    *
    */
-  static fetchByMhid(mhid, force=false){
+  static fetchByMhid(mhid, view='basic', force=false){
     if( typeof mhid !== 'string' && !(mhid instanceof String) ){
       throw TypeError('MHObject.fetchByMhid argument must be type string.');
     }
 
-    log('in fetchByMhid, looking for: ', mhid);
+    console.log('in fetchByMhid, looking for: ', mhid, 'with view=',view);
 
     // Check LRU for mhid
     if( !force && mhidLRU.has(mhid) ){
@@ -439,7 +428,7 @@ export class MHObject {
 
     return houndRequest({
         method: 'GET',
-        endpoint: mhClass.rootEndpoint + '/' + mhid
+        endpoint: mhClass.rootEndpoint + '/' + mhid + '?view=' + view
       })
       .then(function(response){
         newObj = MHObject.create(response);
@@ -650,4 +639,3 @@ export class MHObject {
       });
   }
 }
-

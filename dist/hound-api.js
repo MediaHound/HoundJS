@@ -3185,36 +3185,23 @@ System.register("models/base/MHObject", [], function() {
       socialSym = Symbol('social');
   var MHObject = function MHObject(args) {
     args = $MHObject.parseArgs(args);
-    if (typeof args.mhid === 'undefined' || args.mhid === null) {
+    if (typeof args.metadata.mhid === 'undefined' || args.metadata.mhid === null) {
       throw new TypeError('mhid is null or undefined', 'MHObject.js', 89);
     }
-    var mhid = args.mhid,
-        name = (args.name != null) ? args.name : null,
-        altId = args.altId || null,
+    var metadata = args.metadata.altId || null,
         primaryImage = (args.primaryImage != null) ? $MHObject.create(args.primaryImage) : null,
         secondaryImage = (args.secondaryImage != null) ? $MHObject.create(args.secondaryImage) : null,
-        createdDate = new Date(args.createdDate);
+        social = (args.social != null) ? $MHObject.fetchSocial(args.metadata.mhid) : null,
+        createdDate = new Date(args.metadata.createdDate);
     if (isNaN(createdDate)) {
-      createdDate = args.createdDate || null;
+      createdDate = args.metadata.createdDate || null;
     }
     Object.defineProperties(this, {
-      'mhid': {
+      'metadata': {
         configurable: false,
         enumerable: true,
         writable: false,
-        value: mhid
-      },
-      'name': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: name
-      },
-      'altId': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: altId
+        value: metadata
       },
       'primaryImage': {
         configurable: false,
@@ -3228,11 +3215,11 @@ System.register("models/base/MHObject", [], function() {
         writable: false,
         value: secondaryImage
       },
-      'createdDate': {
+      'social': {
         configurable: false,
         enumerable: true,
         writable: false,
-        value: createdDate
+        value: social
       },
       'feedPagedRequest': {
         configurable: false,
@@ -3252,27 +3239,6 @@ System.register("models/base/MHObject", [], function() {
         this[socialSym] = newSocial;
       }
       return this.social;
-    },
-    get isMedia() {
-      return $MHObject.isMedia(this);
-    },
-    get isContributor() {
-      return $MHObject.isContributor(this);
-    },
-    get isAction() {
-      return $MHObject.isAction(this);
-    },
-    get isUser() {
-      return $MHObject.isUser(this);
-    },
-    get isCollection() {
-      return $MHObject.isCollection(this);
-    },
-    get isImage() {
-      return $MHObject.isImage(this);
-    },
-    get isTrait() {
-      return $MHObject.isTrait(this);
     },
     get className() {
       return this.constructor.name;
@@ -3379,7 +3345,7 @@ System.register("models/base/MHObject", [], function() {
   }, {
     parseArgs: function(args) {
       var type = typeof args;
-      if (type === 'object' && !(args instanceof String) && args.mhid) {
+      if (type === 'object' && !(args instanceof String) && args.metadata.mhid) {
         return args;
       }
       if (type === 'string' || args instanceof String) {
@@ -3415,12 +3381,13 @@ System.register("models/base/MHObject", [], function() {
       }
       try {
         args = $MHObject.parseArgs(args);
-        if (typeof args.mhid !== 'undefined' && args.mhid !== null) {
-          if (mhidLRU.has(args.mhid)) {
-            log('getting from cache in create: ' + args.mhid);
-            return mhidLRU.get(args.mhid);
+        console.log(args);
+        if (typeof args.metadata.mhid !== 'undefined' && args.metadata.mhid !== null) {
+          if (mhidLRU.has(args.metadata.mhid)) {
+            log('getting from cache in create: ' + args.metadata.mhid);
+            return mhidLRU.get(args.metadata.mhid);
           }
-          var prefix = $MHObject.getPrefixFromMhid(args.mhid),
+          var prefix = $MHObject.getPrefixFromMhid(args.metadata.mhid),
               mhObj = new childrenConstructors[prefix](args);
           return mhObj;
         }
@@ -3476,33 +3443,13 @@ System.register("models/base/MHObject", [], function() {
     get mhidPrefix() {
       return null;
     },
-    isMedia: function(toCheck) {
-      return toCheck instanceof System.get('models/media/MHMedia').MHMedia;
-    },
-    isContributor: function(toCheck) {
-      return toCheck instanceof System.get('models/contributor/MHContributor').MHContributor;
-    },
-    isAction: function(toCheck) {
-      return toCheck instanceof System.get('models/action/MHAction').MHAction;
-    },
-    isUser: function(toCheck) {
-      return toCheck instanceof System.get('models/user/MHUser').MHUser;
-    },
-    isCollection: function(toCheck) {
-      return toCheck instanceof System.get('models/collection/MHCollection').MHCollection;
-    },
-    isImage: function(toCheck) {
-      return toCheck instanceof System.get('models/image/MHImage').MHImage;
-    },
-    isTrait: function(toCheck) {
-      return toCheck instanceof System.get('models/trait/MHTrait').MHTrait;
-    },
     fetchByMhid: function(mhid) {
-      var force = arguments[1] !== (void 0) ? arguments[1] : false;
+      var view = arguments[1] !== (void 0) ? arguments[1] : 'basic';
+      var force = arguments[2] !== (void 0) ? arguments[2] : false;
       if (typeof mhid !== 'string' && !(mhid instanceof String)) {
         throw TypeError('MHObject.fetchByMhid argument must be type string.');
       }
-      log('in fetchByMhid, looking for: ', mhid);
+      console.log('in fetchByMhid, looking for: ', mhid, 'with view=', view);
       if (!force && mhidLRU.has(mhid)) {
         return Promise.resolve(mhidLRU.get(mhid));
       }
@@ -3518,7 +3465,7 @@ System.register("models/base/MHObject", [], function() {
       }
       return houndRequest({
         method: 'GET',
-        endpoint: mhClass.rootEndpoint + '/' + mhid
+        endpoint: mhClass.rootEndpoint + '/' + mhid + '?view=' + view
       }).then(function(response) {
         newObj = $MHObject.create(response);
         log('fetched: ', newObj);
