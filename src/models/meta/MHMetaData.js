@@ -1,8 +1,5 @@
-
-import { MHObject } from '../base/MHObject';
-
-export class MHMetaData extends MHObject {
-  /*  MHImage Constructor
+export class MHMetaData {
+  /*  MHMetaData Constructor
    *
    * MediaHound Object constructors take a single parameter {Object | JSON String}
    * If the argument is an object properties will be read and placed properly
@@ -19,8 +16,6 @@ export class MHMetaData extends MHObject {
    *
    */
   constructor(args){
-    args = MHObject.parseArgs(args);
-    super(args);
 
     // Unique Properties
     var mhid        = args.mhid  || null,
@@ -120,7 +115,3 @@ export class MHMetaData extends MHObject {
   }
 
 }
-
-(function(){
-  MHObject.registerConstructor(MHMetaData);
-}());

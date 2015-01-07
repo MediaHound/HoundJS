@@ -6,6 +6,7 @@ import { houndRequest } from '../../request/hound-request';
 import { pagedRequest } from '../../request/hound-paged-request';
 
 import { MHCache } from '../internal/MHCache';
+import { MHMetaData } from '../meta/MHMetaData';
 import { MHSocial } from '../social/MHSocial';
 
 var childrenConstructors = {};
@@ -46,23 +47,26 @@ export class MHObject {
    */
   constructor(args) {
     args = MHObject.parseArgs(args);
-    //log(args);
+
     if( typeof args.metadata.mhid === 'undefined' || args.metadata.mhid === null ){
       throw new TypeError('mhid is null or undefined', 'MHObject.js', 89);
     }
 
-    var mhid            = args.metadata.mhid || null,
+    var metadata        = new MHMetaData(args.metadata) || null,
+        mhid            = args.metadata.mhid || null,
         altId           = args.metadata.altId || null,
-        metadata        = args.metadata || null,
         // Optional (nullable) values
         primaryImage    = (args.primaryImage != null)   ? MHObject.create(args.primaryImage)    : null,
         secondaryImage  = (args.secondaryImage != null) ? MHObject.create(args.secondaryImage)  : null,
-        social  = (args.social != null) ? MHObject.fetchSocial(args.metadata.mhid)  : null,
+        social          = args.social || null,
         createdDate     = new Date(args.metadata.createdDate);
 
     // if invalid date reset to original value or null
     if( isNaN(createdDate) ){
       createdDate = args.metadata.createdDate || null;
+    }
+    if(social !==null){
+      social = new MHSocial(args.social);
     }
 
     // Create imutable properties
@@ -114,16 +118,16 @@ export class MHObject {
     });
   }
 
-  /** @property {MHSocial} social */
-  get social(){
-    return this[socialSym] || null;
-  }
-  set social(newSocial){
-    if( newSocial instanceof MHSocial ){
-      this[socialSym] = newSocial;
-    }
-    return this.social;
-  }
+  // /** @property {MHSocial} social */
+  // get social(){
+  //   return this[socialSym] || null;
+  // }
+  // set social(newSocial){
+  //   if( newSocial instanceof MHSocial ){
+  //     this[socialSym] = newSocial;
+  //   }
+  //   return this.social;
+  // }
 
   /**
    * TODO: PRIVATE?
@@ -192,31 +196,45 @@ export class MHObject {
     try{
 
       args = MHObject.parseArgs(args);
+      //log(args.metadata.mhid)
+      var mhid = args.metadata.mhid || undefined;
+      var mhObj;
 
-      if( typeof args.metadata.mhid !== 'undefined' && args.metadata.mhid !== null ){
+
+      //log('at start of creating... ',mhid,args);
+
+      if( mhid !== 'undefined' && mhid !== null){
+        args.mhid = mhid;
         // check cache
-        log('in create function trying to parseArgs: \n\n' + JSON.stringify(args));
+        //log('in create function trying to parseArgs: \n\n' , args);
 
         if( mhidLRU.has(args.metadata.mhid) ){
           log('getting from cache in create: ' + args.metadata.mhid);
           return mhidLRU.get(args.metadata.mhid);
         }
 
-        var prefix = MHObject.getPrefixFromMhid(args.metadata.mhid),
-            mhObj = new childrenConstructors[prefix](args);
-        /*
-        if( prefix === 'mhimg' ){
-          // bypass cache
-        } else {
-          log('putting from create');
-          mhidLRU.putMHObj(mhObj);
-        }
-        */
-        log('trying to create ',prefix,': ', mhObj);
+        var prefix = MHObject.getPrefixFromMhid(mhid);
+        //log(prefix,new childrenConstructors[prefix](args));
+        mhObj = new childrenConstructors[prefix](args);
+
+
+
+        // if( prefix === 'mhimg' ){
+        //   // bypass cache
+        // } else {
+        //   log('putting from create');
+        //   mhidLRU.putMHObj(mhObj);
+        // }
+        //log('creating... ',prefix,': ', mhObj);
+        return mhObj;
+      }
+      else{
+        mhObj = args;
+        //log('creating without a prefix...', mhObj);
         return mhObj;
       }
     } catch (err) {
-      log(err);
+      //log(err);
       if( err instanceof TypeError ) {
         if( err.message === 'undefined is not a function' ) {
           warn('Unknown mhid prefix, see args object: ', args);
@@ -386,7 +404,7 @@ export class MHObject {
    */
   isEqualToMHObject(otherObj){
     if( otherObj && otherObj.mhid ){
-      return this.mhid === otherObj.mhid;
+      return this.metadata.mhid === otherObj.mhid;
     }
     return false;
   }
@@ -401,7 +419,7 @@ export class MHObject {
    */
   hasMhid(mhid){
     if( typeof mhid === 'string' || mhid instanceof String ){
-      return this.mhid === mhid;
+      return this.metadata.mhid === mhid;
     }
     return false;
   }
@@ -420,12 +438,12 @@ export class MHObject {
    * @return  { Promise       } - resloves to specific MHObject sub class
    *
    */
-  static fetchByMhid(mhid, view='basic', force=false){
+  static fetchByMhid(mhid, view='full', force=false){
     if( typeof mhid !== 'string' && !(mhid instanceof String) ){
       throw TypeError('MHObject.fetchByMhid argument must be type string.');
     }
 
-    log('in fetchByMhid, looking for: ', mhid, 'with view = ',view);
+    //log('in fetchByMhid, looking for: ', mhid, 'with view = ',view);
 
     // Check LRU for mhid
     if( !force && mhidLRU.has(mhid) ){
@@ -451,12 +469,13 @@ export class MHObject {
       })
       .then(function(response){
         newObj = MHObject.create(response);
+        //newObj = response;
         log('fetched: ', newObj, 'with response: ', response);
-        if( prefix === 'mhimg' ){
-          // bypass cache
-        } else {
-          mhidLRU.putMHObj(newObj);
-        }
+        // if( prefix === 'mhimg' ){
+        //   // bypass cache
+        // } else {
+        //   mhidLRU.putMHObj(newObj);
+        // }
         return newObj;
       });
   }
@@ -470,13 +489,14 @@ export class MHObject {
    */
   // Should this return a single Promise?
   //  Could be done through a second flag argument
-  static fetchByMhids(mhids){
+    static fetchByMhids(mhids,view="basic"){
     if( mhids.map ){
       return mhids.map(MHObject.fetchByMhid);
     } else if( mhids.length > 0 ){
       var i, mhObjs = [];
       for( i = 0 ; i < mhids.length ; i++ ){
-        mhObjs.push(MHObject.fetchByMhid(mhids[i]));
+        //log(mhids[i],view);
+        mhObjs.push(MHObject.fetchByMhid(mhids[i],view));
       }
       return mhObjs;
     }
@@ -551,7 +571,7 @@ export class MHObject {
     if( !force && this.social instanceof MHSocial ){
       return Promise.resolve(this.social);
     }
-
+    console.log(path);
     return houndRequest({
         method: 'GET',
         endpoint: path

@@ -15,7 +15,6 @@ import { MHObject }           from './base/MHObject';
 import { MHEmbeddedObject }   from './base/MHEmbeddedObject';
 import { MHEmbeddedRelation } from './base/MHEmbeddedRelation';
 import { MHRelationalPair }   from './base/MHRelationalPair';
-import { MHMetaData }         from './meta/MHMetaData';
 
 
 // Action Models
@@ -63,6 +62,7 @@ import { MHTrailer }            from './media/MHTrailer';
 
 import { MHCollection } from './collection/MHCollection';
 
+import { MHMetaData } from './meta/MHMetaData';
 import { MHImage } from './image/MHImage';
 
 
@@ -176,4 +176,3 @@ export var models = {
   get MHSourceMedium(){ return MHSourceMedium; },
   get MHSourceModel() { return MHSourceModel; }
 };
-

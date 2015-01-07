@@ -3032,6 +3032,109 @@ System.register("models/internal/MHCache", [], function() {
       return MHCache;
     }};
 });
+System.register("models/meta/MHMetaData", [], function() {
+  "use strict";
+  var __moduleName = "models/meta/MHMetaData";
+  var MHMetaData = function MHMetaData(args) {
+    var mhid = args.mhid || null,
+        altid = args.altid || null,
+        name = args.name || null,
+        description = args.description || null,
+        message = args.message || null,
+        mixlist = args.mixlist || null,
+        username = args.username || null,
+        email = args.email || null,
+        phoneNumber = args.phoneNumber || null,
+        isDefault = args.isDefault || null,
+        primaryColor = args.primaryColor || null,
+        createdDate = new Date(args.createdDate) * 1000 || null,
+        releaseDate = new Date(args.createdDate) * 1000 || null;
+    Object.defineProperties(this, {
+      'mhid': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: mhid
+      },
+      'altid': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: altid
+      },
+      'name': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: name
+      },
+      'description': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      },
+      'message': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: message
+      },
+      'mixlist': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: mixlist
+      },
+      'username': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: username
+      },
+      'email': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: email
+      },
+      'phoneNumber': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: phoneNumber
+      },
+      'isDefault': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: isDefault
+      },
+      'primaryColor': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: primaryColor
+      },
+      'createdDate': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: createdDate
+      },
+      'releaseDate': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: releaseDate
+      }
+    });
+  };
+  ($traceurRuntime.createClass)(MHMetaData, {}, {});
+  return {get MHMetaData() {
+      return MHMetaData;
+    }};
+});
 System.register("models/social/MHSocial", [], function() {
   "use strict";
   var __moduleName = "models/social/MHSocial";
@@ -3043,9 +3146,9 @@ System.register("models/social/MHSocial", [], function() {
         throw new TypeError('Args typeof string but not JSON in MHSocial', 'MHSocial.js', 28);
       }
     }
-    for (var $__11 = $MHSocial.members[Symbol.iterator](),
-        $__12; !($__12 = $__11.next()).done; ) {
-      var prop = $__12.value;
+    for (var $__12 = $MHSocial.members[Symbol.iterator](),
+        $__13; !($__13 = $__12.next()).done; ) {
+      var prop = $__13.value;
       {
         var curr = typeof args[prop] === 'undefined' ? null : args[prop];
         Object.defineProperty(this, prop, {
@@ -3060,9 +3163,9 @@ System.register("models/social/MHSocial", [], function() {
   var $MHSocial = MHSocial;
   ($traceurRuntime.createClass)(MHSocial, {
     isEqualToMHSocial: function(otherObj) {
-      for (var $__11 = $MHSocial.members[Symbol.iterator](),
-          $__12; !($__12 = $__11.next()).done; ) {
-        var prop = $__12.value;
+      for (var $__12 = $MHSocial.members[Symbol.iterator](),
+          $__13; !($__13 = $__12.next()).done; ) {
+        var prop = $__13.value;
         {
           if (typeof this[prop] === 'number' && typeof otherObj[prop] === 'number' && this[prop] === otherObj[prop]) {
             continue;
@@ -3111,9 +3214,9 @@ System.register("models/social/MHSocial", [], function() {
         default:
           break;
       }
-      for (var $__11 = $MHSocial.members[Symbol.iterator](),
-          $__12; !($__12 = $__11.next()).done; ) {
-        var prop = $__12.value;
+      for (var $__12 = $MHSocial.members[Symbol.iterator](),
+          $__13; !($__13 = $__12.next()).done; ) {
+        var prop = $__13.value;
         {
           if (prop === toChange) {
             newArgs[prop] = newValue;
@@ -3168,13 +3271,14 @@ System.register("models/social/MHSocial", [], function() {
 System.register("models/base/MHObject", [], function() {
   "use strict";
   var __moduleName = "models/base/MHObject";
-  var $__13 = System.get("models/internal/debug-helpers"),
-      log = $__13.log,
-      warn = $__13.warn,
-      error = $__13.error;
+  var $__14 = System.get("models/internal/debug-helpers"),
+      log = $__14.log,
+      warn = $__14.warn,
+      error = $__14.error;
   var houndRequest = System.get("request/hound-request").houndRequest;
   var pagedRequest = System.get("request/hound-paged-request").pagedRequest;
   var MHCache = System.get("models/internal/MHCache").MHCache;
+  var MHMetaData = System.get("models/meta/MHMetaData").MHMetaData;
   var MHSocial = System.get("models/social/MHSocial").MHSocial;
   var childrenConstructors = {};
   var mhidLRU = new MHCache(1000);
@@ -3188,15 +3292,18 @@ System.register("models/base/MHObject", [], function() {
     if (typeof args.metadata.mhid === 'undefined' || args.metadata.mhid === null) {
       throw new TypeError('mhid is null or undefined', 'MHObject.js', 89);
     }
-    var mhid = args.metadata.mhid || null,
+    var metadata = new MHMetaData(args.metadata) || null,
+        mhid = args.metadata.mhid || null,
         altId = args.metadata.altId || null,
-        metadata = args.metadata || null,
         primaryImage = (args.primaryImage != null) ? $MHObject.create(args.primaryImage) : null,
         secondaryImage = (args.secondaryImage != null) ? $MHObject.create(args.secondaryImage) : null,
-        social = (args.social != null) ? $MHObject.fetchSocial(args.metadata.mhid) : null,
+        social = args.social || null,
         createdDate = new Date(args.metadata.createdDate);
     if (isNaN(createdDate)) {
       createdDate = args.metadata.createdDate || null;
+    }
+    if (social !== null) {
+      social = new MHSocial(args.social);
     }
     Object.defineProperties(this, {
       'mhid': {
@@ -3245,27 +3352,18 @@ System.register("models/base/MHObject", [], function() {
   };
   var $MHObject = MHObject;
   ($traceurRuntime.createClass)(MHObject, {
-    get social() {
-      return this[socialSym] || null;
-    },
-    set social(newSocial) {
-      if (newSocial instanceof MHSocial) {
-        this[socialSym] = newSocial;
-      }
-      return this.social;
-    },
     get className() {
       return this.constructor.name;
     },
     isEqualToMHObject: function(otherObj) {
       if (otherObj && otherObj.mhid) {
-        return this.mhid === otherObj.mhid;
+        return this.metadata.mhid === otherObj.mhid;
       }
       return false;
     },
     hasMhid: function(mhid) {
       if (typeof mhid === 'string' || mhid instanceof String) {
-        return this.mhid === mhid;
+        return this.metadata.mhid === mhid;
       }
       return false;
     },
@@ -3283,16 +3381,17 @@ System.register("models/base/MHObject", [], function() {
     },
     fetchSocial: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__18 = this;
+      var $__20 = this;
       var path = this.subendpoint('social');
       if (!force && this.social instanceof MHSocial) {
         return Promise.resolve(this.social);
       }
+      console.log(path);
       return houndRequest({
         method: 'GET',
         endpoint: path
       }).then(((function(parsed) {
-        return $__18.social = new MHSocial(parsed);
+        return $__20.social = new MHSocial(parsed);
       })).bind(this));
     },
     fetchFeed: function() {
@@ -3322,7 +3421,7 @@ System.register("models/base/MHObject", [], function() {
       return this.fetchFeed(view, page, size, force).currentPromise;
     },
     takeAction: function(action) {
-      var $__18 = this;
+      var $__20 = this;
       if (typeof action !== 'string' && !(action instanceof String)) {
         throw new TypeError('Action not of type String or undefined');
       }
@@ -3345,12 +3444,12 @@ System.register("models/base/MHObject", [], function() {
         endpoint: path
       }).then((function(socialRes) {
         var newSocial = new MHSocial(socialRes);
-        if ($__18[lastSocialRequestIdSym] === requestId) {
+        if ($__20[lastSocialRequestIdSym] === requestId) {
           self.social = newSocial;
         }
         return newSocial;
       })).catch((function(err) {
-        if ($__18[lastSocialRequestIdSym] === requestId) {
+        if ($__20[lastSocialRequestIdSym] === requestId) {
           self.social = original;
         }
         throw err;
@@ -3396,19 +3495,22 @@ System.register("models/base/MHObject", [], function() {
       }
       try {
         args = $MHObject.parseArgs(args);
-        if (typeof args.metadata.mhid !== 'undefined' && args.metadata.mhid !== null) {
-          log('in create function trying to parseArgs: \n\n' + JSON.stringify(args));
+        var mhid = args.metadata.mhid || undefined;
+        var mhObj;
+        if (mhid !== 'undefined' && mhid !== null) {
+          args.mhid = mhid;
           if (mhidLRU.has(args.metadata.mhid)) {
             log('getting from cache in create: ' + args.metadata.mhid);
             return mhidLRU.get(args.metadata.mhid);
           }
-          var prefix = $MHObject.getPrefixFromMhid(args.metadata.mhid),
-              mhObj = new childrenConstructors[prefix](args);
-          log('trying to create ', prefix, ': ', mhObj);
+          var prefix = $MHObject.getPrefixFromMhid(mhid);
+          mhObj = new childrenConstructors[prefix](args);
+          return mhObj;
+        } else {
+          mhObj = args;
           return mhObj;
         }
       } catch (err) {
-        log(err);
         if (err instanceof TypeError) {
           if (err.message === 'undefined is not a function') {
             warn('Unknown mhid prefix, see args object: ', args);
@@ -3460,12 +3562,11 @@ System.register("models/base/MHObject", [], function() {
       return null;
     },
     fetchByMhid: function(mhid) {
-      var view = arguments[1] !== (void 0) ? arguments[1] : 'basic';
+      var view = arguments[1] !== (void 0) ? arguments[1] : 'full';
       var force = arguments[2] !== (void 0) ? arguments[2] : false;
       if (typeof mhid !== 'string' && !(mhid instanceof String)) {
         throw TypeError('MHObject.fetchByMhid argument must be type string.');
       }
-      log('in fetchByMhid, looking for: ', mhid, 'with view = ', view);
       if (!force && mhidLRU.has(mhid)) {
         return Promise.resolve(mhidLRU.get(mhid));
       }
@@ -3485,20 +3586,18 @@ System.register("models/base/MHObject", [], function() {
       }).then(function(response) {
         newObj = $MHObject.create(response);
         log('fetched: ', newObj, 'with response: ', response);
-        if (prefix === 'mhimg') {} else {
-          mhidLRU.putMHObj(newObj);
-        }
         return newObj;
       });
     },
     fetchByMhids: function(mhids) {
+      var view = arguments[1] !== (void 0) ? arguments[1] : "basic";
       if (mhids.map) {
         return mhids.map($MHObject.fetchByMhid);
       } else if (mhids.length > 0) {
         var i,
             mhObjs = [];
         for (i = 0; i < mhids.length; i++) {
-          mhObjs.push($MHObject.fetchByMhid(mhids[i]));
+          mhObjs.push($MHObject.fetchByMhid(mhids[i], view));
         }
         return mhObjs;
       }
@@ -3619,14 +3718,14 @@ System.register("models/action/MHAction", [], function() {
     },
     fetchOwners: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__22 = this;
+      var $__24 = this;
       var path = this.subendpoint('owners');
       if (force || this.ownersPromise === null) {
         this.ownersPromise = houndRequest({
           method: 'GET',
           endpoint: path
         }).catch(((function(err) {
-          $__22.ownersPromise = null;
+          $__24.ownersPromise = null;
           throw err;
         })).bind(this)).then(function(res) {
           return Promise.all(res.map((function(m) {
@@ -3638,14 +3737,14 @@ System.register("models/action/MHAction", [], function() {
     },
     fetchComments: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__22 = this;
+      var $__24 = this;
       var path = this.subendpoint('comments');
       if (force || this.commentsPromise === null) {
         this.commentsPromise = houndRequest({
           method: 'GET',
           endpoint: path
         }).catch(((function(err) {
-          $__22.commentsPromise = null;
+          $__24.commentsPromise = null;
           throw err;
         })).bind(this)).then(function(res) {
           return Promise.all(res.map((function(m) {
@@ -3657,14 +3756,14 @@ System.register("models/action/MHAction", [], function() {
     },
     fetchMentions: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__22 = this;
+      var $__24 = this;
       var path = this.subendpoint('mentions');
       if (force || this.mentionsPromise === null) {
         this.mentionsPromise = houndRequest({
           method: 'GET',
           endpoint: path
         }).catch(((function(err) {
-          $__22.mentionsPromise = null;
+          $__24.mentionsPromise = null;
           throw err;
         })).bind(this)).then(function(res) {
           return Promise.all(res.map((function(m) {
@@ -3726,14 +3825,14 @@ System.register("models/action/MHComment", [], function() {
     },
     fetchParentAction: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__30 = this;
+      var $__32 = this;
       var path = this.subendpoint('parent');
       if (force || this.parentPromise === null) {
         this.parentPromise = houndRequest({
           method: 'GET',
           endpoint: path
         }).catch(((function(err) {
-          $__30.parentPromise = null;
+          $__32.parentPromise = null;
           throw err;
         })).bind(this));
       }
@@ -3972,9 +4071,9 @@ System.register("models/base/MHEmbeddedRelation", [], function() {
 System.register("models/base/MHRelationalPair", [], function() {
   "use strict";
   var __moduleName = "models/base/MHRelationalPair";
-  var $__48 = System.get("models/base/MHObject"),
-      MHObject = $__48.MHObject,
-      mhidLRU = $__48.mhidLRU;
+  var $__50 = System.get("models/base/MHObject"),
+      MHObject = $__50.MHObject,
+      mhidLRU = $__50.mhidLRU;
   var MHRelationalPair = function MHRelationalPair(args) {
     if (args == null) {
       throw new TypeError('Args is null or undefined in MHRelationalPair constructor.');
@@ -4037,9 +4136,9 @@ System.register("models/user/MHUser", [], function() {
   "use strict";
   var __moduleName = "models/user/MHUser";
   var log = System.get("models/internal/debug-helpers").log;
-  var $__51 = System.get("models/base/MHObject"),
-      MHObject = $__51.MHObject,
-      mhidLRU = $__51.mhidLRU;
+  var $__53 = System.get("models/base/MHObject"),
+      MHObject = $__53.MHObject,
+      mhidLRU = $__53.mhidLRU;
   var houndRequest = System.get("request/hound-request").houndRequest;
   var pagedRequest = System.get("request/hound-paged-request").pagedRequest;
   var MHUser = function MHUser(args) {
@@ -4221,7 +4320,7 @@ System.register("models/user/MHUser", [], function() {
     fetchOwnedCollections: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__54 = this;
+      var $__56 = this;
       var path = this.subendpoint('ownedCollections');
       if (force || this.ownedCollectionsPromise === null) {
         this.ownedCollectionsPromise = houndRequest({
@@ -4230,7 +4329,7 @@ System.register("models/user/MHUser", [], function() {
           withCredentials: true,
           params: {'view': view}
         }).catch(((function(err) {
-          $__54.ownedCollectionsPromise = null;
+          $__56.ownedCollectionsPromise = null;
           throw err;
         })).bind(this)).then((function(res) {
           if (view === 'full' && Array.isArray(res)) {
@@ -4243,7 +4342,7 @@ System.register("models/user/MHUser", [], function() {
     },
     fetchFollowed: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__54 = this;
+      var $__56 = this;
       var path = this.subendpoint('following');
       if (force || this.followedPromise === null) {
         this.followedPromise = houndRequest({
@@ -4251,7 +4350,7 @@ System.register("models/user/MHUser", [], function() {
           endpoint: path,
           withCredentials: true
         }).catch(((function(err) {
-          $__54.followedPromise = null;
+          $__56.followedPromise = null;
           throw err;
         })).bind(this));
       }
@@ -4259,7 +4358,7 @@ System.register("models/user/MHUser", [], function() {
     },
     fetchFollowedCollections: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__54 = this;
+      var $__56 = this;
       var path = this.subendpoint('following');
       if (force || this.followedCollectionsPromise === null) {
         this.followedCollectionsPromise = houndRequest({
@@ -4268,7 +4367,7 @@ System.register("models/user/MHUser", [], function() {
           withCredentials: true,
           params: {type: 'collection'}
         }).catch(((function(err) {
-          $__54.followedCollectionsPromise = null;
+          $__56.followedCollectionsPromise = null;
           throw err;
         })).bind(this));
       }
@@ -4544,13 +4643,13 @@ System.register("models/user/MHUser", [], function() {
 System.register("models/user/MHLoginSession", [], function() {
   "use strict";
   var __moduleName = "models/user/MHLoginSession";
-  var $__56 = System.get("models/internal/debug-helpers"),
-      log = $__56.log,
-      warn = $__56.warn,
-      error = $__56.error;
-  var $__57 = System.get("models/base/MHObject"),
-      MHObject = $__57.MHObject,
-      mhidLRU = $__57.mhidLRU;
+  var $__58 = System.get("models/internal/debug-helpers"),
+      log = $__58.log,
+      warn = $__58.warn,
+      error = $__58.error;
+  var $__59 = System.get("models/base/MHObject"),
+      MHObject = $__59.MHObject,
+      mhidLRU = $__59.mhidLRU;
   var MHUser = System.get("models/user/MHUser").MHUser;
   var houndRequest = System.get("request/hound-request").houndRequest;
   var makeEvent = function(name, options) {
@@ -4823,7 +4922,7 @@ System.register("models/collection/MHCollection", [], function() {
       return this.changeContents(contents, 'remove');
     },
     changeContents: function(contents, sub) {
-      var $__65 = this;
+      var $__67 = this;
       if (!Array.isArray(contents)) {
         throw new TypeError('Contents must be an array in changeContents');
       }
@@ -4848,7 +4947,7 @@ System.register("models/collection/MHCollection", [], function() {
         endpoint: path,
         data: {'content': mhids}
       }).catch(((function(err) {
-        $__65.contentPromise = null;
+        $__67.contentPromise = null;
         throw err;
       })).bind(this)).then(function(response) {
         contents.forEach((function(v) {
@@ -4859,14 +4958,14 @@ System.register("models/collection/MHCollection", [], function() {
     },
     fetchOwners: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__65 = this;
+      var $__67 = this;
       var path = this.subendpoint('owners');
       if (force || this.ownersPromise === null) {
         this.ownersPromise = houndRequest({
           method: 'GET',
           endpoint: path
         }).catch(((function(err) {
-          $__65.ownersPromise = null;
+          $__67.ownersPromise = null;
           throw err;
         })).bind(this));
       }
@@ -4875,7 +4974,7 @@ System.register("models/collection/MHCollection", [], function() {
     fetchContent: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__65 = this;
+      var $__67 = this;
       var path = this.subendpoint('content');
       if (force || this.contentPromise === null) {
         this.contentPromise = houndRequest({
@@ -4883,7 +4982,7 @@ System.register("models/collection/MHCollection", [], function() {
           endpoint: path,
           params: {view: view}
         }).catch(((function(err) {
-          $__65.contentPromise = null;
+          $__67.contentPromise = null;
           throw err;
         })).bind(this)).then((function(res) {
           if (view === 'full' && Array.isArray(res)) {
@@ -4907,14 +5006,14 @@ System.register("models/collection/MHCollection", [], function() {
     },
     fetchMixlist: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__65 = this;
+      var $__67 = this;
       var path = this.subendpoint('mixlist');
       if (force || this.mixlistPromise === null) {
         this.mixlistPromise = houndRequest({
           method: 'GET',
           endpoint: path
         }).catch(((function(err) {
-          $__65.mixlistPromise = null;
+          $__67.mixlistPromise = null;
           throw err;
         })).bind(this));
       }
@@ -5005,7 +5104,7 @@ System.register("models/contributor/MHContributor", [], function() {
     fetchMedia: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__69 = this;
+      var $__71 = this;
       var path = this.subendpoint('media');
       if (force || this.mediaPromise === null) {
         this.mediaPromise = houndRequest({
@@ -5013,7 +5112,7 @@ System.register("models/contributor/MHContributor", [], function() {
           endpoint: path,
           params: {'view': view}
         }).catch(((function(err) {
-          $__69.mediaPromise = null;
+          $__71.mediaPromise = null;
           throw err;
         })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
@@ -5026,14 +5125,14 @@ System.register("models/contributor/MHContributor", [], function() {
     },
     fetchCollections: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__69 = this;
+      var $__71 = this;
       var path = this.subendpoint('collections');
       if (force || this.collectionsPromise === null) {
         this.collectionsPromise = houndRequest({
           method: 'GET',
           endpoint: path
         }).catch(((function(err) {
-          $__69.collectionsPromise = null;
+          $__71.collectionsPromise = null;
           throw err;
         })).bind(this)).then(function(ids) {
           return Promise.all(ids.map((function(v) {
@@ -5083,7 +5182,7 @@ System.register("models/contributor/MHFictionalGroupContributor", [], function()
     fetchContributors: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__74 = this;
+      var $__76 = this;
       var path = this.subendpoint('contributors');
       if (force || this.contributorsPromise === null) {
         this.contributorsPromise = houndRequest({
@@ -5091,7 +5190,7 @@ System.register("models/contributor/MHFictionalGroupContributor", [], function()
           endpoint: path,
           params: {'view': view}
         }).catch(((function(err) {
-          $__74.contributorsPromise = null;
+          $__76.contributorsPromise = null;
           throw err;
         })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
@@ -5142,7 +5241,7 @@ System.register("models/contributor/MHFictionalIndividualContributor", [], funct
     fetchContributors: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__79 = this;
+      var $__81 = this;
       var path = this.subendpoint('contributors');
       if (force || this.contributorsPromise === null) {
         this.contributorsPromise = houndRequest({
@@ -5150,7 +5249,7 @@ System.register("models/contributor/MHFictionalIndividualContributor", [], funct
           endpoint: path,
           params: {'view': view}
         }).catch(((function(err) {
-          $__79.contributorsPromise = null;
+          $__81.contributorsPromise = null;
           throw err;
         })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
@@ -5201,7 +5300,7 @@ System.register("models/contributor/MHRealGroupContributor", [], function() {
     fetchCharacters: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__84 = this;
+      var $__86 = this;
       var path = this.subendpoint('characters');
       if (force || this.charactersPromise === null) {
         this.charactersPromise = houndRequest({
@@ -5209,7 +5308,7 @@ System.register("models/contributor/MHRealGroupContributor", [], function() {
           endpoint: path,
           params: {'view': view}
         }).catch(((function(err) {
-          $__84.charactersPromise = null;
+          $__86.charactersPromise = null;
           throw err;
         })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
@@ -5260,7 +5359,7 @@ System.register("models/contributor/MHRealIndividualContributor", [], function()
     fetchCharacters: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__89 = this;
+      var $__91 = this;
       var path = this.subendpoint('characters');
       if (force || this.charactersPromise === null) {
         this.charactersPromise = houndRequest({
@@ -5268,7 +5367,7 @@ System.register("models/contributor/MHRealIndividualContributor", [], function()
           endpoint: path,
           params: {'view': view}
         }).catch(((function(err) {
-          $__89.charactersPromise = null;
+          $__91.charactersPromise = null;
           throw err;
         })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
@@ -5418,7 +5517,7 @@ System.register("models/source/MHSourceMethod", [], function() {
   var MHSourceFormat = System.get("models/source/MHSourceFormat").MHSourceFormat;
   var MHSourceMethod = function MHSourceMethod(args) {
     var medium = arguments[1] !== (void 0) ? arguments[1] : null;
-    var $__95 = this;
+    var $__97 = this;
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5432,7 +5531,7 @@ System.register("models/source/MHSourceMethod", [], function() {
       throw new TypeError('Type or formats not defined on args array in MHSourceMethod', 'MHSourceMethod.js', 41);
     }
     formats = formats.map((function(v) {
-      return new MHSourceFormat(v, $__95);
+      return new MHSourceFormat(v, $__97);
     }));
     Object.defineProperties(this, {
       'type': {
@@ -5468,7 +5567,7 @@ System.register("models/source/MHSourceMedium", [], function() {
   var MHSourceMethod = System.get("models/source/MHSourceMethod").MHSourceMethod;
   var MHSourceMedium = function MHSourceMedium(args) {
     var source = arguments[1] !== (void 0) ? arguments[1] : null;
-    var $__98 = this;
+    var $__100 = this;
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5482,7 +5581,7 @@ System.register("models/source/MHSourceMedium", [], function() {
       throw new TypeError('Type or methods not defined on args in MHSourceMedium');
     }
     methods = methods.map((function(v) {
-      return new MHSourceMethod(v, $__98);
+      return new MHSourceMethod(v, $__100);
     }));
     Object.defineProperties(this, {
       'type': {
@@ -5518,7 +5617,7 @@ System.register("models/source/MHSourceModel", [], function() {
   var MHSourceMedium = System.get("models/source/MHSourceMedium").MHSourceMedium;
   var MHSourceModel = function MHSourceModel(args) {
     var content = arguments[1] !== (void 0) ? arguments[1] : null;
-    var $__101 = this;
+    var $__103 = this;
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5538,7 +5637,7 @@ System.register("models/source/MHSourceModel", [], function() {
       logo.url = logo.url.replace(/http:|https:/gi, '');
     }
     mediums = mediums.map((function(v) {
-      return new MHSourceMedium(v, $__101);
+      return new MHSourceMedium(v, $__103);
     }));
     Object.defineProperties(this, {
       'name': {
@@ -5681,14 +5780,14 @@ System.register("models/media/MHMedia", [], function() {
     },
     fetchCollections: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__108 = this;
+      var $__110 = this;
       var path = this.subendpoint('collections');
       if (force || this.collectionsPromise === null) {
         this.collectionsPromise = houndRequest({
           method: 'GET',
           endpoint: path
         }).catch(((function(err) {
-          $__108.collectionsPromise = null;
+          $__110.collectionsPromise = null;
           throw err;
         })).bind(this));
       }
@@ -5756,7 +5855,7 @@ System.register("models/media/MHMedia", [], function() {
     fetchContributors: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__108 = this;
+      var $__110 = this;
       var path = this.subendpoint('contributors');
       if (force || this.contributorsPromise === null) {
         this.contributorsPromise = houndRequest({
@@ -5764,7 +5863,7 @@ System.register("models/media/MHMedia", [], function() {
           endpoint: path,
           params: {view: view}
         }).catch(((function(err) {
-          $__108.contributorsPromise = null;
+          $__110.contributorsPromise = null;
           throw err;
         })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
@@ -5789,7 +5888,7 @@ System.register("models/media/MHMedia", [], function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var excludeMinors = arguments[1] !== (void 0) ? arguments[1] : false;
       var force = arguments[2] !== (void 0) ? arguments[2] : false;
-      var $__108 = this;
+      var $__110 = this;
       var path = this.subendpoint('contributors');
       if (force || this.charactersPromise === null) {
         this.charactersPromise = houndRequest({
@@ -5800,7 +5899,7 @@ System.register("models/media/MHMedia", [], function() {
             excludeMinors: excludeMinors
           }
         }).catch(((function(err) {
-          $__108.charactersPromise = null;
+          $__110.charactersPromise = null;
           throw err;
         })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
@@ -5824,7 +5923,7 @@ System.register("models/media/MHMedia", [], function() {
     fetchTraits: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__108 = this;
+      var $__110 = this;
       var path = this.subendpoint('traits');
       if (force || this.traitsPromise === null) {
         this.traitsPromise = houndRequest({
@@ -5832,7 +5931,7 @@ System.register("models/media/MHMedia", [], function() {
           endpoint: path,
           params: {view: view}
         }).catch(((function(err) {
-          $__108.traitsPromise = null;
+          $__110.traitsPromise = null;
           throw err;
         })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
@@ -6388,116 +6487,6 @@ System.register("models/media/MHTrailer", [], function() {
       return MHTrailer;
     }};
 });
-System.register("models/meta/MHMetaData", [], function() {
-  "use strict";
-  var __moduleName = "models/meta/MHMetaData";
-  var MHObject = System.get("models/base/MHObject").MHObject;
-  var MHMetaData = function MHMetaData(args) {
-    args = MHObject.parseArgs(args);
-    $traceurRuntime.superCall(this, $MHMetaData.prototype, "constructor", [args]);
-    var mhid = args.mhid || null,
-        altid = args.altid || null,
-        name = args.name || null,
-        description = args.description || null,
-        message = args.message || null,
-        mixlist = args.mixlist || null,
-        username = args.username || null,
-        email = args.email || null,
-        phoneNumber = args.phoneNumber || null,
-        isDefault = args.isDefault || null,
-        primaryColor = args.primaryColor || null,
-        createdDate = new Date(args.createdDate) * 1000 || null,
-        releaseDate = new Date(args.createdDate) * 1000 || null;
-    Object.defineProperties(this, {
-      'mhid': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: mhid
-      },
-      'altid': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: altid
-      },
-      'name': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: name
-      },
-      'description': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: description
-      },
-      'message': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: message
-      },
-      'mixlist': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: mixlist
-      },
-      'username': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: username
-      },
-      'email': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: email
-      },
-      'phoneNumber': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: phoneNumber
-      },
-      'isDefault': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: isDefault
-      },
-      'primaryColor': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: primaryColor
-      },
-      'createdDate': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: createdDate
-      },
-      'releaseDate': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: releaseDate
-      }
-    });
-  };
-  var $MHMetaData = MHMetaData;
-  ($traceurRuntime.createClass)(MHMetaData, {}, {}, MHObject);
-  (function() {
-    MHObject.registerConstructor(MHMetaData);
-  }());
-  return {get MHMetaData() {
-      return MHMetaData;
-    }};
-});
 System.register("models/trait/MHTrait", [], function() {
   "use strict";
   var __moduleName = "models/trait/MHTrait";
@@ -6926,7 +6915,6 @@ System.register("models/all-models", [], function() {
   var MHEmbeddedObject = System.get("models/base/MHEmbeddedObject").MHEmbeddedObject;
   var MHEmbeddedRelation = System.get("models/base/MHEmbeddedRelation").MHEmbeddedRelation;
   var MHRelationalPair = System.get("models/base/MHRelationalPair").MHRelationalPair;
-  var MHMetaData = System.get("models/meta/MHMetaData").MHMetaData;
   var MHAction = System.get("models/action/MHAction").MHAction;
   var MHAdd = System.get("models/action/MHAdd").MHAdd;
   var MHComment = System.get("models/action/MHComment").MHComment;
@@ -6963,6 +6951,7 @@ System.register("models/all-models", [], function() {
   var MHSpecialSeries = System.get("models/media/MHSpecialSeries").MHSpecialSeries;
   var MHTrailer = System.get("models/media/MHTrailer").MHTrailer;
   var MHCollection = System.get("models/collection/MHCollection").MHCollection;
+  var MHMetaData = System.get("models/meta/MHMetaData").MHMetaData;
   var MHImage = System.get("models/image/MHImage").MHImage;
   var MHTrait = System.get("models/trait/MHTrait").MHTrait;
   var MHTraitGroup = System.get("models/trait/MHTraitGroup").MHTraitGroup;
