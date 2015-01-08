@@ -2438,7 +2438,7 @@ System.register("models/internal/debug-helpers", [], function() {
   "use strict";
   var __moduleName = "models/internal/debug-helpers";
   var debug = {
-    log: true,
+    log: false,
     warn: true,
     error: true
   };
@@ -2698,23 +2698,23 @@ System.register("request/hound-paged-request", [], function() {
   var defaults = {
     headers: {'Accept': 'application/json'},
     pageSize: 10,
-    startingPage: 0,
+    startingPage: '',
     withCredentials: false
   },
       getPageSize = function(args) {
         if (typeof args.pageSize === 'number') {
           return args.pageSize;
         }
-        if (args.params != null && typeof args.params['page.size'] === 'number') {
-          return args.params['page.size'];
+        if (args.params != null && typeof args.params['pageSize'] === 'number') {
+          return args.params['pageSize'];
         }
         return defaults.pageSize;
       },
       getStartingPage = function(args) {
-        if (typeof args.startingPage === 'number') {
+        if (typeof args.startingPage === 'string') {
           return args.startingPage;
         }
-        if (args.params != null && typeof args.params.page === 'number') {
+        if (args.params != null && typeof args.params.page === 'string') {
           return args.params.page;
         }
         return defaults.startingPage;
@@ -2727,25 +2727,18 @@ System.register("request/hound-paged-request", [], function() {
         }
       },
       setInfo = function(response) {
-        this.firstPage = response.firstPage || response.first;
-        this.lastPage = response.lastPage || response.last;
-        this.page = response.number;
-        this.totalPages = response.totalPages;
-        this.numberOfElements = response.numberOfElements;
-        this.totalElements = response.totalElements;
         return response;
       },
       setContentArray = function(response) {
         var MHObject = System.get('models/base/MHObject').MHObject;
         var self = this,
-            newContent;
-        if ((this._args.params.view && this._args.params.view === 'id') || typeof response.content[0] === 'string') {
-          newContent = Promise.all(MHObject.fetchByMhids(response.content));
-        } else {
-          newContent = Promise.resolve(MHObject.create(response.content));
-        }
+            newContent,
+            originalContent;
+        originalContent = response.content;
+        newContent = Promise.all(originalContent.map(function(args) {
+          return MHObject.create(args.object);
+        }));
         return newContent.then(function(mhObjs) {
-          setContentForPage.call(self, response.number, response.size, mhObjs);
           response.content = mhObjs;
           return response;
         });
@@ -2764,7 +2757,7 @@ System.register("request/hound-paged-request", [], function() {
       startingPage = defaults.startingPage;
     }
     myArgs.params = myArgs.params || {};
-    myArgs.params['page.size'] = pageSize;
+    myArgs.params['pageSize'] = pageSize;
     myArgs.params.page = startingPage;
     delete myArgs.pageSize;
     delete myArgs.startingPage;
@@ -2789,7 +2782,7 @@ System.register("request/hound-paged-request", [], function() {
       return this.currentPromise.then(function(response) {
         if (!self.lastPage) {
           self.page += 1;
-          self._args.params.page = self.page;
+          self._args.params.pageNext = response.pagingInfo.next;
           if (self.pagePromises[self.page] == null) {
             self.pagePromises[self.page] = houndRequest(self._args).then(setInfo.bind(self)).then(setContentArray.bind(self));
           }
@@ -3386,7 +3379,6 @@ System.register("models/base/MHObject", [], function() {
       if (!force && this.social instanceof MHSocial) {
         return Promise.resolve(this.social);
       }
-      console.log(path);
       return houndRequest({
         method: 'GET',
         endpoint: path
@@ -3499,11 +3491,8 @@ System.register("models/base/MHObject", [], function() {
         var mhObj;
         if (mhid !== 'undefined' && mhid !== null) {
           args.mhid = mhid;
-          if (mhidLRU.has(args.metadata.mhid)) {
-            log('getting from cache in create: ' + args.metadata.mhid);
-            return mhidLRU.get(args.metadata.mhid);
-          }
           var prefix = $MHObject.getPrefixFromMhid(mhid);
+          log(prefix, new childrenConstructors[prefix](args));
           mhObj = new childrenConstructors[prefix](args);
           return mhObj;
         } else {
@@ -3566,6 +3555,9 @@ System.register("models/base/MHObject", [], function() {
       var force = arguments[2] !== (void 0) ? arguments[2] : false;
       if (typeof mhid !== 'string' && !(mhid instanceof String)) {
         throw TypeError('MHObject.fetchByMhid argument must be type string.');
+      }
+      if (view === null || view === undefined) {
+        view = 'full';
       }
       if (!force && mhidLRU.has(mhid)) {
         return Promise.resolve(mhidLRU.get(mhid));

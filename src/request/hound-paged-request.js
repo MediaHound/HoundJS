@@ -8,7 +8,7 @@ var defaults = {
         'Accept':'application/json'
       },
       pageSize: 10,
-      startingPage: 0,
+      startingPage: '',
       withCredentials: false
     },
     // get page size from args helper
@@ -16,17 +16,17 @@ var defaults = {
       if( typeof args.pageSize === 'number' ){
         return args.pageSize;
       }
-      if( args.params != null && typeof args.params['page.size'] === 'number' ){
-        return args.params['page.size'];
+      if( args.params != null && typeof args.params['pageSize'] === 'number' ){
+        return args.params['pageSize'];
       }
       return defaults.pageSize;
     },
     // get starting page number from args helper
     getStartingPage = function(args){
-      if( typeof args.startingPage === 'number' ){
+      if( typeof args.startingPage === 'string' ){
         return args.startingPage;
       }
-      if( args.params != null && typeof args.params.page === 'number' ){
+      if( args.params != null && typeof args.params.page === 'string' ){
         return args.params.page;
       }
       return defaults.startingPage;
@@ -38,30 +38,36 @@ var defaults = {
         this.content[pageNumber*pageSize + i] = newContent[i];
       }
     },
+    //deprecated setInfo
     setInfo = function(response){
-      // set: lastPage, firstPage, totalPages, numberOfElements, totalElements
-      this.firstPage        = response.firstPage || response.first;
-      this.lastPage         = response.lastPage  || response.last;
-      this.page             = response.number;
-      this.totalPages       = response.totalPages;
-      this.numberOfElements = response.numberOfElements;
-      this.totalElements    = response.totalElements;
+
+      //set: lastPage, firstPage, totalPages, numberOfElements, totalElements
+      // this.firstPage        = response.firstPage || response.first;
+      // this.lastPage         = response.lastPage  || response.last;
+      // this.page             = response.number;
+      // this.totalPages       = response.totalPages;
+      // this.numberOfElements = response.numberOfElements;
+      // this.totalElements    = response.totalElements;
       return response;
     },
     setContentArray = function(response){
       var MHObject = System.get('../../src/models/base/MHObject').MHObject;
       //console.warn('circular dep: ', MHObject);
 
-      var self = this, newContent;
+      var self = this,
+          newContent,
+          originalContent;
 
-      if( (this._args.params.view && this._args.params.view === 'id') || typeof response.content[0] === 'string' ){
-        newContent = Promise.all(MHObject.fetchByMhids(response.content));
-      } else {
-        newContent = Promise.resolve(MHObject.create(response.content));
-      }
-
+      originalContent = response.content;
+      // if( (this._args.params.view && this._args.params.view === 'basic') || typeof response.content[0] === 'string' ){
+      //   newContent = Promise.all(MHObject.fetchByMhids(response.content));
+      // } else {
+        newContent = Promise.all(originalContent.map(function(args){
+          return MHObject.create(args.object);
+        }));
+      // }
       return newContent.then(function(mhObjs){
-          setContentForPage.call(self, response.number, response.size, mhObjs);
+          //setContentForPage.call(self, response.number, response.size, mhObjs);
           response.content = mhObjs;
           return response;
         });
@@ -119,9 +125,10 @@ class PagedRequest {
       startingPage = defaults.startingPage;
     }
 
-    myArgs.params               = myArgs.params || {};
-    myArgs.params['page.size']  = pageSize;
-    myArgs.params.page          = startingPage;
+    myArgs.params              = myArgs.params || {};
+    myArgs.params['pageSize']  = pageSize;
+    myArgs.params.page         = startingPage;
+  //  myArgs.params.pageNext     = pageNext;
 
     // remove extraneous args props
     delete myArgs.pageSize;
@@ -136,7 +143,7 @@ class PagedRequest {
     this.pagePromises[this.page] = houndRequest(this._args)
                                     .then(setInfo.bind(this))
                                     .then(setContentArray.bind(this));
-
+                                    //.then(console.log(this,setContentArray.bind(this)));
     // Define Immutable Props and getters
     Object.defineProperties(this, {
       'pageSize':{
@@ -168,7 +175,8 @@ class PagedRequest {
       .then(function(response){
         if( !self.lastPage ){
           self.page += 1;
-          self._args.params.page = self.page;
+          //self._args.params.page = self.page;
+          self._args.params.pageNext = response.pagingInfo.next;
 
           if( self.pagePromises[self.page] == null ){
             self.pagePromises[self.page] = houndRequest(self._args)
@@ -233,4 +241,3 @@ class PagedRequest {
 
 // Create and export factory function
 export var pagedRequest = function(a){ return new PagedRequest(a); };
-

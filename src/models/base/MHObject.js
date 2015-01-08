@@ -200,7 +200,6 @@ export class MHObject {
       var mhid = args.metadata.mhid || undefined;
       var mhObj;
 
-
       //log('at start of creating... ',mhid,args);
 
       if( mhid !== 'undefined' && mhid !== null){
@@ -208,13 +207,13 @@ export class MHObject {
         // check cache
         //log('in create function trying to parseArgs: \n\n' , args);
 
-        if( mhidLRU.has(args.metadata.mhid) ){
-          log('getting from cache in create: ' + args.metadata.mhid);
-          return mhidLRU.get(args.metadata.mhid);
-        }
+        // if( mhidLRU.has(args.metadata.mhid) ){
+        //   log('getting from cache in create: ' + args.metadata.mhid);
+        //   return mhidLRU.get(args.metadata.mhid);
+        // }
 
         var prefix = MHObject.getPrefixFromMhid(mhid);
-        //log(prefix,new childrenConstructors[prefix](args));
+        log(prefix,new childrenConstructors[prefix](args));
         mhObj = new childrenConstructors[prefix](args);
 
 
@@ -439,8 +438,13 @@ export class MHObject {
    *
    */
   static fetchByMhid(mhid, view='full', force=false){
+
     if( typeof mhid !== 'string' && !(mhid instanceof String) ){
       throw TypeError('MHObject.fetchByMhid argument must be type string.');
+    }
+
+    if(view === null || view === undefined) {
+      view = 'full';
     }
 
     //log('in fetchByMhid, looking for: ', mhid, 'with view = ',view);
@@ -571,7 +575,6 @@ export class MHObject {
     if( !force && this.social instanceof MHSocial ){
       return Promise.resolve(this.social);
     }
-    console.log(path);
     return houndRequest({
         method: 'GET',
         endpoint: path
@@ -592,7 +595,6 @@ export class MHObject {
    */
   fetchFeed(view='full', page=0, size=12, force=false){
     var path = this.subendpoint('feed');
-
     if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
       this.feedPagedRequest = pagedRequest({
         method: 'GET',
@@ -604,7 +606,7 @@ export class MHObject {
     } else if( this.feedPagedRequest.page !== page ){
       this.feedPagedRequest.jumpTo(page);
     }
-
+    //console.log(this.feedPagedRequest);
     return this.feedPagedRequest;
   }
 
