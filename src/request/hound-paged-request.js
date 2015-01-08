@@ -7,8 +7,9 @@ var defaults = {
       headers: {
         'Accept':'application/json'
       },
+      page: 0,
       pageSize: 10,
-      startingPage: '',
+      startingPage: 0,
       withCredentials: false
     },
     // get page size from args helper
@@ -16,28 +17,28 @@ var defaults = {
       if( typeof args.pageSize === 'number' ){
         return args.pageSize;
       }
-      if( args.params != null && typeof args.params['pageSize'] === 'number' ){
-        return args.params['pageSize'];
-      }
+      // if( args.params != null && typeof args.params['pageSize'] === 'number' ){
+      //   return args.params['pageSize'];
+      // }
       return defaults.pageSize;
     },
     // get starting page number from args helper
     getStartingPage = function(args){
-      if( typeof args.startingPage === 'string' ){
-        return args.startingPage;
+      if( typeof args.pagingInfo === 'string' ){
+        return args.pagingInfo;
       }
       if( args.params != null && typeof args.params.page === 'string' ){
         return args.params.page;
       }
-      return defaults.startingPage;
+      return defaults.page;
     },
-// Then Helpers, use 'call' or 'bind' to set proper this reference
-    setContentForPage = function(pageNumber, pageSize, newContent){
-      var i = 0, length = newContent.length;
-      for( ; i < length ; i++ ){
-        this.content[pageNumber*pageSize + i] = newContent[i];
-      }
-    },
+    // deprecated setContentForPage Then Helpers, use 'call' or 'bind' to set proper this reference
+    // setContentForPage = function(pageNumber, pageSize, newContent){
+    //   var i = 0, length = newContent.length;
+    //   for( ; i < length ; i++ ){
+    //     this.content[pageNumber*pageSize + i] = newContent[i];
+    //   }
+    // },
     //deprecated setInfo
     setInfo = function(response){
 
@@ -59,16 +60,17 @@ var defaults = {
           originalContent;
 
       originalContent = response.content;
+      self.pageid = response.content[0].object.metadata.mhid;
       // if( (this._args.params.view && this._args.params.view === 'basic') || typeof response.content[0] === 'string' ){
       //   newContent = Promise.all(MHObject.fetchByMhids(response.content));
       // } else {
-        newContent = Promise.all(originalContent.map(function(args){
-          return MHObject.create(args.object);
-        }));
+      newContent = Promise.all(originalContent.map(function(args){
+        return MHObject.create(args.object);
+      }));
       // }
       return newContent.then(function(mhObjs){
-          //setContentForPage.call(self, response.number, response.size, mhObjs);
           response.content = mhObjs;
+          self.content = mhObjs;
           return response;
         });
     };
@@ -126,8 +128,9 @@ class PagedRequest {
     }
 
     myArgs.params              = myArgs.params || {};
+    myArgs.params['page']      = startingPage;
     myArgs.params['pageSize']  = pageSize;
-    myArgs.params.page         = startingPage;
+
   //  myArgs.params.pageNext     = pageNext;
 
     // remove extraneous args props
@@ -141,9 +144,7 @@ class PagedRequest {
     this._args = myArgs;
 
     this.pagePromises[this.page] = houndRequest(this._args)
-                                    .then(setInfo.bind(this))
                                     .then(setContentArray.bind(this));
-                                    //.then(console.log(this,setContentArray.bind(this)));
     // Define Immutable Props and getters
     Object.defineProperties(this, {
       'pageSize':{
@@ -177,10 +178,11 @@ class PagedRequest {
           self.page += 1;
           //self._args.params.page = self.page;
           self._args.params.pageNext = response.pagingInfo.next;
+          delete self._args.params.page;
+          //  self._args.params.pageNext = response.pagingInfo.next;
 
           if( self.pagePromises[self.page] == null ){
             self.pagePromises[self.page] = houndRequest(self._args)
-                                            .then(setInfo.bind(self))
                                             .then(setContentArray.bind(self));
           }
           return self.pagePromises[self.page];
@@ -195,12 +197,14 @@ class PagedRequest {
     return this.currentPromise
       .then(function(response){
         if( !self.firstPage ){
+
+
           self.page -= 1;
-          self._args.params.page = self.page;
+          self._args.params.pageNext = self.pagePromises[self.page].pagingInfo.next;
+          delete self._args.params.page;
 
           if( self.pagePromises[self.page] == null ){
             self.pagePromises[self.page] = houndRequest(self._args)
-                                            .then(setInfo.bind(self))
                                             .then(setContentArray.bind(self));
           }
           return self.pagePromises[self.page];
@@ -209,33 +213,33 @@ class PagedRequest {
       });
   }
 
-  // .jumpTo(n)
-  //  needs testing
-  jumpTo(n){
-    if( n < 0 ){ n = 0; }
-    if( n >= this.totalPages ){
-      n = this.totalPages;
-      //throw TypeError("Can't jump to page that doesn't exist.");
-    }
-
-    if( this.pagePromises[n] == null ){
-      // needs request
-      var self = this;
-      return this.currentPromise
-        .then(function(){
-          self.page = n;
-          self._args.params.page = self.page;
-          self.pagePromises[self.page] = houndRequest(self._args)
-                                          .then(setInfo.bind(self))
-                                          .then(setContentArray.bind(self));
-          return self.pagePromises[self.page];
-        });
-    } else if( this.page !== n ){
-      this.page = n;
-      return this.pagePromises[this.page];
-    }
-    return this.currentPromise;
-  }
+  // // .jumpTo(n)
+  // //  needs testing
+  // jumpTo(n){
+  //   if( n < 0 ){ n = 0; }
+  //   if( n >= this.totalPages ){
+  //     n = this.totalPages;
+  //     //throw TypeError("Can't jump to page that doesn't exist.");
+  //   }
+  //
+  //   if( this.pagePromises[n] == null ){
+  //     // needs request
+  //     var self = this;
+  //     return this.currentPromise
+  //       .then(function(){
+  //         self.page = n;
+  //         self._args.params.page = self.page;
+  //         self.pagePromises[self.page] = houndRequest(self._args)
+  //                                         .then(setInfo.bind(self))
+  //                                         .then(setContentArray.bind(self));
+  //         return self.pagePromises[self.page];
+  //       });
+  //   } else if( this.page !== n ){
+  //     this.page = n;
+  //     return this.pagePromises[this.page];
+  //   }
+  //   return this.currentPromise;
+  // }
 
 } // end class
 

@@ -2697,34 +2697,25 @@ System.register("request/hound-paged-request", [], function() {
   var houndRequest = System.get("request/hound-request").houndRequest;
   var defaults = {
     headers: {'Accept': 'application/json'},
+    page: 0,
     pageSize: 10,
-    startingPage: '',
+    startingPage: 0,
     withCredentials: false
   },
       getPageSize = function(args) {
         if (typeof args.pageSize === 'number') {
           return args.pageSize;
         }
-        if (args.params != null && typeof args.params['pageSize'] === 'number') {
-          return args.params['pageSize'];
-        }
         return defaults.pageSize;
       },
       getStartingPage = function(args) {
-        if (typeof args.startingPage === 'string') {
-          return args.startingPage;
+        if (typeof args.pagingInfo === 'string') {
+          return args.pagingInfo;
         }
         if (args.params != null && typeof args.params.page === 'string') {
           return args.params.page;
         }
-        return defaults.startingPage;
-      },
-      setContentForPage = function(pageNumber, pageSize, newContent) {
-        var i = 0,
-            length = newContent.length;
-        for (; i < length; i++) {
-          this.content[pageNumber * pageSize + i] = newContent[i];
-        }
+        return defaults.page;
       },
       setInfo = function(response) {
         return response;
@@ -2735,11 +2726,13 @@ System.register("request/hound-paged-request", [], function() {
             newContent,
             originalContent;
         originalContent = response.content;
+        self.pageid = response.content[0].object.metadata.mhid;
         newContent = Promise.all(originalContent.map(function(args) {
           return MHObject.create(args.object);
         }));
         return newContent.then(function(mhObjs) {
           response.content = mhObjs;
+          self.content = mhObjs;
           return response;
         });
       };
@@ -2757,15 +2750,15 @@ System.register("request/hound-paged-request", [], function() {
       startingPage = defaults.startingPage;
     }
     myArgs.params = myArgs.params || {};
+    myArgs.params['page'] = startingPage;
     myArgs.params['pageSize'] = pageSize;
-    myArgs.params.page = startingPage;
     delete myArgs.pageSize;
     delete myArgs.startingPage;
     this.content = [];
     this.pagePromises = [];
     this.page = startingPage;
     this._args = myArgs;
-    this.pagePromises[this.page] = houndRequest(this._args).then(setInfo.bind(this)).then(setContentArray.bind(this));
+    this.pagePromises[this.page] = houndRequest(this._args).then(setContentArray.bind(this));
     Object.defineProperties(this, {'pageSize': {
         configurable: false,
         enumerable: true,
@@ -2783,8 +2776,9 @@ System.register("request/hound-paged-request", [], function() {
         if (!self.lastPage) {
           self.page += 1;
           self._args.params.pageNext = response.pagingInfo.next;
+          delete self._args.params.page;
           if (self.pagePromises[self.page] == null) {
-            self.pagePromises[self.page] = houndRequest(self._args).then(setInfo.bind(self)).then(setContentArray.bind(self));
+            self.pagePromises[self.page] = houndRequest(self._args).then(setContentArray.bind(self));
           }
           return self.pagePromises[self.page];
         }
@@ -2796,35 +2790,15 @@ System.register("request/hound-paged-request", [], function() {
       return this.currentPromise.then(function(response) {
         if (!self.firstPage) {
           self.page -= 1;
-          self._args.params.page = self.page;
+          self._args.params.pageNext = self.pagePromises[self.page].pagingInfo.next;
+          delete self._args.params.page;
           if (self.pagePromises[self.page] == null) {
-            self.pagePromises[self.page] = houndRequest(self._args).then(setInfo.bind(self)).then(setContentArray.bind(self));
+            self.pagePromises[self.page] = houndRequest(self._args).then(setContentArray.bind(self));
           }
           return self.pagePromises[self.page];
         }
         return response;
       });
-    },
-    jumpTo: function(n) {
-      if (n < 0) {
-        n = 0;
-      }
-      if (n >= this.totalPages) {
-        n = this.totalPages;
-      }
-      if (this.pagePromises[n] == null) {
-        var self = this;
-        return this.currentPromise.then(function() {
-          self.page = n;
-          self._args.params.page = self.page;
-          self.pagePromises[self.page] = houndRequest(self._args).then(setInfo.bind(self)).then(setContentArray.bind(self));
-          return self.pagePromises[self.page];
-        });
-      } else if (this.page !== n) {
-        this.page = n;
-        return this.pagePromises[this.page];
-      }
-      return this.currentPromise;
     }
   }, {get extraEncode() {
       return houndRequest.extraEncode;
