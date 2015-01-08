@@ -36,9 +36,9 @@ export class MHAction extends MHObject {
     super(args);
 
     // Default MHAction unique objects to null
-    var message         = args.message        || null,
-        primaryOwner    = args.primaryOwner   || null,
-        primaryMention  = args.primaryMention || null;
+    var message         = args.metadata.message || null,
+        primaryOwner    = (args.primaryOwner != null) ? MHObject.create(args.primaryOwner) : null,
+        primaryMention  = (args.primaryMention != null) ? MHObject.create(args.primaryMention) : null;
 
     // Create imutable properties
     //  message, owners, mentions
@@ -60,26 +60,26 @@ export class MHAction extends MHObject {
         enumerable:   true,
         writable:     false,
         value:        primaryMention
-      },
-      // Promises
-      'ownersPromise':{
-        configurable: false,
-        enumerable:   false,
-        writable:     true,
-        value:        null
-      },
-      'commentsPromise':{
-        configurable: false,
-        enumerable:   false,
-        writable:     true,
-        value:        null
-      },
-      'mentionsPromise':{
-        configurable: false,
-        enumerable:   false,
-        writable:     true,
-        value:        null
       }
+      // // Promises
+      // 'ownersPromise':{
+      //   configurable: false,
+      //   enumerable:   false,
+      //   writable:     true,
+      //   value:        null
+      // },
+      // 'commentsPromise':{
+      //   configurable: false,
+      //   enumerable:   false,
+      //   writable:     true,
+      //   value:        null
+      // },
+      // 'mentionsPromise':{
+      //   configurable: false,
+      //   enumerable:   false,
+      //   writable:     true,
+      //   value:        null
+      // }
     });
   }
 
@@ -94,104 +94,104 @@ export class MHAction extends MHObject {
    *  MHAction.commentWithMessage(message{string}, mentions{Array<MHObject>}, primaryMention{MHObject})
    *  creates a new comment
    */
-  commentWithMessage(message, mentions, primaryMention){
-    if( !message ||
-        !mentions ||
-        typeof message !== 'string' ||
-        !Array.isArray(mentions) ||
-        !mentions.every(x => x instanceof MHObject) )
-    {
-      throw new TypeError("Can't create comment without message string, and mentions array.");
-    }
-
-    var path = this.subendpoint('comment'),
-        i = 0, postBody,
-        length = mentions.length,
-        mentionedMhids = [];
-
-    for( ; i < length ; i++ ){
-      mentionedMhids.push(mentions[i].mhid);
-    }
-
-    postBody = {
-      'message':message,
-      'mentions': mentionedMhids
-    };
-    if( primaryMention && primaryMention instanceof MHObject ){
-      postBody.primaryMention = primaryMention.mhid;
-    }
-    return houndRequest({
-        method: 'POST',
-        endpoint: path,
-        data: postBody
-      })
-      .then(res => {
-        // update social counts of mentioned objects
-        mentions.forEach(m => m.fetchSocial(true));
-        return res;
-      });
-  }
-
-  /** TODO docJS
-   *
-   */
-  fetchOwners(force=false){
-    var path = this.subendpoint('owners');
-
-    if( force || this.ownersPromise === null ){
-      this.ownersPromise = houndRequest({
-          method: 'GET',
-          endpoint: path
-        })
-        .catch( (err => { this.ownersPromise = null; throw err; }).bind(this) )
-        .then(function(res){
-          return Promise.all(res.map(m => MHObject.fetchByMhid(m)));
-        });
-    }
-
-    return this.ownersPromise;
-  }
-
-  /** TODO docJS
-   *
-   */
-  fetchComments(force=false){
-    var path = this.subendpoint('comments');
-
-    if( force || this.commentsPromise === null ){
-      this.commentsPromise = houndRequest({
-          method: 'GET',
-          endpoint: path
-        })
-        .catch( (err => {this.commentsPromise = null; throw err; }).bind(this) )
-        .then(function(res){
-          return Promise.all(res.map(m => MHObject.fetchByMhid(m)));
-        });
-
-    }
-
-    return this.commentsPromise;
-  }
-
-  /** TODO docJS
-   *
-   */
-  fetchMentions(force=false){
-    var path = this.subendpoint('mentions');
-
-    if( force || this.mentionsPromise === null ){
-      this.mentionsPromise = houndRequest({
-          method: 'GET',
-          endpoint: path
-        })
-        .catch( (err => { this.mentionsPromise = null; throw err; }).bind(this) )
-        .then(function(res){
-          return Promise.all(res.map(m => MHObject.fetchByMhid(m)));
-        });
-
-    }
-
-    return this.mentionsPromise;
-  }
+  // Deprecated
+  // commentWithMessage(message, mentions, primaryMention){
+  //   if( !message ||
+  //       !mentions ||
+  //       typeof message !== 'string' ||
+  //       !Array.isArray(mentions) ||
+  //       !mentions.every(x => x instanceof MHObject) )
+  //   {
+  //     throw new TypeError("Can't create comment without message string, and mentions array.");
+  //   }
+  //
+  //   var path = this.subendpoint('comment'),
+  //       i = 0, postBody,
+  //       length = mentions.length,
+  //       mentionedMhids = [];
+  //
+  //   for( ; i < length ; i++ ){
+  //     mentionedMhids.push(mentions[i].mhid);
+  //   }
+  //
+  //   postBody = {
+  //     'message':message,
+  //     'mentions': mentionedMhids
+  //   };
+  //   if( primaryMention && primaryMention instanceof MHObject ){
+  //     postBody.primaryMention = primaryMention.mhid;
+  //   }
+  //   return houndRequest({
+  //       method: 'POST',
+  //       endpoint: path,
+  //       data: postBody
+  //     })
+  //     .then(res => {
+  //       // update social counts of mentioned objects
+  //       mentions.forEach(m => m.fetchSocial(true));
+  //       return res;
+  //     });
+  // }
+  //
+  // /** TODO docJS
+  //  *
+  //  */
+  // fetchOwners(force=false){
+  //   var path = this.subendpoint('owners');
+  //
+  //   if( force || this.ownersPromise === null ){
+  //     this.ownersPromise = houndRequest({
+  //         method: 'GET',
+  //         endpoint: path
+  //       })
+  //       .catch( (err => { this.ownersPromise = null; throw err; }).bind(this) )
+  //       .then(function(res){
+  //         return Promise.all(res.map(m => MHObject.fetchByMhid(m)));
+  //       });
+  //   }
+  //
+  //   return this.ownersPromise;
+  // }
+  //
+  // /** TODO docJS
+  //  *
+  //  */
+  // fetchComments(force=false){
+  //   var path = this.subendpoint('comments');
+  //
+  //   if( force || this.commentsPromise === null ){
+  //     this.commentsPromise = houndRequest({
+  //         method: 'GET',
+  //         endpoint: path
+  //       })
+  //       .catch( (err => {this.commentsPromise = null; throw err; }).bind(this) )
+  //       .then(function(res){
+  //         return Promise.all(res.map(m => MHObject.fetchByMhid(m)));
+  //       });
+  //
+  //   }
+  //
+  //   return this.commentsPromise;
+  // }
+  //
+  // /** TODO docJS
+  //  *
+  //  */
+  // fetchMentions(force=false){
+  //   var path = this.subendpoint('mentions');
+  //
+  //   if( force || this.mentionsPromise === null ){
+  //     this.mentionsPromise = houndRequest({
+  //         method: 'GET',
+  //         endpoint: path
+  //       })
+  //       .catch( (err => { this.mentionsPromise = null; throw err; }).bind(this) )
+  //       .then(function(res){
+  //         return Promise.all(res.map(m => MHObject.fetchByMhid(m)));
+  //       });
+  //
+  //   }
+  //
+  //   return this.mentionsPromise;
+  // }
 }
-
