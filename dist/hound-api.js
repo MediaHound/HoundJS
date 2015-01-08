@@ -4365,14 +4365,16 @@ System.register("models/user/MHUser", [], function() {
       return houndRequest({
         method: 'GET',
         endpoint: path
-      }).then(function(response) {
-        return response === 200;
+      }).then(function() {
+        return 200;
       }).catch(function(error) {
         if (error.xhr.status === 406) {
           console.error('The username ' + username + ' is already taken.');
+          return error.xhr.status;
         } else {
           console.log('error in validate username: ', error.error.message);
           console.error(error.error.stack);
+          return error.xhr.status;
         }
         return false;
       });
@@ -4385,14 +4387,16 @@ System.register("models/user/MHUser", [], function() {
       return houndRequest({
         method: 'GET',
         endpoint: path
-      }).then(function(response) {
-        return response === 200;
+      }).then(function() {
+        return 200;
       }).catch(function(error) {
         if (error.xhr.status === 406) {
           console.error('The email ' + email + ' is already registered.');
+          return error.xhr.status;
         } else {
           console.log('error in validate username: ', error.error.message);
           console.error(error.error.stack);
+          return error.xhr.status;
         }
         return false;
       });

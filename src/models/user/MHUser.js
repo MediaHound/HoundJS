@@ -214,62 +214,66 @@ export class MHUser extends MHObject {
   /** TODO: refactor after new auth system
    *
    */
-  static validateUsername(username){
-    if( !username || (typeof username !== 'string' && !(username instanceof String)) ){
-      throw new TypeError('Username must be type string in MHUser.validateUsername');
-    }
-    var path = MHUser.rootEndpoint + '/validate/' + encodeURIComponent(username);
+   static validateUsername(username){
+     if( !username || (typeof username !== 'string' && !(username instanceof String)) ){
+       throw new TypeError('Username must be type string in MHUser.validateUsername');
+     }
+     var path = MHUser.rootEndpoint + '/validate/' + encodeURIComponent(username);
 
-    // returns 200 for acceptable user name
-    // returns 406 for taken user name
-    return houndRequest({
-        method: 'GET',
-        endpoint: path
-      })
-      .then(function(response){
-        //console.log('valid username response: ', response, response === 200);
-        return response === 200;
-      })
-      .catch(function(error){
-        if( error.xhr.status === 406 ){
-          console.error('The username ' + username + ' is already taken.');
-        } else {
-          console.log('error in validate username: ', error.error.message);
-          console.error(error.error.stack);
-        }
-        return false;
-      });
-  }
+     // returns 200 for acceptable user name
+     // returns 406 for taken user name
+     return houndRequest({
+       method: 'GET',
+       endpoint: path
+     })
+     .then(function(){
+       //console.log('valid username response: ', response, response === 200);
+       return 200;
+     })
+     .catch(function(error){
+       if( error.xhr.status === 406 ){
+         console.error('The username ' + username + ' is already taken.');
+         return error.xhr.status;
+       } else {
+         console.log('error in validate username: ', error.error.message);
+         console.error(error.error.stack);
+         return error.xhr.status;
+       }
+       return false;
+     });
+   }
 
-  /** TODO: refactor after new auth system
+   /** TODO: refactor after new auth system
    *
    */
-  static validateEmail(email){
-    if( !email || (typeof email !== 'string' && !(email instanceof String)) ){
-      throw new TypeError('Email must be type string in MHUser.validateEmail');
-    }
-    var path = MHUser.rootEndpoint + '/validate/email/' + encodeURIComponent(email);
+   static validateEmail(email){
+     if( !email || (typeof email !== 'string' && !(email instanceof String)) ){
+       throw new TypeError('Email must be type string in MHUser.validateEmail');
+     }
+     var path = MHUser.rootEndpoint + '/validate/email/' + encodeURIComponent(email);
 
-    // returns 200 for acceptable user name
-    // returns 406 for taken user name
-    return houndRequest({
-        method: 'GET',
-        endpoint: path
-      })
-      .then(function(response){
-        //console.log('valid email response: ', response);
-        return response === 200;
-      })
-      .catch(function(error){
-        if( error.xhr.status === 406 ){
-          console.error('The email ' + email + ' is already registered.');
-        } else {
-          console.log('error in validate username: ', error.error.message);
-          console.error(error.error.stack);
-        }
-        return false;
-      });
-  }
+     // returns 200 for acceptable user name
+     // returns 406 for taken user name
+     return houndRequest({
+       method: 'GET',
+       endpoint: path
+     })
+     .then(function(){
+       //console.log('valid email response: ', response);
+       return 200;
+     })
+     .catch(function(error){
+       if( error.xhr.status === 406 ){
+         console.error('The email ' + email + ' is already registered.');
+         return error.xhr.status;
+       } else {
+         console.log('error in validate username: ', error.error.message);
+         console.error(error.error.stack);
+         return error.xhr.status;
+       }
+       return false;
+     });
+   }
   /* TODO: change endpoint to CamelCase and to use mhid?
   * mhUser.forgotUsernameWithEmail()
   *
