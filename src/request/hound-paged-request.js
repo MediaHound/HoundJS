@@ -70,7 +70,7 @@ var defaults = {
       // }
       return newContent.then(function(mhObjs){
           response.content = mhObjs;
-          self.content = mhObjs;
+          Array.prototype.push.apply(self.content, mhObjs);
           return response;
         });
     };

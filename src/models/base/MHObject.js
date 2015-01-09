@@ -337,54 +337,54 @@ export class MHObject {
   // case:
   //    instanceof only works if the object being checked was created
   //    in the same global scope as the constructor function it is being checked against
-  // static isMedia(toCheck){
-  //   return toCheck instanceof System.get('../../src/models/media/MHMedia').MHMedia;
-  // }
-  // get isMedia(){
-  //   return MHObject.isMedia(this);
-  // }
-  //
-  // static isContributor(toCheck){
-  //   return toCheck instanceof System.get('../../src/models/contributor/MHContributor').MHContributor;
-  // }
-  // get isContributor(){
-  //   return MHObject.isContributor(this);
-  // }
-  //
-  // static isAction(toCheck){
-  //   return toCheck instanceof System.get('../../src/models/action/MHAction').MHAction;
-  // }
-  // get isAction(){
-  //   return MHObject.isAction(this);
-  // }
-  //
-  // static isUser(toCheck){
-  //   return toCheck instanceof System.get('../../src/models/user/MHUser').MHUser;
-  // }
-  // get isUser(){
-  //   return MHObject.isUser(this);
-  // }
-  //
-  // static isCollection(toCheck){
-  //   return toCheck instanceof System.get('../../src/models/collection/MHCollection').MHCollection;
-  // }
-  // get isCollection(){
-  //   return MHObject.isCollection(this);
-  // }
-  //
-  // static isImage(toCheck){
-  //   return toCheck instanceof System.get('../../src/models/image/MHImage').MHImage;
-  // }
-  // get isImage(){
-  //   return MHObject.isImage(this);
-  // }
-  //
-  // static isTrait(toCheck){
-  //   return toCheck instanceof System.get('../../src/models/trait/MHTrait').MHTrait;
-  // }
-  // get isTrait(){
-  //   return MHObject.isTrait(this);
-  // }
+  static isMedia(toCheck){
+    return toCheck instanceof System.get('../../src/models/media/MHMedia').MHMedia;
+  }
+  get isMedia(){
+    return MHObject.isMedia(this);
+  }
+
+  static isContributor(toCheck){
+    return toCheck instanceof System.get('../../src/models/contributor/MHContributor').MHContributor;
+  }
+  get isContributor(){
+    return MHObject.isContributor(this);
+  }
+
+  static isAction(toCheck){
+    return toCheck instanceof System.get('../../src/models/action/MHAction').MHAction;
+  }
+  get isAction(){
+    return MHObject.isAction(this);
+  }
+
+  static isUser(toCheck){
+    return toCheck instanceof System.get('../../src/models/user/MHUser').MHUser;
+  }
+  get isUser(){
+    return MHObject.isUser(this);
+  }
+
+  static isCollection(toCheck){
+    return toCheck instanceof System.get('../../src/models/collection/MHCollection').MHCollection;
+  }
+  get isCollection(){
+    return MHObject.isCollection(this);
+  }
+
+  static isImage(toCheck){
+    return toCheck instanceof System.get('../../src/models/image/MHImage').MHImage;
+  }
+  get isImage(){
+    return MHObject.isImage(this);
+  }
+
+  static isTrait(toCheck){
+    return toCheck instanceof System.get('../../src/models/trait/MHTrait').MHTrait;
+  }
+  get isTrait(){
+    return MHObject.isTrait(this);
+  }
 
   /**
    * This uses the function.name feature which is shimmed if it doesn't exist during the child constructor registration process.

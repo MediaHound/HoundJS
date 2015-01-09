@@ -2732,7 +2732,7 @@ System.register("request/hound-paged-request", [], function() {
         }));
         return newContent.then(function(mhObjs) {
           response.content = mhObjs;
-          self.content = mhObjs;
+          Array.prototype.push.apply(self.content, mhObjs);
           return response;
         });
       };
@@ -3319,6 +3319,27 @@ System.register("models/base/MHObject", [], function() {
   };
   var $MHObject = MHObject;
   ($traceurRuntime.createClass)(MHObject, {
+    get isMedia() {
+      return $MHObject.isMedia(this);
+    },
+    get isContributor() {
+      return $MHObject.isContributor(this);
+    },
+    get isAction() {
+      return $MHObject.isAction(this);
+    },
+    get isUser() {
+      return $MHObject.isUser(this);
+    },
+    get isCollection() {
+      return $MHObject.isCollection(this);
+    },
+    get isImage() {
+      return $MHObject.isImage(this);
+    },
+    get isTrait() {
+      return $MHObject.isTrait(this);
+    },
     get className() {
       return this.constructor.name;
     },
@@ -3523,6 +3544,27 @@ System.register("models/base/MHObject", [], function() {
     },
     get mhidPrefix() {
       return null;
+    },
+    isMedia: function(toCheck) {
+      return toCheck instanceof System.get('models/media/MHMedia').MHMedia;
+    },
+    isContributor: function(toCheck) {
+      return toCheck instanceof System.get('models/contributor/MHContributor').MHContributor;
+    },
+    isAction: function(toCheck) {
+      return toCheck instanceof System.get('models/action/MHAction').MHAction;
+    },
+    isUser: function(toCheck) {
+      return toCheck instanceof System.get('models/user/MHUser').MHUser;
+    },
+    isCollection: function(toCheck) {
+      return toCheck instanceof System.get('models/collection/MHCollection').MHCollection;
+    },
+    isImage: function(toCheck) {
+      return toCheck instanceof System.get('models/image/MHImage').MHImage;
+    },
+    isTrait: function(toCheck) {
+      return toCheck instanceof System.get('models/trait/MHTrait').MHTrait;
     },
     fetchByMhid: function(mhid) {
       var view = arguments[1] !== (void 0) ? arguments[1] : 'full';
@@ -5252,7 +5294,7 @@ System.register("models/image/MHImage", [], function() {
   var MHImage = function MHImage(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHImage.prototype, "constructor", [args]);
-    var url = (typeof args.url === 'string') ? args.url.replace(/^http:|^https:/i, '') : null,
+    var url = (typeof args.original.url === 'string') ? args.original.url.replace(/^http:|^https:/i, '') : null,
         width = args.width || null,
         height = args.height || null,
         isDefault = (typeof args.isDefault === 'boolean') ? args.isDefault : null;
