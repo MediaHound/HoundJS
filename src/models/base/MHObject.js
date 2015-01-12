@@ -55,6 +55,7 @@ export class MHObject {
     var metadata        = new MHMetaData(args.metadata) || null,
         mhid            = args.metadata.mhid || null,
         altId           = args.metadata.altId || null,
+        name            = args.metadata.name || null,
         // Optional (nullable) values
         primaryImage    = (args.primaryImage != null)   ? MHObject.create(args.primaryImage)    : null,
         secondaryImage  = (args.secondaryImage != null) ? MHObject.create(args.secondaryImage)  : null,
@@ -83,6 +84,12 @@ export class MHObject {
         enumerable:   true,
         writable:     false,
         value:        altId
+      },
+      'name':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        name
       },
       'metadata':{
         configurable: false,

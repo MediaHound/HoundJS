@@ -3262,6 +3262,7 @@ System.register("models/base/MHObject", [], function() {
     var metadata = new MHMetaData(args.metadata) || null,
         mhid = args.metadata.mhid || null,
         altId = args.metadata.altId || null,
+        name = args.metadata.name || null,
         primaryImage = (args.primaryImage != null) ? $MHObject.create(args.primaryImage) : null,
         secondaryImage = (args.secondaryImage != null) ? $MHObject.create(args.secondaryImage) : null,
         social = args.social || null,
@@ -3284,6 +3285,12 @@ System.register("models/base/MHObject", [], function() {
         enumerable: true,
         writable: false,
         value: altId
+      },
+      'name': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: name
       },
       'metadata': {
         configurable: false,
