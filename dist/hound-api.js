@@ -3434,7 +3434,7 @@ System.register("models/base/MHObject", [], function() {
       }
       this[lastSocialRequestIdSym] = requestId;
       return houndRequest({
-        method: 'POST',
+        method: 'PUT',
         endpoint: path
       }).then((function(socialRes) {
         var newSocial = new MHSocial(socialRes);

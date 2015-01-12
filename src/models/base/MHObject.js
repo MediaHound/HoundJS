@@ -665,7 +665,7 @@ export class MHObject {
 
     // Return promise to new Social as returned from the server
     return houndRequest({
-        method: 'POST',
+        method: 'PUT',
         endpoint: path
       })
       .then(socialRes => {
