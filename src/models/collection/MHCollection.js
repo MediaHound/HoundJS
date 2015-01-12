@@ -3,7 +3,7 @@ import { log } from '../internal/debug-helpers';
 
 import { MHObject } from '../base/MHObject';
 import { MHLoginSession } from '../user/MHLoginSession';
-
+import { MHRelationalPair } from '../base/MHRelationalPair';
 import { houndRequest } from '../../request/hound-request';
 
 /**
@@ -47,7 +47,8 @@ export class MHCollection extends MHObject {
 
     var mixlist = (typeof args.mixlist === 'string') ? args.mixlist.toLowerCase() : null,
         firstContentImage = (args.firstContentImage != null) ? MHObject.create(args.firstContentImage) : null,
-        description = args.description || null;
+        primaryOwner = (args.primaryOwner != null) ? MHObject.create(args.primaryOwner) : null,
+        description = args.metadata.description || null;
 
     switch(mixlist){
       case 'none':
@@ -82,6 +83,12 @@ export class MHCollection extends MHObject {
         enumerable:   true,
         writable:     false,
         value:        description
+      },
+      'primaryOwner':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        primaryOwner
       },
       // Promises
       'ownersPromise': {
@@ -151,7 +158,7 @@ export class MHCollection extends MHObject {
     return houndRequest({
         method: 'POST',
         endpoint: path,
-        data: { name }
+        data: { "name":name }
       })
       .then(function(response){
         return MHObject.fetchByMhid(response.mhid);
@@ -226,7 +233,7 @@ export class MHCollection extends MHObject {
 
     log('content array to be submitted: ', mhids);
     return (this.contentPromise = houndRequest({
-        method: 'POST',
+        method: 'PUT',
         endpoint: path,
         data: {
           'content': mhids
@@ -263,40 +270,37 @@ export class MHCollection extends MHObject {
    * @param {boolean} force - whether to force a call to the server instead of using the cached contentPromise
    * @returns {Promise} - a promise that resolves to the list of content for this MHCollection
    */
-  fetchContent(view='ids', force=false){
-    var path = this.subendpoint('content');
+   fetchContent(view='ids', force=false){
+     var path = this.subendpoint('content'),
+     self = this;
 
-    if( force || this.contentPromise === null ){
-      this.contentPromise = houndRequest({
-          method    : 'GET',
-          endpoint  : path,
-          params    : { view }
-        })
-        .catch( (err => { this.contentPromise = null; throw err; }).bind(this) )
-        .then(res => {
-          if( view === 'full' && Array.isArray(res) ){
-            res = MHObject.create(res);
-            log('fetched content of collection: ', res);
-            // if collections become ordered MHRelationalPairs like media content:
-            //  also update logic in return statement below
-            //res = MHRelationalPair.createFromArray(res).sort( (a,b) => a.position - b.position );
-          }
-          return res;
-        });
-    }
+     if( force || this.contentPromise === null ){
+       this.contentPromise = houndRequest({
+         method: 'GET',
+         endpoint: path,
+         params: { view }
+       })
+       .catch(err => { self.contentPromise = null; throw err; })
+       .then(function(parsed){
+         if( view === 'full' && Array.isArray(parsed) ){
+           parsed = MHRelationalPair.createFromArray(parsed).sort( (a,b) => a.position - b.position );
+         }
+         return parsed;
+       });
+     }
 
-    return this.contentPromise.then(res => {
-      // if asking for 'full' but cached is 'ids'
-      if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
-        return Promise.all(MHObject.fetchByMhids(res));
-      }
-      // if asking for 'ids' but cached is 'full'
-      if( view === 'ids' && Array.isArray(res) && res[0] instanceof MHObject ){
-        return res.map(obj => obj.mhid);
-      }
-      return res;
-    });
-  }
+     return this.contentPromise.then(res => {
+       // if asking for 'full' but cached is 'ids'
+       if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
+         return self.fetchContent(view, true);
+       }
+       // if asking for 'ids' but cached is 'full'
+       if( view === 'ids' && Array.isArray(res) && res[0].object instanceof MHObject ){
+         return res.map(pair => pair.object.mhid);
+       }
+       return res;
+     });
+   }
 
   /**
    * @param {boolean} force - whether to force a call to the server instead of using the cached mixlistPromise
@@ -335,4 +339,3 @@ export class MHCollection extends MHObject {
 (function(){
   MHObject.registerConstructor(MHCollection);
 })();
-
