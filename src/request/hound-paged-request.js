@@ -40,17 +40,17 @@ var defaults = {
     //   }
     // },
     //deprecated setInfo
-    setInfo = function(response){
-
-      //set: lastPage, firstPage, totalPages, numberOfElements, totalElements
-      // this.firstPage        = response.firstPage || response.first;
-      // this.lastPage         = response.lastPage  || response.last;
-      // this.page             = response.number;
-      // this.totalPages       = response.totalPages;
-      // this.numberOfElements = response.numberOfElements;
-      // this.totalElements    = response.totalElements;
-      return response;
-    },
+    // setInfo = function(response){
+    //
+    //   //set: lastPage, firstPage, totalPages, numberOfElements, totalElements
+    //   // this.firstPage        = response.firstPage || response.first;
+    //   // this.lastPage         = response.lastPage  || response.last;
+    //   // this.page             = response.number;
+    //   // this.totalPages       = response.totalPages;
+    //   // this.numberOfElements = response.numberOfElements;
+    //   // this.totalElements    = response.totalElements;
+    //   return response;
+    // },
     setContentArray = function(response){
       var MHObject = System.get('../../src/models/base/MHObject').MHObject;
       //console.warn('circular dep: ', MHObject);
@@ -128,8 +128,8 @@ class PagedRequest {
     }
 
     myArgs.params              = myArgs.params || {};
-    myArgs.params['page']      = startingPage;
-    myArgs.params['pageSize']  = pageSize;
+    myArgs.params.page         = startingPage;
+    myArgs.params.pageSize     = pageSize;
 
   //  myArgs.params.pageNext     = pageNext;
 

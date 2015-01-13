@@ -148,6 +148,7 @@ export var models = {
   get MHCollection(){ return MHCollection; },
 
   get MHImage(){ return MHImage; },
+  get MHMetaData(){ return MHMetaData; },
 
   get MHTrait()         { return MHTrait; },
   get MHTraitGroup()    { return MHTraitGroup; },

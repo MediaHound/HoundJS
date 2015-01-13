@@ -125,16 +125,16 @@ export class MHObject {
     });
   }
 
-  // /** @property {MHSocial} social */
-  // get social(){
-  //   return this[socialSym] || null;
-  // }
-  // set social(newSocial){
-  //   if( newSocial instanceof MHSocial ){
-  //     this[socialSym] = newSocial;
-  //   }
-  //   return this.social;
-  // }
+  /** @property {MHSocial} social */
+  get social(){
+    return this[socialSym] || null;
+  }
+  set social(newSocial){
+    if( newSocial instanceof MHSocial ){
+      this[socialSym] = newSocial;
+    }
+    return this.social;
+  }
 
   /**
    * TODO: PRIVATE?

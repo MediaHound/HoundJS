@@ -53,11 +53,20 @@ buildSearchHelper = function(index){
       // Cleanup
       .then(parsed => {
         parsed.content = parsed.content.map(v => {
+          //TEMP fix for Search Results
+          v.metadata = {};
+          v.metadata.mhid = v.mhid;
+          v.metadata.name = v.name;
           if( typeof v.primaryImageUrl === 'string' ){
             v.primaryImage = {
-              mhid: 'mhimgPlaceHolderSearchShim',
-              url: v.primaryImageUrl,
-              isDefault: false
+              metadata:{
+                mhid: 'mhimgPlaceHolderSearchShim',
+                isDefault: false
+              },
+              original:{
+                url: v.primaryImageUrl
+              }
+
             };
           }
           return v;
@@ -135,4 +144,3 @@ quickSearch.everything = function(query, size){
 };
 
 export { quickSearch };
-

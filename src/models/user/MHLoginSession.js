@@ -277,7 +277,7 @@ export class MHLoginSession {
     var path = MHUser.rootEndpoint + '/validateSession';
 
     return houndRequest({
-        method: 'POST',
+        method: 'GET',
         endpoint: path,
         withCredentials : true
       })
