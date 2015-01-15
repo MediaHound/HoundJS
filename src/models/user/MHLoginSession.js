@@ -178,6 +178,7 @@ export class MHLoginSession {
       .then(loginMap => {
         access    = loginMap.access;
         onboarded = loginMap.onboarded;
+        console.log(loginMap);
         return loginMap;
       });
   }
@@ -213,21 +214,30 @@ export class MHLoginSession {
         headers: {}
       })
       .then(loginMap => {
-        access    = loginMap.access;
-        onboarded = loginMap.onboarded;
+        //console.log(loginMap);
         return MHObject.fetchByMhid(loginMap.mhid);
       })
       .then(mhUserLoggedIn => {
-        loggedInUser = mhUserLoggedIn;
 
-        // pre-fetch some user content
-        //loggedInUser.fetchOwnedCollections();
-        //loggedInUser.fetchSocial();
+        return MHUser.fetchSettings(mhUserLoggedIn.mhid).then(function(settings){
+          mhUserLoggedIn.settings = settings;
+          return mhUserLoggedIn;
+        });
 
-        // dispatch logged in event: 'mhUserLogin'
+      })
+      .then(user => {
+        console.log(user);
+        access = user.settings.access;
+        onboarded = user.settings.onboarded;
+        user.access = access;
+        user.onboarded = onboarded;
+        loggedInUser = user;
+
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
-
+        sessionStorage["currentUser"] = JSON.stringify(loggedInUser);
+        log('logging in:',loggedInUser);
         return loggedInUser;
+
       })
       .catch(function(error){
         //console.error('Error on MHLoginSession.login', error.error, 'xhr: ', error.xhr);
@@ -248,6 +258,8 @@ export class MHLoginSession {
         'value':keyVal[1]
       };
     });
+
+    window.sessionStorage["currentUser"] = null;
 
     currentCookies.forEach(cookie => {
       if( cookie.key === 'JSESSIONID' ){
@@ -273,24 +285,71 @@ export class MHLoginSession {
   /**
    * @returns {Promise} - resolves to the user that has an open session.
    */
-  static validateOpenSession(){
+  static validateOpenSession(v="full"){
     var path = MHUser.rootEndpoint + '/validateSession';
+    var view = v;
 
     return houndRequest({
         method: 'GET',
         endpoint: path,
+        params : {
+          view : view
+        },
         withCredentials : true
       })
-      .then(function(loginMap){
-        access    = loginMap.access;
-        onboarded = loginMap.onboarded;
-        return MHObject.fetchByMhid(loginMap.mhid);
+      .then(loginMap => {
+
+        var cachedUser = JSON.parse(window.sessionStorage["currentUser"]);
+        console.log(loginMap,cachedUser);
+        // if(cachedUser){
+
+          // if(cachedUser.mhid === loginMap.metadata.mhid ||
+          //    cachedUser.mhid === loginMap.mhid){
+
+               access = cachedUser.settings.access;
+               onboarded = cachedUser.settings.onboarded;
+               return MHObject.create(loginMap.users[0]);
+
+
+
+              //  .then(function(loggedInUser){
+              //   // loggedInUser.access = access;
+              //   // loggedInUser.onboarded = onboarded;
+              //    console.log(loggedInUser);
+              //    window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
+              //    return loggedInUser;
+              //  });
+               //
+
+
+        //  }
+        // }
+        // else{
+        //
+        //   return MHObject.create(loginMap.users[0]).then(function(mhObj){
+        //
+        //     return MHUser.fetchSettings(mhUserLoggedIn.mhid).then(function(settings){
+        //       mhObj.settings = settings;
+        //       access = mhObj.settings.access;
+        //       onboarded = mhObj.settings.onboarded;
+        //       loggedInUser = mhObj;
+        //       window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
+        //       return loggedInUser;
+        //     });
+        //
+        //   });
+        //
+        // }
+
       })
-      .then(function(mhUserLoggedIn){
-        loggedInUser = mhUserLoggedIn;
-        window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
-        return loggedInUser;
-      })
+      .then(function(mhObj){
+        // loggedInUser.access = access;
+        // loggedInUser.onboarded = onboarded;
+         loggedInUser = mhObj;
+         console.log(loggedInUser);
+         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
+         return loggedInUser;
+       })
       .catch(function(error){
         if( error.xhr.status === 401 ){
           console.log('No open MediaHound session');

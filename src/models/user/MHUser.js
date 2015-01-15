@@ -40,6 +40,7 @@ export class MHUser extends MHObject {
   */
   constructor(args) {
     args = MHObject.parseArgs(args);
+
     if( typeof args.metadata.username === 'undefined' || args.metadata.username === null ){
       throw new TypeError('Username is null or undefined', 'MHUser.js', 39);
     }
@@ -209,6 +210,30 @@ export class MHUser extends MHObject {
     throw new Error('Problem registring new User');
   });
   */
+}
+
+/** TODO: refactor after new auth system
+*
+*/
+static fetchSettings(mhid){
+  if( !mhid || (typeof mhid !== 'string' && !(mhid instanceof String)) ){
+    throw new TypeError('mhid must be type string in MHUser.fetchSettings');
+  }
+  var path = MHUser.rootEndpoint +'/'+mhid+'/settings/internal';
+
+  return houndRequest({
+    method: 'GET',
+    endpoint: path
+  })
+  .then(function(response){
+    log('valid settings response: ', response);
+    return response.internalSettings;
+  })
+  .catch(function(error){
+    console.log('error in fetchSettings: ', error.error.message);
+    console.error(error.error.stack);
+    return false;
+  });
 }
 
 /** TODO: refactor after new auth system
@@ -569,12 +594,15 @@ updateProfileData(updates){
 * @return { Promise } - resolves to the MHUser object
 *
 */
-static fetchByUsername(username, force=false){
+static fetchByUsername(username, view='full', force=false){
   if( !username || (typeof username !== 'string' && !(username instanceof String)) ){
     throw new TypeError('Username not of type String in fetchByUsername');
   }
   if( MHObject.getPrefixFromMhid(username) != null ){
     throw new TypeError('Passed mhid to fetchByUsername, please use MHObject.fetchByMhid for this request.');
+  }
+  if(view === null || view === undefined) {
+    view = 'full';
   }
 
   log('in fetchByUsername, looking for: ' + username);
@@ -590,7 +618,10 @@ static fetchByUsername(username, force=false){
   return houndRequest({
     method          : 'GET',
     endpoint        : path,
-    withCredentials : true
+    withCredentials : true,
+    params:{
+      view: view
+    }
   })
   .then(function(response){
     newObj = MHObject.create(response);

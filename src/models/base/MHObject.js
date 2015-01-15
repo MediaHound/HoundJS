@@ -476,7 +476,10 @@ export class MHObject {
 
     return houndRequest({
         method: 'GET',
-        endpoint: mhClass.rootEndpoint + '/' + mhid + '?view=' + view
+        endpoint: mhClass.rootEndpoint + '/' + mhid,
+        params:{
+          view: view
+        }
       })
       .then(function(response){
         newObj = MHObject.create(response);

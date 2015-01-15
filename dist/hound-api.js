@@ -3603,7 +3603,8 @@ System.register("models/base/MHObject", [], function() {
       }
       return houndRequest({
         method: 'GET',
-        endpoint: mhClass.rootEndpoint + '/' + mhid + '?view=' + view
+        endpoint: mhClass.rootEndpoint + '/' + mhid,
+        params: {view: view}
       }).then(function(response) {
         newObj = $MHObject.create(response);
         log('fetched: ', newObj, 'with response: ', response);
@@ -4337,6 +4338,23 @@ System.register("models/user/MHUser", [], function() {
         return MHObject.fetchByMhid(parsed.metadata.mhid);
       });
     },
+    fetchSettings: function(mhid) {
+      if (!mhid || (typeof mhid !== 'string' && !(mhid instanceof String))) {
+        throw new TypeError('mhid must be type string in MHUser.fetchSettings');
+      }
+      var path = $MHUser.rootEndpoint + '/' + mhid + '/settings/internal';
+      return houndRequest({
+        method: 'GET',
+        endpoint: path
+      }).then(function(response) {
+        log('valid settings response: ', response);
+        return response.internalSettings;
+      }).catch(function(error) {
+        console.log('error in fetchSettings: ', error.error.message);
+        console.error(error.error.stack);
+        return false;
+      });
+    },
     validateUsername: function(username) {
       if (!username || (typeof username !== 'string' && !(username instanceof String))) {
         throw new TypeError('Username must be type string in MHUser.validateUsername');
@@ -4490,12 +4508,16 @@ System.register("models/user/MHUser", [], function() {
       });
     },
     fetchByUsername: function(username) {
-      var force = arguments[1] !== (void 0) ? arguments[1] : false;
+      var view = arguments[1] !== (void 0) ? arguments[1] : 'full';
+      var force = arguments[2] !== (void 0) ? arguments[2] : false;
       if (!username || (typeof username !== 'string' && !(username instanceof String))) {
         throw new TypeError('Username not of type String in fetchByUsername');
       }
       if (MHObject.getPrefixFromMhid(username) != null) {
         throw new TypeError('Passed mhid to fetchByUsername, please use MHObject.fetchByMhid for this request.');
+      }
+      if (view === null || view === undefined) {
+        view = 'full';
       }
       log('in fetchByUsername, looking for: ' + username);
       if (!force && mhidLRU.hasAltId(username)) {
@@ -4506,7 +4528,8 @@ System.register("models/user/MHUser", [], function() {
       return houndRequest({
         method: 'GET',
         endpoint: path,
-        withCredentials: true
+        withCredentials: true,
+        params: {view: view}
       }).then(function(response) {
         newObj = MHObject.create(response);
         mhidLRU.putMHObj(newObj);
@@ -4661,6 +4684,7 @@ System.register("models/user/MHLoginSession", [], function() {
       }).then((function(loginMap) {
         access = loginMap.access;
         onboarded = loginMap.onboarded;
+        console.log(loginMap);
         return loginMap;
       }));
     },
@@ -4683,12 +4707,22 @@ System.register("models/user/MHLoginSession", [], function() {
         withCredentials: true,
         headers: {}
       }).then((function(loginMap) {
-        access = loginMap.access;
-        onboarded = loginMap.onboarded;
         return MHObject.fetchByMhid(loginMap.mhid);
       })).then((function(mhUserLoggedIn) {
-        loggedInUser = mhUserLoggedIn;
+        return MHUser.fetchSettings(mhUserLoggedIn.mhid).then(function(settings) {
+          mhUserLoggedIn.settings = settings;
+          return mhUserLoggedIn;
+        });
+      })).then((function(user) {
+        console.log(user);
+        access = user.settings.access;
+        onboarded = user.settings.onboarded;
+        user.access = access;
+        user.onboarded = onboarded;
+        loggedInUser = user;
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
+        sessionStorage["currentUser"] = JSON.stringify(loggedInUser);
+        log('logging in:', loggedInUser);
         return loggedInUser;
       })).catch(function(error) {
         throw new Error('Problem during login: ' + error.error.message, 'MHLoginSession.js');
@@ -4702,6 +4736,7 @@ System.register("models/user/MHLoginSession", [], function() {
           'value': keyVal[1]
         };
       }));
+      window.sessionStorage["currentUser"] = null;
       currentCookies.forEach((function(cookie) {
         if (cookie.key === 'JSESSIONID') {
           var expires = (new Date(0)).toGMTString();
@@ -4718,17 +4753,23 @@ System.register("models/user/MHLoginSession", [], function() {
       });
     },
     validateOpenSession: function() {
+      var v = arguments[0] !== (void 0) ? arguments[0] : "full";
       var path = MHUser.rootEndpoint + '/validateSession';
+      var view = v;
       return houndRequest({
         method: 'GET',
         endpoint: path,
+        params: {view: view},
         withCredentials: true
-      }).then(function(loginMap) {
-        access = loginMap.access;
-        onboarded = loginMap.onboarded;
-        return MHObject.fetchByMhid(loginMap.mhid);
-      }).then(function(mhUserLoggedIn) {
-        loggedInUser = mhUserLoggedIn;
+      }).then((function(loginMap) {
+        var cachedUser = JSON.parse(window.sessionStorage["currentUser"]);
+        console.log(loginMap, cachedUser);
+        access = cachedUser.settings.access;
+        onboarded = cachedUser.settings.onboarded;
+        return MHObject.create(loginMap.users[0]);
+      })).then(function(mhObj) {
+        loggedInUser = mhObj;
+        console.log(loggedInUser);
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         return loggedInUser;
       }).catch(function(error) {
