@@ -2496,7 +2496,7 @@ System.register("models/internal/debug-helpers", [], function() {
 System.register("origin/hound-origin", [], function() {
   "use strict";
   var __moduleName = "origin/hound-origin";
-  var houndOrigin = 'https://stag-api.mediahound.com/';
+  var houndOrigin = 'https://api.mediahound.com/';
   ;
   return {get houndOrigin() {
       return houndOrigin;
