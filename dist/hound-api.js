@@ -4635,7 +4635,7 @@ System.register("models/user/MHLoginSession", [], function() {
       access = false,
       count = null;
   var restoreFromSessionStorage = function() {
-    var inStorage = window.sessionStorage["currentUser"];
+    var inStorage = window.sessionStorage.currentUser;
     if (inStorage) {
       loggedInUser = MHObject.create(inStorage);
       return true;
@@ -4727,7 +4727,7 @@ System.register("models/user/MHLoginSession", [], function() {
         onboarded = user.onboarded = user.settings.onboarded;
         loggedInUser = user;
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
-        sessionStorage["currentUser"] = JSON.stringify(loggedInUser);
+        sessionStorage.currentUser = JSON.stringify(loggedInUser);
         log('logging in:', loggedInUser);
         return loggedInUser;
       })).catch(function(error) {
@@ -4742,7 +4742,7 @@ System.register("models/user/MHLoginSession", [], function() {
           'value': keyVal[1]
         };
       }));
-      window.sessionStorage["currentUser"] = null;
+      window.sessionStorage.currentUser = null;
       currentCookies.forEach((function(cookie) {
         if (cookie.key === 'JSESSIONID') {
           var expires = (new Date(0)).toGMTString();
@@ -4781,8 +4781,7 @@ System.register("models/user/MHLoginSession", [], function() {
             return loggedInUser;
           }));
         }
-      })).then(function(mhObj) {
-        console.log(loggedInUser);
+      })).then(function() {
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         return loggedInUser;
       }).catch(function(error) {

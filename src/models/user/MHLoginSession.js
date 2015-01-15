@@ -86,7 +86,7 @@ var loggedInUser  = null,
 
 // Hidden Restore from Storage function
 var restoreFromSessionStorage = function(){
-  var inStorage = window.sessionStorage["currentUser"];
+  var inStorage = window.sessionStorage.currentUser;
 
   if( inStorage ){
     loggedInUser = MHObject.create(inStorage);
@@ -237,13 +237,12 @@ export class MHLoginSession {
 
       })
       .then(user => {
-        console.log(user);
         access = user.access = user.settings.access;
         onboarded = user.onboarded = user.settings.onboarded;
         loggedInUser = user;
 
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
-        sessionStorage["currentUser"] = JSON.stringify(loggedInUser);
+        sessionStorage.currentUser = JSON.stringify(loggedInUser);
         log('logging in:',loggedInUser);
         return loggedInUser;
       })
@@ -267,7 +266,7 @@ export class MHLoginSession {
       };
     });
 
-    window.sessionStorage["currentUser"] = null;
+    window.sessionStorage.currentUser = null;
 
     currentCookies.forEach(cookie => {
       if( cookie.key === 'JSESSIONID' ){
@@ -319,11 +318,11 @@ export class MHLoginSession {
           });
         }
       })
-      .then(function(mhObj){
+      .then(function(){
         // loggedInUser.access = access;
         // loggedInUser.onboarded = onboarded;
         // loggedInUser = mhObj;
-        console.log(loggedInUser);
+        //console.log(loggedInUser);
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         return loggedInUser;
       })
