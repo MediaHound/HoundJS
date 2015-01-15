@@ -302,53 +302,6 @@ export class MHLoginSession {
         params: { view },
         withCredentials: true
       })
-    /*
-      .then(loginMap => {
-
-        var cachedUser = JSON.parse(window.sessionStorage["currentUser"]);
-        console.log(loginMap,cachedUser);
-        // if(cachedUser){
-
-          // if(cachedUser.mhid === loginMap.metadata.mhid ||
-          //    cachedUser.mhid === loginMap.mhid){
-
-               access = cachedUser.settings.access;
-               onboarded = cachedUser.settings.onboarded;
-               return MHObject.create(loginMap.users[0]);
-
-
-
-              //  .then(function(loggedInUser){
-              //   // loggedInUser.access = access;
-              //   // loggedInUser.onboarded = onboarded;
-              //    console.log(loggedInUser);
-              //    window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
-              //    return loggedInUser;
-              //  });
-               //
-
-
-        //  }
-        // }
-        // else{
-        //
-        //   return MHObject.create(loginMap.users[0]).then(function(mhObj){
-        //
-        //     return MHUser.fetchSettings(mhUserLoggedIn.mhid).then(function(settings){
-        //       mhObj.settings = settings;
-        //       access = mhObj.settings.access;
-        //       onboarded = mhObj.settings.onboarded;
-        //       loggedInUser = mhObj;
-        //       window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
-        //       return loggedInUser;
-        //     });
-        //
-        //   });
-        //
-        // }
-
-      })
-    */
       .then(response => {
         var restored = restoreFromSessionStorage();
 

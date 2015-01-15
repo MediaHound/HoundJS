@@ -124,6 +124,7 @@ var extraEncode = function(str){
 
       // Set Credentials, spec says can be done in UNSENT or OPENED states
       xhr.withCredentials = withCreds;
+      //xhr.withCredentials = true;
 
       // NOT SUPPORTED ACROSS THE BOARD... :/
       //xhr.responseType = 'json';
@@ -215,4 +216,3 @@ Object.defineProperty(promiseRequest, 'extraEncode', {
 
 export { promiseRequest };
 export default promiseRequest;
-

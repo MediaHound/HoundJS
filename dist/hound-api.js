@@ -2616,7 +2616,7 @@ System.register("request/hound-request", [], function() {
       requestMap = {},
       defaults = {
         headers: {'Accept': 'application/json'},
-        withCredentials: false
+        withCredentials: true
       },
       responseThen = function(response) {
         if (!!response) {
@@ -4634,6 +4634,14 @@ System.register("models/user/MHLoginSession", [], function() {
       onboarded = false,
       access = false,
       count = null;
+  var restoreFromSessionStorage = function() {
+    var inStorage = window.sessionStorage["currentUser"];
+    if (inStorage) {
+      loggedInUser = MHObject.create(inStorage);
+      return true;
+    }
+    return false;
+  };
   var MHLoginSession = function MHLoginSession() {};
   ($traceurRuntime.createClass)(MHLoginSession, {}, {
     get currentUser() {
@@ -4715,10 +4723,8 @@ System.register("models/user/MHLoginSession", [], function() {
         });
       })).then((function(user) {
         console.log(user);
-        access = user.settings.access;
-        onboarded = user.settings.onboarded;
-        user.access = access;
-        user.onboarded = onboarded;
+        access = user.access = user.settings.access;
+        onboarded = user.onboarded = user.settings.onboarded;
         loggedInUser = user;
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         sessionStorage["currentUser"] = JSON.stringify(loggedInUser);
@@ -4753,22 +4759,29 @@ System.register("models/user/MHLoginSession", [], function() {
       });
     },
     validateOpenSession: function() {
-      var v = arguments[0] !== (void 0) ? arguments[0] : "full";
+      var view = arguments[0] !== (void 0) ? arguments[0] : "full";
       var path = MHUser.rootEndpoint + '/validateSession';
-      var view = v;
       return houndRequest({
         method: 'GET',
         endpoint: path,
         params: {view: view},
         withCredentials: true
-      }).then((function(loginMap) {
-        var cachedUser = JSON.parse(window.sessionStorage["currentUser"]);
-        console.log(loginMap, cachedUser);
-        access = cachedUser.settings.access;
-        onboarded = cachedUser.settings.onboarded;
-        return MHObject.create(loginMap.users[0]);
+      }).then((function(response) {
+        var restored = restoreFromSessionStorage();
+        if (restored && loggedInUser.hasMhid(response.users[0].mhid)) {
+          access = loggedInUser.access;
+          onboarded = loggedInUser.onboarded;
+          return loggedInUser;
+        } else {
+          loggedInUser = MHObject.create(response.users[0]);
+          return loggedInUser.fetchSettings().then((function(settings) {
+            loggedInUser.settings = settings;
+            access = loggedInUser.access = settings.access;
+            onboarded = loggedInUser.onboarded = settings.onboarded;
+            return loggedInUser;
+          }));
+        }
       })).then(function(mhObj) {
-        loggedInUser = mhObj;
         console.log(loggedInUser);
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         return loggedInUser;

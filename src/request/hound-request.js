@@ -11,7 +11,7 @@ var extraEncode = promiseRequest.extraEncode,
       headers: {
         'Accept':'application/json'
       },
-      withCredentials: false
+      withCredentials: true
     },
     responseThen = function(response){
       //log('hound-request: ', response);
@@ -125,4 +125,3 @@ Object.defineProperty(houndRequest, 'extraEncode', {
 });
 
 export default houndRequest;
-
