@@ -84,6 +84,17 @@ var loggedInUser  = null,
     access        = false,
     count         = null;
 
+// Hidden Restore from Storage function
+var restoreFromSessionStorage = function(){
+  var inStorage = window.sessionStorage["currentUser"];
+
+  if( inStorage ){
+    loggedInUser = MHObject.create(inStorage);
+    return true;
+  }
+  return false;
+};
+
 // MediaHound Login Session Singleton
 /** @class MHLoginSession */
 export class MHLoginSession {
@@ -227,17 +238,14 @@ export class MHLoginSession {
       })
       .then(user => {
         console.log(user);
-        access = user.settings.access;
-        onboarded = user.settings.onboarded;
-        user.access = access;
-        user.onboarded = onboarded;
+        access = user.access = user.settings.access;
+        onboarded = user.onboarded = user.settings.onboarded;
         loggedInUser = user;
 
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         sessionStorage["currentUser"] = JSON.stringify(loggedInUser);
         log('logging in:',loggedInUser);
         return loggedInUser;
-
       })
       .catch(function(error){
         //console.error('Error on MHLoginSession.login', error.error, 'xhr: ', error.xhr);
@@ -285,18 +293,16 @@ export class MHLoginSession {
   /**
    * @returns {Promise} - resolves to the user that has an open session.
    */
-  static validateOpenSession(v="full"){
+  static validateOpenSession(view="full"){
     var path = MHUser.rootEndpoint + '/validateSession';
-    var view = v;
 
     return houndRequest({
         method: 'GET',
         endpoint: path,
-        params : {
-          view : view
-        },
-        withCredentials : true
+        params: { view },
+        withCredentials: true
       })
+    /*
       .then(loginMap => {
 
         var cachedUser = JSON.parse(window.sessionStorage["currentUser"]);
@@ -342,14 +348,32 @@ export class MHLoginSession {
         // }
 
       })
+    */
+      .then(response => {
+        var restored = restoreFromSessionStorage();
+
+        if( restored && loggedInUser.hasMhid(response.users[0].mhid) ){
+          access = loggedInUser.access;
+          onboarded = loggedInUser.onboarded;
+          return loggedInUser;
+        } else {
+          loggedInUser = MHObject.create(response.users[0]);
+          return loggedInUser.fetchSettings().then(settings => {
+            loggedInUser.settings = settings;
+            access = loggedInUser.access = settings.access;
+            onboarded = loggedInUser.onboarded = settings.onboarded;
+            return loggedInUser;
+          });
+        }
+      })
       .then(function(mhObj){
         // loggedInUser.access = access;
         // loggedInUser.onboarded = onboarded;
-         loggedInUser = mhObj;
-         console.log(loggedInUser);
-         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
-         return loggedInUser;
-       })
+        // loggedInUser = mhObj;
+        console.log(loggedInUser);
+        window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
+        return loggedInUser;
+      })
       .catch(function(error){
         if( error.xhr.status === 401 ){
           console.log('No open MediaHound session');
