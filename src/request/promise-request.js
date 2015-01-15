@@ -70,7 +70,7 @@ var extraEncode = function(str){
           params      = args.params           || null,
           data        = args.data             || null,
           headers     = args.headers          || null,
-          withCreds   = args.withCredentials  || false,
+          //withCreds   = args.withCredentials  || false,
           onprogress  = args.onprogress       || args.onProgress || null,
           xhr         = new XMLHttpRequest();
 
@@ -123,10 +123,11 @@ var extraEncode = function(str){
       xhr.open(method, url, true);
 
       // Set Credentials, spec says can be done in UNSENT or OPENED states
-      xhr.withCredentials = withCreds;
-      //xhr.withCredentials = true;
+      //xhr.withCredentials = withCreds;
+      xhr.withCredentials = true;
 
-      console.log(method,url,withCreds);
+      //console.log(method,url,withCreds);
+
       // NOT SUPPORTED ACROSS THE BOARD... :/
       //xhr.responseType = 'json';
 

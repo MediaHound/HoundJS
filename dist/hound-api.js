@@ -2519,7 +2519,6 @@ System.register("request/promise-request", [], function() {
             params = args.params || null,
             data = args.data || null,
             headers = args.headers || null,
-            withCreds = args.withCredentials || false,
             onprogress = args.onprogress || args.onProgress || null,
             xhr = new XMLHttpRequest();
         if (url === null) {
@@ -2552,8 +2551,7 @@ System.register("request/promise-request", [], function() {
           }
         }
         xhr.open(method, url, true);
-        xhr.withCredentials = withCreds;
-        console.log(method, url, withCreds);
+        xhr.withCredentials = true;
         if (headers !== null) {
           for (prop in headers) {
             if (headers.hasOwnProperty(prop)) {
@@ -4761,7 +4759,7 @@ System.register("models/user/MHLoginSession", [], function() {
         headers: {}
       }).then((function(loginMap) {
         if (restoreFromSessionStorage()) {
-          var cachedUser = JSON.parse(window.sessionStorage["currentUser"]);
+          var cachedUser = JSON.parse(window.sessionStorage.currentUser);
           if (cachedUser.mhid === loginMap.users[0].metadata.mhid || cachedUser.mhid === loginMap.users[0].mhid) {
             access = cachedUser.settings.access;
             onboarded = cachedUser.settings.onboarded;
