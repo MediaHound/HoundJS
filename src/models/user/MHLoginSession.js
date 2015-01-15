@@ -89,7 +89,7 @@ var restoreFromSessionStorage = function(){
   var inStorage = window.sessionStorage.currentUser;
 
   if( inStorage ){
-    loggedInUser = MHObject.create(inStorage);
+    //loggedInUser = MHObject.create(inStorage);
     return true;
   }
   return false;
@@ -298,27 +298,31 @@ export class MHLoginSession {
     return houndRequest({
         method: 'GET',
         endpoint: path,
-        params: { view },
-        withCredentials: true
+        params : {
+          view : view
+        },
+        withCredentials : true,
+        headers: {}
       })
-      .then(response => {
-        var restored = restoreFromSessionStorage();
+      .then(loginMap => {
 
-        if( restored && loggedInUser.hasMhid(response.users[0].mhid) ){
-          access = loggedInUser.access;
-          onboarded = loggedInUser.onboarded;
-          return loggedInUser;
-        } else {
-          loggedInUser = MHObject.create(response.users[0]);
-          return loggedInUser.fetchSettings().then(settings => {
-            loggedInUser.settings = settings;
-            access = loggedInUser.access = settings.access;
-            onboarded = loggedInUser.onboarded = settings.onboarded;
-            return loggedInUser;
-          });
+        if(restoreFromSessionStorage()){
+          var cachedUser = JSON.parse(window.sessionStorage.currentUser);
+          if(cachedUser.mhid === loginMap.users[0].metadata.mhid ||
+             cachedUser.mhid === loginMap.users[0].mhid){
+
+               access = cachedUser.settings.access;
+               onboarded = cachedUser.settings.onboarded;
+               return MHObject.create(loginMap.users[0]);
+
+         }
         }
+        else{
+          return MHObject.create(loginMap.users[0]);
+        }
+
       })
-      .then(function(){
+      .then(function(loggedInUser){
         // loggedInUser.access = access;
         // loggedInUser.onboarded = onboarded;
         // loggedInUser = mhObj;

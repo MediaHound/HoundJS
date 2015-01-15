@@ -126,6 +126,7 @@ var extraEncode = function(str){
       xhr.withCredentials = withCreds;
       //xhr.withCredentials = true;
 
+      console.log(method,url,withCreds);
       // NOT SUPPORTED ACROSS THE BOARD... :/
       //xhr.responseType = 'json';
 

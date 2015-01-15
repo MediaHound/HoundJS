@@ -682,32 +682,49 @@ fetchInterestFeed(view='full', page=0, size=12, force=false){
 * @return { Promise }
 *
 */
-fetchOwnedCollections(view='full', force=false){
+fetchOwnedCollections(view='full', page=0, size=12, force=false){
   var path = this.subendpoint('ownedCollections');
-
-  if( force || this.ownedCollectionsPromise === null ){
-    //console.log('force: '+force, 'ownedCollectionsPromise: ', ownedCollectionsPromise);
-    this.ownedCollectionsPromise = houndRequest({
-      method          : 'GET',
-      endpoint        : path,
-      withCredentials : true,
+  if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
+    this.ownedCollectionsPromise = pagedRequest({
+      method: 'GET',
+      endpoint: path,
+      pageSize: size,
       params: {
-        'view':view
+        view: view
       }
-    }).catch( (err => { this.ownedCollectionsPromise = null; throw err; }).bind(this) )
-    .then(res => {
-      if( view === 'full' && Array.isArray(res) ){
-        res = MHObject.create(res);
-        //console.log('fetched owned collection: ', res);
-        // if collections become ordered MHRelationalPairs like media content:
-        //  also update logic in return statement below
-        //res = MHRelationalPair.createFromArray(res).sort( (a,b) => a.position - b.position );
-      }
-      return res;
     });
   }
-  return this.ownedCollectionsPromise;
+  return this.ownedCollectionsPromise.content;
 }
+
+// fetchOwnedCollections(view='full', page=0, size=12, force=false){
+//   var path = this.subendpoint('ownedCollections');
+//
+//   if( force || this.ownedCollectionsPromise === null ){
+//     //console.log('force: '+force, 'ownedCollectionsPromise: ', ownedCollectionsPromise);
+//     this.ownedCollectionsPromise = pagedRequest({
+//       method          : 'GET',
+//       endpoint        : path,
+//       withCredentials : true,
+//       startingPage    : page,
+//       pageSize        : size,
+//       params: {
+//         'view':view
+//       }
+//     }).catch( (err => { this.ownedCollectionsPromise = null; throw err; }).bind(this) )
+//     .then(res => {
+//       if( view === 'full' && Array.isArray(res) ){
+//         res = MHObject.create(res);
+//         console.log('fetched owned collection: ', res);
+//         // if collections become ordered MHRelationalPairs like media content:
+//         //  also update logic in return statement below
+//         res = MHRelationalPair.createFromArray(res).sort( (a,b) => a.position - b.position );
+//       }
+//       return res;
+//     });
+//   }
+//   return this.ownedCollectionsPromise;
+// }
 
 
 /**

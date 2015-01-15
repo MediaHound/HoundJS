@@ -2553,6 +2553,7 @@ System.register("request/promise-request", [], function() {
         }
         xhr.open(method, url, true);
         xhr.withCredentials = withCreds;
+        console.log(method, url, withCreds);
         if (headers !== null) {
           for (prop in headers) {
             if (headers.hasOwnProperty(prop)) {
@@ -4238,26 +4239,19 @@ System.register("models/user/MHUser", [], function() {
     },
     fetchOwnedCollections: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-      var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__54 = this;
+      var page = arguments[1] !== (void 0) ? arguments[1] : 0;
+      var size = arguments[2] !== (void 0) ? arguments[2] : 12;
+      var force = arguments[3] !== (void 0) ? arguments[3] : false;
       var path = this.subendpoint('ownedCollections');
-      if (force || this.ownedCollectionsPromise === null) {
-        this.ownedCollectionsPromise = houndRequest({
+      if (force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size) {
+        this.ownedCollectionsPromise = pagedRequest({
           method: 'GET',
           endpoint: path,
-          withCredentials: true,
-          params: {'view': view}
-        }).catch(((function(err) {
-          $__54.ownedCollectionsPromise = null;
-          throw err;
-        })).bind(this)).then((function(res) {
-          if (view === 'full' && Array.isArray(res)) {
-            res = MHObject.create(res);
-          }
-          return res;
-        }));
+          pageSize: size,
+          params: {view: view}
+        });
       }
-      return this.ownedCollectionsPromise;
+      return this.ownedCollectionsPromise.content;
     },
     fetchFollowed: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
@@ -4637,7 +4631,6 @@ System.register("models/user/MHLoginSession", [], function() {
   var restoreFromSessionStorage = function() {
     var inStorage = window.sessionStorage.currentUser;
     if (inStorage) {
-      loggedInUser = MHObject.create(inStorage);
       return true;
     }
     return false;
@@ -4722,7 +4715,6 @@ System.register("models/user/MHLoginSession", [], function() {
           return mhUserLoggedIn;
         });
       })).then((function(user) {
-        console.log(user);
         access = user.access = user.settings.access;
         onboarded = user.onboarded = user.settings.onboarded;
         loggedInUser = user;
@@ -4765,23 +4757,20 @@ System.register("models/user/MHLoginSession", [], function() {
         method: 'GET',
         endpoint: path,
         params: {view: view},
-        withCredentials: true
-      }).then((function(response) {
-        var restored = restoreFromSessionStorage();
-        if (restored && loggedInUser.hasMhid(response.users[0].mhid)) {
-          access = loggedInUser.access;
-          onboarded = loggedInUser.onboarded;
-          return loggedInUser;
+        withCredentials: true,
+        headers: {}
+      }).then((function(loginMap) {
+        if (restoreFromSessionStorage()) {
+          var cachedUser = JSON.parse(window.sessionStorage["currentUser"]);
+          if (cachedUser.mhid === loginMap.users[0].metadata.mhid || cachedUser.mhid === loginMap.users[0].mhid) {
+            access = cachedUser.settings.access;
+            onboarded = cachedUser.settings.onboarded;
+            return MHObject.create(loginMap.users[0]);
+          }
         } else {
-          loggedInUser = MHObject.create(response.users[0]);
-          return loggedInUser.fetchSettings().then((function(settings) {
-            loggedInUser.settings = settings;
-            access = loggedInUser.access = settings.access;
-            onboarded = loggedInUser.onboarded = settings.onboarded;
-            return loggedInUser;
-          }));
+          return MHObject.create(loginMap.users[0]);
         }
-      })).then(function() {
+      })).then(function(loggedInUser) {
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         return loggedInUser;
       }).catch(function(error) {
