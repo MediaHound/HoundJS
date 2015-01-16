@@ -4237,9 +4237,8 @@ System.register("models/user/MHUser", [], function() {
     },
     fetchOwnedCollections: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-      var page = arguments[1] !== (void 0) ? arguments[1] : 0;
-      var size = arguments[2] !== (void 0) ? arguments[2] : 12;
-      var force = arguments[3] !== (void 0) ? arguments[3] : false;
+      var size = arguments[1] !== (void 0) ? arguments[1] : 12;
+      var force = arguments[2] !== (void 0) ? arguments[2] : false;
       var path = this.subendpoint('ownedCollections');
       if (force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size) {
         this.ownedCollectionsPromise = pagedRequest({
@@ -5009,10 +5008,10 @@ System.register("models/collection/MHCollection", [], function() {
         endpoint: path,
         data: {"name": name}
       }).then(function(response) {
-        return MHObject.fetchByMhid(response.mhid);
+        return MHObject.fetchByMhid(response.metadata.mhid);
       }).then(function(newCollection) {
         if (MHLoginSession.openSession) {
-          MHLoginSession.currentUser.fetchOwnedCollections(true);
+          MHLoginSession.currentUser.fetchOwnedCollections("full", 12, true);
         }
         return newCollection;
       });

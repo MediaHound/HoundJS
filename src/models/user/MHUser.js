@@ -682,7 +682,7 @@ fetchInterestFeed(view='full', page=0, size=12, force=false){
 * @return { Promise }
 *
 */
-fetchOwnedCollections(view='full', page=0, size=12, force=false){
+fetchOwnedCollections(view='full', size=12, force=false){
   var path = this.subendpoint('ownedCollections');
   if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
     this.ownedCollectionsPromise = pagedRequest({

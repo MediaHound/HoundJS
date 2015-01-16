@@ -161,11 +161,11 @@ export class MHCollection extends MHObject {
         data: { "name":name }
       })
       .then(function(response){
-        return MHObject.fetchByMhid(response.mhid);
+        return MHObject.fetchByMhid(response.metadata.mhid);
       })
       .then(function(newCollection){
         if( MHLoginSession.openSession ){
-          MHLoginSession.currentUser.fetchOwnedCollections(true);
+          MHLoginSession.currentUser.fetchOwnedCollections("full",12,true);
         }
         return newCollection;
       });
