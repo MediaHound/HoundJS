@@ -396,7 +396,7 @@ export class MHUser extends MHObject {
   * @return { Promise }
   *
   */
-  setPassword(password,newPassword){
+  static setPassword(password,newPassword){
 
     if( !password || (typeof password !== 'string' && !(password instanceof String)) ){
       throw new TypeError('password must be type string in MHUser.newPassword');
