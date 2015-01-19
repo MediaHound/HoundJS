@@ -154,6 +154,9 @@ class PagedRequest {
         value:        pageSize
       }
     });
+
+    return this;
+
   } // end constructor
 
   // extraEncode

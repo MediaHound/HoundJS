@@ -3,6 +3,7 @@
 import { log } from '../internal/debug-helpers';
 
 import { MHObject, mhidLRU } from '../base/MHObject';
+//import { MHRelationalPair } from '../base/MHRelationalPair';
 
 import { houndRequest } from '../../request/hound-request';
 import { pagedRequest } from '../../request/hound-paged-request';
@@ -682,19 +683,44 @@ fetchInterestFeed(view='full', page=0, size=12, force=false){
 * @return { Promise }
 *
 */
-fetchOwnedCollections(view='full', size=12, force=false){
+// fetchOwnedCollections(view='full', size=12, force=false){
+//   var path = this.subendpoint('ownedCollections');
+//   //if( force || this.ownedCollectionsPromise === null ){
+//     this.ownedCollectionsPromise = houndRequest({
+//       method: 'GET',
+//       endpoint: path,
+//       pageSize: size,
+//       params: {
+//         view: view
+//       }
+//     })//.catch( (err => { this.ownedCollectionsPromise = null; throw err; }).bind(this) )
+//       .then(res => {
+//         console.log(res);
+//         // if( view === 'full' && Array.isArray(res) ){
+//         //   res = MHObject.create(res);
+//         //   console.log('fetched owned collection: ', res);
+//         //   // if collections become ordered MHRelationalPairs like media content:
+//         //   //  also update logic in return statement below
+//         //   res = MHRelationalPair.createFromArray(res).sort( (a,b) => a.position - b.position );
+//         // }
+//         return res;
+//       });
+//     //}
+//     return this.ownedCollectionsPromise;
+// }
+
+fetchOwnedCollections(view='full', size=12, force=true){
   var path = this.subendpoint('ownedCollections');
-  if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
-    this.ownedCollectionsPromise = pagedRequest({
+  if( force || this.feedPagedRequest === null ){
+    this.feedPagedRequest = pagedRequest({
       method: 'GET',
       endpoint: path,
       pageSize: size,
-      params: {
-        view: view
-      }
+      params: { view }
     });
   }
-  return this.ownedCollectionsPromise.content;
+  console.log(this.feedPagedRequest);
+  return this.feedPagedRequest;
 }
 
 // fetchOwnedCollections(view='full', page=0, size=12, force=false){

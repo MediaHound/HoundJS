@@ -3,8 +3,10 @@ import { log } from '../internal/debug-helpers';
 
 import { MHObject } from '../base/MHObject';
 import { MHLoginSession } from '../user/MHLoginSession';
-import { MHRelationalPair } from '../base/MHRelationalPair';
+// import { MHRelationalPair } from '../base/MHRelationalPair';
+
 import { houndRequest } from '../../request/hound-request';
+import { pagedRequest } from '../../request/hound-paged-request';
 
 /**
  * @classdesc Mediahound Collection Object (MHCollection) inherits from MHObject
@@ -269,7 +271,7 @@ export class MHCollection extends MHObject {
    * @param view {string} view - the view paramater, 'full' or 'ids'
    * @param {boolean} force - whether to force a call to the server instead of using the cached contentPromise
    * @returns {Promise} - a promise that resolves to the list of content for this MHCollection
-   */
+
    fetchContent(view='ids', force=false){
      var path = this.subendpoint('content'),
      self = this;
@@ -301,6 +303,20 @@ export class MHCollection extends MHObject {
        return res;
      });
    }
+  */
+   fetchContent(view='full', size=12, force=true){
+    var path = this.subendpoint('content');
+    if( force || this.feedPagedRequest === null ){
+      this.feedPagedRequest = pagedRequest({
+        method: 'GET',
+        endpoint: path,
+        pageSize: size,
+        params: { view }
+      });
+    }
+    //console.log(this.feedPagedRequest);
+    return this.feedPagedRequest;
+  }
 
   /**
    * @param {boolean} force - whether to force a call to the server instead of using the cached mixlistPromise

@@ -27,7 +27,7 @@ export class MHRelationalPair {
 
     var position  = args.context.sorting.position || null,
         context   = args.context || null,
-        object    = mhidLRU.has(args.object.mhid) ? mhidLRU.get(args.object.mhid) : MHObject.create(args.object) || null;
+        object    = mhidLRU.has(args.object.metadata.mhid) ? mhidLRU.get(args.object.metadata.mhid) : MHObject.create(args.object) || null;
 
     if( position == null || object == null ){
       throw new TypeError('Either position or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);

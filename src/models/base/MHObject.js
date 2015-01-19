@@ -613,8 +613,6 @@ export class MHObject {
         startingPage: page,
         params: { view }
       });
-    } else if( this.feedPagedRequest.page !== page ){
-      this.feedPagedRequest.jumpTo(page);
     }
     //console.log(this.feedPagedRequest);
     return this.feedPagedRequest;
