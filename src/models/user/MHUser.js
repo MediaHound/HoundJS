@@ -719,7 +719,7 @@ fetchOwnedCollections(view='full', size=12, force=true){
       params: { view }
     });
   }
-  console.log(this.feedPagedRequest);
+  //console.log(this.feedPagedRequest);
   return this.feedPagedRequest;
 }
 
@@ -801,14 +801,20 @@ fetchFollowedCollections(force=false){
 * @return { Promise }
 *
 */
-static linkTwitterAccount(s,f){
+static linkAccount(serv,succ,fail){
 
-  var success = s || 'https://www.mediahound.com/',
-  failure = f || 'https://www.mediahound.com/';
+  var service = serv || null,
+  success = succ || 'https://www.mediahound.com/',
+  failure = fail || 'https://www.mediahound.com/';
+
+  if(service === null){
+    console.warn("No service provided, aborting. First argument must include service name i.e. 'facebook' or 'twitter'.");
+    return false;
+  }
 
   return houndRequest({
     method            : 'GET',
-    endpoint          : MHUser.rootEndpoint + '/account/twitter/link?successRedirectUrl='+success+'&failureRedirectUrl='+failure,
+    endpoint          : MHUser.rootEndpoint + '/account/'+service+'/link?successRedirectUrl='+success+'&failureRedirectUrl='+failure,
     withCredentials: true,
     //data   : { 'successRedirectUrl' : 'http://www.mediahound.com',  'failureRedirectUrl' : 'http://www.mediahound.com'},
     headers: {
@@ -816,6 +822,7 @@ static linkTwitterAccount(s,f){
       'Content-Type':'application/json'
     }
   }).then(function(response){
+    console.log(response);
     return response;
   });
 }
@@ -825,17 +832,24 @@ static linkTwitterAccount(s,f){
 * @return { Promise }
 *
 */
-static unlinkTwitterAccount(){
+static unlinkAccount(serv){
+  var service = serv || null;
+
+  if(service === null){
+    console.warn("No service provided, aborting. First argument must include service name i.e. 'facebook' or 'twitter'.");
+    return false;
+  }
 
   return houndRequest({
     method            : 'GET',
-    endpoint          : MHUser.rootEndpoint + '/account/twitter/unlink',
+    endpoint          : MHUser.rootEndpoint + '/account/'+service+'/unlink',
     withCredentials: true,
     headers: {
       'Accept':'application/json',
       'Content-Type':'application/json'
     }
   }).then(function(response){
+    console.log(response);
     return response;
   });
 }

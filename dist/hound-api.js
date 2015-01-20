@@ -3502,7 +3502,6 @@ System.register("models/base/MHObject", [], function() {
         args = $MHObject.parseArgs(args);
         var mhid = args.metadata.mhid || undefined;
         var mhObj;
-        console.log(this.isEmpty(args));
         if (mhid !== 'undefined' && mhid !== null && args instanceof Object && this.isEmpty(args) !== 0) {
           args.mhid = mhid;
           var prefix = $MHObject.getPrefixFromMhid(mhid);
@@ -4227,7 +4226,6 @@ System.register("models/user/MHUser", [], function() {
           params: {view: view}
         });
       }
-      console.log(this.feedPagedRequest);
       return this.feedPagedRequest;
     },
     fetchFollowed: function() {
@@ -4547,31 +4545,43 @@ System.register("models/user/MHUser", [], function() {
         return Promise.all(MHObject.fetchByMhids(response));
       });
     },
-    linkTwitterAccount: function(s, f) {
-      var success = s || 'https://www.mediahound.com/',
-          failure = f || 'https://www.mediahound.com/';
+    linkAccount: function(serv, succ, fail) {
+      var service = serv || null,
+          success = succ || 'https://www.mediahound.com/',
+          failure = fail || 'https://www.mediahound.com/';
+      if (service === null) {
+        console.warn("No service provided, aborting. First argument must include service name i.e. 'facebook' or 'twitter'.");
+        return false;
+      }
       return houndRequest({
         method: 'GET',
-        endpoint: $MHUser.rootEndpoint + '/account/twitter/link?successRedirectUrl=' + success + '&failureRedirectUrl=' + failure,
+        endpoint: $MHUser.rootEndpoint + '/account/' + service + '/link?successRedirectUrl=' + success + '&failureRedirectUrl=' + failure,
         withCredentials: true,
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         }
       }).then(function(response) {
+        console.log(response);
         return response;
       });
     },
-    unlinkTwitterAccount: function() {
+    unlinkAccount: function(serv) {
+      var service = serv || null;
+      if (service === null) {
+        console.warn("No service provided, aborting. First argument must include service name i.e. 'facebook' or 'twitter'.");
+        return false;
+      }
       return houndRequest({
         method: 'GET',
-        endpoint: $MHUser.rootEndpoint + '/account/twitter/unlink',
+        endpoint: $MHUser.rootEndpoint + '/account/' + service + '/unlink',
         withCredentials: true,
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         }
       }).then(function(response) {
+        console.log(response);
         return response;
       });
     }

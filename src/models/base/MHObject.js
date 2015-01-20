@@ -216,7 +216,6 @@ export class MHObject {
       var mhObj;
 
       //log('at start of creating... ',mhid,args);
-      console.log(this.isEmpty(args));
 
       if( mhid !== 'undefined' && mhid !== null && args instanceof Object && this.isEmpty(args) !== 0){
         args.mhid = mhid;
