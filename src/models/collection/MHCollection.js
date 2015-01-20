@@ -313,9 +313,9 @@ export class MHCollection extends MHObject {
         pageSize: size,
         params: { view }
       });
-      this.feedPagedRequest.currentPromise.then(function(args){
-        console.log(args);
-      });
+      // this.feedPagedRequest.currentPromise.then(function(args){
+      //   console.log(args);
+      // });
     }
     //console.log(this.feedPagedRequest);
     return this.feedPagedRequest;

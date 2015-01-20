@@ -216,8 +216,9 @@ export class MHObject {
       var mhObj;
 
       //log('at start of creating... ',mhid,args);
+      console.log(this.isEmpty(args));
 
-      if( mhid !== 'undefined' && mhid !== null){
+      if( mhid !== 'undefined' && mhid !== null && args instanceof Object && this.isEmpty(args) !== 0){
         args.mhid = mhid;
         // check cache
         //log('in create function trying to parseArgs: \n\n' , args);
@@ -292,6 +293,11 @@ export class MHObject {
       return true;
     }
     return false;
+  }
+
+
+  static isEmpty(obj) {
+    return Object.keys(obj).length;
   }
 
   /**
@@ -512,7 +518,7 @@ export class MHObject {
    */
   // Should this return a single Promise?
   //  Could be done through a second flag argument
-    static fetchByMhids(mhids,view="basic"){
+  static fetchByMhids(mhids,view="basic"){
     if( mhids.map ){
       return mhids.map(MHObject.fetchByMhid);
     } else if( mhids.length > 0 ){

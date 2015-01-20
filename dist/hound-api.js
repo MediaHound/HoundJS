@@ -3502,7 +3502,8 @@ System.register("models/base/MHObject", [], function() {
         args = $MHObject.parseArgs(args);
         var mhid = args.metadata.mhid || undefined;
         var mhObj;
-        if (mhid !== 'undefined' && mhid !== null) {
+        console.log(this.isEmpty(args));
+        if (mhid !== 'undefined' && mhid !== null && args instanceof Object && this.isEmpty(args) !== 0) {
           args.mhid = mhid;
           var prefix = $MHObject.getPrefixFromMhid(mhid);
           log(prefix, new childrenConstructors[prefix](args));
@@ -3541,6 +3542,9 @@ System.register("models/base/MHObject", [], function() {
         return true;
       }
       return false;
+    },
+    isEmpty: function(obj) {
+      return Object.keys(obj).length;
     },
     get prefixes() {
       return Object.keys(childrenConstructors);
@@ -4954,9 +4958,6 @@ System.register("models/collection/MHCollection", [], function() {
           endpoint: path,
           pageSize: size,
           params: {view: view}
-        });
-        this.feedPagedRequest.currentPromise.then(function(args) {
-          console.log(args);
         });
       }
       return this.feedPagedRequest;

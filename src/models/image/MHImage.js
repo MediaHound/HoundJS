@@ -34,6 +34,7 @@ export class MHImage extends MHObject {
    *
    */
   constructor(args){
+
     args = MHObject.parseArgs(args);
     super(args);
 
@@ -69,7 +70,9 @@ export class MHImage extends MHObject {
         value:        height
       }
     });
+
   }
+
 
   static get mhidPrefix(){
     return 'mhimg';
