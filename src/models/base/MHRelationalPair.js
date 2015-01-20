@@ -25,7 +25,7 @@ export class MHRelationalPair {
       }
     }
 
-    var position  = args.context.sorting.position || null,
+    var position  = args.context.relationship.position || null,
         context   = args.context || null,
         object    = mhidLRU.has(args.object.metadata.mhid) ? mhidLRU.get(args.object.metadata.mhid) : MHObject.create(args.object) || null;
 

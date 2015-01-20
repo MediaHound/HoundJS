@@ -3261,6 +3261,7 @@ System.register("models/base/MHObject", [], function() {
         altId = args.metadata.altId || null,
         name = args.metadata.name || null,
         primaryImage = (args.primaryImage != null) ? $MHObject.create(args.primaryImage) : null,
+        primaryGroup = (args.primaryGroup != null) ? $MHObject.create(args.primaryGroup.object) : null,
         secondaryImage = (args.secondaryImage != null) ? $MHObject.create(args.secondaryImage) : null,
         social = args.social || null,
         createdDate = new Date(args.metadata.createdDate);
@@ -3306,6 +3307,12 @@ System.register("models/base/MHObject", [], function() {
         enumerable: true,
         writable: false,
         value: secondaryImage
+      },
+      'primaryGroup': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: primaryGroup
       },
       'social': {
         configurable: false,
@@ -3995,7 +4002,7 @@ System.register("models/base/MHRelationalPair", [], function() {
         throw new TypeError('Args typeof string but not valid JSON in MHRelationalPair', 'MHRelationalPair.js', 15);
       }
     }
-    var position = args.context.sorting.position || null,
+    var position = args.context.relationship.position || null,
         context = args.context || null,
         object = mhidLRU.has(args.object.metadata.mhid) ? mhidLRU.get(args.object.metadata.mhid) : MHObject.create(args.object) || null;
     if (position == null || object == null) {
@@ -4948,6 +4955,9 @@ System.register("models/collection/MHCollection", [], function() {
           pageSize: size,
           params: {view: view}
         });
+        this.feedPagedRequest.currentPromise.then(function(args) {
+          console.log(args);
+        });
       }
       return this.feedPagedRequest;
     },
@@ -5638,15 +5648,14 @@ System.register("models/media/MHMedia", [], function() {
   var MHObject = System.get("models/base/MHObject").MHObject;
   var MHSourceModel = System.get("models/source/MHSourceModel").MHSourceModel;
   var MHEmbeddedObject = System.get("models/base/MHEmbeddedObject").MHEmbeddedObject;
-  var MHRelationalPair = System.get("models/base/MHRelationalPair").MHRelationalPair;
   var houndRequest = System.get("request/hound-request").houndRequest;
+  var pagedRequest = System.get("request/hound-paged-request").pagedRequest;
   var MHMedia = function MHMedia(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHMedia.prototype, "constructor", [args]);
     var releaseDate = new Date(args.releaseDate) * 1000,
         suitabilityRating = args.suitabilityRating || null,
         length = args.length || null,
-        primaryGroup = args.primaryGroup || null,
         keyContributors = (!!args.keyContributors) ? MHEmbeddedObject.createFromArray(args.keyContributors) : null;
     if (isNaN(releaseDate)) {
       releaseDate = args.releaseDate || null;
@@ -5675,12 +5684,6 @@ System.register("models/media/MHMedia", [], function() {
         enumerable: true,
         writable: false,
         value: keyContributors
-      },
-      'primaryGroup': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: primaryGroup
       },
       'collectionsPromise': {
         configurable: false,
@@ -5741,38 +5744,19 @@ System.register("models/media/MHMedia", [], function() {
       return this.collectionsPromise;
     },
     fetchContent: function() {
-      var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
-      var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var path = this.subendpoint('content'),
-          self = this;
-      if (force || this.contentPromise === null) {
-        this.contentPromise = houndRequest({
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+      var size = arguments[1] !== (void 0) ? arguments[1] : 20;
+      var force = arguments[2] !== (void 0) ? arguments[2] : true;
+      var path = this.subendpoint('content');
+      if (force || this.feedPagedRequest === null) {
+        this.feedPagedRequest = pagedRequest({
           method: 'GET',
           endpoint: path,
+          pageSize: size,
           params: {view: view}
-        }).catch((function(err) {
-          self.contentPromise = null;
-          throw err;
-        })).then(function(parsed) {
-          if (view === 'full' && Array.isArray(parsed)) {
-            parsed = MHRelationalPair.createFromArray(parsed).sort((function(a, b) {
-              return a.position - b.position;
-            }));
-          }
-          return parsed;
         });
       }
-      return this.contentPromise.then((function(res) {
-        if (view === 'full' && Array.isArray(res) && typeof res[0] === 'string') {
-          return self.fetchContent(view, true);
-        }
-        if (view === 'ids' && Array.isArray(res) && res[0].object instanceof MHObject) {
-          return res.map((function(pair) {
-            return pair.object.mhid;
-          }));
-        }
-        return res;
-      }));
+      return this.feedPagedRequest;
     },
     fetchSources: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;

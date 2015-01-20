@@ -3,7 +3,7 @@ import { log } from '../internal/debug-helpers';
 
 import { MHObject } from '../base/MHObject';
 import { MHLoginSession } from '../user/MHLoginSession';
-// import { MHRelationalPair } from '../base/MHRelationalPair';
+//import { MHRelationalPair } from '../base/MHRelationalPair';
 
 import { houndRequest } from '../../request/hound-request';
 import { pagedRequest } from '../../request/hound-paged-request';
@@ -312,6 +312,9 @@ export class MHCollection extends MHObject {
         endpoint: path,
         pageSize: size,
         params: { view }
+      });
+      this.feedPagedRequest.currentPromise.then(function(args){
+        console.log(args);
       });
     }
     //console.log(this.feedPagedRequest);

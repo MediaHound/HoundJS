@@ -47,6 +47,7 @@ export class MHObject {
    */
   constructor(args) {
     args = MHObject.parseArgs(args);
+    // console.log(args);
 
     if( typeof args.metadata.mhid === 'undefined' || args.metadata.mhid === null ){
       throw new TypeError('mhid is null or undefined', 'MHObject.js', 89);
@@ -58,6 +59,7 @@ export class MHObject {
         name            = args.metadata.name || null,
         // Optional (nullable) values
         primaryImage    = (args.primaryImage != null)   ? MHObject.create(args.primaryImage)    : null,
+        primaryGroup    = (args.primaryGroup != null)   ? MHObject.create(args.primaryGroup.object)    : null,
         secondaryImage  = (args.secondaryImage != null) ? MHObject.create(args.secondaryImage)  : null,
         social          = args.social || null,
         createdDate     = new Date(args.metadata.createdDate);
@@ -108,6 +110,12 @@ export class MHObject {
         enumerable:   true,
         writable:     false,
         value:        secondaryImage
+      },
+      'primaryGroup':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        primaryGroup
       },
       'social':{
         configurable: false,
@@ -239,6 +247,7 @@ export class MHObject {
         //log('creating without a prefix...', mhObj);
         return mhObj;
       }
+
     } catch (err) {
       //log(err);
       if( err instanceof TypeError ) {

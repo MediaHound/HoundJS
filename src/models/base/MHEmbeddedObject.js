@@ -68,4 +68,3 @@ export class MHEmbeddedObject {
     return arr;
   }
 }
-
