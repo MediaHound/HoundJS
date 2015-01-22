@@ -21,6 +21,7 @@ export class MHSourceFormat {
    *
    */
   constructor(args, method=null) {
+    console.log(args);
     if( typeof args === 'string' || args instanceof String ){
       try{
         args = JSON.parse(args);
@@ -31,8 +32,7 @@ export class MHSourceFormat {
     var type        = args.type       || null,
         price       = args.price,
         launchInfo  = args.launchInfo || null,
-        timeperiod  = args.timeperiod || null,
-        subscriptionDescription = args.subscriptionDescription || null;
+        timePeriod  = args.timePeriod || null;
 
     if( type === null || price === null || launchInfo === null ){
       throw new TypeError('Required info not defined on argument map in MHSourceFormat', 'MHSourceFormat.js', 41);
@@ -59,17 +59,11 @@ export class MHSourceFormat {
         writable:false,
         value: launchInfo
       },
-      'timeperiod':{
+      'timePeriod':{
         configurable:false,
         enumerable:true,
         writable:false,
-        value: timeperiod
-      },
-      'subscriptionDescription':{
-        configurable:false,
-        enumerable:true,
-        writable:false,
-        value: subscriptionDescription
+        value: timePeriod
       },
       'method':{
         configurable:false,

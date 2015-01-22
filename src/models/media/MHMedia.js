@@ -226,7 +226,12 @@ export class MHMedia extends MHObject {
         })
         .catch( err => { self.sourcesPromise = null; throw err; } )
         .then(function(parsed){
+          parsed = parsed.content;
+          console.log(parsed);
           return parsed.map( v => new MHSourceModel(v, self) );
+        })
+        .then(function(sources){
+          console.log(sources);
         });
 
     }

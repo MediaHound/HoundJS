@@ -39,6 +39,8 @@ export class MHSourceModel {
    *
    */
   constructor(args, content=null) {
+
+    console.log(args);
     if( typeof args === 'string' || args instanceof String ){
       try{
         args = JSON.parse(args);
@@ -47,10 +49,10 @@ export class MHSourceModel {
       }
     }
 
-    var name        = args.name     || null,
-        logo        = args.logo     || null, // not created as MHImage because it has a different set of possible properties
-        mediums     = args.mediums  || null,
-        consumable  = (typeof args.consumable === 'boolean') ? args.consumable : null;
+    var name        = args.object.metadata.name     || null,
+        //logo        = args.logo     || null, // not created as MHImage because it has a different set of possible properties
+        mediums     = args.context.mediums  || null,
+        consumable  = (typeof args.context.consumable === 'boolean') ? args.context.consumable : null;
 
     // Required Props Check
     if( name === null || consumable === null || mediums === null ){
@@ -58,13 +60,16 @@ export class MHSourceModel {
       throw new TypeError('Name, consumable, or mediums null in args in MHSourceModel');
     }
 
+
     // Transform logo.url
-    if( typeof logo.url === 'string' ){
-      logo.url = logo.url.replace(/http:|https:/gi, '');
-    }
+    // if( typeof logo.url === 'string' ){
+    //   logo.url = logo.url.replace(/http:|https:/gi, '');
+    // }
 
     // Create MHSourceMediums
     mediums = mediums.map( v => new MHSourceMedium(v, this) );
+
+    console.log(content);
 
     Object.defineProperties(this, {
       'name':{
@@ -85,12 +90,12 @@ export class MHSourceModel {
         writable:     false,
         value:        mediums
       },
-      'logo':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        logo
-      },
+      // 'logo':{
+      //   configurable: false,
+      //   enumerable:   true,
+      //   writable:     false,
+      //   value:        logo
+      // },
       'content':{
         configurable: false,
         enumerable:   true,
@@ -105,6 +110,7 @@ export class MHSourceModel {
     this.mediums.forEach(function(medium){
       medium.methods.forEach(function(method){
         allFormats = allFormats.concat(method.formats);
+        console.log(allFormats);
         /*
         method.formats.forEach(function(format){
           allFormats.push(format);
@@ -115,4 +121,3 @@ export class MHSourceModel {
     return allFormats;
   }
 }
-

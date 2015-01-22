@@ -5415,6 +5415,7 @@ System.register("models/source/MHSourceFormat", [], function() {
   var __moduleName = "models/source/MHSourceFormat";
   var MHSourceFormat = function MHSourceFormat(args) {
     var method = arguments[1] !== (void 0) ? arguments[1] : null;
+    console.log(args);
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5425,8 +5426,7 @@ System.register("models/source/MHSourceFormat", [], function() {
     var type = args.type || null,
         price = args.price,
         launchInfo = args.launchInfo || null,
-        timeperiod = args.timeperiod || null,
-        subscriptionDescription = args.subscriptionDescription || null;
+        timePeriod = args.timePeriod || null;
     if (type === null || price === null || launchInfo === null) {
       throw new TypeError('Required info not defined on argument map in MHSourceFormat', 'MHSourceFormat.js', 41);
     }
@@ -5452,17 +5452,11 @@ System.register("models/source/MHSourceFormat", [], function() {
         writable: false,
         value: launchInfo
       },
-      'timeperiod': {
+      'timePeriod': {
         configurable: false,
         enumerable: true,
         writable: false,
-        value: timeperiod
-      },
-      'subscriptionDescription': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: subscriptionDescription
+        value: timePeriod
       },
       'method': {
         configurable: false,
@@ -5486,6 +5480,7 @@ System.register("models/source/MHSourceMethod", [], function() {
   var MHSourceMethod = function MHSourceMethod(args) {
     var medium = arguments[1] !== (void 0) ? arguments[1] : null;
     var $__96 = this;
+    console.log(args);
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5536,6 +5531,7 @@ System.register("models/source/MHSourceMedium", [], function() {
   var MHSourceMedium = function MHSourceMedium(args) {
     var source = arguments[1] !== (void 0) ? arguments[1] : null;
     var $__99 = this;
+    console.log(args);
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5586,6 +5582,7 @@ System.register("models/source/MHSourceModel", [], function() {
   var MHSourceModel = function MHSourceModel(args) {
     var content = arguments[1] !== (void 0) ? arguments[1] : null;
     var $__102 = this;
+    console.log(args);
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5593,20 +5590,17 @@ System.register("models/source/MHSourceModel", [], function() {
         throw new TypeError('Args typeof string but not JSON in MHSourceModel', 'MHSourceModel.js', 28);
       }
     }
-    var name = args.name || null,
-        logo = args.logo || null,
-        mediums = args.mediums || null,
-        consumable = (typeof args.consumable === 'boolean') ? args.consumable : null;
+    var name = args.object.metadata.name || null,
+        mediums = args.context.mediums || null,
+        consumable = (typeof args.context.consumable === 'boolean') ? args.context.consumable : null;
     if (name === null || consumable === null || mediums === null) {
       console.warn('errored args: ', args);
       throw new TypeError('Name, consumable, or mediums null in args in MHSourceModel');
     }
-    if (typeof logo.url === 'string') {
-      logo.url = logo.url.replace(/http:|https:/gi, '');
-    }
     mediums = mediums.map((function(v) {
       return new MHSourceMedium(v, $__102);
     }));
+    console.log(content);
     Object.defineProperties(this, {
       'name': {
         configurable: false,
@@ -5626,12 +5620,6 @@ System.register("models/source/MHSourceModel", [], function() {
         writable: false,
         value: mediums
       },
-      'logo': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: logo
-      },
       'content': {
         configurable: false,
         enumerable: true,
@@ -5645,6 +5633,7 @@ System.register("models/source/MHSourceModel", [], function() {
       this.mediums.forEach(function(medium) {
         medium.methods.forEach(function(method) {
           allFormats = allFormats.concat(method.formats);
+          console.log(allFormats);
         });
       });
       return allFormats;
@@ -5781,9 +5770,13 @@ System.register("models/media/MHMedia", [], function() {
           self.sourcesPromise = null;
           throw err;
         })).then(function(parsed) {
+          parsed = parsed.content;
+          console.log(parsed);
           return parsed.map((function(v) {
             return new MHSourceModel(v, self);
           }));
+        }).then(function(sources) {
+          console.log(sources);
         });
       }
       return this.sourcesPromise;
