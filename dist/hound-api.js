@@ -5415,7 +5415,6 @@ System.register("models/source/MHSourceFormat", [], function() {
   var __moduleName = "models/source/MHSourceFormat";
   var MHSourceFormat = function MHSourceFormat(args) {
     var method = arguments[1] !== (void 0) ? arguments[1] : null;
-    console.log(args);
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5427,12 +5426,6 @@ System.register("models/source/MHSourceFormat", [], function() {
         price = args.price,
         launchInfo = args.launchInfo || null,
         timePeriod = args.timePeriod || null;
-    if (type === null || price === null || launchInfo === null) {
-      throw new TypeError('Required info not defined on argument map in MHSourceFormat', 'MHSourceFormat.js', 41);
-    }
-    if (price === undefined) {
-      throw new TypeError('Price is undefined.', 'MHSourceFormat.js', 43);
-    }
     Object.defineProperties(this, {
       'type': {
         configurable: false,
@@ -5480,7 +5473,6 @@ System.register("models/source/MHSourceMethod", [], function() {
   var MHSourceMethod = function MHSourceMethod(args) {
     var medium = arguments[1] !== (void 0) ? arguments[1] : null;
     var $__96 = this;
-    console.log(args);
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5531,7 +5523,6 @@ System.register("models/source/MHSourceMedium", [], function() {
   var MHSourceMedium = function MHSourceMedium(args) {
     var source = arguments[1] !== (void 0) ? arguments[1] : null;
     var $__99 = this;
-    console.log(args);
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5582,7 +5573,6 @@ System.register("models/source/MHSourceModel", [], function() {
   var MHSourceModel = function MHSourceModel(args) {
     var content = arguments[1] !== (void 0) ? arguments[1] : null;
     var $__102 = this;
-    console.log(args);
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5600,7 +5590,6 @@ System.register("models/source/MHSourceModel", [], function() {
     mediums = mediums.map((function(v) {
       return new MHSourceMedium(v, $__102);
     }));
-    console.log(content);
     Object.defineProperties(this, {
       'name': {
         configurable: false,
@@ -5759,7 +5748,7 @@ System.register("models/media/MHMedia", [], function() {
       return this.feedPagedRequest;
     },
     fetchSources: function() {
-      var force = arguments[0] !== (void 0) ? arguments[0] : false;
+      var force = arguments[0] !== (void 0) ? arguments[0] : true;
       var self = this,
           path = this.subendpoint('sources');
       if (force || this.sourcesPromise === null) {
@@ -5770,13 +5759,10 @@ System.register("models/media/MHMedia", [], function() {
           self.sourcesPromise = null;
           throw err;
         })).then(function(parsed) {
-          parsed = parsed.content;
-          console.log(parsed);
-          return parsed.map((function(v) {
+          var content = parsed.content;
+          return content.map((function(v) {
             return new MHSourceModel(v, self);
           }));
-        }).then(function(sources) {
-          console.log(sources);
         });
       }
       return this.sourcesPromise;

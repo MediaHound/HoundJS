@@ -40,7 +40,7 @@ export class MHSourceModel {
    */
   constructor(args, content=null) {
 
-    console.log(args);
+
     if( typeof args === 'string' || args instanceof String ){
       try{
         args = JSON.parse(args);
@@ -68,8 +68,7 @@ export class MHSourceModel {
 
     // Create MHSourceMediums
     mediums = mediums.map( v => new MHSourceMedium(v, this) );
-
-    console.log(content);
+    //console.log('MHSourceModel',mediums);
 
     Object.defineProperties(this, {
       'name':{
@@ -104,6 +103,8 @@ export class MHSourceModel {
       }
     });
   }
+
+
 
   getAllFormats(){
     var allFormats = [];

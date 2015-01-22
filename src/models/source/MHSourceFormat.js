@@ -21,7 +21,7 @@ export class MHSourceFormat {
    *
    */
   constructor(args, method=null) {
-    console.log(args);
+
     if( typeof args === 'string' || args instanceof String ){
       try{
         args = JSON.parse(args);
@@ -34,12 +34,12 @@ export class MHSourceFormat {
         launchInfo  = args.launchInfo || null,
         timePeriod  = args.timePeriod || null;
 
-    if( type === null || price === null || launchInfo === null ){
-      throw new TypeError('Required info not defined on argument map in MHSourceFormat', 'MHSourceFormat.js', 41);
-    }
-    if(price === undefined){
-      throw new TypeError('Price is undefined.', 'MHSourceFormat.js', 43);
-    }
+    // if( type === null || price === null || launchInfo === null ){
+    //   throw new TypeError('Required info not defined on argument map in MHSourceFormat', 'MHSourceFormat.js', 41);
+    // }
+    // if(price === undefined){
+    //   throw new TypeError('Price is undefined.', 'MHSourceFormat.js', 43);
+    // }
     Object.defineProperties(this, {
       'type':{
         configurable:false,

@@ -35,7 +35,7 @@ export class MHSourceMethod {
    *
    */
   constructor(args, medium=null) {
-    console.log(args);
+
     if( typeof args === 'string' || args instanceof String ){
       try{
         args = JSON.parse(args);
@@ -54,6 +54,7 @@ export class MHSourceMethod {
     // Map formats to be array of MHSourceFormats instead of object array
 
     formats = formats.map( v => new MHSourceFormat(v, this) );
+    //console.log('MHSourceMethods',formats);
 
     Object.defineProperties(this, {
       'type':{
