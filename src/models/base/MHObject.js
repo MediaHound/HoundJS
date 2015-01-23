@@ -47,7 +47,6 @@ export class MHObject {
    */
   constructor(args) {
     args = MHObject.parseArgs(args);
-    // console.log(args);
 
     if( typeof args.metadata.mhid === 'undefined' || args.metadata.mhid === null ){
       throw new TypeError('mhid is null or undefined', 'MHObject.js', 89);
@@ -59,7 +58,7 @@ export class MHObject {
         name            = args.metadata.name || null,
         // Optional (nullable) values
         primaryImage    = (args.primaryImage != null)   ? MHObject.create(args.primaryImage)    : null,
-        primaryGroup    = (args.primaryGroup != null)   ? MHObject.create(args.primaryGroup.object)    : null,
+        primaryGroup    = (args.primaryGroup != null && args.primaryGroup !== undefined) ? MHObject.create(args.primaryGroup.object)    : null,
         secondaryImage  = (args.secondaryImage != null) ? MHObject.create(args.secondaryImage)  : null,
         social          = args.social || null,
         createdDate     = new Date(args.metadata.createdDate);
@@ -120,7 +119,7 @@ export class MHObject {
       'social':{
         configurable: false,
         enumerable:   true,
-        writable:     false,
+        writable:     true,
         value:        social
       },
       // Promises
@@ -157,9 +156,10 @@ export class MHObject {
     var type = typeof args;
 
     // If object with mhid return
-    if( type === 'object' && !(args instanceof String) && args.metadata.mhid ){
+    if( type === 'object' && !(args instanceof String) && args.metadata.mhid){
       return args;
     }
+
     // if type string, parse
     if( type === 'string' || args instanceof String ){
       try{
@@ -215,7 +215,7 @@ export class MHObject {
       var mhid = args.metadata.mhid || undefined;
       var mhObj;
 
-      //log('at start of creating... ',mhid,args);
+      //console.log('at start of creating... ',mhid,args);
 
       if( mhid !== 'undefined' && mhid !== null && args instanceof Object && this.isEmpty(args) !== 0){
         args.mhid = mhid;
@@ -239,7 +239,7 @@ export class MHObject {
         //   log('putting from create');
         //   mhidLRU.putMHObj(mhObj);
         // }
-        //log('creating... ',prefix,': ', mhObj);
+        //console.log('creating... ',prefix,': ', mhObj);
         return mhObj;
       }
       else{
@@ -495,6 +495,8 @@ export class MHObject {
       throw Error('Could not find correct class, unknown mhid: ' + mhid);
     }
 
+    //console.log('fetching:', mhClass.rootEndpoint + '/' + mhid);
+
     return houndRequest({
         method: 'GET',
         endpoint: mhClass.rootEndpoint + '/' + mhid,
@@ -505,7 +507,7 @@ export class MHObject {
       .then(function(response){
         newObj = MHObject.create(response);
         //newObj = response;
-        log('fetched: ', newObj, 'with response: ', response);
+        //console.log('fetched: ', newObj, 'with response: ', response);
         // if( prefix === 'mhimg' ){
         //   // bypass cache
         // } else {
@@ -610,7 +612,10 @@ export class MHObject {
         method: 'GET',
         endpoint: path
       })
-      .then( (parsed => this.social = new MHSocial(parsed)).bind(this) );
+      .then( (parsed => this.social = new MHSocial(parsed)).bind(this) )
+      .catch(function(err){
+        console.warn('fetchSocial:',err);
+      });
   }
 
   /**

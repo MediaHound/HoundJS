@@ -60,7 +60,9 @@ var defaults = {
           originalContent;
 
       originalContent = response.content;
-      self.pageid = response.content[0].object.metadata.mhid;
+      if(response.content[0]){
+        self.pageid = response.content[0].object.metadata.mhid;
+      }
       // if( (this._args.params.view && this._args.params.view === 'basic') || typeof response.content[0] === 'string' ){
       //   newContent = Promise.all(MHObject.fetchByMhids(response.content));
       // } else {

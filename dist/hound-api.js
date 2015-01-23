@@ -2722,7 +2722,9 @@ System.register("request/hound-paged-request", [], function() {
             newContent,
             originalContent;
         originalContent = response.content;
-        self.pageid = response.content[0].object.metadata.mhid;
+        if (response.content[0]) {
+          self.pageid = response.content[0].object.metadata.mhid;
+        }
         newContent = Promise.all(originalContent.map(function(args) {
           return MHObject.create(args.object);
         }));
@@ -3289,7 +3291,7 @@ System.register("models/base/MHObject", [], function() {
         altId = args.metadata.altId || null,
         name = args.metadata.name || null,
         primaryImage = (args.primaryImage != null) ? $MHObject.create(args.primaryImage) : null,
-        primaryGroup = (args.primaryGroup != null) ? $MHObject.create(args.primaryGroup.object) : null,
+        primaryGroup = (args.primaryGroup != null && args.primaryGroup !== undefined) ? $MHObject.create(args.primaryGroup.object) : null,
         secondaryImage = (args.secondaryImage != null) ? $MHObject.create(args.secondaryImage) : null,
         social = args.social || null,
         createdDate = new Date(args.metadata.createdDate);
@@ -3345,7 +3347,7 @@ System.register("models/base/MHObject", [], function() {
       'social': {
         configurable: false,
         enumerable: true,
-        writable: false,
+        writable: true,
         value: social
       },
       'feedPagedRequest': {
@@ -3430,7 +3432,9 @@ System.register("models/base/MHObject", [], function() {
         endpoint: path
       }).then(((function(parsed) {
         return $__20.social = new MHSocial(parsed);
-      })).bind(this));
+      })).bind(this)).catch(function(err) {
+        console.warn('fetchSocial:', err);
+      });
     },
     fetchFeed: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
@@ -3649,7 +3653,6 @@ System.register("models/base/MHObject", [], function() {
         params: {view: view}
       }).then(function(response) {
         newObj = $MHObject.create(response);
-        log('fetched: ', newObj, 'with response: ', response);
         return newObj;
       });
     },
