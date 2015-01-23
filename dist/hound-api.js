@@ -4116,6 +4116,14 @@ System.register("models/user/MHUser", [], function() {
         phonenumber = args.metadata.phonenumber || args.metadata.phoneNumber || null,
         firstname = args.metadata.firstname || args.metadata.firstName || null,
         lastname = args.metadata.lastname || args.metadata.lastName || null;
+    if (firstname == null || lastname == null) {
+      var regex = new RegExp('((?:[a-z][a-z]+))(\\s+)((?:[a-z][a-z]+))', ["i"]);
+      var test = regex.exec(args.metadata.name);
+      if (test != null) {
+        firstname = test[1];
+        lastname = test[3];
+      }
+    }
     Object.defineProperties(this, {
       'username': {
         configurable: false,
@@ -4349,6 +4357,7 @@ System.register("models/user/MHUser", [], function() {
         throw new TypeError('Updates must include operation, property, and value as parameters.');
       }
       var path = $MHUser.rootEndpoint + '/' + mhid + '/settings/internal/update';
+      console.log(path, updates);
       return houndRequest({
         method: 'PUT',
         endpoint: path,

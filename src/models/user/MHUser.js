@@ -55,6 +55,16 @@ export class MHUser extends MHObject {
     firstname   = args.metadata.firstname    || args.metadata.firstName   || null,
     lastname    = args.metadata.lastname     || args.metadata.lastName    || null;
 
+    if(firstname == null || lastname == null){
+
+      var regex = new RegExp('((?:[a-z][a-z]+))(\\s+)((?:[a-z][a-z]+))',["i"]);
+      var test = regex.exec(args.metadata.name);
+      if(test != null){
+        firstname = test[1];
+        lastname = test[3];
+      }
+
+    }
     // Create imutable properties
     //  username, email, phonenumber, firstname, lastname
     Object.defineProperties(this, {
@@ -259,7 +269,7 @@ static fetchSettings(mhid){
 * {
 *   "operation":"add",
 *   "property":"tooltips",
-*   "value":"mh-web-tooltip-1"
+*   "value":["webapptooltip1", "webapptooltip2", "webapptooltip3"]
 * }
 * @returns {Promise}
 */
@@ -271,6 +281,7 @@ static updateSettings(mhid,updates){
     throw new TypeError('Updates must include operation, property, and value as parameters.');
   }
   var path = MHUser.rootEndpoint +'/'+mhid+'/settings/internal/update';
+  console.log(path,updates);
   return houndRequest({
     method          : 'PUT',
     endpoint        : path,
