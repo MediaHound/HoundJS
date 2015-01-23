@@ -4212,26 +4212,6 @@ System.register("models/user/MHUser", [], function() {
         return userWithImage;
       });
     },
-    updateProfile: function(key, value) {
-      var data = {};
-      data[key] = value;
-      return this.updateProfileData(data);
-    },
-    updateProfileData: function(updates) {
-      if (updates == null || typeof updates === 'string' || Array.isArray(updates)) {
-        throw new TypeError('Update profile data parameter must be of type object');
-      }
-      var path = $MHUser.rootEndpoint + '/update';
-      return houndRequest({
-        method: 'POST',
-        endpoint: path,
-        withCredentials: true,
-        data: updates
-      }).catch(function(err) {
-        console.log('error on profile update: ', err);
-        throw err;
-      });
-    },
     fetchInterestFeed: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
       var page = arguments[1] !== (void 0) ? arguments[1] : 0;
@@ -4359,6 +4339,24 @@ System.register("models/user/MHUser", [], function() {
         console.log('error in fetchSettings: ', error.error.message);
         console.error(error.error.stack);
         return false;
+      });
+    },
+    updateSettings: function(mhid, updates) {
+      if (updates == null || typeof updates === 'string' || Array.isArray(updates)) {
+        throw new TypeError('Update data parameter must be of type object');
+      }
+      if (updates.operation == null || updates.property == null || updates.value == null) {
+        throw new TypeError('Updates must include operation, property, and value as parameters.');
+      }
+      var path = $MHUser.rootEndpoint + '/' + mhid + '/settings/internal/update';
+      return houndRequest({
+        method: 'PUT',
+        endpoint: path,
+        withCredentials: true,
+        data: updates
+      }).catch(function(err) {
+        console.log('error on profile update: ', err);
+        throw err;
       });
     },
     validateUsername: function(username) {
@@ -4730,19 +4728,6 @@ System.register("models/user/MHLoginSession", [], function() {
       loggedInUser.fetchOwnedCollections();
       window.dispatchEvent(MHSessionUserProfileImageChange.create(loggedInUser));
       return true;
-    },
-    completedOnboarding: function() {
-      var path = MHUser.rootEndpoint + '/onboard';
-      return houndRequest({
-        method: 'POST',
-        endpoint: path,
-        'withCredentials': true
-      }).then((function(loginMap) {
-        access = loginMap.access;
-        onboarded = loginMap.onboarded;
-        console.log(loginMap);
-        return loginMap;
-      }));
     },
     login: function(username, password) {
       if (typeof username !== 'string' && !(username instanceof String)) {

@@ -213,8 +213,10 @@ export class MHUser extends MHObject {
   */
 }
 
-/** TODO: refactor after new auth system
-*
+/**
+* fetchSettings(mhid)
+* @param mhid
+* Fetches the settings for the current logged in user.
 */
 static fetchSettings(mhid){
   if( !mhid || (typeof mhid !== 'string' && !(mhid instanceof String)) ){
@@ -234,6 +236,50 @@ static fetchSettings(mhid){
     console.log('error in fetchSettings: ', error.error.message);
     console.error(error.error.stack);
     return false;
+  });
+}
+
+
+/**
+* updateSettings(mhid,updates)
+*
+* @param updates
+* updates must be passed into updateSettings as an object with three required params.
+* An example of updating the boolean value of onboarded.
+* {
+*   "operation":"replace",
+*   "property":"onboarded",
+*   "value":Boolean
+* }
+* operation refers to the actions "replace", "add", or "remove"
+* property is the property you want to change, i.e. "onboarded", "access", or "tooltips"
+* value is either a boolean or string based on context of the request
+*
+* Another exmaple for updating tooltips:
+* {
+*   "operation":"add",
+*   "property":"tooltips",
+*   "value":"mh-web-tooltip-1"
+* }
+* @returns {Promise}
+*/
+static updateSettings(mhid,updates){
+  if( updates == null || typeof updates === 'string' || Array.isArray(updates) ){
+    throw new TypeError('Update data parameter must be of type object');
+  }
+  if(updates.operation == null || updates.property == null || updates.value == null){
+    throw new TypeError('Updates must include operation, property, and value as parameters.');
+  }
+  var path = MHUser.rootEndpoint +'/'+mhid+'/settings/internal/update';
+  return houndRequest({
+    method          : 'PUT',
+    endpoint        : path,
+    withCredentials : true,
+    data            : updates
+  })
+  .catch(function(err){
+    console.log('error on profile update: ', err);
+    throw err;
   });
 }
 
@@ -546,43 +592,6 @@ setProfileImage(image){
     //console.warn('circular dep: ', MHLoginSession);
     MHLoginSession.updatedProfileImage(MHObject.create(userWithImage));
     return userWithImage;
-  });
-}
-
-/**
-*
-* Update single profile value
-* @param key
-* @param value
-* @returns {Promise}
-*/
-updateProfile(key, value){
-  var data = {};
-  data[key] = value;
-  return this.updateProfileData(data);
-}
-
-/**
-* TODO updateCurrent user in MHLoginSession, test
-* TODO should this be static?
-* @param updates
-* @returns {Promise}
-*/
-updateProfileData(updates){
-  if( updates == null || typeof updates === 'string' || Array.isArray(updates) ){
-    throw new TypeError('Update profile data parameter must be of type object');
-  }
-  var path = MHUser.rootEndpoint + '/update';
-
-  return houndRequest({
-    method          : 'POST',
-    endpoint        : path,
-    withCredentials : true,
-    data            : updates
-  })
-  .catch(function(err){
-    console.log('error on profile update: ', err);
-    throw err;
   });
 }
 

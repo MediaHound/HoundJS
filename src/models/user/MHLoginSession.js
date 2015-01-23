@@ -179,20 +179,21 @@ export class MHLoginSession {
     return true;
   }
 
-  static completedOnboarding(){
-    var path = MHUser.rootEndpoint + '/onboard';
-    return houndRequest({
-        method            : 'POST',
-        endpoint          : path,
-        'withCredentials' : true
-      })
-      .then(loginMap => {
-        access    = loginMap.access;
-        onboarded = loginMap.onboarded;
-        console.log(loginMap);
-        return loginMap;
-      });
-  }
+  // DEPRECATED: Use MHUser.updateSettings() instead.
+  // static completedOnboarding(){
+  //   var path = MHUser.rootEndpoint + '/onboard';
+  //   return houndRequest({
+  //       method            : 'POST',
+  //       endpoint          : path,
+  //       'withCredentials' : true
+  //     })
+  //     .then(loginMap => {
+  //       access    = loginMap.access;
+  //       onboarded = loginMap.onboarded;
+  //       console.log(loginMap);
+  //       return loginMap;
+  //     });
+  // }
 
   /**
    *  MHLoginSession.login(username, password)
