@@ -3012,7 +3012,11 @@ System.register("models/meta/MHMetaData", [], function() {
         isDefault = args.isDefault || null,
         primaryColor = args.primaryColor || null,
         createdDate = new Date(args.createdDate) * 1000 || null,
-        releaseDate = new Date(args.createdDate) * 1000 || null;
+        releaseDate = new Date(args.createdDate) * 1000 || null,
+        currency = currency || null,
+        price = price || null,
+        timePeriod = timePeriod || null,
+        mediums = mediums || null;
     Object.defineProperties(this, {
       'mhid': {
         configurable: false,
@@ -3091,6 +3095,30 @@ System.register("models/meta/MHMetaData", [], function() {
         enumerable: true,
         writable: false,
         value: releaseDate
+      },
+      'currency': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: currency
+      },
+      'price': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: price
+      },
+      'timePeriod': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: timePeriod
+      },
+      'mediums': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: mediums
       }
     });
   };
@@ -3360,6 +3388,9 @@ System.register("models/base/MHObject", [], function() {
     get isTrait() {
       return $MHObject.isTrait(this);
     },
+    get isSource() {
+      return $MHObject.isSource(this);
+    },
     get className() {
       return this.constructor.name;
     },
@@ -3586,6 +3617,9 @@ System.register("models/base/MHObject", [], function() {
     },
     isTrait: function(toCheck) {
       return toCheck instanceof System.get('models/trait/MHTrait').MHTrait;
+    },
+    isSource: function(toCheck) {
+      return toCheck instanceof System.get('models/source/MHSource').MHSource;
     },
     fetchByMhid: function(mhid) {
       var view = arguments[1] !== (void 0) ? arguments[1] : 'full';
@@ -5569,10 +5603,13 @@ System.register("models/source/MHSourceMedium", [], function() {
 System.register("models/source/MHSourceModel", [], function() {
   "use strict";
   var __moduleName = "models/source/MHSourceModel";
+  var MHObject = System.get("models/base/MHObject").MHObject;
   var MHSourceMedium = System.get("models/source/MHSourceMedium").MHSourceMedium;
+  var houndRequest = System.get("request/hound-request").houndRequest;
+  var sources;
   var MHSourceModel = function MHSourceModel(args) {
     var content = arguments[1] !== (void 0) ? arguments[1] : null;
-    var $__102 = this;
+    var $__104 = this;
     if (typeof args === 'string' || args instanceof String) {
       try {
         args = JSON.parse(args);
@@ -5588,7 +5625,7 @@ System.register("models/source/MHSourceModel", [], function() {
       throw new TypeError('Name, consumable, or mediums null in args in MHSourceModel');
     }
     mediums = mediums.map((function(v) {
-      return new MHSourceMedium(v, $__102);
+      return new MHSourceMedium(v, $__104);
     }));
     Object.defineProperties(this, {
       'name': {
@@ -5626,7 +5663,37 @@ System.register("models/source/MHSourceModel", [], function() {
         });
       });
       return allFormats;
-    }}, {});
+    }}, {
+    fetchAllSources: function() {
+      var view = arguments[0] !== (void 0) ? arguments[0] : "full";
+      var force = arguments[1] !== (void 0) ? arguments[1] : false;
+      var path = 'graph/source/all';
+      if (force || this.sourcesPromise === null) {
+        this.sourcesPromise = houndRequest({
+          method: 'GET',
+          endpoint: path,
+          params: {view: view}
+        }).then(function(parsed) {
+          var content = parsed.content;
+          return content.map((function(v) {
+            return MHObject.create(v.object);
+          }));
+        }).then(function(arr) {
+          var obj = {};
+          arr.forEach(function(source) {
+            var name = source.metadata.name.replace(/\s+/g, '').toLowerCase();
+            obj[name] = source;
+          });
+          sources = obj;
+          return obj;
+        });
+      }
+      return this.sourcesPromise;
+    },
+    get sources() {
+      return sources;
+    }
+  });
   return {get MHSourceModel() {
       return MHSourceModel;
     }};
@@ -5719,14 +5786,14 @@ System.register("models/media/MHMedia", [], function() {
     },
     fetchCollections: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__109 = this;
+      var $__111 = this;
       var path = this.subendpoint('collections');
       if (force || this.collectionsPromise === null) {
         this.collectionsPromise = houndRequest({
           method: 'GET',
           endpoint: path
         }).catch(((function(err) {
-          $__109.collectionsPromise = null;
+          $__111.collectionsPromise = null;
           throw err;
         })).bind(this));
       }
@@ -5751,6 +5818,9 @@ System.register("models/media/MHMedia", [], function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : true;
       var self = this,
           path = this.subendpoint('sources');
+      if (MHSourceModel.sources === null || MHSourceModel.sources === undefined) {
+        MHSourceModel.fetchAllSources("full", true);
+      }
       if (force || this.sourcesPromise === null) {
         this.sourcesPromise = houndRequest({
           method: 'GET',
@@ -5776,7 +5846,7 @@ System.register("models/media/MHMedia", [], function() {
     fetchContributors: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__109 = this;
+      var $__111 = this;
       var path = this.subendpoint('contributors');
       if (force || this.contributorsPromise === null) {
         this.contributorsPromise = houndRequest({
@@ -5784,7 +5854,7 @@ System.register("models/media/MHMedia", [], function() {
           endpoint: path,
           params: {view: view}
         }).catch(((function(err) {
-          $__109.contributorsPromise = null;
+          $__111.contributorsPromise = null;
           throw err;
         })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
@@ -5809,7 +5879,7 @@ System.register("models/media/MHMedia", [], function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var excludeMinors = arguments[1] !== (void 0) ? arguments[1] : false;
       var force = arguments[2] !== (void 0) ? arguments[2] : false;
-      var $__109 = this;
+      var $__111 = this;
       var path = this.subendpoint('contributors');
       if (force || this.charactersPromise === null) {
         this.charactersPromise = houndRequest({
@@ -5820,7 +5890,7 @@ System.register("models/media/MHMedia", [], function() {
             excludeMinors: excludeMinors
           }
         }).catch(((function(err) {
-          $__109.charactersPromise = null;
+          $__111.charactersPromise = null;
           throw err;
         })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
@@ -5844,7 +5914,7 @@ System.register("models/media/MHMedia", [], function() {
     fetchTraits: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__109 = this;
+      var $__111 = this;
       var path = this.subendpoint('traits');
       if (force || this.traitsPromise === null) {
         this.traitsPromise = houndRequest({
@@ -5852,7 +5922,7 @@ System.register("models/media/MHMedia", [], function() {
           endpoint: path,
           params: {view: view}
         }).catch(((function(err) {
-          $__109.traitsPromise = null;
+          $__111.traitsPromise = null;
           throw err;
         })).bind(this)).then(function(parsed) {
           if (view === 'full' && Array.isArray(parsed)) {
@@ -6408,6 +6478,76 @@ System.register("models/media/MHTrailer", [], function() {
       return MHTrailer;
     }};
 });
+System.register("models/source/MHSource", [], function() {
+  "use strict";
+  var __moduleName = "models/source/MHSource";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHSource = function MHSource(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHSource.prototype, "constructor", [args]);
+    var mediums = (args.allMediums) ? args.allMediums : null,
+        subscriptions = (args.subscriptions) ? args.subscriptions : null;
+    if (subscriptions !== null) {
+      subscriptions = subscriptions.map((function(v) {
+        return MHObject.create(v);
+      }));
+    }
+    Object.defineProperties(this, {
+      'mediums': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: mediums
+      },
+      'subscriptions': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: subscriptions
+      }
+    });
+  };
+  var $MHSource = MHSource;
+  ($traceurRuntime.createClass)(MHSource, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHSource.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhsrc';
+    }}, MHObject);
+  (function() {
+    MHObject.registerConstructor(MHSource);
+  })();
+  return {get MHSource() {
+      return MHSource;
+    }};
+});
+System.register("models/source/MHSubscription", [], function() {
+  "use strict";
+  var __moduleName = "models/source/MHSubscription";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHSubscription = function MHSubscription(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHSubscription.prototype, "constructor", [args]);
+    var mediums = (args.metadata.mediums) ? args.metadata.mediums : null;
+    Object.defineProperties(this, {'mediums': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: mediums
+      }});
+  };
+  var $MHSubscription = MHSubscription;
+  ($traceurRuntime.createClass)(MHSubscription, {toString: function() {
+      return $traceurRuntime.superCall(this, $MHSubscription.prototype, "toString", []);
+    }}, {get mhidPrefix() {
+      return 'mhsubtemp';
+    }}, MHObject);
+  (function() {
+    MHObject.registerConstructor(MHSubscription);
+  })();
+  return {get MHSubscription() {
+      return MHSubscription;
+    }};
+});
 System.register("models/trait/MHTrait", [], function() {
   "use strict";
   var __moduleName = "models/trait/MHTrait";
@@ -6894,6 +7034,8 @@ System.register("models/all-models", [], function() {
   var MHRealGroupContributor = System.get("models/contributor/MHRealGroupContributor").MHRealGroupContributor;
   var MHFictionalIndividualContributor = System.get("models/contributor/MHFictionalIndividualContributor").MHFictionalIndividualContributor;
   var MHFictionalGroupContributor = System.get("models/contributor/MHFictionalGroupContributor").MHFictionalGroupContributor;
+  var MHSource = System.get("models/source/MHSource").MHSource;
+  var MHSubscription = System.get("models/source/MHSubscription").MHSubscription;
   var MHSourceFormat = System.get("models/source/MHSourceFormat").MHSourceFormat;
   var MHSourceMethod = System.get("models/source/MHSourceMethod").MHSourceMethod;
   var MHSourceMedium = System.get("models/source/MHSourceMedium").MHSourceMedium;
@@ -7086,6 +7228,12 @@ System.register("models/all-models", [], function() {
     get MHFictionalGroupContributor() {
       return MHFictionalGroupContributor;
     },
+    get MHSource() {
+      return MHSource;
+    },
+    get MHSubscription() {
+      return MHSubscription;
+    },
     get MHSourceFormat() {
       return MHSourceFormat;
     },
@@ -7120,9 +7268,9 @@ System.register("search/paged-search", [], function() {
 System.register("search/quick-search", [], function() {
   "use strict";
   var __moduleName = "search/quick-search";
-  var $__292 = System.get("models/internal/debug-helpers"),
-      warn = $__292.warn,
-      error = $__292.error;
+  var $__300 = System.get("models/internal/debug-helpers"),
+      warn = $__300.warn,
+      error = $__300.error;
   var houndRequest = System.get("request/hound-request").houndRequest;
   var MHObject = System.get("models/base/MHObject").MHObject;
   var i,

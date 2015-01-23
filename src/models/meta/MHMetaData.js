@@ -30,7 +30,11 @@ export class MHMetaData {
         isDefault   = args.isDefault || null,
         primaryColor = args.primaryColor || null,
         createdDate = new Date(args.createdDate)*1000 || null,
-        releaseDate = new Date(args.createdDate)*1000 || null;
+        releaseDate = new Date(args.createdDate)*1000 || null,
+        currency = currency || null,
+        price = price || null,
+        timePeriod = timePeriod || null,
+        mediums = mediums || null;
 
     Object.defineProperties(this, {
       'mhid':{
@@ -110,6 +114,30 @@ export class MHMetaData {
         enumerable:   true,
         writable:     false,
         value:        releaseDate
+      },
+      'currency':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        currency
+      },
+      'price':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        price
+      },
+      'timePeriod':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        timePeriod
+      },
+      'mediums':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        mediums
       }
     });
   }

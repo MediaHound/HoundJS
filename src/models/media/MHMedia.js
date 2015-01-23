@@ -219,7 +219,12 @@ export class MHMedia extends MHObject {
     var self = this,
         path = this.subendpoint('sources');
 
+    if(MHSourceModel.sources === null || MHSourceModel.sources === undefined){
+      MHSourceModel.fetchAllSources("full",true);
+    }
+
     if( force || this.sourcesPromise === null ){
+
       this.sourcesPromise = houndRequest({
           method  : 'GET',
           endpoint: path

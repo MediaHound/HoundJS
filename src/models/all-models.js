@@ -93,6 +93,8 @@ import { MHFictionalGroupContributor }      from './contributor/MHFictionalGroup
 
 
 // Source Models
+import { MHSource } from './source/MHSource';
+import { MHSubscription } from './source/MHSubscription';
 import { MHSourceFormat } from './source/MHSourceFormat';
 import { MHSourceMethod } from './source/MHSourceMethod';
 import { MHSourceMedium } from './source/MHSourceMedium';
@@ -172,6 +174,8 @@ export var models = {
   get MHFictionalIndividualContributor(){ return MHFictionalIndividualContributor; },
   get MHFictionalGroupContributor()     { return MHFictionalGroupContributor; },
 
+  get MHSource(){ return MHSource; },
+  get MHSubscription(){ return MHSubscription; },
   get MHSourceFormat(){ return MHSourceFormat; },
   get MHSourceMethod(){ return MHSourceMethod; },
   get MHSourceMedium(){ return MHSourceMedium; },

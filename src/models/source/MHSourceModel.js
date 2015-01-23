@@ -1,5 +1,7 @@
 
+import { MHObject } from '../base/MHObject';
 import { MHSourceMedium } from './MHSourceMedium';
+import { houndRequest } from '../../request/hound-request';
 
 // TODO
 //@property (strong, nonatomic, readonly) NSString* logoName;
@@ -11,6 +13,8 @@ import { MHSourceMedium } from './MHSourceMedium';
 //- (SourceMedium*)mediumForType:(NSString*)type;
 //- (NSComparisonResult)compareDesirability:(SourceModel*)otherSource;
 // END TODO
+
+var sources;
 
 // MediaHound SourceModel Object
 export class MHSourceModel {
@@ -104,7 +108,37 @@ export class MHSourceModel {
     });
   }
 
+  static fetchAllSources(view="full",force=false){
+    var path = 'graph/source/all';
 
+    if( force || this.sourcesPromise === null ){
+      this.sourcesPromise = houndRequest({
+        method  : 'GET',
+        endpoint: path,
+        params: {view}
+      })
+      //.catch( err => { self.sourcesPromise = null; throw err; } )
+      .then(function(parsed){
+        var content = parsed.content;
+        return content.map( v => MHObject.create(v.object) );
+      })
+      .then(function(arr){
+        var obj = {};
+        arr.forEach(function(source){
+          var name = source.metadata.name.replace(/\s+/g, '').toLowerCase();
+          obj[name] = source;
+        });
+        sources = obj;
+        return obj;
+      });
+    }
+
+    return this.sourcesPromise;
+  }
+
+  static get sources(){
+    return sources;
+  }
 
   getAllFormats(){
     var allFormats = [];

@@ -407,6 +407,13 @@ export class MHObject {
     return MHObject.isTrait(this);
   }
 
+  static isSource(toCheck){
+    return toCheck instanceof System.get('../../src/models/source/MHSource').MHSource;
+  }
+  get isSource(){
+    return MHObject.isSource(this);
+  }
+
   /**
    * This uses the function.name feature which is shimmed if it doesn't exist during the child constructor registration process.
    * @property {string} className - the string class name for this object, ie: MHUser, MHMovie, MHPost, etc.
