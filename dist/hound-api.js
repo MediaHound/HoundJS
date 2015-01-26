@@ -2721,18 +2721,24 @@ System.register("request/hound-paged-request", [], function() {
         var self = this,
             newContent,
             originalContent;
-        originalContent = response.content;
-        if (response.content[0]) {
-          self.pageid = response.content[0].object.metadata.mhid;
+        if (response.content !== undefined) {
+          originalContent = response.content;
+          if (response.content[0] !== undefined) {
+            self.pageid = response.content[0].object.metadata.mhid;
+          }
+          newContent = Promise.all(originalContent.map(function(args) {
+            return MHObject.create(args.object);
+          }));
+          return newContent.then(function(mhObjs) {
+            response.content = mhObjs;
+            Array.prototype.push.apply(self.content, mhObjs);
+            return response;
+          }).catch(function(err) {
+            console.warn(err);
+          });
+        } else {
+          console.warn('pagedRequest content array is empty');
         }
-        newContent = Promise.all(originalContent.map(function(args) {
-          return MHObject.create(args.object);
-        }));
-        return newContent.then(function(mhObjs) {
-          response.content = mhObjs;
-          Array.prototype.push.apply(self.content, mhObjs);
-          return response;
-        });
       };
   var PagedRequest = function PagedRequest(args) {
     if (args.method == null || args.endpoint == null) {
@@ -4254,20 +4260,20 @@ System.register("models/user/MHUser", [], function() {
       return this.feedPagedRequest;
     },
     fetchFollowed: function() {
-      var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__54 = this;
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+      var page = arguments[1] !== (void 0) ? arguments[1] : 0;
+      var size = arguments[2] !== (void 0) ? arguments[2] : 12;
+      var force = arguments[3] !== (void 0) ? arguments[3] : false;
       var path = this.subendpoint('following');
-      if (force || this.followedPromise === null) {
-        this.followedPromise = houndRequest({
+      if (force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size) {
+        this.feedPagedRequest = pagedRequest({
           method: 'GET',
           endpoint: path,
-          withCredentials: true
-        }).catch(((function(err) {
-          $__54.followedPromise = null;
-          throw err;
-        })).bind(this));
+          pageSize: size,
+          params: {view: view}
+        });
       }
-      return this.followedPromise;
+      return this.feedPagedRequest;
     },
     fetchFollowedCollections: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;

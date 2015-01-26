@@ -774,23 +774,24 @@ fetchOwnedCollections(view='full', size=12, force=true){
 
 
 /**
-*
+* mhUser.fetchFollowed()
 * @param force {boolean=false}
 * @returns {Promise}
 */
-fetchFollowed(force=false){
+fetchFollowed(view='full', page=0, size=12, force=false){
   var path = this.subendpoint('following');
-
-  if( force || this.followedPromise === null ){
-    this.followedPromise = houndRequest({
-      method          : 'GET',
-      endpoint        : path,
-      withCredentials : true
-    }).catch( (err => { this.followedPromise = null; throw err; }).bind(this) );
+  if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
+    this.feedPagedRequest = pagedRequest({
+      method: 'GET',
+      endpoint: path,
+      pageSize: size,
+      params: {view}
+    });
   }
-
-  return this.followedPromise;
+  //console.log(this.feedPagedRequest);
+  return this.feedPagedRequest;
 }
+
 
 /* TODO: remove console.log debug stuffs
 * mhUser.fetchFollowedCollections()

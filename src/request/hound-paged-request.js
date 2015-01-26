@@ -59,22 +59,30 @@ var defaults = {
           newContent,
           originalContent;
 
-      originalContent = response.content;
-      if(response.content[0]){
-        self.pageid = response.content[0].object.metadata.mhid;
-      }
-      // if( (this._args.params.view && this._args.params.view === 'basic') || typeof response.content[0] === 'string' ){
-      //   newContent = Promise.all(MHObject.fetchByMhids(response.content));
-      // } else {
-      newContent = Promise.all(originalContent.map(function(args){
-        return MHObject.create(args.object);
-      }));
-      // }
-      return newContent.then(function(mhObjs){
+      if(response.content !== undefined){
+
+        originalContent = response.content;
+
+        if(response.content[0] !== undefined){
+          self.pageid = response.content[0].object.metadata.mhid;
+        }
+
+        newContent = Promise.all(originalContent.map(function(args){
+          return MHObject.create(args.object);
+        }));
+
+        return newContent.then(function(mhObjs){
           response.content = mhObjs;
           Array.prototype.push.apply(self.content, mhObjs);
           return response;
+        }).catch(function(err){
+          console.warn(err);
         });
+
+      }
+      else{
+        console.warn('pagedRequest content array is empty');
+      }
     };
 
 
