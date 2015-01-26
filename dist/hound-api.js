@@ -5873,72 +5873,38 @@ System.register("models/media/MHMedia", [], function() {
       }));
     },
     fetchCharacters: function() {
-      var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
-      var excludeMinors = arguments[1] !== (void 0) ? arguments[1] : false;
-      var force = arguments[2] !== (void 0) ? arguments[2] : false;
-      var $__111 = this;
-      var path = this.subendpoint('contributors');
-      if (force || this.charactersPromise === null) {
-        this.charactersPromise = houndRequest({
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+      var page = arguments[1] !== (void 0) ? arguments[1] : 0;
+      var size = arguments[2] !== (void 0) ? arguments[2] : 12;
+      var force = arguments[3] !== (void 0) ? arguments[3] : false;
+      var path = this.subendpoint('characters');
+      if (force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size) {
+        this.feedPagedRequest = pagedRequest({
           method: 'GET',
           endpoint: path,
-          params: {
-            view: view,
-            excludeMinors: excludeMinors
-          }
-        }).catch(((function(err) {
-          $__111.charactersPromise = null;
-          throw err;
-        })).bind(this)).then(function(parsed) {
-          if (view === 'full' && Array.isArray(parsed)) {
-            parsed = MHObject.create(parsed);
-          }
-          return parsed;
+          pageSize: size,
+          startingPage: page,
+          params: {view: view}
         });
       }
-      return this.charactersPromise.then((function(res) {
-        if (view === 'full' && Array.isArray(res) && typeof res[0] === 'string') {
-          return Promise.all(MHObject.fetchByMhids(res));
-        }
-        if (view === 'ids' && Array.isArray(res) && typeof res[0] instanceof MHObject) {
-          return res.map((function(obj) {
-            return obj.mhid;
-          }));
-        }
-        return res;
-      }));
+      return this.feedPagedRequest;
     },
     fetchTraits: function() {
-      var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
-      var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__111 = this;
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+      var page = arguments[1] !== (void 0) ? arguments[1] : 0;
+      var size = arguments[2] !== (void 0) ? arguments[2] : 12;
+      var force = arguments[3] !== (void 0) ? arguments[3] : false;
       var path = this.subendpoint('traits');
-      if (force || this.traitsPromise === null) {
-        this.traitsPromise = houndRequest({
+      if (force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size) {
+        this.feedPagedRequest = pagedRequest({
           method: 'GET',
           endpoint: path,
+          pageSize: size,
+          startingPage: page,
           params: {view: view}
-        }).catch(((function(err) {
-          $__111.traitsPromise = null;
-          throw err;
-        })).bind(this)).then(function(parsed) {
-          if (view === 'full' && Array.isArray(parsed)) {
-            parsed = MHObject.create(parsed);
-          }
-          return parsed;
         });
       }
-      return this.traitsPromise.then((function(res) {
-        if (view === 'full' && Array.isArray(res) && typeof res[0] === 'string') {
-          return Promise.all(MHObject.fetchByMhids(res));
-        }
-        if (view === 'ids' && Array.isArray(res) && res[0] instanceof MHObject) {
-          return res.map((function(obj) {
-            return obj.mhid;
-          }));
-        }
-        return res;
-      }));
+      return this.feedPagedRequest;
     }
   }, {get rootEndpoint() {
       return 'graph/media';

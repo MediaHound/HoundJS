@@ -280,71 +280,59 @@ export class MHMedia extends MHObject {
     });
   }
 
-  /* TODO: docJS
-   * mhMed.fetchCharacters()
-   *
-   * @return { Promise } - resolves to
-   *
-   */
-  fetchCharacters(view='ids', excludeMinors=false, force=false){
-    var path = this.subendpoint('contributors');
-
-    if( force || this.charactersPromise === null ){
-      this.charactersPromise = houndRequest({
-          method  : 'GET',
-          endpoint: path,
-          params: { view, excludeMinors }
-        })
-        .catch( (err => { this.charactersPromise = null; throw err; }).bind(this) )
-        .then(function(parsed){
-          if( view === 'full' && Array.isArray(parsed) ){
-            parsed = MHObject.create(parsed);
-          }
-          return parsed;
-        });
-    }
-
-    return this.charactersPromise.then(res => {
-      if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
-        return Promise.all(MHObject.fetchByMhids(res));
-      }
-      if( view === 'ids' && Array.isArray(res) && typeof res[0] instanceof MHObject ){
-        return res.map(obj => obj.mhid);
-      }
-      return res;
-    });
-  }
-
-  fetchTraits(view='ids', force=false){
-    var path = this.subendpoint('traits');
-
-    if( force || this.traitsPromise === null ){
-      this.traitsPromise = houndRequest({
+  /**
+  * mhObj.fetchCharacters(mhid,force)
+  *
+  * @param { string='full' } view - the view needed to depict each MHObject that is returned
+  * @param { number=0      } page - the zero indexed page number to return
+  * @param { number=12     } size  - the number of items to return per page
+  * @param { Boolean=false } force
+  *
+  * @return { houndPagedRequest }  - MediaHound paged request object for this feed
+  *
+  */
+  fetchCharacters(view='full', page=0, size=12, force=false){
+    var path = this.subendpoint('characters');
+    if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
+      this.feedPagedRequest = pagedRequest({
         method: 'GET',
         endpoint: path,
-        params: { view }
-      })
-      .catch( (err => { this.traitsPromise = null; throw err; }).bind(this) )
-      .then(function(parsed){
-        if( view === 'full' && Array.isArray(parsed) ){
-          parsed = MHObject.create(parsed);
-        }
-        return parsed;
+        pageSize: size,
+        startingPage: page,
+        params: {view}
       });
     }
-
-    return this.traitsPromise.then(res => {
-      // if asking for 'full' but cached is 'ids'
-      if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
-        return Promise.all(MHObject.fetchByMhids(res));
-      }
-      // if asking for 'ids' but cached is 'full'
-      if( view === 'ids' && Array.isArray(res) && res[0] instanceof MHObject ){
-        return res.map(obj => obj.mhid);
-      }
-      return res;
-    });
+    //console.log(this.feedPagedRequest);
+    return this.feedPagedRequest;
   }
+
+
+  /**
+  * mhObj.fetchTraits(mhid,force)
+  *
+  * @param { string='full' } view - the view needed to depict each MHObject that is returned
+  * @param { number=0      } page - the zero indexed page number to return
+  * @param { number=12     } size  - the number of items to return per page
+  * @param { Boolean=false } force
+  *
+  * @return { houndPagedRequest }  - MediaHound paged request object for this feed
+  *
+  */
+  fetchTraits(view='full', page=0, size=12, force=false){
+    var path = this.subendpoint('traits');
+    if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
+      this.feedPagedRequest = pagedRequest({
+        method: 'GET',
+        endpoint: path,
+        pageSize: size,
+        startingPage: page,
+        params: {view}
+      });
+    }
+    //console.log(this.feedPagedRequest);
+    return this.feedPagedRequest;
+  }
+
 
   /* TODO?
    * mhMed.fetchTrailers()
