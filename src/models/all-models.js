@@ -25,6 +25,7 @@ import { MHCreate }   from './action/MHCreate';
 import { MHLike }     from './action/MHLike';
 import { MHFollow }   from './action/MHFollow';
 import { MHPost }     from './action/MHPost';
+import { MHHashtag }  from './action/MHHashtag';
 
 // User Models
 import { MHUser }         from './user/MHUser';
@@ -115,6 +116,7 @@ export var models = {
   get MHLike()    { return MHLike; },
   get MHFollow()  { return MHFollow; },
   get MHPost()    { return MHPost; },
+  get MHHashtag() { return MHHashtag; },
 
   get MHUser()        { return MHUser; },
   get MHLoginSession(){ return MHLoginSession; },
