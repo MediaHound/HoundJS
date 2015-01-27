@@ -83,10 +83,7 @@ export class MHHashtag extends MHAction {
     return houndRequest({
       method          : 'GET',
       endpoint        : path,
-      withCredentials : true,
-      params:{
-        view: view
-      }
+      withCredentials : true
     })
     .then(function(response){
       newObj = MHObject.create(response);

@@ -3898,8 +3898,7 @@ System.register("models/action/MHHashtag", [], function() {
       return houndRequest({
         method: 'GET',
         endpoint: path,
-        withCredentials: true,
-        params: {view: view}
+        withCredentials: true
       }).then(function(response) {
         newObj = MHObject.create(response);
         mhidLRU.putMHObj(newObj);
