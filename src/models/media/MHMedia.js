@@ -325,7 +325,6 @@ export class MHMedia extends MHObject {
         method: 'GET',
         endpoint: path,
         pageSize: size,
-        startingPage: page,
         params: {view}
       });
     }

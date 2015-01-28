@@ -1,5 +1,6 @@
 
 import { MHObject, mhidLRU } from './MHObject';
+import { MHContext } from '../meta/MHContext';
 
 // MediaHound Relational Pair Object
 export class MHRelationalPair {
@@ -25,21 +26,14 @@ export class MHRelationalPair {
       }
     }
 
-    var position  = args.context.relationship.position || null,
-        context   = args.context || null,
+    var context   = new MHContext(args.context) || null,
         object    = mhidLRU.has(args.object.metadata.mhid) ? mhidLRU.get(args.object.metadata.mhid) : MHObject.create(args.object) || null;
 
-    if( position == null || object == null ){
-      throw new TypeError('Either position or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);
+    if( context == null || object == null ){
+      throw new TypeError('Either context or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);
     }
 
     Object.defineProperties(this, {
-      'position':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        position
-      },
       'context':{
         configurable: false,
         enumerable:   true,

@@ -3,7 +3,7 @@
 import { log } from '../internal/debug-helpers';
 
 import { MHObject, mhidLRU } from '../base/MHObject';
-//import { MHRelationalPair } from '../base/MHRelationalPair';
+import { MHRelationalPair } from '../base/MHRelationalPair';
 
 import { houndRequest } from '../../request/hound-request';
 import { pagedRequest } from '../../request/hound-paged-request';
@@ -248,6 +248,34 @@ static fetchSettings(mhid){
     return false;
   });
 }
+
+/**
+* fetchSourceSettings(mhid)
+* @param mhid
+* Fetches the settings for the current logged in user.
+*/
+static fetchSourceSettings(mhid){
+  if( !mhid || (typeof mhid !== 'string' && !(mhid instanceof String)) ){
+    throw new TypeError('mhid must be type string in MHUser.fetchSourceSettings');
+  }
+  var path = MHUser.rootEndpoint +'/'+mhid+'/settings/sources';
+
+  return houndRequest({
+    method: 'GET',
+    endpoint: path
+  })
+  .then(function(response){
+    response = MHRelationalPair.createFromArray(response.content);
+    console.log('valid settings response: ', response);
+    return response;
+  })
+  .catch(function(error){
+    console.log('error in fetchSourceSettings: ', error.error.message);
+    console.error(error.error.stack);
+    return false;
+  });
+}
+
 
 
 /**

@@ -63,6 +63,7 @@ import { MHTrailer }            from './media/MHTrailer';
 
 import { MHCollection } from './collection/MHCollection';
 
+import { MHContext } from './meta/MHContext';
 import { MHMetaData } from './meta/MHMetaData';
 import { MHImage } from './image/MHImage';
 
@@ -152,6 +153,7 @@ export var models = {
   get MHCollection(){ return MHCollection; },
 
   get MHImage(){ return MHImage; },
+  get MHContext(){ return MHContext; },
   get MHMetaData(){ return MHMetaData; },
 
   get MHTrait()         { return MHTrait; },
