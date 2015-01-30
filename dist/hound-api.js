@@ -5951,36 +5951,19 @@ System.register("models/media/MHMedia", [], function() {
       return this.fetchAvailableSources();
     },
     fetchContributors: function() {
-      var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
-      var force = arguments[1] !== (void 0) ? arguments[1] : false;
-      var $__118 = this;
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+      var size = arguments[1] !== (void 0) ? arguments[1] : 12;
+      var force = arguments[2] !== (void 0) ? arguments[2] : false;
       var path = this.subendpoint('contributors');
-      if (force || this.contributorsPromise === null) {
-        this.contributorsPromise = houndRequest({
+      if (force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size) {
+        this.feedPagedRequest = pagedRequest({
           method: 'GET',
           endpoint: path,
+          pageSize: size,
           params: {view: view}
-        }).catch(((function(err) {
-          $__118.contributorsPromise = null;
-          throw err;
-        })).bind(this)).then(function(parsed) {
-          if (view === 'full' && Array.isArray(parsed)) {
-            parsed = MHObject.create(parsed);
-          }
-          return parsed;
         });
       }
-      return this.contributorsPromise.then((function(res) {
-        if (view === 'full' && Array.isArray(res) && typeof res[0] === 'string') {
-          return Promise.all(MHObject.fetchByMhids(res));
-        }
-        if (view === 'ids' && Array.isArray(res) && typeof res[0] instanceof MHObject) {
-          return res.map((function(obj) {
-            return obj.mhid;
-          }));
-        }
-        return res;
-      }));
+      return this.feedPagedRequest;
     },
     fetchCharacters: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
@@ -5993,7 +5976,6 @@ System.register("models/media/MHMedia", [], function() {
           method: 'GET',
           endpoint: path,
           pageSize: size,
-          startingPage: page,
           params: {view: view}
         });
       }

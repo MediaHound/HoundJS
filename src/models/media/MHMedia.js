@@ -250,35 +250,52 @@ export class MHMedia extends MHObject {
    * @return { Promise } - resolves to
    *
    */
-  fetchContributors(view='ids', force=false){
+  // fetchContributors(view='full', size=12, force=false){
+  //   var path = this.subendpoint('contributors');
+  //
+  //   if( force || this.contributorsPromise === null ){
+  //     this.contributorsPromise = pagedRequest({
+  //         method: 'GET',
+  //         endpoint: path,
+  //         pageSize: size,
+  //         params: {view}
+  //       })
+  //       .catch( (err => { this.contributorsPromise = null; throw err; }).bind(this) )
+  //       .then(function(parsed){
+  //         console.log(parsed);
+  //         if( view === 'full' && Array.isArray(parsed) ){
+  //           parsed = MHObject.create(parsed);
+  //         }
+  //         return parsed;
+  //       });
+  //
+  //   }
+  //
+  //   return this.contributorsPromise.then( res => {
+  //     if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
+  //       return Promise.all(MHObject.fetchByMhids(res));
+  //     }
+  //     if( view === 'ids' && Array.isArray(res) && typeof res[0] instanceof MHObject ){
+  //       return res.map(obj => obj.mhid);
+  //     }
+  //     return res;
+  //   });
+  // }
+
+  fetchContributors(view='full', size=12, force=false){
     var path = this.subendpoint('contributors');
-
-    if( force || this.contributorsPromise === null ){
-      this.contributorsPromise = houndRequest({
-          method  : 'GET',
-          endpoint: path,
-          params: { view }
-        })
-        .catch( (err => { this.contributorsPromise = null; throw err; }).bind(this) )
-        .then(function(parsed){
-          if( view === 'full' && Array.isArray(parsed) ){
-            parsed = MHObject.create(parsed);
-          }
-          return parsed;
-        });
-
+    if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
+      this.feedPagedRequest = pagedRequest({
+        method: 'GET',
+        endpoint: path,
+        pageSize: size,
+        params: {view}
+      });
     }
-
-    return this.contributorsPromise.then( res => {
-      if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
-        return Promise.all(MHObject.fetchByMhids(res));
-      }
-      if( view === 'ids' && Array.isArray(res) && typeof res[0] instanceof MHObject ){
-        return res.map(obj => obj.mhid);
-      }
-      return res;
-    });
+    //console.log(this.feedPagedRequest);
+    return this.feedPagedRequest;
   }
+
 
   /**
   * mhObj.fetchCharacters(mhid,force)
@@ -298,7 +315,6 @@ export class MHMedia extends MHObject {
         method: 'GET',
         endpoint: path,
         pageSize: size,
-        startingPage: page,
         params: {view}
       });
     }
