@@ -5788,7 +5788,7 @@ System.register("models/source/MHSourceModel", [], function() {
         }).then(function(arr) {
           var obj = {};
           arr.forEach(function(source) {
-            var name = source.metadata.name.replace(/\s+/g, '').toLowerCase();
+            var name = source.metadata.name;
             obj[name] = source;
           });
           sources = obj;
