@@ -4328,18 +4328,16 @@ System.register("models/user/MHUser", [], function() {
     },
     fetchInterestFeed: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-      var page = arguments[1] !== (void 0) ? arguments[1] : 0;
-      var size = arguments[2] !== (void 0) ? arguments[2] : 12;
-      var force = arguments[3] !== (void 0) ? arguments[3] : false;
+      var size = arguments[1] !== (void 0) ? arguments[1] : 12;
+      var force = arguments[2] !== (void 0) ? arguments[2] : false;
       var path = this.subendpoint('interestFeed');
       if (force || this.interestFeedPromise === null) {
         this.interestFeedPromise = pagedRequest({
           method: 'GET',
           endpoint: path,
           withCredentials: true,
-          startingPage: page,
           pageSize: size,
-          params: {'view': view}
+          params: {view: view}
         });
       }
       return this.interestFeedPromise;

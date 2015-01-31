@@ -706,7 +706,7 @@ static fetchFeaturedUsers(){
 * @return { pagedRequest } - resolves to paged response from server, res.content contains array of data
 *
 */
-fetchInterestFeed(view='full', page=0, size=12, force=false){
+fetchInterestFeed(view='full', size=12, force=false){
   var path = this.subendpoint('interestFeed');
 
   if( force || this.interestFeedPromise === null ){
@@ -714,14 +714,10 @@ fetchInterestFeed(view='full', page=0, size=12, force=false){
       method          : 'GET',
       endpoint        : path,
       withCredentials : true, //?
-      startingPage    : page,
       pageSize        : size,
-      params: {
-        'view':view
-      }
+      params:{ view }
     });
   }
-
   return this.interestFeedPromise;
 }
 
