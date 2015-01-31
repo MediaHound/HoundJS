@@ -29,13 +29,32 @@ export class MHMetaData {
         phoneNumber = args.phoneNumber || null,
         isDefault   = args.isDefault || null,
         primaryColor = args.primaryColor || null,
-        createdDate = new Date(args.createdDate)*1000 || null,
-        releaseDate = new Date(args.createdDate)*1000 || null,
+        createdDate = new Date(args.createdDate*1000),
+        releaseDate = new Date(args.releaseDate*1000),
         currency = currency || null,
         price = price || null,
         timePeriod = timePeriod || null,
         mediums = mediums || null;
 
+        if( isNaN(releaseDate) ){
+          releaseDate = null;
+        }
+        else if(releaseDate === 'Invalid Date'){
+          releaseDate = null;
+        }
+        else{
+          releaseDate = new Date(releaseDate.valueOf() + releaseDate.getTimezoneOffset() * 60000);
+        }
+        
+        if( isNaN(createdDate) ){
+          createdDate = null;
+        }
+        else if(createdDate === 'Invalid Date'){
+          createdDate = null;
+        }
+        else{
+          createdDate = new Date(createdDate.valueOf() + createdDate.getTimezoneOffset() * 60000);
+        }
     Object.defineProperties(this, {
       'mhid':{
         configurable: false,

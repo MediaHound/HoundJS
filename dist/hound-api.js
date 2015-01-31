@@ -3019,12 +3019,26 @@ System.register("models/meta/MHMetaData", [], function() {
         phoneNumber = args.phoneNumber || null,
         isDefault = args.isDefault || null,
         primaryColor = args.primaryColor || null,
-        createdDate = new Date(args.createdDate) * 1000 || null,
-        releaseDate = new Date(args.createdDate) * 1000 || null,
+        createdDate = new Date(args.createdDate * 1000),
+        releaseDate = new Date(args.releaseDate * 1000),
         currency = currency || null,
         price = price || null,
         timePeriod = timePeriod || null,
         mediums = mediums || null;
+    if (isNaN(releaseDate)) {
+      releaseDate = null;
+    } else if (releaseDate === 'Invalid Date') {
+      releaseDate = null;
+    } else {
+      releaseDate = new Date(releaseDate.valueOf() + releaseDate.getTimezoneOffset() * 60000);
+    }
+    if (isNaN(createdDate)) {
+      createdDate = null;
+    } else if (createdDate === 'Invalid Date') {
+      createdDate = null;
+    } else {
+      createdDate = new Date(createdDate.valueOf() + createdDate.getTimezoneOffset() * 60000);
+    }
     Object.defineProperties(this, {
       'mhid': {
         configurable: false,
@@ -5816,32 +5830,8 @@ System.register("models/media/MHMedia", [], function() {
   var MHMedia = function MHMedia(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHMedia.prototype, "constructor", [args]);
-    var releaseDate = new Date(args.releaseDate) * 1000,
-        suitabilityRating = args.suitabilityRating || null,
-        length = args.length || null,
-        keyContributors = (!!args.keyContributors) ? MHEmbeddedObject.createFromArray(args.keyContributors) : null;
-    if (isNaN(releaseDate)) {
-      releaseDate = args.releaseDate || null;
-    }
+    var keyContributors = (!!args.keyContributors) ? MHEmbeddedObject.createFromArray(args.keyContributors) : null;
     Object.defineProperties(this, {
-      'releaseDate': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: releaseDate
-      },
-      'suitabilityRating': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: suitabilityRating
-      },
-      'length': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: length
-      },
       'keyContributors': {
         configurable: false,
         enumerable: true,

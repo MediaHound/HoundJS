@@ -35,42 +35,18 @@ export class MHMedia extends MHObject {
    *
    */
   constructor(args){
+
+
     args = MHObject.parseArgs(args);
     // Call Super Constructor
     super(args);
 
     // Default MHMedia unique objects to null
-    var releaseDate       = new Date(args.releaseDate)*1000, //convert to milliseconds
-        suitabilityRating = args.suitabilityRating  || null,
-        length            = args.length             || null,
-        //primaryGroup      = args.primaryGroup.object || null,
-        keyContributors   = (!!args.keyContributors) ? MHEmbeddedObject.createFromArray(args.keyContributors) : null;
-
-    if( isNaN(releaseDate) ){
-      releaseDate = args.releaseDate || null;
-    }
+    var keyContributors   = (!!args.keyContributors) ? MHEmbeddedObject.createFromArray(args.keyContributors) : null;
 
     // Create imutable properties
     //  releaseDate
     Object.defineProperties(this, {
-      'releaseDate':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        releaseDate
-      },
-      'suitabilityRating':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        suitabilityRating
-      },
-      'length':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        length
-      },
       'keyContributors':{
         configurable: false,
         enumerable:   true,
