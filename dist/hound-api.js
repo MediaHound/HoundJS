@@ -5116,14 +5116,14 @@ System.register("models/collection/MHCollection", [], function() {
       var force = arguments[2] !== (void 0) ? arguments[2] : true;
       var path = this.subendpoint('content');
       if (force || this.feedPagedRequest === null) {
-        this.feedPagedRequest = pagedRequest({
+        this.contentPromise = pagedRequest({
           method: 'GET',
           endpoint: path,
           pageSize: size,
           params: {view: view}
         });
       }
-      return this.feedPagedRequest;
+      return this.contentPromise;
     },
     fetchMixlist: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;

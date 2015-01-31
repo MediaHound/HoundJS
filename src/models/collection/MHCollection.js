@@ -307,7 +307,7 @@ export class MHCollection extends MHObject {
    fetchContent(view='full', size=12, force=true){
     var path = this.subendpoint('content');
     if( force || this.feedPagedRequest === null ){
-      this.feedPagedRequest = pagedRequest({
+      this.contentPromise = pagedRequest({
         method: 'GET',
         endpoint: path,
         pageSize: size,
@@ -318,7 +318,7 @@ export class MHCollection extends MHObject {
       // });
     }
     //console.log(this.feedPagedRequest);
-    return this.feedPagedRequest;
+    return this.contentPromise;
   }
 
   /**
