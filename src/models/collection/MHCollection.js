@@ -2,6 +2,7 @@
 import { log } from '../internal/debug-helpers';
 
 import { MHObject } from '../base/MHObject';
+import { MHAction } from '../action/MHAction';
 import { MHLoginSession } from '../user/MHLoginSession';
 //import { MHRelationalPair } from '../base/MHRelationalPair';
 
@@ -47,7 +48,7 @@ export class MHCollection extends MHObject {
 
     // mixlist = 'none', 'partial', 'full'
 
-    var mixlist = (typeof args.mixlist === 'string') ? args.mixlist.toLowerCase() : null,
+    var mixlist = (typeof args.metadata.mixlist === 'string') ? args.metadata.mixlist.toLowerCase() : null,
         firstContentImage = (args.firstContentImage != null) ? MHObject.create(args.firstContentImage) : null,
         primaryOwner = (args.primaryOwner != null) ? MHObject.create(args.primaryOwner) : null,
         description = args.metadata.description || null;
@@ -233,8 +234,14 @@ export class MHCollection extends MHObject {
 
     var path = this.subendpoint(sub),
         mhids = contents.map(v => {
-          if( v instanceof MHObject ){
-            return v.mhid;
+          if( v instanceof MHObject){
+            if(!v instanceof MHAction){
+              return v.mhid;
+            }
+            else{
+              console.error('MHActions including like, favorite, create, and post cannot be collected. Please resubmit with actual content.');
+            }
+
           } else if ( typeof v === 'string' && MHObject.prefixes.indexOf(MHObject.getPrefixFromMhid(v)) > -1 ){
             // TODO double check this if statement
             return v;
@@ -244,10 +251,12 @@ export class MHCollection extends MHObject {
 
     // invalidate mixlistPromise
     this.mixlistPromise = null;
+    if(mhids.length > -1){
 
-    log('content array to be submitted: ', mhids);
-    return (this.contentPromise = houndRequest({
-        method: 'PUT',
+      log('content array to be submitted: ', mhids);
+
+      return (this.contentPromise = houndRequest({
+        method: 'POST',
         endpoint: path,
         data: {
           'content': mhids
@@ -259,6 +268,12 @@ export class MHCollection extends MHObject {
         contents.forEach(v => typeof v.fetchSocial === 'function' && v.fetchSocial(true));
         return response;
       }));
+
+    }
+    else{
+      console.error('To add or remove content from a Collection the content array must include at least one MHObject');
+    }
+
   }
 
 

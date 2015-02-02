@@ -796,6 +796,29 @@ fetchOwnedCollections(view='full', size=12, force=true){
 //   return this.ownedCollectionsPromise;
 // }
 
+/**
+* mhObj.fetchSuggested(mhid,force)
+*
+* @param { string='full' } view - the view needed to depict each MHObject that is returned
+* @param { number=12     } size  - the number of items to return per page
+* @param { Boolean=false } force
+*
+* @return { houndPagedRequest }  - MediaHound paged request object for this feed
+*
+*/
+fetchSuggested(view='full', size=12, force=false){
+  var path = this.subendpoint('suggested');
+  if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
+    this.suggestedPagedRequest = pagedRequest({
+      method: 'GET',
+      endpoint: path,
+      pageSize: size,
+      params: {view}
+    });
+  }
+  //console.log(this.feedPagedRequest);
+  return this.suggestedPagedRequest;
+}
 
 /**
 * mhUser.fetchFollowed()
