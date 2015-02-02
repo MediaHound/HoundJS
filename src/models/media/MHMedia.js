@@ -44,6 +44,8 @@ export class MHMedia extends MHObject {
     // Default MHMedia unique objects to null
     var keyContributors   = (!!args.keyContributors) ? MHEmbeddedObject.createFromArray(args.keyContributors) : null;
 
+
+
     // Create imutable properties
     //  releaseDate
     Object.defineProperties(this, {
@@ -261,7 +263,7 @@ export class MHMedia extends MHObject {
   fetchContributors(view='full', size=12, force=false){
     var path = this.subendpoint('contributors');
     if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
-      this.feedPagedRequest = pagedRequest({
+      this.contributorsPagedRequest = pagedRequest({
         method: 'GET',
         endpoint: path,
         pageSize: size,
@@ -269,7 +271,7 @@ export class MHMedia extends MHObject {
       });
     }
     //console.log(this.feedPagedRequest);
-    return this.feedPagedRequest;
+    return this.contributorsPagedRequest;
   }
 
 
@@ -287,15 +289,14 @@ export class MHMedia extends MHObject {
   fetchCharacters(view='full', page=0, size=12, force=false){
     var path = this.subendpoint('characters');
     if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
-      this.feedPagedRequest = pagedRequest({
+      this.charactersPagedRequest = pagedRequest({
         method: 'GET',
         endpoint: path,
         pageSize: size,
         params: {view}
       });
     }
-    //console.log(this.feedPagedRequest);
-    return this.feedPagedRequest;
+    return this.charactersPagedRequest;
   }
 
 
@@ -313,7 +314,7 @@ export class MHMedia extends MHObject {
   fetchTraits(view='full', page=0, size=12, force=false){
     var path = this.subendpoint('traits');
     if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
-      this.feedPagedRequest = pagedRequest({
+      this.traitsPagedRequest = pagedRequest({
         method: 'GET',
         endpoint: path,
         pageSize: size,
@@ -321,9 +322,34 @@ export class MHMedia extends MHObject {
       });
     }
     //console.log(this.feedPagedRequest);
-    return this.feedPagedRequest;
+    return this.traitsPagedRequest;
   }
 
+
+  /**
+  * mhObj.fetchRelated(mhid,force)
+  *
+  * @param { string='full' } view - the view needed to depict each MHObject that is returned
+  * @param { number=0      } page - the zero indexed page number to return
+  * @param { number=12     } size  - the number of items to return per page
+  * @param { Boolean=false } force
+  *
+  * @return { houndPagedRequest }  - MediaHound paged request object for this feed
+  *
+  */
+  fetchRelated(view='full', size=12, force=false){
+    var path = this.subendpoint('related');
+    if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
+      this.relatedPagedRequest = pagedRequest({
+        method: 'GET',
+        endpoint: path,
+        pageSize: size,
+        params: {view}
+      });
+    }
+    //console.log(this.feedPagedRequest);
+    return this.relatedPagedRequest;
+  }
 
   /* TODO?
    * mhMed.fetchTrailers()

@@ -5525,9 +5525,10 @@ System.register("models/image/MHImage", [], function() {
   var MHImage = function MHImage(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHImage.prototype, "constructor", [args]);
+    console.log(args);
     var url = (typeof args.original.url === 'string') ? args.original.url.replace(/^http:|^https:/i, '') : null,
-        width = args.width || null,
-        height = args.height || null,
+        width = args.original.width || null,
+        height = args.original.height || null,
         isDefault = (typeof args.isDefault === 'boolean') ? args.isDefault : null;
     Object.defineProperties(this, {
       'url': {
@@ -5953,14 +5954,14 @@ System.register("models/media/MHMedia", [], function() {
       var force = arguments[2] !== (void 0) ? arguments[2] : false;
       var path = this.subendpoint('contributors');
       if (force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size) {
-        this.feedPagedRequest = pagedRequest({
+        this.contributorsPagedRequest = pagedRequest({
           method: 'GET',
           endpoint: path,
           pageSize: size,
           params: {view: view}
         });
       }
-      return this.feedPagedRequest;
+      return this.contributorsPagedRequest;
     },
     fetchCharacters: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
@@ -5969,14 +5970,14 @@ System.register("models/media/MHMedia", [], function() {
       var force = arguments[3] !== (void 0) ? arguments[3] : false;
       var path = this.subendpoint('characters');
       if (force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size) {
-        this.feedPagedRequest = pagedRequest({
+        this.charactersPagedRequest = pagedRequest({
           method: 'GET',
           endpoint: path,
           pageSize: size,
           params: {view: view}
         });
       }
-      return this.feedPagedRequest;
+      return this.charactersPagedRequest;
     },
     fetchTraits: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
@@ -5985,14 +5986,29 @@ System.register("models/media/MHMedia", [], function() {
       var force = arguments[3] !== (void 0) ? arguments[3] : false;
       var path = this.subendpoint('traits');
       if (force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size) {
-        this.feedPagedRequest = pagedRequest({
+        this.traitsPagedRequest = pagedRequest({
           method: 'GET',
           endpoint: path,
           pageSize: size,
           params: {view: view}
         });
       }
-      return this.feedPagedRequest;
+      return this.traitsPagedRequest;
+    },
+    fetchRelated: function() {
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+      var size = arguments[1] !== (void 0) ? arguments[1] : 12;
+      var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      var path = this.subendpoint('related');
+      if (force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size) {
+        this.relatedPagedRequest = pagedRequest({
+          method: 'GET',
+          endpoint: path,
+          pageSize: size,
+          params: {view: view}
+        });
+      }
+      return this.relatedPagedRequest;
     }
   }, {get rootEndpoint() {
       return 'graph/media';

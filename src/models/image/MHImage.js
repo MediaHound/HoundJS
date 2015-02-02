@@ -37,11 +37,12 @@ export class MHImage extends MHObject {
 
     args = MHObject.parseArgs(args);
     super(args);
+    console.log(args);
 
     // Unique Properties
     var url       = (typeof args.original.url === 'string') ? args.original.url.replace(/^http:|^https:/i, '') : null,
-        width     = args.width  || null,
-        height    = args.height || null,
+        width     = args.original.width  || null,
+        height    = args.original.height || null,
         isDefault = (typeof args.isDefault === 'boolean') ? args.isDefault : null;
 
     Object.defineProperties(this, {
