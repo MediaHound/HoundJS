@@ -155,12 +155,24 @@ export class MHCollection extends MHObject {
    * @returns {Promise<MHCollection>} - a Promise that resolves to the newly created MHCollection
    * @static
    */
-  static createWithName(name){
-    var path = MHCollection.rootEndpoint + '/new';
+  static createWithName(name,description){
+    var path = MHCollection.rootEndpoint + '/new',
+    data = {};
+
+    if(description){
+      data = {
+        "name":name,
+        "description":description
+      }
+    }
+    else if(name){
+      data = { "name":name };
+    }
+
     return houndRequest({
         method: 'POST',
         endpoint: path,
-        data: { "name":name }
+        data: data
       })
       .then(function(response){
         return MHObject.fetchByMhid(response.metadata.mhid);
@@ -313,9 +325,6 @@ export class MHCollection extends MHObject {
         pageSize: size,
         params: { view }
       });
-      // this.feedPagedRequest.currentPromise.then(function(args){
-      //   console.log(args);
-      // });
     }
     //console.log(this.feedPagedRequest);
     return this.contentPromise;
@@ -325,16 +334,17 @@ export class MHCollection extends MHObject {
    * @param {boolean} force - whether to force a call to the server instead of using the cached mixlistPromise
    * @returns {Promise} - a promise that resolves to the list of mixlist content for this MHCollection
    */
-  fetchMixlist(force=false){
+  fetchMixlist(view='full', size=20, force=true){
     var path = this.subendpoint('mixlist');
-
-    if( force || this.mixlistPromise === null ){
-      this.mixlistPromise = houndRequest({
-          method    : 'GET',
-          endpoint  : path
-        }).catch( (err => { this.mixlistPromise = null; throw err; }).bind(this) );
+    if( force || this.feedPagedRequest === null ){
+      this.mixlistPromise = pagedRequest({
+        method: 'GET',
+        endpoint: path,
+        pageSize: size,
+        params: { view }
+      });
     }
-
+    //console.log(this.feedPagedRequest);
     return this.mixlistPromise;
   }
 

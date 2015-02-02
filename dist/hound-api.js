@@ -5126,17 +5126,17 @@ System.register("models/collection/MHCollection", [], function() {
       return this.contentPromise;
     },
     fetchMixlist: function() {
-      var force = arguments[0] !== (void 0) ? arguments[0] : false;
-      var $__73 = this;
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+      var size = arguments[1] !== (void 0) ? arguments[1] : 20;
+      var force = arguments[2] !== (void 0) ? arguments[2] : true;
       var path = this.subendpoint('mixlist');
-      if (force || this.mixlistPromise === null) {
-        this.mixlistPromise = houndRequest({
+      if (force || this.feedPagedRequest === null) {
+        this.mixlistPromise = pagedRequest({
           method: 'GET',
-          endpoint: path
-        }).catch(((function(err) {
-          $__73.mixlistPromise = null;
-          throw err;
-        })).bind(this));
+          endpoint: path,
+          pageSize: size,
+          params: {view: view}
+        });
       }
       return this.mixlistPromise;
     }
@@ -5156,12 +5156,21 @@ System.register("models/collection/MHCollection", [], function() {
     get rootEndpoint() {
       return 'graph/collection';
     },
-    createWithName: function(name) {
-      var path = $MHCollection.rootEndpoint + '/new';
+    createWithName: function(name, description) {
+      var path = $MHCollection.rootEndpoint + '/new',
+          data = {};
+      if (description) {
+        data = {
+          "name": name,
+          "description": description
+        };
+      } else if (name) {
+        data = {"name": name};
+      }
       return houndRequest({
         method: 'POST',
         endpoint: path,
-        data: {"name": name}
+        data: data
       }).then(function(response) {
         return MHObject.fetchByMhid(response.metadata.mhid);
       }).then(function(newCollection) {
