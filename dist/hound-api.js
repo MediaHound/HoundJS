@@ -7340,10 +7340,19 @@ System.register("search/quick-search", [], function() {
       extraEncode = houndRequest.extraEncode,
       types = ['all', 'movie', 'song', 'album', 'tvseries', 'book', 'game', 'person', 'collection', 'user'],
       makeEndpoint = function(searchType, query) {
-        return 'search/' + searchType + '/find/' + extraEncode(query) + '/autocomplete';
+        if (searchType === 'all') {
+          return 'search/' + searchType + '/find/' + extraEncode(query) + '/autocomplete';
+        } else {
+          return 'search/' + searchType + '/' + extraEncode(query) + '';
+        }
       },
-      makeParams = function(size) {
-        var params = {page: 0};
+      makeParams = function(size, type) {
+        var params;
+        if (type === 'all') {
+          params = {page: 0};
+        } else {
+          params = {};
+        }
         params['page.size'] = (typeof size === 'number') ? size : 8;
         return params;
       },
@@ -7351,7 +7360,7 @@ System.register("search/quick-search", [], function() {
         return houndRequest({
           method: 'GET',
           endpoint: makeEndpoint(searchType, query),
-          params: makeParams(size)
+          params: makeParams(size, searchType)
         });
       };
   buildSearchHelper = function(index) {

@@ -163,7 +163,7 @@ export class MHCollection extends MHObject {
       data = {
         "name":name,
         "description":description
-      }
+      };
     }
     else if(name){
       data = { "name":name };
