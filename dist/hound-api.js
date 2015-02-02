@@ -4941,7 +4941,8 @@ System.register("models/user/MHLoginSession", [], function() {
         } else {
           return MHObject.create(loginMap.users[0]);
         }
-      })).then(function(loggedInUser) {
+      })).then(function(user) {
+        loggedInUser = user;
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         return loggedInUser;
       }).catch(function(error) {
@@ -5525,7 +5526,6 @@ System.register("models/image/MHImage", [], function() {
   var MHImage = function MHImage(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHImage.prototype, "constructor", [args]);
-    console.log(args);
     var url = (typeof args.original.url === 'string') ? args.original.url.replace(/^http:|^https:/i, '') : null,
         width = args.original.width || null,
         height = args.original.height || null,

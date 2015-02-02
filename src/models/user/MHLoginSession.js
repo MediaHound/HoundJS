@@ -323,10 +323,10 @@ export class MHLoginSession {
         }
 
       })
-      .then(function(loggedInUser){
+      .then(function(user){
         // loggedInUser.access = access;
         // loggedInUser.onboarded = onboarded;
-        // loggedInUser = mhObj;
+        loggedInUser = user;
         //console.log(loggedInUser);
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         return loggedInUser;

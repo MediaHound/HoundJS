@@ -37,7 +37,6 @@ export class MHImage extends MHObject {
 
     args = MHObject.parseArgs(args);
     super(args);
-    console.log(args);
 
     // Unique Properties
     var url       = (typeof args.original.url === 'string') ? args.original.url.replace(/^http:|^https:/i, '') : null,
