@@ -62,37 +62,37 @@ export class MHMedia extends MHObject {
       //   value:        primaryGroup
       // },
       // Promises
-      'collectionsPromise':{
+      'collections':{
         configurable: false,
         enumerable:   false,
         writable:     true,
         value:        null
       },
-      'contentPromise':{
+      'content':{
         configurable: false,
         enumerable:   false,
         writable:     true,
         value:        null
       },
-      'sourcesPromise':{
+      'sources':{
         configurable: false,
         enumerable:   false,
         writable:     true,
         value:        null
       },
-      'contributorsPromise':{
+      'contributors':{
         configurable: false,
         enumerable:   false,
         writable:     true,
         value:        null
       },
-      'charactersPromise':{
+      'characters':{
         configurable: false,
         enumerable:   false,
         writable:     true,
         value:        null
       },
-      'traitsPromise':{
+      'traits':{
         configurable: false,
         enumerable:   false,
         writable:     true,
@@ -172,20 +172,20 @@ export class MHMedia extends MHObject {
       MHSourceModel.fetchAllSources("full",true);
     }
 
-    if( force || this.sourcesPromise === null ){
+    if( force || this.sources === null ){
 
-      this.sourcesPromise = houndRequest({
+      this.sources = houndRequest({
           method  : 'GET',
           endpoint: path
         })
-        .catch( err => { self.sourcesPromise = null; throw err; } )
+        .catch( err => { self.sources = null; throw err; } )
         .then(function(parsed){
           var content = parsed.content;
           return content.map( v => new MHSourceModel(v, self) );
         });
     }
 
-    return this.sourcesPromise;
+    return this.sources;
   }
 
   // TODO should this be here?

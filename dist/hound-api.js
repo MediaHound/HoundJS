@@ -5023,7 +5023,7 @@ System.register("models/collection/MHCollection", [], function() {
         writable: true,
         value: null
       },
-      'contentPromise': {
+      'content': {
         configurable: false,
         enumerable: true,
         writable: true,
@@ -5092,12 +5092,12 @@ System.register("models/collection/MHCollection", [], function() {
       this.mixlistPromise = null;
       if (mhids.length > -1) {
         log('content array to be submitted: ', mhids);
-        return (this.contentPromise = houndRequest({
+        return (this.content = houndRequest({
           method: 'PUT',
           endpoint: path,
           data: {'content': mhids}
         }).catch(((function(err) {
-          $__73.contentPromise = null;
+          $__73.content = null;
           throw err;
         })).bind(this)).then(function(response) {
           contents.forEach((function(v) {
@@ -5144,15 +5144,15 @@ System.register("models/collection/MHCollection", [], function() {
       var size = arguments[1] !== (void 0) ? arguments[1] : 20;
       var force = arguments[2] !== (void 0) ? arguments[2] : true;
       var path = this.subendpoint('mixlist');
-      if (force || this.mixlistPagedRequest === null) {
-        this.mixlistPagedRequest = pagedRequest({
+      if (force || this.mixlistPromise === null) {
+        this.mixlistPromise = pagedRequest({
           method: 'GET',
           endpoint: path,
           pageSize: size,
           params: {view: view}
         });
       }
-      return this.mixlistPagedRequest;
+      return this.mixlistPromise;
     }
   }, {
     get MIXLIST_TYPE_NONE() {
@@ -5859,37 +5859,37 @@ System.register("models/media/MHMedia", [], function() {
         writable: false,
         value: keyContributors
       },
-      'collectionsPromise': {
+      'collections': {
         configurable: false,
         enumerable: false,
         writable: true,
         value: null
       },
-      'contentPromise': {
+      'content': {
         configurable: false,
         enumerable: false,
         writable: true,
         value: null
       },
-      'sourcesPromise': {
+      'sources': {
         configurable: false,
         enumerable: false,
         writable: true,
         value: null
       },
-      'contributorsPromise': {
+      'contributors': {
         configurable: false,
         enumerable: false,
         writable: true,
         value: null
       },
-      'charactersPromise': {
+      'characters': {
         configurable: false,
         enumerable: false,
         writable: true,
         value: null
       },
-      'traitsPromise': {
+      'traits': {
         configurable: false,
         enumerable: false,
         writable: true,
@@ -5939,12 +5939,12 @@ System.register("models/media/MHMedia", [], function() {
       if (MHSourceModel.sources === null || MHSourceModel.sources === undefined) {
         MHSourceModel.fetchAllSources("full", true);
       }
-      if (force || this.sourcesPromise === null) {
-        this.sourcesPromise = houndRequest({
+      if (force || this.sources === null) {
+        this.sources = houndRequest({
           method: 'GET',
           endpoint: path
         }).catch((function(err) {
-          self.sourcesPromise = null;
+          self.sources = null;
           throw err;
         })).then(function(parsed) {
           var content = parsed.content;
@@ -5953,7 +5953,7 @@ System.register("models/media/MHMedia", [], function() {
           }));
         });
       }
-      return this.sourcesPromise;
+      return this.sources;
     },
     fetchAvailableSources: function() {
       return this.fetchSources();

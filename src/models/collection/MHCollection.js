@@ -100,7 +100,7 @@ export class MHCollection extends MHObject {
         writable:     true,
         value:        null
       },
-      'contentPromise': {
+      'content': {
         configurable: false,
         enumerable:   true,
         writable:     true,
@@ -255,14 +255,14 @@ export class MHCollection extends MHObject {
 
       log('content array to be submitted: ', mhids);
 
-      return (this.contentPromise = houndRequest({
+      return (this.content = houndRequest({
         method: 'PUT',
         endpoint: path,
         data: {
           'content': mhids
         }
       })
-      .catch( (err => { this.contentPromise = null; throw err; }).bind(this) )
+      .catch( (err => { this.content = null; throw err; }).bind(this) )
       .then(function(response){
         // fetch social for original passed in mhobjs
         contents.forEach(v => typeof v.fetchSocial === 'function' && v.fetchSocial(true));
@@ -296,20 +296,20 @@ export class MHCollection extends MHObject {
 
   /**
    * @param view {string} view - the view paramater, 'full' or 'ids'
-   * @param {boolean} force - whether to force a call to the server instead of using the cached contentPromise
+   * @param {boolean} force - whether to force a call to the server instead of using the cached content
    * @returns {Promise} - a promise that resolves to the list of content for this MHCollection
 
    fetchContent(view='ids', force=false){
      var path = this.subendpoint('content'),
      self = this;
 
-     if( force || this.contentPromise === null ){
-       this.contentPromise = houndRequest({
+     if( force || this.content === null ){
+       this.content = houndRequest({
          method: 'GET',
          endpoint: path,
          params: { view }
        })
-       .catch(err => { self.contentPromise = null; throw err; })
+       .catch(err => { self.content = null; throw err; })
        .then(function(parsed){
          if( view === 'full' && Array.isArray(parsed) ){
            parsed = MHRelationalPair.createFromArray(parsed).sort( (a,b) => a.position - b.position );
@@ -318,7 +318,7 @@ export class MHCollection extends MHObject {
        });
      }
 
-     return this.contentPromise.then(res => {
+     return this.content.then(res => {
        // if asking for 'full' but cached is 'ids'
        if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
          return self.fetchContent(view, true);
@@ -351,8 +351,8 @@ export class MHCollection extends MHObject {
    */
   fetchMixlist(view='full', size=20, force=true){
     var path = this.subendpoint('mixlist');
-    if( force || this.mixlistPagedRequest === null ){
-      this.mixlistPagedRequest = pagedRequest({
+    if( force || this.mixlistPromise === null ){
+      this.mixlistPromise = pagedRequest({
         method: 'GET',
         endpoint: path,
         pageSize: size,
@@ -360,7 +360,7 @@ export class MHCollection extends MHObject {
       });
     }
     //console.log(this.feedPagedRequest);
-    return this.mixlistPagedRequest;
+    return this.mixlistPromise;
   }
 
   /** TODO: Deprecate
