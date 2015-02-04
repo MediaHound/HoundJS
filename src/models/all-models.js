@@ -12,8 +12,8 @@
 
 // Base Models
 import { MHObject }           from './base/MHObject';
-import { MHEmbeddedObject }   from './base/MHEmbeddedObject';
-import { MHEmbeddedRelation } from './base/MHEmbeddedRelation';
+//import { MHEmbeddedObject }   from './base/MHEmbeddedObject';
+//import { MHEmbeddedRelation } from './base/MHEmbeddedRelation';
 import { MHRelationalPair }   from './base/MHRelationalPair';
 
 
@@ -106,8 +106,8 @@ delete MHObject.registerConstructor;
 
 export var models = {
   get MHObject()          { return MHObject; },
-  get MHEmbeddedObject()  { return MHEmbeddedObject; },
-  get MHEmbeddedRelation(){ return MHEmbeddedRelation; },
+  //get MHEmbeddedObject()  { return MHEmbeddedObject; },
+  //get MHEmbeddedRelation(){ return MHEmbeddedRelation; },
   get MHRelationalPair()  { return MHRelationalPair; },
 
   get MHAction()  { return MHAction; },

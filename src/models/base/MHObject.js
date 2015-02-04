@@ -270,6 +270,38 @@ export class MHObject {
   }
 
   /***
+  *
+  * Create MHObjects from Arrays of Objects. (formally found in MHEmbeddedObject)
+  *
+  * MHObject.createFromArray(array)
+  *
+  * @param { Array } - Array of args
+  * @return { Array } - Array of MHObjects
+  *
+  */
+
+  static createFromArray(arr){
+    if( Array.isArray(arr) ){
+      return arr.map( v => {
+        try{
+          return MHObject.create(v);
+        } catch (e) {
+          return v;
+        }
+      });
+    } else if( arr && arr.length > 0 ){
+      var i = 0, len = arr.length,
+      newArry = [];
+      for( ; i < len ; i++ ){
+        newArry.push( MHObject.create(arr[i]) );
+      }
+      return newArry;
+    }
+    return arr;
+  }
+
+
+  /***
    * Register Child Constructors
    *
    * MHObject.registerConstructor(mhClass)
@@ -561,6 +593,7 @@ export class MHObject {
     warn('Reached fallback return statement in MHObject.fetchByMhids', mhids);
     return mhids || null;
   }
+
 
   /**
    * Children override

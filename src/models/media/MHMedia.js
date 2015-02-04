@@ -1,7 +1,7 @@
 
 import { MHObject } from '../base/MHObject';
 import { MHSourceModel } from '../source/MHSourceModel';
-import { MHEmbeddedObject } from '../base/MHEmbeddedObject';
+
 //import { MHRelationalPair } from '../base/MHRelationalPair';
 //import { MHEmbeddedRelation } from '../base/MHEmbeddedRelation';
 
@@ -42,9 +42,7 @@ export class MHMedia extends MHObject {
     super(args);
 
     // Default MHMedia unique objects to null
-    var keyContributors   = (!!args.keyContributors) ? MHEmbeddedObject.createFromArray(args.keyContributors) : null;
-
-
+    var keyContributors   = (!!args.keyContributors) ? MHObject.createFromArray(args.keyContributors) : null;
 
     // Create imutable properties
     //  releaseDate
