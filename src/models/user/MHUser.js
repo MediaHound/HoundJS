@@ -679,7 +679,7 @@ static fetchByUsername(username, view='full', force=false){
   });
 }
 
-/*
+/* TODO: Refactor to api 1.0 specs
 * MHUser.fetchFeaturedUsers()
 *
 * @return { Promise } - resloves to an array of featured users of type MHUser
@@ -709,16 +709,15 @@ static fetchFeaturedUsers(){
 fetchInterestFeed(view='full', size=12, force=false){
   var path = this.subendpoint('interestFeed');
 
-  if( force || this.interestFeedPromise === null ){
-    this.interestFeedPromise = pagedRequest({
+  if( force || this.interestFeed === null ){
+    this.interestFeed = pagedRequest({
       method          : 'GET',
       endpoint        : path,
-      withCredentials : true, //?
       pageSize        : size,
       params:{ view }
     });
   }
-  return this.interestFeedPromise;
+  return this.interestFeed;
 }
 
 /* TODO: remove console.log debug stuffs
@@ -727,36 +726,11 @@ fetchInterestFeed(view='full', size=12, force=false){
 * @return { Promise }
 *
 */
-// fetchOwnedCollections(view='full', size=12, force=false){
-//   var path = this.subendpoint('ownedCollections');
-//   //if( force || this.ownedCollectionsPromise === null ){
-//     this.ownedCollectionsPromise = houndRequest({
-//       method: 'GET',
-//       endpoint: path,
-//       pageSize: size,
-//       params: {
-//         view: view
-//       }
-//     })//.catch( (err => { this.ownedCollectionsPromise = null; throw err; }).bind(this) )
-//       .then(res => {
-//         console.log(res);
-//         // if( view === 'full' && Array.isArray(res) ){
-//         //   res = MHObject.create(res);
-//         //   console.log('fetched owned collection: ', res);
-//         //   // if collections become ordered MHRelationalPairs like media content:
-//         //   //  also update logic in return statement below
-//         //   res = MHRelationalPair.createFromArray(res).sort( (a,b) => a.position - b.position );
-//         // }
-//         return res;
-//       });
-//     //}
-//     return this.ownedCollectionsPromise;
-// }
 
 fetchOwnedCollections(view='full', size=12, force=true){
   var path = this.subendpoint('ownedCollections');
-  if( force || this.feedPagedRequest === null ){
-    this.feedPagedRequest = pagedRequest({
+  if( force || this.collections === null ){
+    this.collections = pagedRequest({
       method: 'GET',
       endpoint: path,
       pageSize: size,
@@ -764,37 +738,8 @@ fetchOwnedCollections(view='full', size=12, force=true){
     });
   }
   //console.log(this.feedPagedRequest);
-  return this.feedPagedRequest;
+  return this.collections;
 }
-
-// fetchOwnedCollections(view='full', page=0, size=12, force=false){
-//   var path = this.subendpoint('ownedCollections');
-//
-//   if( force || this.ownedCollectionsPromise === null ){
-//     //console.log('force: '+force, 'ownedCollectionsPromise: ', ownedCollectionsPromise);
-//     this.ownedCollectionsPromise = pagedRequest({
-//       method          : 'GET',
-//       endpoint        : path,
-//       withCredentials : true,
-//       startingPage    : page,
-//       pageSize        : size,
-//       params: {
-//         'view':view
-//       }
-//     }).catch( (err => { this.ownedCollectionsPromise = null; throw err; }).bind(this) )
-//     .then(res => {
-//       if( view === 'full' && Array.isArray(res) ){
-//         res = MHObject.create(res);
-//         console.log('fetched owned collection: ', res);
-//         // if collections become ordered MHRelationalPairs like media content:
-//         //  also update logic in return statement below
-//         res = MHRelationalPair.createFromArray(res).sort( (a,b) => a.position - b.position );
-//       }
-//       return res;
-//     });
-//   }
-//   return this.ownedCollectionsPromise;
-// }
 
 /**
 * mhObj.fetchSuggested(mhid,force)
@@ -808,8 +753,8 @@ fetchOwnedCollections(view='full', size=12, force=true){
 */
 fetchSuggested(view='full', size=12, force=false){
   var path = this.subendpoint('suggested');
-  if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
-    this.suggestedPagedRequest = pagedRequest({
+  if( force || this.suggested === null || this.suggested.numberOfElements !== size ){
+    this.suggested = pagedRequest({
       method: 'GET',
       endpoint: path,
       pageSize: size,
@@ -817,7 +762,7 @@ fetchSuggested(view='full', size=12, force=false){
     });
   }
   //console.log(this.feedPagedRequest);
-  return this.suggestedPagedRequest;
+  return this.suggested;
 }
 
 /**
@@ -825,10 +770,10 @@ fetchSuggested(view='full', size=12, force=false){
 * @param force {boolean=false}
 * @returns {Promise}
 */
-fetchFollowed(view='full', page=0, size=12, force=false){
+fetchFollowed(view='full', size=12, force=false){
   var path = this.subendpoint('following');
-  if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
-    this.feedPagedRequest = pagedRequest({
+  if( force || this.following === null || this.following.numberOfElements !== size ){
+    this.following = pagedRequest({
       method: 'GET',
       endpoint: path,
       pageSize: size,
@@ -836,33 +781,9 @@ fetchFollowed(view='full', page=0, size=12, force=false){
     });
   }
   //console.log(this.feedPagedRequest);
-  return this.feedPagedRequest;
+  return this.following;
 }
 
-
-/* TODO: remove console.log debug stuffs
-* mhUser.fetchFollowedCollections()
-*
-* @return { Promise }
-*
-*/
-fetchFollowedCollections(force=false){
-  var path = this.subendpoint('following');
-
-  if( force || this.followedCollectionsPromise === null ){
-    //console.log('force: '+force, 'followedCollectionsPromise: ', followedCollectionsPromise);
-    this.followedCollectionsPromise = houndRequest({
-      method          : 'GET',
-      endpoint        : path,
-      withCredentials : true,
-      params : {
-        type : 'collection'
-      }
-    }).catch( (err => { this.followedCollectionsPromise = null; throw err; }).bind(this) );
-  }
-
-  return this.followedCollectionsPromise;
-}
 /*
 * mhUser.linkTwitterAccount()
 *

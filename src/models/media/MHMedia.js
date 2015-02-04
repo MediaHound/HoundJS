@@ -120,61 +120,32 @@ export class MHMedia extends MHObject {
    * @return { Promise }  - resolves to server response of collections for this MediaHound object
    *
    */
-  fetchCollections(force=false){
-    var path = this.subendpoint('collections');
+   fetchCollections(view='full', size=20, force=true){
+     var path = this.subendpoint('collections');
+     if( force || this.collections === null ){
+       this.collections = pagedRequest({
+         method: 'GET',
+         endpoint: path,
+         pageSize: size,
+         params: { view }
+       });
+     }
+     //console.log(this.feedPagedRequest);
+     return this.collections;
+   }
 
-    if( force || this.collectionsPromise === null ){
-      this.collectionsPromise = houndRequest({
-          method    : 'GET',
-          endpoint  : path
-        }).catch( (err => { this.collectionsPromise = null; throw err; }).bind(this) );
-    }
-
-    return this.collectionsPromise;
-  }
-
-  /*
-   * TODO: DocJS comments
-   */
-  // fetchContent(view='full', size=24, force=false){
-  //   var path = this.subendpoint('content'),
-  //       self = this;
-  //
-  //   if( force || this.contentPromise === null ){
-  //     this.contentPromise = pagedRequest({
-  //         method: 'GET',
-  //         endpoint: path,
-  //         pageSize: size,
-  //         params: { view }
-  //       })
-  //       .catch(err => { self.contentPromise = null; throw err; })
-  //       .then(function(parsed){
-  //         console.log(parsed);
-  //         //if( view === 'full' && Array.isArray(parsed) ){
-  //         parsed = MHRelationalPair.createFromArray(parsed).sort( (a,b) => a.position - b.position );
-  //         //}
-  //         console.log(parsed);
-  //         return parsed;
-  //       });
-  //   }
-  //
-  //   return this.contentPromise.then(res => {
-  //     // if asking for 'full' but cached is 'ids'
-  //     if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
-  //       return self.fetchContent(view, true);
-  //     }
-  //     // if asking for 'ids' but cached is 'full'
-  //     if( view === 'ids' && Array.isArray(res) && res[0].object instanceof MHObject ){
-  //       return res.map(pair => pair.object.mhid);
-  //     }
-  //     return res;
-  //   });
-  // }
+  /* TODO: DocJS
+  * mhMed.fetchContent()
+  *
+  * @param force { Boolean } - force refetch of content
+  * @return { Promise } - resolves to
+  *
+  */
 
   fetchContent(view='full', size=20, force=true){
     var path = this.subendpoint('content');
-    if( force || this.feedPagedRequest === null ){
-      this.feedPagedRequest = pagedRequest({
+    if( force || this.content === null ){
+      this.content = pagedRequest({
         method: 'GET',
         endpoint: path,
         pageSize: size,
@@ -182,7 +153,7 @@ export class MHMedia extends MHObject {
       });
     }
     //console.log(this.feedPagedRequest);
-    return this.feedPagedRequest;
+    return this.content;
   }
 
 
@@ -222,56 +193,28 @@ export class MHMedia extends MHObject {
   fetchDesiredSource(){ return this.fetchAvailableSources(); }
 
 
-  /* TODO: docJS
-   * mhMed.fetchContributors()
-   *
-   * @return { Promise } - resolves to
-   *
-   */
-  // fetchContributors(view='full', size=12, force=false){
-  //   var path = this.subendpoint('contributors');
-  //
-  //   if( force || this.contributorsPromise === null ){
-  //     this.contributorsPromise = pagedRequest({
-  //         method: 'GET',
-  //         endpoint: path,
-  //         pageSize: size,
-  //         params: {view}
-  //       })
-  //       .catch( (err => { this.contributorsPromise = null; throw err; }).bind(this) )
-  //       .then(function(parsed){
-  //         console.log(parsed);
-  //         if( view === 'full' && Array.isArray(parsed) ){
-  //           parsed = MHObject.create(parsed);
-  //         }
-  //         return parsed;
-  //       });
-  //
-  //   }
-  //
-  //   return this.contributorsPromise.then( res => {
-  //     if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
-  //       return Promise.all(MHObject.fetchByMhids(res));
-  //     }
-  //     if( view === 'ids' && Array.isArray(res) && typeof res[0] instanceof MHObject ){
-  //       return res.map(obj => obj.mhid);
-  //     }
-  //     return res;
-  //   });
-  // }
+  /**
+  * mhObj.fetchContributors(mhid,force)
+  *
+  * @param { string='full' } view - the view needed to depict each MHObject that is returned
+  * @param { number=12     } size  - the number of items to return per page
+  * @param { Boolean=false } force
+  *
+  * @return { houndPagedRequest }  - MediaHound paged request object for this feed
+  *
+  */
 
   fetchContributors(view='full', size=12, force=false){
     var path = this.subendpoint('contributors');
-    if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
-      this.contributorsPagedRequest = pagedRequest({
+    if( force || this.contributors === null ){
+      this.contributors = pagedRequest({
         method: 'GET',
         endpoint: path,
         pageSize: size,
         params: {view}
       });
     }
-    //console.log(this.feedPagedRequest);
-    return this.contributorsPagedRequest;
+    return this.contributors;
   }
 
 
@@ -286,17 +229,17 @@ export class MHMedia extends MHObject {
   * @return { houndPagedRequest }  - MediaHound paged request object for this feed
   *
   */
-  fetchCharacters(view='full', page=0, size=12, force=false){
+  fetchCharacters(view='full', size=12, force=false){
     var path = this.subendpoint('characters');
-    if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
-      this.charactersPagedRequest = pagedRequest({
+    if( force || this.characters === null ){
+      this.characters = pagedRequest({
         method: 'GET',
         endpoint: path,
         pageSize: size,
         params: {view}
       });
     }
-    return this.charactersPagedRequest;
+    return this.characters;
   }
 
 
@@ -311,10 +254,10 @@ export class MHMedia extends MHObject {
   * @return { houndPagedRequest }  - MediaHound paged request object for this feed
   *
   */
-  fetchTraits(view='full', page=0, size=12, force=false){
+  fetchTraits(view='full', size=12, force=false){
     var path = this.subendpoint('traits');
-    if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
-      this.traitsPagedRequest = pagedRequest({
+    if( force || this.traits === null ){
+      this.traits = pagedRequest({
         method: 'GET',
         endpoint: path,
         pageSize: size,
@@ -322,7 +265,7 @@ export class MHMedia extends MHObject {
       });
     }
     //console.log(this.feedPagedRequest);
-    return this.traitsPagedRequest;
+    return this.traits;
   }
 
 
@@ -339,16 +282,15 @@ export class MHMedia extends MHObject {
   */
   fetchRelated(view='full', size=12, force=false){
     var path = this.subendpoint('related');
-    if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
-      this.relatedPagedRequest = pagedRequest({
+    if( force || this.related === null ){
+      this.related = pagedRequest({
         method: 'GET',
         endpoint: path,
         pageSize: size,
         params: {view}
       });
     }
-    //console.log(this.feedPagedRequest);
-    return this.relatedPagedRequest;
+    return this.related;
   }
 
   /* TODO?

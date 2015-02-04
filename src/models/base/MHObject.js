@@ -210,11 +210,18 @@ export class MHObject {
     }
     try{
 
+      if(args.mhid && args.metadata === undefined) {
+        args.metadata = {
+          "mhid": args.mhid,
+          "altId": args.altId,
+          "name": args.name
+        }
+      }
+
       args = MHObject.parseArgs(args);
       //log(args.metadata.mhid)
-      var mhid = args.metadata.mhid || undefined;
+      var mhid = args.metadata.mhid || args.mhid || undefined;
       var mhObj;
-
       //console.log('at start of creating... ',mhid,args);
 
       if( mhid !== 'undefined' && mhid !== null && args instanceof Object && this.isEmpty(args) !== 0){
@@ -222,7 +229,7 @@ export class MHObject {
         // check cache
         //log('in create function trying to parseArgs: \n\n' , args);
 
-        // if( mhidLRU.has(args.metadata.mhid) ){
+        // if( mhidLRU.has(args.metadata.mhid) || mhidLRU.has(args.mhid) ){
         //   log('getting from cache in create: ' + args.metadata.mhid);
         //   return mhidLRU.get(args.metadata.mhid);
         // }
@@ -230,8 +237,6 @@ export class MHObject {
         var prefix = MHObject.getPrefixFromMhid(mhid);
         log(prefix,new childrenConstructors[prefix](args));
         mhObj = new childrenConstructors[prefix](args);
-
-
 
         // if( prefix === 'mhimg' ){
         //   // bypass cache
@@ -475,7 +480,7 @@ export class MHObject {
       view = 'full';
     }
 
-    //log('in fetchByMhid, looking for: ', mhid, 'with view = ',view);
+    console.log('in fetchByMhid, looking for: ', mhid, 'with view = ',view);
 
     // Check LRU for mhid
     if( !force && mhidLRU.has(mhid) ){
@@ -505,6 +510,7 @@ export class MHObject {
         }
       })
       .then(function(response){
+        //console.log(response);
         newObj = MHObject.create(response);
         //newObj = response;
         //console.log('fetched: ', newObj, 'with response: ', response);

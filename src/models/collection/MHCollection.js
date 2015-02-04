@@ -256,7 +256,7 @@ export class MHCollection extends MHObject {
       log('content array to be submitted: ', mhids);
 
       return (this.contentPromise = houndRequest({
-        method: 'POST',
+        method: 'PUT',
         endpoint: path,
         data: {
           'content': mhids
@@ -333,8 +333,8 @@ export class MHCollection extends MHObject {
   */
    fetchContent(view='full', size=12, force=true){
     var path = this.subendpoint('content');
-    if( force || this.feedPagedRequest === null ){
-      this.contentPromise = pagedRequest({
+    if( force || this.content === null ){
+      this.content = pagedRequest({
         method: 'GET',
         endpoint: path,
         pageSize: size,
@@ -342,7 +342,7 @@ export class MHCollection extends MHObject {
       });
     }
     //console.log(this.feedPagedRequest);
-    return this.contentPromise;
+    return this.content;
   }
 
   /**
@@ -351,8 +351,8 @@ export class MHCollection extends MHObject {
    */
   fetchMixlist(view='full', size=20, force=true){
     var path = this.subendpoint('mixlist');
-    if( force || this.feedPagedRequest === null ){
-      this.mixlistPromise = pagedRequest({
+    if( force || this.mixlistPagedRequest === null ){
+      this.mixlistPagedRequest = pagedRequest({
         method: 'GET',
         endpoint: path,
         pageSize: size,
@@ -360,10 +360,10 @@ export class MHCollection extends MHObject {
       });
     }
     //console.log(this.feedPagedRequest);
-    return this.mixlistPromise;
+    return this.mixlistPagedRequest;
   }
 
-  /**
+  /** TODO: Deprecate
    * @static
    * @returns {Promise} - a promise that resolves to the list of the featured collections
    */
