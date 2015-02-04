@@ -1,6 +1,6 @@
 
 import { MHObject } from '../base/MHObject';
-import { houndRequest } from '../../request/hound-request';
+import { pagedRequest } from '../../request/hound-paged-request';
 
 // MediaHound Contributor Object
 export class MHContributor extends MHObject {
@@ -36,13 +36,13 @@ export class MHContributor extends MHObject {
     Object.defineProperties(this, {
       // Props
       // Promises
-      'mediaPromise':{
+      'media':{
         configurable: false,
         enumerable:   false,
         writable:     true,
         value:        null
       },
-      'collectionsPromise':{
+      'collections':{
         configurable: false,
         enumerable:   false,
         writable:     true,
@@ -83,28 +83,19 @@ export class MHContributor extends MHObject {
   /*
    * TODO DocJS
    */
-  fetchMedia(view='ids', force=false){
-    var path = this.subendpoint('media');
-
-    if( force || this.mediaPromise === null ){
-      this.mediaPromise = houndRequest({
-          method: 'GET',
-          endpoint: path,
-          params:{
-            'view':view
-          }
-        })
-        .catch( (err => { this.mediaPromise = null; throw err; }).bind(this) )
-        .then(function(parsed){
-          if( view === 'full' && Array.isArray(parsed) ){
-            parsed = MHObject.create(parsed);
-          }
-          return parsed;
-        });
-    }
-
-    return this.mediaPromise;
-  }
+   fetchMedia(view='full', size=12, force=true){
+     var path = this.subendpoint('media');
+     if( force || this.media === null ){
+       this.media = pagedRequest({
+         method: 'GET',
+         endpoint: path,
+         pageSize: size,
+         params: { view }
+       });
+     }
+     //console.log(this.feedPagedRequest);
+     return this.media;
+   }
 
   /*
    * mhContributor.fetchCollections(force)
@@ -112,23 +103,17 @@ export class MHContributor extends MHObject {
    * @return { Promise }  - resolves to server response of collections for this MediaHound object
    *
    */
-  fetchCollections(force=false){
-    var path = this.subendpoint('collections');
-
-    if( force || this.collectionsPromise === null ){
-      this.collectionsPromise = houndRequest({
-          method: 'GET',
-          endpoint: path
-        })
-        .catch( (err => { this.collectionsPromise = null; throw err; }).bind(this) )
-        .then(function(ids){
-          // TODO, remove? fix? view=full?
-          return Promise.all(ids.map(v => MHObject.fetchByMhid(v)));
-        });
-    }
-
-    return this.collectionsPromise;
-  }
+   fetchCollections(view='full', size=12, force=true){
+     var path = this.subendpoint('collections');
+     if( force || this.collections === null ){
+       this.collections = pagedRequest({
+         method: 'GET',
+         endpoint: path,
+         pageSize: size,
+         params: { view }
+       });
+     }
+     return this.collections;
+   }
 
 }
-

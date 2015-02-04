@@ -1,7 +1,7 @@
 
 import { MHObject } from '../base/MHObject';
 import { MHContributor } from './MHContributor';
-import { houndRequest } from '../../request/hound-request';
+import { pagedRequest } from '../../request/hound-paged-request';
 
 // MediaHound Contributor Object
 export class MHRealIndividualContributor extends MHContributor {
@@ -32,7 +32,7 @@ export class MHRealIndividualContributor extends MHContributor {
     Object.defineProperties(this, {
       // Props
       // Promises
-      'charactersPromise':{
+      'characters':{
         configurable: false,
         enumerable:   false,
         writable:     true,
@@ -57,27 +57,18 @@ export class MHRealIndividualContributor extends MHContributor {
    *  fetchCharacters
    *
    */
-  fetchCharacters(view='ids', force=false){
+  fetchCharacters(view='full', size=12, force=true){
     var path = this.subendpoint('characters');
-
-    if( force || this.charactersPromise === null ){
-      this.charactersPromise = houndRequest({
-          method: 'GET',
-          endpoint: path,
-          params:{
-            'view':view
-          }
-        })
-        .catch( (err => { this.charactersPromise = null; throw err; }).bind(this) )
-        .then(function(parsed){
-          if( view === 'full' && Array.isArray(parsed) ){
-            parsed = MHObject.create(parsed);
-          }
-          return parsed;
-        });
+    if( force || this.characters === null ){
+      this.characters = pagedRequest({
+        method: 'GET',
+        endpoint: path,
+        pageSize: size,
+        params: { view }
+      });
     }
-
-    return this.charactersPromise;
+    //console.log(this.feedPagedRequest);
+    return this.characters;
   }
 
 }
