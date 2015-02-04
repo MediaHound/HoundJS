@@ -3025,19 +3025,23 @@ System.register("models/meta/MHMetaData", [], function() {
         price = price || null,
         timePeriod = timePeriod || null,
         mediums = mediums || null;
-    if (isNaN(releaseDate)) {
-      releaseDate = null;
-    } else if (releaseDate === 'Invalid Date') {
-      releaseDate = null;
-    } else {
-      releaseDate = new Date(releaseDate.valueOf() + releaseDate.getTimezoneOffset() * 60000);
+    if (args.releaseDate) {
+      if (isNaN(releaseDate)) {
+        releaseDate = null;
+      } else if (releaseDate === 'Invalid Date') {
+        releaseDate = null;
+      } else {
+        releaseDate = new Date(releaseDate.valueOf() + releaseDate.getTimezoneOffset() * 60000);
+      }
     }
-    if (isNaN(createdDate)) {
-      createdDate = null;
-    } else if (createdDate === 'Invalid Date') {
-      createdDate = null;
-    } else {
-      createdDate = new Date(createdDate.valueOf() + createdDate.getTimezoneOffset() * 60000);
+    if (args.createdDate) {
+      if (isNaN(createdDate)) {
+        createdDate = null;
+      } else if (createdDate === 'Invalid Date') {
+        createdDate = null;
+      } else {
+        createdDate = new Date(createdDate.valueOf() + createdDate.getTimezoneOffset() * 60000);
+      }
     }
     Object.defineProperties(this, {
       'mhid': {
