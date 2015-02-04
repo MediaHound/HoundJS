@@ -229,10 +229,10 @@ export class MHObject {
         // check cache
         //log('in create function trying to parseArgs: \n\n' , args);
 
-        // if( mhidLRU.has(args.metadata.mhid) || mhidLRU.has(args.mhid) ){
-        //   log('getting from cache in create: ' + args.metadata.mhid);
-        //   return mhidLRU.get(args.metadata.mhid);
-        // }
+        if( mhidLRU.has(args.metadata.mhid) || mhidLRU.has(args.mhid) ){
+          log('getting from cache in create: ' + args.metadata.mhid);
+          return mhidLRU.get(args.metadata.mhid);
+        }
 
         var prefix = MHObject.getPrefixFromMhid(mhid);
         log(prefix,new childrenConstructors[prefix](args));
@@ -366,57 +366,72 @@ export class MHObject {
   static isMedia(toCheck){
     return toCheck instanceof System.get('../../src/models/media/MHMedia').MHMedia;
   }
-  get isMedia(){
-    return MHObject.isMedia(this);
-  }
 
   static isContributor(toCheck){
     return toCheck instanceof System.get('../../src/models/contributor/MHContributor').MHContributor;
-  }
-  get isContributor(){
-    return MHObject.isContributor(this);
   }
 
   static isAction(toCheck){
     return toCheck instanceof System.get('../../src/models/action/MHAction').MHAction;
   }
-  get isAction(){
-    return MHObject.isAction(this);
-  }
 
   static isUser(toCheck){
     return toCheck instanceof System.get('../../src/models/user/MHUser').MHUser;
-  }
-  get isUser(){
-    return MHObject.isUser(this);
   }
 
   static isCollection(toCheck){
     return toCheck instanceof System.get('../../src/models/collection/MHCollection').MHCollection;
   }
-  get isCollection(){
-    return MHObject.isCollection(this);
-  }
 
   static isImage(toCheck){
     return toCheck instanceof System.get('../../src/models/image/MHImage').MHImage;
-  }
-  get isImage(){
-    return MHObject.isImage(this);
   }
 
   static isTrait(toCheck){
     return toCheck instanceof System.get('../../src/models/trait/MHTrait').MHTrait;
   }
-  get isTrait(){
-    return MHObject.isTrait(this);
-  }
 
   static isSource(toCheck){
     return toCheck instanceof System.get('../../src/models/source/MHSource').MHSource;
   }
-  get isSource(){
-    return MHObject.isSource(this);
+
+
+  static isType(obj){
+    var type = '';
+
+    if( MHObject.isAction(obj) ){
+      type = 'MHAction';
+    }
+    else if( MHObject.isMedia(obj) ){
+      type = 'MHMedia';
+    }
+    else if( MHObject.isImage(obj) ){
+      type = 'MHImage';
+    }
+    else if( MHObject.isCollection(obj) ){
+      type = 'MHCollection';
+    }
+    else if( MHObject.isUser(obj) ){
+      type = 'MHUser';
+    }
+    else if( MHObject.isContributor(obj) ){
+      type = 'MHContributor';
+    }
+    else if( MHObject.isSource(obj) ){
+      type = 'MHSource';
+    }
+    else if( MHObject.isTrait(obj) ){
+      type = 'MHTrait';
+    }
+    else{
+      type = null;
+    }
+
+    return type;
+  }
+
+  get type(){
+    return MHObject.isType(this);
   }
 
   /**

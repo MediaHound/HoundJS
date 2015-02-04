@@ -3389,29 +3389,8 @@ System.register("models/base/MHObject", [], function() {
       }
       return this.social;
     },
-    get isMedia() {
-      return $MHObject.isMedia(this);
-    },
-    get isContributor() {
-      return $MHObject.isContributor(this);
-    },
-    get isAction() {
-      return $MHObject.isAction(this);
-    },
-    get isUser() {
-      return $MHObject.isUser(this);
-    },
-    get isCollection() {
-      return $MHObject.isCollection(this);
-    },
-    get isImage() {
-      return $MHObject.isImage(this);
-    },
-    get isTrait() {
-      return $MHObject.isTrait(this);
-    },
-    get isSource() {
-      return $MHObject.isSource(this);
+    get type() {
+      return $MHObject.isType(this);
     },
     get className() {
       return this.constructor.name;
@@ -3566,6 +3545,10 @@ System.register("models/base/MHObject", [], function() {
         var mhObj;
         if (mhid !== 'undefined' && mhid !== null && args instanceof Object && this.isEmpty(args) !== 0) {
           args.mhid = mhid;
+          if (mhidLRU.has(args.metadata.mhid) || mhidLRU.has(args.mhid)) {
+            log('getting from cache in create: ' + args.metadata.mhid);
+            return mhidLRU.get(args.metadata.mhid);
+          }
           var prefix = $MHObject.getPrefixFromMhid(mhid);
           log(prefix, new childrenConstructors[prefix](args));
           mhObj = new childrenConstructors[prefix](args);
@@ -3651,6 +3634,29 @@ System.register("models/base/MHObject", [], function() {
     },
     isSource: function(toCheck) {
       return toCheck instanceof System.get('models/source/MHSource').MHSource;
+    },
+    isType: function(obj) {
+      var type = '';
+      if ($MHObject.isAction(obj)) {
+        type = 'MHAction';
+      } else if ($MHObject.isMedia(obj)) {
+        type = 'MHMedia';
+      } else if ($MHObject.isImage(obj)) {
+        type = 'MHImage';
+      } else if ($MHObject.isCollection(obj)) {
+        type = 'MHCollection';
+      } else if ($MHObject.isUser(obj)) {
+        type = 'MHUser';
+      } else if ($MHObject.isContributor(obj)) {
+        type = 'MHContributor';
+      } else if ($MHObject.isSource(obj)) {
+        type = 'MHSource';
+      } else if ($MHObject.isTrait(obj)) {
+        type = 'MHTrait';
+      } else {
+        type = null;
+      }
+      return type;
     },
     fetchByMhid: function(mhid) {
       var view = arguments[1] !== (void 0) ? arguments[1] : 'full';
