@@ -99,25 +99,25 @@ export class MHUser extends MHObject {
         value:        lastname
       },
       // Promises
-      'interestFeedPromise':{
+      'interestFeed':{
         configurable: false,
         enumerable:   false,
         writable:     true,
         value:        null
       },
-      'ownedCollectionsPromise':{
+      'ownedCollections':{
         configurable: false,
         enumerable:   false,
         writable:     true,
         value:        null
       },
-      'followedPromise':{
+      'followed':{
         configurable: false,
         enumerable:   false,
         writable:     true,
         value:        null
       },
-      'followedCollectionsPromise':{
+      'suggested':{
         configurable: false,
         enumerable:   false,
         writable:     true,
@@ -729,8 +729,8 @@ fetchInterestFeed(view='full', size=12, force=false){
 
 fetchOwnedCollections(view='full', size=12, force=true){
   var path = this.subendpoint('ownedCollections');
-  if( force || this.collections === null ){
-    this.collections = pagedRequest({
+  if( force || this.ownedCollections === null ){
+    this.ownedCollections = pagedRequest({
       method: 'GET',
       endpoint: path,
       pageSize: size,
@@ -738,7 +738,7 @@ fetchOwnedCollections(view='full', size=12, force=true){
     });
   }
   //console.log(this.feedPagedRequest);
-  return this.collections;
+  return this.ownedCollections;
 }
 
 /**
@@ -790,7 +790,7 @@ fetchFollowed(view='full', size=12, force=false){
 * @return { Promise }
 *
 */
-static linkAccount(serv,succ,fail){
+static linkService(serv,succ,fail){
 
   var service = serv || null,
   success = succ || 'https://www.mediahound.com/',
@@ -821,7 +821,7 @@ static linkAccount(serv,succ,fail){
 * @return { Promise }
 *
 */
-static unlinkAccount(serv){
+static unlinkService(serv){
   var service = serv || null;
 
   if(service === null){
@@ -838,6 +838,40 @@ static unlinkAccount(serv){
       'Content-Type':'application/json'
     }
   }).then(function(response){
+    console.log(response);
+    return response;
+  });
+}
+
+/*
+* mhUser.fetchAccountSettings()
+*
+* @return { Promise }
+*
+*/
+fetchServiceSettings(serv){
+
+  var service = serv || null;
+
+  if(service === null){
+    console.warn("No service provided, aborting. First argument must include service name i.e. 'facebook' or 'twitter'.");
+    return false;
+  }
+  var path = this.subendpoint('settings');
+
+  return houndRequest({
+    method            : 'GET',
+    endpoint          : path+'/'+service,
+    withCredentials: true,
+    //data   : { 'successRedirectUrl' : 'http://www.mediahound.com',  'failureRedirectUrl' : 'http://www.mediahound.com'},
+    headers: {
+      'Accept':'application/json',
+      'Content-Type':'application/json'
+    }
+  }).catch(function(response){
+    console.error(response.error);
+  })
+  .then(function(response){
     console.log(response);
     return response;
   });

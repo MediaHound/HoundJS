@@ -4269,25 +4269,25 @@ System.register("models/user/MHUser", [], function() {
         writable: false,
         value: lastname
       },
-      'interestFeedPromise': {
+      'interestFeed': {
         configurable: false,
         enumerable: false,
         writable: true,
         value: null
       },
-      'ownedCollectionsPromise': {
+      'ownedCollections': {
         configurable: false,
         enumerable: false,
         writable: true,
         value: null
       },
-      'followedPromise': {
+      'followed': {
         configurable: false,
         enumerable: false,
         writable: true,
         value: null
       },
-      'followedCollectionsPromise': {
+      'suggested': {
         configurable: false,
         enumerable: false,
         writable: true,
@@ -4354,15 +4354,15 @@ System.register("models/user/MHUser", [], function() {
       var size = arguments[1] !== (void 0) ? arguments[1] : 12;
       var force = arguments[2] !== (void 0) ? arguments[2] : true;
       var path = this.subendpoint('ownedCollections');
-      if (force || this.collections === null) {
-        this.collections = pagedRequest({
+      if (force || this.ownedCollections === null) {
+        this.ownedCollections = pagedRequest({
           method: 'GET',
           endpoint: path,
           pageSize: size,
           params: {view: view}
         });
       }
-      return this.collections;
+      return this.ownedCollections;
     },
     fetchSuggested: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
@@ -4393,6 +4393,28 @@ System.register("models/user/MHUser", [], function() {
         });
       }
       return this.following;
+    },
+    fetchServiceSettings: function(serv) {
+      var service = serv || null;
+      if (service === null) {
+        console.warn("No service provided, aborting. First argument must include service name i.e. 'facebook' or 'twitter'.");
+        return false;
+      }
+      var path = this.subendpoint('settings');
+      return houndRequest({
+        method: 'GET',
+        endpoint: path + '/' + service,
+        withCredentials: true,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      }).catch(function(response) {
+        console.error(response.error);
+      }).then(function(response) {
+        console.log(response);
+        return response;
+      });
     },
     toString: function() {
       return $traceurRuntime.superCall(this, $MHUser.prototype, "toString", []) + ' and username ' + this.username;
@@ -4715,7 +4737,7 @@ System.register("models/user/MHUser", [], function() {
         return Promise.all(MHObject.fetchByMhids(response));
       });
     },
-    linkAccount: function(serv, succ, fail) {
+    linkService: function(serv, succ, fail) {
       var service = serv || null,
           success = succ || 'https://www.mediahound.com/',
           failure = fail || 'https://www.mediahound.com/';
@@ -4736,7 +4758,7 @@ System.register("models/user/MHUser", [], function() {
         return response;
       });
     },
-    unlinkAccount: function(serv) {
+    unlinkService: function(serv) {
       var service = serv || null;
       if (service === null) {
         console.warn("No service provided, aborting. First argument must include service name i.e. 'facebook' or 'twitter'.");
