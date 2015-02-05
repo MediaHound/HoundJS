@@ -59,20 +59,11 @@ export class MHObject {
         // Optional (nullable) values
         primaryImage    = (args.primaryImage != null)   ? MHObject.create(args.primaryImage)    : null,
         primaryGroup    = (args.primaryGroup != null && args.primaryGroup !== undefined) ? MHObject.create(args.primaryGroup.object)    : null,
-        secondaryImage  = (args.secondaryImage != null) ? MHObject.create(args.secondaryImage)  : null,
-        social          = args.social || null;
+        secondaryImage  = (args.secondaryImage != null) ? MHObject.create(args.secondaryImage)  : null;
 
-
-    if(social !== null){
-      social = new MHSocial(args.social);
-
-      Object.defineProperty(this,'social',{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        social
-      });
-    }
+        if(args.social){
+          this.social = new MHSocial(args.social);
+        }
 
     // Create imutable properties
 
@@ -227,7 +218,7 @@ export class MHObject {
           "mhid": args.mhid,
           "altId": args.altId,
           "name": args.name
-        }
+        };
       }
 
       args = MHObject.parseArgs(args);
