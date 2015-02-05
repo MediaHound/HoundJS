@@ -4330,11 +4330,11 @@ System.register("models/user/MHUser", [], function() {
     },
     fetchServiceSettings: function(serv) {
       var service = serv || null;
+      var path = this.subendpoint('settings');
       if (service === null) {
         console.warn("No service provided, aborting. First argument must include service name i.e. 'facebook' or 'twitter'.");
         return false;
       }
-      var path = this.subendpoint('settings');
       return houndRequest({
         method: 'GET',
         endpoint: path + '/' + service,
@@ -4349,6 +4349,36 @@ System.register("models/user/MHUser", [], function() {
         console.log(response);
         return response;
       });
+    },
+    fetchTwitterFollowers: function() {
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+      var size = arguments[1] !== (void 0) ? arguments[1] : 12;
+      var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      var path = this.subendpoint('settings') + '/twitter/friends';
+      if (force || this.twitterFollowers === null) {
+        this.twitterFollowers = pagedRequest({
+          method: 'GET',
+          endpoint: path,
+          pageSize: size,
+          params: {view: view}
+        });
+      }
+      return this.twitterFollowers;
+    },
+    fetchFacebookFriends: function() {
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+      var size = arguments[1] !== (void 0) ? arguments[1] : 12;
+      var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      var path = this.subendpoint('settings') + '/facebook/friends';
+      if (force || this.facebookFriends === null) {
+        this.facebookFriends = pagedRequest({
+          method: 'GET',
+          endpoint: path,
+          pageSize: size,
+          params: {view: view}
+        });
+      }
+      return this.facebookFriends;
     },
     toString: function() {
       return $traceurRuntime.superCall(this, $MHUser.prototype, "toString", []) + ' and username ' + this.username;

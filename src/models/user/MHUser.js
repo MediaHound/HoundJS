@@ -778,7 +778,7 @@ fetchFollowed(view='full', size=12, force=false){
 }
 
 /*
-* mhUser.linkTwitterAccount()
+* mhUser.linkService()
 *
 * @return { Promise }
 *
@@ -809,7 +809,7 @@ static linkService(serv,succ,fail){
   });
 }
 /*
-* mhUser.unlinkTwitterAccount()
+* mhUser.unlinkService()
 *
 * @return { Promise }
 *
@@ -837,7 +837,7 @@ static unlinkService(serv){
 }
 
 /*
-* mhUser.fetchAccountSettings()
+* mhUser.fetchServiceSettings()
 *
 * @return { Promise }
 *
@@ -845,12 +845,12 @@ static unlinkService(serv){
 fetchServiceSettings(serv){
 
   var service = serv || null;
+  var path = this.subendpoint('settings');
 
   if(service === null){
     console.warn("No service provided, aborting. First argument must include service name i.e. 'facebook' or 'twitter'.");
     return false;
   }
-  var path = this.subendpoint('settings');
 
   return houndRequest({
     method            : 'GET',
@@ -869,6 +869,51 @@ fetchServiceSettings(serv){
     return response;
   });
 }
+
+/*
+* mhUser.fetchTwitterFollowers()
+*
+* @return { PagedRequest }
+*
+*/
+fetchTwitterFollowers(view='full', size=12, force=false){
+
+  var path = this.subendpoint('settings')+'/twitter/friends';
+  if( force || this.twitterFollowers === null ){
+    this.twitterFollowers = pagedRequest({
+      method: 'GET',
+      endpoint: path,
+      pageSize: size,
+      params: {view}
+    });
+  }
+  return this.twitterFollowers;
+
+}
+
+
+/*
+* mhUser.fetchFacebookFriends()
+*
+* @return { PagedRequest }
+*
+*/
+fetchFacebookFriends(view='full', size=12, force=false){
+
+  var path = this.subendpoint('settings')+'/facebook/friends';
+  if( force || this.facebookFriends === null ){
+    this.facebookFriends = pagedRequest({
+      method: 'GET',
+      endpoint: path,
+      pageSize: size,
+      params: {view}
+    });
+  }
+  return this.facebookFriends;
+
+}
+
+
 
 // Could change as needed
 toString(){
