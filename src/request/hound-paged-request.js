@@ -52,7 +52,7 @@ var defaults = {
     //   return response;
     // },
     setContentArray = function(response){
-      console.log(response);
+      //console.log(response);
       var MHRelationalPair = System.get('../../src/models/base/MHRelationalPair').MHRelationalPair;
 
       var self = this;

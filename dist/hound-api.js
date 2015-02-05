@@ -2717,7 +2717,6 @@ System.register("request/hound-paged-request", [], function() {
         return defaults.page;
       },
       setContentArray = function(response) {
-        console.log(response);
         var MHRelationalPair = System.get('models/base/MHRelationalPair').MHRelationalPair;
         var self = this;
         if (response.content !== undefined) {
