@@ -32,7 +32,7 @@ export class MHMetaData {
         releaseDate = new Date(args.releaseDate*1000);
 
 
-    if(args.name){
+    if(name){
       Object.defineProperty(this,'name',{
         configurable: false,
         enumerable:   true,
@@ -41,7 +41,7 @@ export class MHMetaData {
       });
     }
 
-    if(args.altid){
+    if(altid){
       Object.defineProperty(this,'altId',{
         configurable: false,
         enumerable:   true,
@@ -50,7 +50,7 @@ export class MHMetaData {
       });
     }
 
-    if(args.username){
+    if(username){
       Object.defineProperty(this,'username',{
         configurable: false,
         enumerable:   true,
@@ -59,7 +59,7 @@ export class MHMetaData {
       });
     }
 
-    if(args.email){
+    if(email){
       Object.defineProperty(this,'email',{
         configurable: false,
         enumerable:   true,
@@ -68,7 +68,7 @@ export class MHMetaData {
       });
     }
 
-    if(args.description){
+    if(description){
       Object.defineProperty(this,'description',{
         configurable: false,
         enumerable:   true,
@@ -77,7 +77,7 @@ export class MHMetaData {
       });
     }
 
-    if(args.message){
+    if(message){
       Object.defineProperty(this,'message',{
         configurable: false,
         enumerable:   true,
@@ -86,7 +86,7 @@ export class MHMetaData {
       });
     }
 
-    if(args.mixlist){
+    if(mixlist){
       Object.defineProperty(this,'mixlist',{
         configurable: false,
         enumerable:   true,
@@ -95,7 +95,7 @@ export class MHMetaData {
       });
     }
 
-    if(args.averageColor){
+    if(averageColor){
       Object.defineProperty(this,'averageColor',{
         configurable: false,
         enumerable:   true,
@@ -104,7 +104,7 @@ export class MHMetaData {
       });
     }
 
-    if(args.isDefault){
+    if(isDefault){
       Object.defineProperty(this,'isDefault',{
         configurable: false,
         enumerable:   true,

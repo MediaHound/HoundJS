@@ -54,24 +54,72 @@ export class MHObject {
 
     var metadata        = new MHMetaData(args.metadata) || null,
         mhid            = args.metadata.mhid || null,
-        altId           = args.metadata.altId || null,
+        altid           = args.metadata.altId || null,
         name            = args.metadata.name || null,
         // Optional (nullable) values
         primaryImage    = (args.primaryImage != null)   ? MHObject.create(args.primaryImage)    : null,
         primaryGroup    = (args.primaryGroup != null && args.primaryGroup !== undefined) ? MHObject.create(args.primaryGroup.object)    : null,
         secondaryImage  = (args.secondaryImage != null) ? MHObject.create(args.secondaryImage)  : null,
-        social          = args.social || null,
-        createdDate     = new Date(args.metadata.createdDate);
+        social          = args.social || null;
 
-    // if invalid date reset to original value or null
-    if( isNaN(createdDate) ){
-      createdDate = args.metadata.createdDate || null;
-    }
-    if(social !==null){
+
+    if(social !== null){
       social = new MHSocial(args.social);
+
+      Object.defineProperty(this,'social',{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        social
+      });
     }
 
     // Create imutable properties
+
+    if(name){
+      Object.defineProperty(this,'name',{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        name
+      });
+    }
+
+    if(altid){
+      Object.defineProperty(this,'altId',{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        altid
+      });
+    }
+
+    if(primaryGroup){
+      Object.defineProperty(this,'primaryGroup',{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        primaryGroup
+      });
+    }
+
+    if(primaryImage){
+      Object.defineProperty(this,'primaryImage',{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        primaryImage
+      });
+    }
+
+    if(secondaryImage){
+      Object.defineProperty(this,'secondaryImage',{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        secondaryImage
+      });
+    }
     //  mhid, name, primaryImage, createdDate, etc...
     Object.defineProperties(this, {
       'mhid':{
@@ -80,50 +128,14 @@ export class MHObject {
         writable:     false,
         value:        mhid
       },
-      'altId':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        altId
-      },
-      'name':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        name
-      },
       'metadata':{
         configurable: false,
         enumerable:   true,
         writable:     false,
         value:        metadata
       },
-      'primaryImage':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        primaryImage
-      },
-      'secondaryImage':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        secondaryImage
-      },
-      'primaryGroup':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        primaryGroup
-      },
-      'social':{
-        configurable: false,
-        enumerable:   true,
-        writable:     true,
-        value:        social
-      },
       // Promises
-      'feedPagedRequest':{
+      'feed':{
         configurable: false,
         enumerable:   false,
         writable:     true,
@@ -672,7 +684,7 @@ export class MHObject {
       });
   }
 
-  /**
+  /** TODO: Move to Objects that actually use it, i.e. not MHAction
    * mhObj.fetchFeed(view, page, size)
    *
    * @param { string=full   } view - the view param
@@ -683,19 +695,18 @@ export class MHObject {
    * @return { houndPagedRequest }  - MediaHound paged request object for this feed
    *
    */
-  fetchFeed(view='full', page=0, size=12, force=false){
+  fetchFeed(view='full', size=12, force=false){
     var path = this.subendpoint('feed');
-    if( force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size ){
-      this.feedPagedRequest = pagedRequest({
+    if( force || this.feed === null || this.feed.numberOfElements !== size ){
+      this.feed = pagedRequest({
         method: 'GET',
         endpoint: path,
         pageSize: size,
-        startingPage: page,
         params: { view }
       });
     }
-    //console.log(this.feedPagedRequest);
-    return this.feedPagedRequest;
+    //console.log(this.feed);
+    return this.feed;
   }
 
   /** TODO: TEST
@@ -708,8 +719,8 @@ export class MHObject {
    * @return { Promise }  - resolves to server response of feed info for this MediaHound object
    *
    */
-  fetchFeedPage(view='full', page=0, size=12, force=false){
-    return this.fetchFeed(view, page, size, force).currentPromise;
+  fetchFeedPage(view='full', size=12, force=false){
+    return this.fetchFeed(view, size, force).currentPromise;
   }
 
   /**

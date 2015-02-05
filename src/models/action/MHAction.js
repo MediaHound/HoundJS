@@ -41,14 +41,18 @@ export class MHAction extends MHObject {
         primaryMention  = (args.primaryMention != null) ? MHObject.create(args.primaryMention) : null;
 
     // Create imutable properties
-    //  message, owners, mentions
-    Object.defineProperties(this, {
-      "message":{
+
+    if(message){
+      Object.defineProperty(this,'message',{
         configurable: false,
         enumerable:   true,
         writable:     false,
         value:        message
-      },
+      });
+    }
+
+    //  message, owners, mentions
+    Object.defineProperties(this, {
       "primaryOwner":{
         configurable: false,
         enumerable:   true,

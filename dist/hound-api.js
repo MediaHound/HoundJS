@@ -3020,7 +3020,7 @@ System.register("models/meta/MHMetaData", [], function() {
         averageColor = args.averageColor || null,
         createdDate = new Date(args.createdDate * 1000),
         releaseDate = new Date(args.releaseDate * 1000);
-    if (args.name) {
+    if (name) {
       Object.defineProperty(this, 'name', {
         configurable: false,
         enumerable: true,
@@ -3028,7 +3028,7 @@ System.register("models/meta/MHMetaData", [], function() {
         value: name
       });
     }
-    if (args.altid) {
+    if (altid) {
       Object.defineProperty(this, 'altId', {
         configurable: false,
         enumerable: true,
@@ -3036,7 +3036,7 @@ System.register("models/meta/MHMetaData", [], function() {
         value: altid
       });
     }
-    if (args.username) {
+    if (username) {
       Object.defineProperty(this, 'username', {
         configurable: false,
         enumerable: true,
@@ -3044,7 +3044,7 @@ System.register("models/meta/MHMetaData", [], function() {
         value: username
       });
     }
-    if (args.email) {
+    if (email) {
       Object.defineProperty(this, 'email', {
         configurable: false,
         enumerable: true,
@@ -3052,7 +3052,7 @@ System.register("models/meta/MHMetaData", [], function() {
         value: email
       });
     }
-    if (args.description) {
+    if (description) {
       Object.defineProperty(this, 'description', {
         configurable: false,
         enumerable: true,
@@ -3060,7 +3060,7 @@ System.register("models/meta/MHMetaData", [], function() {
         value: description
       });
     }
-    if (args.message) {
+    if (message) {
       Object.defineProperty(this, 'message', {
         configurable: false,
         enumerable: true,
@@ -3068,7 +3068,7 @@ System.register("models/meta/MHMetaData", [], function() {
         value: message
       });
     }
-    if (args.mixlist) {
+    if (mixlist) {
       Object.defineProperty(this, 'mixlist', {
         configurable: false,
         enumerable: true,
@@ -3076,7 +3076,7 @@ System.register("models/meta/MHMetaData", [], function() {
         value: mixlist
       });
     }
-    if (args.averageColor) {
+    if (averageColor) {
       Object.defineProperty(this, 'averageColor', {
         configurable: false,
         enumerable: true,
@@ -3084,7 +3084,7 @@ System.register("models/meta/MHMetaData", [], function() {
         value: averageColor
       });
     }
-    if (args.isDefault) {
+    if (isDefault) {
       Object.defineProperty(this, 'isDefault', {
         configurable: false,
         enumerable: true,
@@ -3293,18 +3293,60 @@ System.register("models/base/MHObject", [], function() {
     }
     var metadata = new MHMetaData(args.metadata) || null,
         mhid = args.metadata.mhid || null,
-        altId = args.metadata.altId || null,
+        altid = args.metadata.altId || null,
         name = args.metadata.name || null,
         primaryImage = (args.primaryImage != null) ? $MHObject.create(args.primaryImage) : null,
         primaryGroup = (args.primaryGroup != null && args.primaryGroup !== undefined) ? $MHObject.create(args.primaryGroup.object) : null,
         secondaryImage = (args.secondaryImage != null) ? $MHObject.create(args.secondaryImage) : null,
-        social = args.social || null,
-        createdDate = new Date(args.metadata.createdDate);
-    if (isNaN(createdDate)) {
-      createdDate = args.metadata.createdDate || null;
-    }
+        social = args.social || null;
     if (social !== null) {
       social = new MHSocial(args.social);
+      Object.defineProperty(this, 'social', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: social
+      });
+    }
+    if (name) {
+      Object.defineProperty(this, 'name', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: name
+      });
+    }
+    if (altid) {
+      Object.defineProperty(this, 'altId', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: altid
+      });
+    }
+    if (primaryGroup) {
+      Object.defineProperty(this, 'primaryGroup', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: primaryGroup
+      });
+    }
+    if (primaryImage) {
+      Object.defineProperty(this, 'primaryImage', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: primaryImage
+      });
+    }
+    if (secondaryImage) {
+      Object.defineProperty(this, 'secondaryImage', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: secondaryImage
+      });
     }
     Object.defineProperties(this, {
       'mhid': {
@@ -3313,49 +3355,13 @@ System.register("models/base/MHObject", [], function() {
         writable: false,
         value: mhid
       },
-      'altId': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: altId
-      },
-      'name': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: name
-      },
       'metadata': {
         configurable: false,
         enumerable: true,
         writable: false,
         value: metadata
       },
-      'primaryImage': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: primaryImage
-      },
-      'secondaryImage': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: secondaryImage
-      },
-      'primaryGroup': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: primaryGroup
-      },
-      'social': {
-        configurable: false,
-        enumerable: true,
-        writable: true,
-        value: social
-      },
-      'feedPagedRequest': {
+      'feed': {
         configurable: false,
         enumerable: false,
         writable: true,
@@ -3422,27 +3428,24 @@ System.register("models/base/MHObject", [], function() {
     },
     fetchFeed: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-      var page = arguments[1] !== (void 0) ? arguments[1] : 0;
-      var size = arguments[2] !== (void 0) ? arguments[2] : 12;
-      var force = arguments[3] !== (void 0) ? arguments[3] : false;
+      var size = arguments[1] !== (void 0) ? arguments[1] : 12;
+      var force = arguments[2] !== (void 0) ? arguments[2] : false;
       var path = this.subendpoint('feed');
-      if (force || this.feedPagedRequest === null || this.feedPagedRequest.numberOfElements !== size) {
-        this.feedPagedRequest = pagedRequest({
+      if (force || this.feed === null || this.feed.numberOfElements !== size) {
+        this.feed = pagedRequest({
           method: 'GET',
           endpoint: path,
           pageSize: size,
-          startingPage: page,
           params: {view: view}
         });
       }
-      return this.feedPagedRequest;
+      return this.feed;
     },
     fetchFeedPage: function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-      var page = arguments[1] !== (void 0) ? arguments[1] : 0;
-      var size = arguments[2] !== (void 0) ? arguments[2] : 12;
-      var force = arguments[3] !== (void 0) ? arguments[3] : false;
-      return this.fetchFeed(view, page, size, force).currentPromise;
+      var size = arguments[1] !== (void 0) ? arguments[1] : 12;
+      var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      return this.fetchFeed(view, size, force).currentPromise;
     },
     takeAction: function(action) {
       var $__20 = this;
@@ -3745,13 +3748,15 @@ System.register("models/action/MHAction", [], function() {
     var message = args.metadata.message || null,
         primaryOwner = (args.primaryOwner != null) ? MHObject.create(args.primaryOwner) : null,
         primaryMention = (args.primaryMention != null) ? MHObject.create(args.primaryMention) : null;
-    Object.defineProperties(this, {
-      "message": {
+    if (message) {
+      Object.defineProperty(this, 'message', {
         configurable: false,
         enumerable: true,
         writable: false,
         value: message
-      },
+      });
+    }
+    Object.defineProperties(this, {
       "primaryOwner": {
         configurable: false,
         enumerable: true,
