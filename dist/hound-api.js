@@ -4022,29 +4022,52 @@ System.register("models/meta/MHContext", [], function() {
   "use strict";
   var __moduleName = "models/meta/MHContext";
   var MHContext = function MHContext(args) {
-    var connected = args.connected,
+    var connected = args.connected || null,
         preference = args.preference || null,
-        position = args.position || null;
-    Object.defineProperties(this, {
-      'connected': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: connected
-      },
-      'preference': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: preference
-      },
-      'position': {
+        consumable = args.consumable || null,
+        mediums = args.mediums || null,
+        position = args.sorting.position || args.sorting.importance || null;
+    if (position) {
+      Object.defineProperty(this, 'position', {
         configurable: false,
         enumerable: true,
         writable: false,
         value: position
-      }
-    });
+      });
+      return;
+    }
+    if (connected) {
+      Object.defineProperty(this, 'connected', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: connected
+      });
+    }
+    if (preference) {
+      Object.defineProperty(this, 'preference', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: preference
+      });
+    }
+    if (consumable) {
+      Object.defineProperty(this, 'consumable', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: consumable
+      });
+    }
+    if (mediums) {
+      Object.defineProperty(this, 'mediums', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: mediums
+      });
+    }
   };
   ($traceurRuntime.createClass)(MHContext, {}, {});
   return {get MHContext() {
