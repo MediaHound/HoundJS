@@ -52,7 +52,7 @@ var defaults = {
     //   return response;
     // },
     setContentArray = function(response){
-
+      console.log(response);
       var MHRelationalPair = System.get('../../src/models/base/MHRelationalPair').MHRelationalPair;
 
       var self = this;
@@ -77,7 +77,7 @@ var defaults = {
 
       }
       else{
-        console.warn('content array is undefined in setContentArray MHRelationalPair');
+        console.warn('content array is undefined or empty in setContentArray MHRelationalPair',self);
       }
     };
 

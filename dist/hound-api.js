@@ -2717,6 +2717,7 @@ System.register("request/hound-paged-request", [], function() {
         return defaults.page;
       },
       setContentArray = function(response) {
+        console.log(response);
         var MHRelationalPair = System.get('models/base/MHRelationalPair').MHRelationalPair;
         var self = this;
         if (response.content !== undefined) {
@@ -2734,7 +2735,7 @@ System.register("request/hound-paged-request", [], function() {
             return response;
           });
         } else {
-          console.warn('content array is undefined in setContentArray MHRelationalPair');
+          console.warn('content array is undefined or empty in setContentArray MHRelationalPair', self);
         }
       };
   var PagedRequest = function PagedRequest(args) {
@@ -3665,7 +3666,7 @@ System.register("models/base/MHObject", [], function() {
       if (view === null || view === undefined) {
         view = 'full';
       }
-      console.log('in fetchByMhid, looking for: ', mhid, 'with view = ', view);
+      log('in fetchByMhid, looking for: ', mhid, 'with view = ', view);
       if (!force && mhidLRU.has(mhid)) {
         return Promise.resolve(mhidLRU.get(mhid));
       }

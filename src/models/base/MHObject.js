@@ -530,7 +530,7 @@ export class MHObject {
       view = 'full';
     }
 
-    console.log('in fetchByMhid, looking for: ', mhid, 'with view = ',view);
+    log('in fetchByMhid, looking for: ', mhid, 'with view = ',view);
 
     // Check LRU for mhid
     if( !force && mhidLRU.has(mhid) ){
