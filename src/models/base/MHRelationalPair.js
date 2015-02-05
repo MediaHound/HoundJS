@@ -15,6 +15,10 @@ export class MHRelationalPair {
    *
    */
   constructor(args){
+
+    var context,
+        object;
+
     if( args == null ){
       throw new TypeError('Args is null or undefined in MHRelationalPair constructor.');
     }
@@ -26,8 +30,9 @@ export class MHRelationalPair {
       }
     }
 
-    var context   = new MHContext(args.context) || null,
-        object    = mhidLRU.has(args.object.metadata.mhid) ? mhidLRU.get(args.object.metadata.mhid) : MHObject.create(args.object) || null;
+     args.context.target = args.object.metadata.mhid;
+     context = new MHContext(args.context);
+     object = mhidLRU.has(args.object.metadata.mhid) ? mhidLRU.get(args.object.metadata.mhid) : MHObject.create(args.object) || null;
 
     if( context == null || object == null ){
       throw new TypeError('Either context or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);
@@ -59,6 +64,7 @@ export class MHRelationalPair {
         try{
           return new MHRelationalPair(v);
         } catch(e) {
+          console.log(e);
           return v;
         }
       });

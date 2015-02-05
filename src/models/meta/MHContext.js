@@ -13,21 +13,28 @@ export class MHContext {
   constructor(args){
 
     // Unique Properties
+
+    if(args === undefined){
+      return;
+    }
     var connected   = args.connected || null,
         preference  = args.preference || null,
         consumable  = args.consumable || null,
         mediums     = args.mediums  || null,
-        position    = args.sorting.position || args.sorting.importance || null;
+        position    = null,
+        target      = args.target || null;
 
-    if(position){
+    if(args.sorting){
+      position = args.sorting.position || args.sorting.importance || null;
+    }
+
+    if(position!=null){
       Object.defineProperty(this,'position',{
         configurable: false,
         enumerable:   true,
         writable:     false,
         value:        position
       });
-      //All MHContexts with a position param do not require other params, so return
-      return;
     }
 
     if(connected){
@@ -65,6 +72,13 @@ export class MHContext {
         value:        mediums
       });
     }
+
+    Object.defineProperty(this,'target',{
+      configurable: false,
+      enumerable:   true,
+      writable:     false,
+      value:        target
+    });
 
   }
 

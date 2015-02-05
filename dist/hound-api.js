@@ -2717,27 +2717,24 @@ System.register("request/hound-paged-request", [], function() {
         return defaults.page;
       },
       setContentArray = function(response) {
-        var MHObject = System.get('models/base/MHObject').MHObject;
-        var self = this,
-            newContent,
-            originalContent;
+        var MHRelationalPair = System.get('models/base/MHRelationalPair').MHRelationalPair;
+        var self = this;
         if (response.content !== undefined) {
-          originalContent = response.content;
           if (response.content[0] !== undefined) {
-            self.pageid = response.content[0].object.metadata.mhid;
+            this.pageid = response.content[0].object.metadata.mhid;
           }
-          newContent = Promise.all(originalContent.map(function(args) {
-            return MHObject.create(args.object);
+          var content = Promise.all(MHRelationalPair.createFromArray(response.content).map(function(relationalPair) {
+            return relationalPair.object;
           }));
-          return newContent.then(function(mhObjs) {
-            response.content = mhObjs;
-            Array.prototype.push.apply(self.content, mhObjs);
-            return response;
-          }).catch(function(err) {
+          return content.catch(function(err) {
             console.warn(err);
+          }).then(function(mhObjs) {
+            Array.prototype.push.apply(self.content, mhObjs);
+            response.content = mhObjs;
+            return response;
           });
         } else {
-          console.warn('pagedRequest content array is empty');
+          console.warn('content array is undefined in setContentArray MHRelationalPair');
         }
       };
   var PagedRequest = function PagedRequest(args) {
@@ -4020,19 +4017,25 @@ System.register("models/meta/MHContext", [], function() {
   "use strict";
   var __moduleName = "models/meta/MHContext";
   var MHContext = function MHContext(args) {
+    if (args === undefined) {
+      return;
+    }
     var connected = args.connected || null,
         preference = args.preference || null,
         consumable = args.consumable || null,
         mediums = args.mediums || null,
-        position = args.sorting.position || args.sorting.importance || null;
-    if (position) {
+        position = null,
+        target = args.target || null;
+    if (args.sorting) {
+      position = args.sorting.position || args.sorting.importance || null;
+    }
+    if (position != null) {
       Object.defineProperty(this, 'position', {
         configurable: false,
         enumerable: true,
         writable: false,
         value: position
       });
-      return;
     }
     if (connected) {
       Object.defineProperty(this, 'connected', {
@@ -4066,6 +4069,12 @@ System.register("models/meta/MHContext", [], function() {
         value: mediums
       });
     }
+    Object.defineProperty(this, 'target', {
+      configurable: false,
+      enumerable: true,
+      writable: false,
+      value: target
+    });
   };
   ($traceurRuntime.createClass)(MHContext, {}, {});
   return {get MHContext() {
@@ -4080,6 +4089,8 @@ System.register("models/base/MHRelationalPair", [], function() {
       mhidLRU = $__50.mhidLRU;
   var MHContext = System.get("models/meta/MHContext").MHContext;
   var MHRelationalPair = function MHRelationalPair(args) {
+    var context,
+        object;
     if (args == null) {
       throw new TypeError('Args is null or undefined in MHRelationalPair constructor.');
     }
@@ -4090,8 +4101,9 @@ System.register("models/base/MHRelationalPair", [], function() {
         throw new TypeError('Args typeof string but not valid JSON in MHRelationalPair', 'MHRelationalPair.js', 15);
       }
     }
-    var context = new MHContext(args.context) || null,
-        object = mhidLRU.has(args.object.metadata.mhid) ? mhidLRU.get(args.object.metadata.mhid) : MHObject.create(args.object) || null;
+    args.context.target = args.object.metadata.mhid;
+    context = new MHContext(args.context);
+    object = mhidLRU.has(args.object.metadata.mhid) ? mhidLRU.get(args.object.metadata.mhid) : MHObject.create(args.object) || null;
     if (context == null || object == null) {
       throw new TypeError('Either context or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);
     }
@@ -4119,6 +4131,7 @@ System.register("models/base/MHRelationalPair", [], function() {
           try {
             return new $MHRelationalPair(v);
           } catch (e) {
+            console.log(e);
             return v;
           }
         }));
@@ -4155,7 +4168,6 @@ System.register("models/user/MHUser", [], function() {
     $traceurRuntime.superCall(this, $MHUser.prototype, "constructor", [args]);
     var username = args.metadata.username,
         email = args.metadata.email || null,
-        phonenumber = args.metadata.phonenumber || args.metadata.phoneNumber || null,
         firstname = args.metadata.firstname || args.metadata.firstName || null,
         lastname = args.metadata.lastname || args.metadata.lastName || null;
     if (firstname == null || lastname == null) {
@@ -4178,12 +4190,6 @@ System.register("models/user/MHUser", [], function() {
         enumerable: true,
         writable: false,
         value: email
-      },
-      'phonenumber': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: phonenumber
       },
       'firstName': {
         configurable: false,

@@ -52,36 +52,32 @@ var defaults = {
     //   return response;
     // },
     setContentArray = function(response){
-      var MHObject = System.get('../../src/models/base/MHObject').MHObject;
-      //console.warn('circular dep: ', MHObject);
 
-      var self = this,
-          newContent,
-          originalContent;
+      var MHRelationalPair = System.get('../../src/models/base/MHRelationalPair').MHRelationalPair;
+
+      var self = this;
 
       if(response.content !== undefined){
 
-        originalContent = response.content;
-
         if(response.content[0] !== undefined){
-          self.pageid = response.content[0].object.metadata.mhid;
+          this.pageid = response.content[0].object.metadata.mhid;
         }
 
-        newContent = Promise.all(originalContent.map(function(args){
-          return MHObject.create(args.object);
+        var content = Promise.all(MHRelationalPair.createFromArray(response.content).map(function(relationalPair){
+          return relationalPair.object;
         }));
 
-        return newContent.then(function(mhObjs){
-          response.content = mhObjs;
-          Array.prototype.push.apply(self.content, mhObjs);
-          return response;
-        }).catch(function(err){
+        return content.catch(function(err){
           console.warn(err);
+        }).then(function(mhObjs){
+          Array.prototype.push.apply(self.content, mhObjs);
+          response.content = mhObjs;
+          return response;
         });
 
       }
       else{
-        console.warn('pagedRequest content array is empty');
+        console.warn('content array is undefined in setContentArray MHRelationalPair');
       }
     };
 
@@ -117,57 +113,58 @@ var defaults = {
  *  jumpTo(n) -- takes number n, jumps to that page number
  *
  */
-class PagedRequest {
-  constructor(args){
-    // Check for Method and Endpoint
-    if( args.method == null || args.endpoint == null ){
-      throw new TypeError('Method or Endpoint was not defined on pagedRequest argument map');
-    }
 
-    // Page Size and Starting Page
-    var pageSize      = getPageSize(args),
-        startingPage  = getStartingPage(args),
-        myArgs        = args;
-
-    // pageSize and starting page can't be negative
-    if( pageSize <= 0 ){
-      pageSize = defaults.pageSize;
-    }
-    if( startingPage < 0 ){
-      startingPage = defaults.startingPage;
-    }
-
-    myArgs.params              = myArgs.params || {};
-    myArgs.params.page         = startingPage;
-    myArgs.params.pageSize     = pageSize;
-
-  //  myArgs.params.pageNext     = pageNext;
-
-    // remove extraneous args props
-    delete myArgs.pageSize;
-    delete myArgs.startingPage;
-
-    // Define normal instance properties
-    this.content = [];
-    this.pagePromises = [];
-    this.page = startingPage;
-    this._args = myArgs;
-
-    this.pagePromises[this.page] = houndRequest(this._args)
-                                    .then(setContentArray.bind(this));
-    // Define Immutable Props and getters
-    Object.defineProperties(this, {
-      'pageSize':{
-        configurable: false,
-        enumerable:   true,
-        writeable:    false,
-        value:        pageSize
+  class PagedRequest {
+    constructor(args){
+      // Check for Method and Endpoint
+      if( args.method == null || args.endpoint == null ){
+        throw new TypeError('Method or Endpoint was not defined on pagedRequest argument map');
       }
-    });
 
-    return this;
+      // Page Size and Starting Page
+      var pageSize      = getPageSize(args),
+      startingPage  = getStartingPage(args),
+      myArgs        = args;
 
-  } // end constructor
+      // pageSize and starting page can't be negative
+      if( pageSize <= 0 ){
+        pageSize = defaults.pageSize;
+      }
+      if( startingPage < 0 ){
+        startingPage = defaults.startingPage;
+      }
+
+      myArgs.params              = myArgs.params || {};
+      myArgs.params.page         = startingPage;
+      myArgs.params.pageSize     = pageSize;
+
+      //  myArgs.params.pageNext     = pageNext;
+
+      // remove extraneous args props
+      delete myArgs.pageSize;
+      delete myArgs.startingPage;
+
+      // Define normal instance properties
+      this.content = [];
+      this.pagePromises = [];
+      this.page = startingPage;
+      this._args = myArgs;
+
+      this.pagePromises[this.page] = houndRequest(this._args)
+      .then(setContentArray.bind(this));
+      // Define Immutable Props and getters
+      Object.defineProperties(this, {
+        'pageSize':{
+          configurable: false,
+          enumerable:   true,
+          writeable:    false,
+          value:        pageSize
+        }
+      });
+
+      return this;
+
+    } // end constructor
 
   // extraEncode
   static get extraEncode(){

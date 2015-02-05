@@ -51,7 +51,6 @@ export class MHUser extends MHObject {
     // Default MHUser unique non-required objects to null
     var username = args.metadata.username,
     email       = args.metadata.email        || null,
-    phonenumber = args.metadata.phonenumber  || args.metadata.phoneNumber || null,
     firstname   = args.metadata.firstname    || args.metadata.firstName   || null,
     lastname    = args.metadata.lastname     || args.metadata.lastName    || null;
 
@@ -79,12 +78,6 @@ export class MHUser extends MHObject {
         enumerable:   true,
         writable:     false,
         value:        email
-      },
-      'phonenumber':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        phonenumber
       },
       'firstName':{
         configurable: false,
