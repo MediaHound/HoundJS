@@ -3016,15 +3016,82 @@ System.register("models/meta/MHMetaData", [], function() {
         mixlist = args.mixlist || null,
         username = args.username || null,
         email = args.email || null,
-        phoneNumber = args.phoneNumber || null,
         isDefault = args.isDefault || null,
-        primaryColor = args.primaryColor || null,
+        averageColor = args.averageColor || null,
         createdDate = new Date(args.createdDate * 1000),
-        releaseDate = new Date(args.releaseDate * 1000),
-        currency = currency || null,
-        price = price || null,
-        timePeriod = timePeriod || null,
-        mediums = mediums || null;
+        releaseDate = new Date(args.releaseDate * 1000);
+    if (args.name) {
+      Object.defineProperty(this, 'name', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: name
+      });
+    }
+    if (args.altid) {
+      Object.defineProperty(this, 'altId', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: altid
+      });
+    }
+    if (args.username) {
+      Object.defineProperty(this, 'username', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: username
+      });
+    }
+    if (args.email) {
+      Object.defineProperty(this, 'email', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: email
+      });
+    }
+    if (args.description) {
+      Object.defineProperty(this, 'description', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: description
+      });
+    }
+    if (args.message) {
+      Object.defineProperty(this, 'message', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: message
+      });
+    }
+    if (args.mixlist) {
+      Object.defineProperty(this, 'mixlist', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: mixlist
+      });
+    }
+    if (args.averageColor) {
+      Object.defineProperty(this, 'averageColor', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: averageColor
+      });
+    }
+    if (args.isDefault) {
+      Object.defineProperty(this, 'isDefault', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: isDefault
+      });
+    }
     if (args.releaseDate) {
       if (isNaN(releaseDate)) {
         releaseDate = null;
@@ -3033,6 +3100,12 @@ System.register("models/meta/MHMetaData", [], function() {
       } else {
         releaseDate = new Date(releaseDate.valueOf() + releaseDate.getTimezoneOffset() * 60000);
       }
+      Object.defineProperty(this, 'releaseDate', {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: releaseDate
+      });
     }
     if (args.createdDate) {
       if (isNaN(createdDate)) {
@@ -3042,110 +3115,18 @@ System.register("models/meta/MHMetaData", [], function() {
       } else {
         createdDate = new Date(createdDate.valueOf() + createdDate.getTimezoneOffset() * 60000);
       }
-    }
-    Object.defineProperties(this, {
-      'mhid': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: mhid
-      },
-      'altid': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: altid
-      },
-      'name': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: name
-      },
-      'description': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: description
-      },
-      'message': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: message
-      },
-      'mixlist': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: mixlist
-      },
-      'username': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: username
-      },
-      'email': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: email
-      },
-      'phoneNumber': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: phoneNumber
-      },
-      'isDefault': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: isDefault
-      },
-      'primaryColor': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: primaryColor
-      },
-      'createdDate': {
+      Object.defineProperty(this, 'createdDate', {
         configurable: false,
         enumerable: true,
         writable: false,
         value: createdDate
-      },
-      'releaseDate': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: releaseDate
-      },
-      'currency': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: currency
-      },
-      'price': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: price
-      },
-      'timePeriod': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: timePeriod
-      },
-      'mediums': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: mediums
-      }
+      });
+    }
+    Object.defineProperty(this, 'mhid', {
+      configurable: false,
+      enumerable: true,
+      writable: false,
+      value: mhid
     });
   };
   ($traceurRuntime.createClass)(MHMetaData, {}, {});
