@@ -491,49 +491,6 @@ static forgotPasswordWithUsername(username){
   });
 }
 /* TODO: change endpoint to CamelCase and to use mhid?
-* mhUser.setPassword()
-*
-* @return { Promise }
-*
-*/
-static setPassword(password,newPassword){
-
-  if( !password || (typeof password !== 'string' && !(password instanceof String)) ){
-    throw new TypeError('password must be type string in MHUser.newPassword');
-  }
-  if( !newPassword || (typeof newPassword !== 'string' && !(newPassword instanceof String)) ){
-    throw new TypeError('newPassword must be type string in MHUser.newPassword');
-  }
-  var path = MHUser.rootEndpoint + '/forgotpassword/finish',
-  data = {};
-
-  data.oldPassword = password;
-  data.newPassword = newPassword;
-
-  return houndRequest({
-    method          : 'POST',
-    endpoint        : path,
-    withCredentials : true,
-    data            : data
-  })
-  .then(function(response){
-    console.log('valid resetPassword: ', response);
-    return response;
-  })
-  .catch(function(error){
-    if( error.xhr.status === 400 ){
-      console.error('The password ' + password + ' is an invalid password.');
-    }
-    else if( error.xhr.status === 404 ){
-      console.error('The newPassword ' + newPassword + ' was not found.');
-    } else {
-      console.log('error in setPassword: ', error.error.message);
-      console.error(error.error.stack);
-    }
-    return false;
-  });
-}
-/* TODO: change endpoint to CamelCase and to use mhid?
 * mhUser.newPassword()
 *
 * @return { Promise }
@@ -571,6 +528,50 @@ static newPassword(password,ticket){
       console.error('The ticket ' + ticket + ' was not found.');
     } else {
       console.log('error in newPassword: ', error.error.message);
+      console.error(error.error.stack);
+    }
+    return false;
+  });
+}
+
+/* TODO: change endpoint to CamelCase and to use mhid?
+* mhUser.setPassword()
+*
+* @return { Promise }
+*
+*/
+setPassword(password,newPassword){
+
+  if( !password || (typeof password !== 'string' && !(password instanceof String)) ){
+    throw new TypeError('password must be type string in MHUser.newPassword');
+  }
+  if( !newPassword || (typeof newPassword !== 'string' && !(newPassword instanceof String)) ){
+    throw new TypeError('newPassword must be type string in MHUser.newPassword');
+  }
+  var path = this.subendpoint('updatePassword'),
+  data = {};
+
+  data.oldPassword = password;
+  data.newPassword = newPassword;
+
+  return houndRequest({
+    method          : 'PATCH',
+    endpoint        : path,
+    withCredentials : true,
+    data            : data
+  })
+  .then(function(response){
+    console.log('valid password: ', response);
+    return response;
+  })
+  .catch(function(error){
+    if( error.xhr.status === 400 ){
+      console.error('The password ' + password + ' is an invalid password.');
+    }
+    else if( error.xhr.status === 404 ){
+      console.error('The newPassword ' + newPassword + ' was not found.');
+    } else {
+      console.log('error in setPassword: ', error.error.message);
       console.error(error.error.stack);
     }
     return false;
