@@ -57,6 +57,13 @@ var defaults = {
 
       var self = this;
 
+      if(response.pagingInfo.next === undefined){
+        self.lastPage = true;
+      }
+      else{
+        self.pagingInfo = response.pagingInfo;
+      }
+
       if(response.content !== undefined){
 
         if(response.content[0] !== undefined){
@@ -151,7 +158,7 @@ var defaults = {
       this._args = myArgs;
 
       this.pagePromises[this.page] = houndRequest(this._args)
-      .then(setContentArray.bind(this));
+                                      .then(setContentArray.bind(this));
       // Define Immutable Props and getters
       Object.defineProperties(this, {
         'pageSize':{
