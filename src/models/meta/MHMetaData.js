@@ -141,7 +141,7 @@ export class MHMetaData {
         createdDate = null;
       }
       else{
-        createdDate = new Date(createdDate.valueOf() + createdDate.getTimezoneOffset() * 60000);
+        createdDate = new Date(createdDate.valueOf() + createdDate.getTimezoneOffset() );
       }
 
       Object.defineProperty(this,'createdDate',{
