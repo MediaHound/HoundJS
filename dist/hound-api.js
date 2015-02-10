@@ -2719,11 +2719,7 @@ System.register("request/hound-paged-request", [], function() {
       setContentArray = function(response) {
         var MHRelationalPair = System.get('models/base/MHRelationalPair').MHRelationalPair;
         var self = this;
-        if (response.pagingInfo.next === undefined) {
-          self.lastPage = true;
-        } else {
-          self.pagingInfo = response.pagingInfo;
-        }
+        self.pagingInfo = response.pagingInfo || null;
         if (response.content !== undefined) {
           if (response.content[0] !== undefined) {
             this.pageid = response.content[0].object.metadata.mhid;

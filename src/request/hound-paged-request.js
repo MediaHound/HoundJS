@@ -57,12 +57,8 @@ var defaults = {
 
       var self = this;
 
-      if(response.pagingInfo.next === undefined){
-        self.lastPage = true;
-      }
-      else{
-        self.pagingInfo = response.pagingInfo;
-      }
+      self.pagingInfo = response.pagingInfo || null;
+
 
       if(response.content !== undefined){
 
