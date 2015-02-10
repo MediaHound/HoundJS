@@ -3461,7 +3461,7 @@ System.register("models/base/MHObject", [], function() {
         method: 'PUT',
         endpoint: path
       }).then((function(socialRes) {
-        var newSocial = new MHSocial(socialRes);
+        var newSocial = new MHSocial(socialRes.social);
         if ($__20[lastSocialRequestIdSym] === requestId) {
           self.social = newSocial;
         }

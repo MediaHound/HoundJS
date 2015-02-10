@@ -752,13 +752,12 @@ export class MHObject {
         endpoint: path
       })
       .then(socialRes => {
-        var newSocial = new MHSocial(socialRes);
+        var newSocial = new MHSocial(socialRes.social);
 
         // only update if this is the last request returning
         if( this[lastSocialRequestIdSym] === requestId ){
           self.social = newSocial;
         }
-
         //log('in take action response, newSocial: ', newSocial);
         return newSocial;
       })
