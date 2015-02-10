@@ -5041,6 +5041,30 @@ System.register("models/collection/MHCollection", [], function() {
     toString: function() {
       return $traceurRuntime.superCall(this, $MHCollection.prototype, "toString", []) + ' and description ' + this.description;
     },
+    editMetaData: function(name, description) {
+      var path = this.subendpoint('update'),
+          data = {};
+      if (description) {
+        data = {
+          "name": name,
+          "description": description
+        };
+      } else if (name) {
+        data = {"name": name};
+      }
+      return houndRequest({
+        method: 'PUT',
+        endpoint: path,
+        data: data
+      }).then(function(response) {
+        return MHObject.fetchByMhid(response.metadata.mhid);
+      }).then(function(newCollection) {
+        if (MHLoginSession.openSession) {
+          MHLoginSession.currentUser.fetchOwnedCollections("full", 12, true);
+        }
+        return newCollection;
+      });
+    },
     addContent: function(content) {
       return this.addContents([content]);
     },
