@@ -4102,11 +4102,17 @@ System.register("models/base/MHRelationalPair", [], function() {
         throw new TypeError('Args typeof string but not valid JSON in MHRelationalPair', 'MHRelationalPair.js', 15);
       }
     }
-    args.context.target = args.object.metadata.mhid;
-    context = new MHContext(args.context);
+    if (args.context) {
+      args.context.target = args.object.metadata.mhid;
+      context = new MHContext(args.context);
+    } else {
+      args.context = {};
+      args.context.target = args.object.metadata.mhid;
+      context = new MHContext(args.context);
+    }
     object = mhidLRU.has(args.object.metadata.mhid) ? mhidLRU.get(args.object.metadata.mhid) : MHObject.create(args.object) || null;
     if (context == null || object == null) {
-      throw new TypeError('Either context or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);
+      console.warn('Either context or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);
     }
     Object.defineProperties(this, {
       'context': {
@@ -4350,7 +4356,7 @@ System.register("models/user/MHUser", [], function() {
       var size = arguments[1] !== (void 0) ? arguments[1] : 12;
       var force = arguments[2] !== (void 0) ? arguments[2] : false;
       var path = this.subendpoint('following');
-      if (force || this.following === null || this.following.numberOfElements !== size) {
+      if (force || this.following === null) {
         this.following = pagedRequest({
           method: 'GET',
           endpoint: path,
@@ -4358,6 +4364,7 @@ System.register("models/user/MHUser", [], function() {
           params: {view: view}
         });
       }
+      console.log(this.following);
       return this.following;
     },
     fetchServiceSettings: function(serv) {
@@ -4516,7 +4523,7 @@ System.register("models/user/MHUser", [], function() {
       if (!username || (typeof username !== 'string' && !(username instanceof String))) {
         throw new TypeError('Username must be type string in MHUser.validateUsername');
       }
-      var path = $MHUser.rootEndpoint + '/validate/' + encodeURIComponent(username);
+      var path = $MHUser.rootEndpoint + '/validate/username/' + encodeURIComponent(username);
       return houndRequest({
         method: 'GET',
         endpoint: path

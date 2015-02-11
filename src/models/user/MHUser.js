@@ -322,7 +322,7 @@ static validateUsername(username){
   if( !username || (typeof username !== 'string' && !(username instanceof String)) ){
     throw new TypeError('Username must be type string in MHUser.validateUsername');
   }
-  var path = MHUser.rootEndpoint + '/validate/' + encodeURIComponent(username);
+  var path = MHUser.rootEndpoint + '/validate/username/' + encodeURIComponent(username);
 
   // returns 200 for acceptable user name
   // returns 406 for taken user name
@@ -766,7 +766,7 @@ fetchSuggested(view='full', size=12, force=false){
 */
 fetchFollowed(view='full', size=12, force=false){
   var path = this.subendpoint('following');
-  if( force || this.following === null || this.following.numberOfElements !== size ){
+  if( force || this.following === null ){
     this.following = pagedRequest({
       method: 'GET',
       endpoint: path,
@@ -774,7 +774,7 @@ fetchFollowed(view='full', size=12, force=false){
       params: {view}
     });
   }
-  //console.log(this.feedPagedRequest);
+  console.log(this.following);
   return this.following;
 }
 

@@ -29,13 +29,20 @@ export class MHRelationalPair {
         throw new TypeError('Args typeof string but not valid JSON in MHRelationalPair', 'MHRelationalPair.js', 15);
       }
     }
+    if( args.context ){
+      args.context.target = args.object.metadata.mhid;
+      context = new MHContext(args.context);
+    }
+    else{
+      args.context = {};
+      args.context.target = args.object.metadata.mhid;
+      context = new MHContext(args.context);
+    }
 
-     args.context.target = args.object.metadata.mhid;
-     context = new MHContext(args.context);
      object = mhidLRU.has(args.object.metadata.mhid) ? mhidLRU.get(args.object.metadata.mhid) : MHObject.create(args.object) || null;
 
     if( context == null || object == null ){
-      throw new TypeError('Either context or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);
+      console.warn('Either context or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);
     }
 
     Object.defineProperties(this, {
