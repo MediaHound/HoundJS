@@ -331,8 +331,7 @@ static validateUsername(username){
     endpoint: path
   })
   .then(function(response){
-    //console.log('valid username response: ', response, response === 200);
-    return response === 200;
+      return response;
   })
   .catch(function(error){
     if( error.xhr.status === 406 ){
@@ -362,7 +361,7 @@ static validateEmail(email){
   })
   .then(function(response){
     //console.log('valid email response: ', response);
-    return response === 200;
+    return response;
   })
   .catch(function(error){
     if( error.xhr.status === 406 ){
@@ -398,7 +397,7 @@ static forgotUsernameWithEmail(email){
     data            : data
   })
   .then(function(response){
-    console.log('valid forgotUsernameWithEmail: ', response);
+  //  console.log('valid forgotUsernameWithEmail: ', response);
     return response;
   })
   .catch(function(error){
