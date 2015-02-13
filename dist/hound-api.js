@@ -2721,7 +2721,7 @@ System.register("request/hound-paged-request", [], function() {
         var self = this;
         self.pagingInfo = response.pagingInfo || null;
         if (response.content !== undefined) {
-          if (response.content[0] !== undefined) {
+          if (response.content[0].object !== undefined) {
             this.pageid = response.content[0].object.metadata.mhid;
           }
           var content = Promise.all(MHRelationalPair.createFromArray(response.content).map(function(relationalPair) {
@@ -3541,9 +3541,7 @@ System.register("models/base/MHObject", [], function() {
           if (err.message === 'undefined is not a function') {
             warn('Unknown mhid prefix, see args object: ', args);
           }
-          if (err.message === 'Args was object without mhid!') {
-            warn('Incomplete Object passed to create function: ', args);
-          }
+          if (err.message === 'Args was object without mhid!') {}
         }
         return null;
       }
@@ -4528,7 +4526,7 @@ System.register("models/user/MHUser", [], function() {
         method: 'GET',
         endpoint: path
       }).then(function(response) {
-        return response === 200;
+        return response;
       }).catch(function(error) {
         if (error.xhr.status === 406) {
           console.error('The username ' + username + ' is already taken.');
@@ -4548,7 +4546,7 @@ System.register("models/user/MHUser", [], function() {
         method: 'GET',
         endpoint: path
       }).then(function(response) {
-        return response === 200;
+        return response;
       }).catch(function(error) {
         if (error.xhr.status === 406) {
           console.error('The email ' + email + ' is already registered.');
@@ -4572,7 +4570,6 @@ System.register("models/user/MHUser", [], function() {
         withCredentials: false,
         data: data
       }).then(function(response) {
-        console.log('valid forgotUsernameWithEmail: ', response);
         return response;
       }).catch(function(error) {
         if (error.xhr.status === 400) {

@@ -263,7 +263,7 @@ export class MHObject {
           warn('Unknown mhid prefix, see args object: ', args);
         }
         if( err.message === 'Args was object without mhid!'){
-          warn('Incomplete Object passed to create function: ', args);
+          //warn('Incomplete Object passed to create function: ', args);
         }
       }
       //error(err.stack); // turning off this error because it is really annoying!

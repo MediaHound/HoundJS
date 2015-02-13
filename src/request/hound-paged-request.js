@@ -62,7 +62,7 @@ var defaults = {
 
       if(response.content !== undefined){
 
-        if(response.content[0] !== undefined){
+        if(response.content[0].object !== undefined){
           this.pageid = response.content[0].object.metadata.mhid;
         }
 
