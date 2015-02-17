@@ -554,7 +554,7 @@ setPassword(password,newPassword){
   data.newPassword = newPassword;
 
   return houndRequest({
-    method          : 'PATCH',
+    method          : 'PUT',
     endpoint        : path,
     withCredentials : true,
     data            : data

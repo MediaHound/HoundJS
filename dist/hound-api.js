@@ -4252,7 +4252,7 @@ System.register("models/user/MHUser", [], function() {
       data.oldPassword = password;
       data.newPassword = newPassword;
       return houndRequest({
-        method: 'PATCH',
+        method: 'PUT',
         endpoint: path,
         withCredentials: true,
         data: data
