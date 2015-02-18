@@ -547,17 +547,16 @@ setPassword(password,newPassword){
   if( !newPassword || (typeof newPassword !== 'string' && !(newPassword instanceof String)) ){
     throw new TypeError('newPassword must be type string in MHUser.newPassword');
   }
-  var path = this.subendpoint('updatePassword'),
-  data = {};
-
-  data.oldPassword = password;
-  data.newPassword = newPassword;
+  var path = this.subendpoint('updatePassword');
 
   return houndRequest({
     method          : 'PUT',
     endpoint        : path,
     withCredentials : true,
-    data            : data
+    data:{
+      oldPassword: password,
+      newPassword: newPassword
+    }
   })
   .then(function(response){
     console.log('valid password: ', response);
