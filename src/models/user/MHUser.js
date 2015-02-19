@@ -206,7 +206,7 @@ export class MHUser extends MHObject {
       }
     })
     .then(function(parsed){
-      return MHObject.fetchByMhid(parsed.metadata.mhid);
+      return parsed.metadata;
     });
     /*
     .catch(function(error){
@@ -604,12 +604,12 @@ setProfileImage(image){
     })();
   }
 
-  var path = MHUser.rootEndpoint + '/uploadImage',
+  var path = this.subendpoint('uploadImage'),
   form = new FormData();
 
   form.append('data', image);
 
-  //console.log('image: ', image, 'form: ', form);
+  console.log('path: ', path, 'image: ', image, 'form: ', form);
 
   // send form or file?
   return houndRequest({

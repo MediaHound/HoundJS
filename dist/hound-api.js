@@ -4290,9 +4290,10 @@ System.register("models/user/MHUser", [], function() {
           return new NoMHSessionError('No valid user session. Please log in to change profile picture');
         })();
       }
-      var path = $MHUser.rootEndpoint + '/uploadImage',
+      var path = this.subendpoint('uploadImage'),
           form = new FormData();
       form.append('data', image);
+      console.log('path: ', path, 'image: ', image, 'form: ', form);
       return houndRequest({
         method: 'POST',
         endpoint: path,
@@ -4460,7 +4461,7 @@ System.register("models/user/MHUser", [], function() {
         withCredentials: true,
         headers: {}
       }).then(function(parsed) {
-        return MHObject.fetchByMhid(parsed.metadata.mhid);
+        return parsed.metadata;
       });
     },
     fetchSettings: function(mhid) {
@@ -4874,12 +4875,23 @@ System.register("models/user/MHLoginSession", [], function() {
         withCredentials: true,
         headers: {}
       }).then((function(loginMap) {
-        return MHObject.fetchByMhid(loginMap.mhid);
-      })).then((function(mhUserLoggedIn) {
-        return MHUser.fetchSettings(mhUserLoggedIn.mhid).then(function(settings) {
-          mhUserLoggedIn.settings = settings;
-          return mhUserLoggedIn;
+        console.log(loginMap);
+        return MHObject.fetchByMhid(loginMap.mhid).then(function(mhUser) {
+          return [loginMap, mhUser];
         });
+      })).then((function(mhUserMap) {
+        if (mhUserMap[0].access === false) {
+          mhUserMap[1].settings = {
+            onboarded: mhUserMap[0].onboarded,
+            access: mhUserMap[0].access
+          };
+          return mhUserMap[1];
+        } else {
+          return MHUser.fetchSettings(mhUserMap[1].mhid).then(function(settings) {
+            mhUserMap[1].settings = settings;
+            return mhUserMap[1];
+          });
+        }
       })).then((function(user) {
         access = user.access = user.settings.access;
         onboarded = user.onboarded = user.settings.onboarded;
@@ -4889,7 +4901,7 @@ System.register("models/user/MHLoginSession", [], function() {
         log('logging in:', loggedInUser);
         return loggedInUser;
       })).catch(function(error) {
-        throw new Error('Problem during login: ' + error.error.message, 'MHLoginSession.js');
+        throw new Error('Problem during login: ' + error, 'MHLoginSession.js');
       });
     },
     logout: function() {

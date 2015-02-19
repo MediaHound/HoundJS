@@ -226,15 +226,27 @@ export class MHLoginSession {
         headers: {}
       })
       .then(loginMap => {
-        //console.log(loginMap);
-        return MHObject.fetchByMhid(loginMap.mhid);
-      })
-      .then(mhUserLoggedIn => {
-
-        return MHUser.fetchSettings(mhUserLoggedIn.mhid).then(function(settings){
-          mhUserLoggedIn.settings = settings;
-          return mhUserLoggedIn;
+        console.log(loginMap);
+        return MHObject.fetchByMhid(loginMap.mhid).then(function(mhUser){
+          return [loginMap,mhUser];
         });
+      })
+      .then(mhUserMap => {
+        if(mhUserMap[0].access === false){
+
+          mhUserMap[1].settings = {
+            onboarded: mhUserMap[0].onboarded,
+            access: mhUserMap[0].access
+          };
+          return mhUserMap[1];
+
+        }
+        else{
+          return MHUser.fetchSettings(mhUserMap[1].mhid).then(function(settings){
+            mhUserMap[1].settings = settings;
+            return mhUserMap[1];
+          });
+        }
 
       })
       .then(user => {
@@ -249,7 +261,7 @@ export class MHLoginSession {
       })
       .catch(function(error){
         //console.error('Error on MHLoginSession.login', error.error, 'xhr: ', error.xhr);
-        throw new Error('Problem during login: '+error.error.message, 'MHLoginSession.js');
+        throw new Error('Problem during login: '+error, 'MHLoginSession.js');
       });
   }
 
