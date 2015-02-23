@@ -164,7 +164,7 @@ export class MHLoginSession {
    * @returns {Boolean}
    */
   static updatedProfileImage(updatedUser){
-    log('updatedUploadImage: ', updatedUser);
+    console.log('updatedUploadImage: ', updatedUser, updatedUser instanceof MHUser, updatedUser.hasMhid(loggedInUser.mhid));
     if( !(updatedUser instanceof MHUser) || !updatedUser.hasMhid(loggedInUser.mhid) ){
       throw new TypeError("Updated Profile Image must be passed a new MHUser Object that equals the currently logged in user");
     }

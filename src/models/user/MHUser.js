@@ -550,7 +550,7 @@ setPassword(password,newPassword){
   var path = this.subendpoint('updatePassword');
 
   return houndRequest({
-    method          : 'PUT',
+    method          : 'POST',
     endpoint        : path,
     withCredentials : true,
     data:{
