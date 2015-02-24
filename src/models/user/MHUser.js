@@ -861,11 +861,15 @@ fetchServiceSettings(serv){
       'Content-Type':'application/json'
     }
   }).catch(function(response){
-    console.error(response.error);
+    console.error(response);
   })
   .then(function(response){
-    console.log(response);
-    return response;
+    if(response === undefined){
+      return 500;
+    }
+    else{
+      return response;
+    }
   });
 }
 
