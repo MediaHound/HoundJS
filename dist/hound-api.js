@@ -4293,16 +4293,14 @@ System.register("models/user/MHUser", [], function() {
       var path = this.subendpoint('uploadImage'),
           form = new FormData();
       form.append('data', image);
-      console.log('path: ', path, 'image: ', image, 'form: ', form);
+      log('path: ', path, 'image: ', image, 'form: ', form);
       return houndRequest({
         method: 'POST',
         endpoint: path,
         withCredentials: true,
         data: form
-      }).then(function(userWithImage) {
-        var MHLoginSession = System.get('models/user/MHLoginSession').MHLoginSession;
-        MHLoginSession.updatedProfileImage(MHObject.create(userWithImage));
-        return userWithImage;
+      }).then(function(primaryImage) {
+        return primaryImage;
       });
     },
     fetchInterestFeed: function() {
@@ -4799,14 +4797,6 @@ System.register("models/user/MHLoginSession", [], function() {
         detail: {mhUser: mhUserObj}
       });
     }});
-  var MHSessionUserProfileImageChange = function MHSessionUserProfileImageChange() {};
-  ($traceurRuntime.createClass)(MHSessionUserProfileImageChange, {}, {create: function(mhUserObj) {
-      return makeEvent('mhSessionUserProfileImageChange', {
-        bubbles: false,
-        cancelable: false,
-        detail: {mhUser: mhUserObj}
-      });
-    }});
   var loggedInUser = null,
       onboarded = false,
       access = false,
@@ -4847,17 +4837,6 @@ System.register("models/user/MHLoginSession", [], function() {
         error(err.error.stack);
         return count;
       }));
-    },
-    updatedProfileImage: function(updatedUser) {
-      console.log('updatedUploadImage: ', updatedUser, updatedUser instanceof MHUser, updatedUser.hasMhid(loggedInUser.mhid));
-      if (!(updatedUser instanceof MHUser) || !updatedUser.hasMhid(loggedInUser.mhid)) {
-        throw new TypeError("Updated Profile Image must be passed a new MHUser Object that equals the currently logged in user");
-      }
-      loggedInUser = updatedUser;
-      loggedInUser.fetchSocial();
-      loggedInUser.fetchOwnedCollections();
-      window.dispatchEvent(MHSessionUserProfileImageChange.create(loggedInUser));
-      return true;
     },
     login: function(username, password) {
       if (typeof username !== 'string' && !(username instanceof String)) {

@@ -66,17 +66,17 @@ class MHUserLogoutEvent {
   }
 }
 
-class MHSessionUserProfileImageChange {
-  static create(mhUserObj){
-    return makeEvent('mhSessionUserProfileImageChange', {
-      bubbles:    false,
-      cancelable: false,
-      detail: {
-        mhUser: mhUserObj
-      }
-    });
-  }
-}
+// class MHSessionUserProfileImageChange {
+//   static create(mhUserObj){
+//     return makeEvent('mhSessionUserProfileImageChange', {
+//       bubbles:    false,
+//       cancelable: false,
+//       detail: {
+//         mhUser: mhUserObj
+//       }
+//     });
+//   }
+// }
 
 // Singleton Containers
 var loggedInUser  = null,
@@ -157,27 +157,27 @@ export class MHLoginSession {
       });
   }
 
-  /**
+  /** DEPRECATED: updatedProfileImage doesn't need to be called, just fetch the current logged in user.
    * When A user updates their profile picture this will fire the event
    * and update the currentUser property.
    * @param  {MHUser} updatedUser
    * @returns {Boolean}
    */
-  static updatedProfileImage(updatedUser){
-    console.log('updatedUploadImage: ', updatedUser, updatedUser instanceof MHUser, updatedUser.hasMhid(loggedInUser.mhid));
-    if( !(updatedUser instanceof MHUser) || !updatedUser.hasMhid(loggedInUser.mhid) ){
-      throw new TypeError("Updated Profile Image must be passed a new MHUser Object that equals the currently logged in user");
-    }
-
-    loggedInUser = updatedUser;
-    loggedInUser.fetchSocial();
-    loggedInUser.fetchOwnedCollections();
-
-    // dispatch profile image changed event: 'mhUserProfileImageChanged'
-    window.dispatchEvent(MHSessionUserProfileImageChange.create(loggedInUser));
-
-    return true;
-  }
+  // static updatedProfileImage(updatedImage){
+  //   console.log('updatedUploadImage: ', updatedUser, updatedUser instanceof MHUser, updatedUser.hasMhid(loggedInUser.mhid));
+  //   if( !(updatedUser instanceof MHUser) || !updatedUser.hasMhid(loggedInUser.mhid) ){
+  //     throw new TypeError("Updated Profile Image must be passed a new MHUser Object that equals the currently logged in user");
+  //   }
+  //
+  //   loggedInUser = updatedUser;
+  //   loggedInUser.fetchSocial();
+  //   loggedInUser.fetchOwnedCollections();
+  //
+  //   // dispatch profile image changed event: 'mhUserProfileImageChanged'
+  //   window.dispatchEvent(MHSessionUserProfileImageChange.create(loggedInUser));
+  //
+  //   return true;
+  // }
 
   // DEPRECATED: Use MHUser.updateSettings() instead.
   // static completedOnboarding(){

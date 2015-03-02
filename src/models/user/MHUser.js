@@ -4,6 +4,7 @@ import { log } from '../internal/debug-helpers';
 
 import { MHObject, mhidLRU } from '../base/MHObject';
 import { MHRelationalPair } from '../base/MHRelationalPair';
+//import { MHImage } from '../image/MHImage';
 
 import { houndRequest } from '../../request/hound-request';
 import { pagedRequest } from '../../request/hound-paged-request';
@@ -609,7 +610,7 @@ setProfileImage(image){
 
   form.append('data', image);
 
-  console.log('path: ', path, 'image: ', image, 'form: ', form);
+  log('path: ', path, 'image: ', image, 'form: ', form);
 
   // send form or file?
   return houndRequest({
@@ -618,11 +619,17 @@ setProfileImage(image){
     withCredentials : true,
     data            : form
   })
-  .then(function(userWithImage){
-    var MHLoginSession = System.get('../../src/models/user/MHLoginSession').MHLoginSession;
-    //console.warn('circular dep: ', MHLoginSession);
-    MHLoginSession.updatedProfileImage(MHObject.create(userWithImage));
-    return userWithImage;
+  .then(function(primaryImage){
+
+    // var MHLoginSession = System.get('../../src/models/user/MHLoginSession').MHLoginSession;
+    // //console.warn('circular dep: ', MHLoginSession);
+    //var img = new MHImage(primaryImage);
+    //MHLoginSession.updatedProfileImage(img);
+    //return img;
+
+    // TODO: wire back up the Event in MHLoginSession
+    return primaryImage;
+
   });
 }
 
