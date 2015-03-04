@@ -4857,10 +4857,13 @@ System.register("models/user/MHLoginSession", [], function() {
         withCredentials: true,
         headers: {}
       }).then((function(loginMap) {
-        console.log(loginMap);
-        return MHObject.fetchByMhid(loginMap.mhid).then(function(mhUser) {
-          return [loginMap, mhUser];
-        });
+        if (!loginMap.Error) {
+          return MHObject.fetchByMhid(loginMap.mhid).then(function(mhUser) {
+            return [loginMap, mhUser];
+          });
+        } else {
+          throw new Error(loginMap.Error);
+        }
       })).then((function(mhUserMap) {
         if (mhUserMap[0].access === false) {
           mhUserMap[1].settings = {
@@ -4883,7 +4886,7 @@ System.register("models/user/MHLoginSession", [], function() {
         log('logging in:', loggedInUser);
         return loggedInUser;
       })).catch(function(error) {
-        throw new Error('Problem during login: ' + error, 'MHLoginSession.js');
+        throw new Error(error);
       });
     },
     logout: function() {
