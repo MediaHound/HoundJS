@@ -7382,6 +7382,7 @@ System.register("search/quick-search", [], function() {
           v.metadata = {};
           v.metadata.mhid = v.mhid;
           v.metadata.name = v.name;
+          v.metadata.username = v.username || null;
           if (typeof v.primaryImageUrl === 'string') {
             v.primaryImage = {
               metadata: {
