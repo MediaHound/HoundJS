@@ -7439,6 +7439,9 @@ System.register("search/quick-search", [], function() {
     }
     return rtn;
   };
+  quickSearch.type = function(query, size, type) {
+    return search[type](query, size);
+  };
   ;
   return {get quickSearch() {
       return quickSearch;
