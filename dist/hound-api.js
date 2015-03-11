@@ -4021,7 +4021,6 @@ System.register("models/meta/MHContext", [], function() {
     }
     var connected = args.connected || null,
         preference = args.preference || null,
-        consumable = args.consumable || null,
         mediums = args.mediums || null,
         position = null,
         target = args.target || null;
@@ -4050,14 +4049,6 @@ System.register("models/meta/MHContext", [], function() {
         enumerable: true,
         writable: false,
         value: preference
-      });
-    }
-    if (consumable) {
-      Object.defineProperty(this, 'consumable', {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: consumable
       });
     }
     if (mediums) {
@@ -5754,27 +5745,22 @@ System.register("models/source/MHSourceModel", [], function() {
       }
     }
     var name = args.object.metadata.name || null,
-        mediums = args.context.mediums || null,
-        consumable = (typeof args.context.consumable === 'boolean') ? args.context.consumable : null;
-    if (name === null || consumable === null || mediums === null) {
+        mediums = args.context.mediums || null;
+    if (name === null) {
       console.warn('errored args: ', args);
       throw new TypeError('Name, consumable, or mediums null in args in MHSourceModel');
     }
-    mediums = mediums.map((function(v) {
-      return new MHSourceMedium(v, $__106);
-    }));
+    if (mediums != null) {
+      mediums = mediums.map((function(v) {
+        return new MHSourceMedium(v, $__106);
+      }));
+    }
     Object.defineProperties(this, {
       'name': {
         configurable: false,
         enumerable: true,
         writable: false,
         value: name
-      },
-      'consumable': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: consumable
       },
       'mediums': {
         configurable: false,

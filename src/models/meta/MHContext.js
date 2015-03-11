@@ -19,7 +19,7 @@ export class MHContext {
     }
     var connected   = args.connected || null,
         preference  = args.preference || null,
-        consumable  = args.consumable || null,
+        //consumable  = args.consumable || null, //DEPRECATED
         mediums     = args.mediums  || null,
         position    = null,
         target      = args.target || null;
@@ -55,14 +55,14 @@ export class MHContext {
       });
     }
 
-    if(consumable){
-      Object.defineProperty(this,'consumable',{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        consumable
-      });
-    }
+    // if(consumable){
+    //   Object.defineProperty(this,'consumable',{
+    //     configurable: false,
+    //     enumerable:   true,
+    //     writable:     false,
+    //     value:        consumable
+    //   });
+    // }
 
     if(mediums){
       Object.defineProperty(this,'mediums',{
