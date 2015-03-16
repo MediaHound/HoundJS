@@ -291,6 +291,22 @@ export class MHMedia extends MHObject {
     return this.related;
   }
 
+  /**
+  * mhObj.fetchShortestPath(mhid,force)
+  *
+  * @param { otherMhid     } otherMhid - the MHID for the object to calculate shortest path
+  * 
+  * @return { houndRequest }  - MediaHound request object for this shortest path
+  *
+  */
+  fetchShortestPath(otherMhid){
+    var path = this.subendpoint('shortestPath/' + otherMhid);
+    return houndRequest({
+      method: 'GET',
+      endpoint: path
+    });
+  }
+
   /* TODO?
    * mhMed.fetchTrailers()
    *
