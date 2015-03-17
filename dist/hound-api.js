@@ -2560,7 +2560,7 @@ System.register("request/promise-request", [], function() {
           prop = null;
         }
         if (data) {
-          if (typeof data === 'string' || data instanceof String || data instanceof Blob || data instanceof ArrayBuffer || data instanceof FormData) {} else {
+          if (typeof data === 'string' || data instanceof String || data instanceof ArrayBuffer) {} else if (FormData !== undefined && FormData !== null && data instanceof FormData) {} else if (Blob !== undefined && Blob !== null && data instanceof Blob) {} else {
             data = JSON.stringify(data);
             if (headers == null) {
               headers = {'Content-Type': 'application/json'};
@@ -6026,6 +6026,21 @@ System.register("models/media/MHMedia", [], function() {
         });
       }
       return this.related;
+    },
+    fetchShortestDistance: function(otherMhid) {
+      var path = this.subendpoint('shortestPath/' + otherMhid);
+      return houndRequest({
+        method: 'GET',
+        endpoint: path
+      }).then(function(response) {
+        return response.paths[0].path.length - 1;
+      }).catch(function(err) {
+        if (err.xhr.status === 404) {
+          return null;
+        } else {
+          throw err;
+        }
+      });
     }
   }, {get rootEndpoint() {
       return 'graph/media';
