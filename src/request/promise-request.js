@@ -33,9 +33,20 @@
  *
  **/
 // Start Module
-if( !window.XMLHttpRequest || !("withCredentials" in new XMLHttpRequest()) ){
-  throw new Error("No XMLHttpRequest 2 Object found, please update your browser.");
+var xhrc;
+
+if(typeof window !== 'undefined'){
+    if( !window.XMLHttpRequest || !("withCredentials" in new XMLHttpRequest()) ){
+      throw new Error("No XMLHttpRequest 2 Object found, please update your browser.");
+    }
+    else{
+      xhrc = window;
+    }
 }
+else if(typeof window === 'undefined'){
+  xhrc = require("xmlhttprequest-cookie");
+}
+
 
 var extraEncode = function(str){
       // encodeURIComponent then encode - _ . ! ~ * ' ( ) as well
@@ -72,7 +83,7 @@ var extraEncode = function(str){
           headers     = args.headers          || null,
           //withCreds   = args.withCredentials  || false,
           onprogress  = args.onprogress       || args.onProgress || null,
-          xhr         = new XMLHttpRequest();
+          xhr         = new xhrc.XMLHttpRequest();
 
 
       // Check for url

@@ -7,7 +7,14 @@ var debug = {
 };
 
 var isDevAndDebug = function(){
-  return window.mhDebug && (window.location.host === 'local.mediahound.com:2014');
+
+  if(typeof window !== 'undefined'){
+    return window.mhDebug && (window.location.host === 'local.mediahound.com:2014');
+  }
+  else{
+    return false;
+  }
+
 };
 
 // TODO change so that log takes override and returns console function so that console shows correct line number
