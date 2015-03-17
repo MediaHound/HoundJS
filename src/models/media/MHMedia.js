@@ -306,7 +306,7 @@ export class MHMedia extends MHObject {
       method: 'GET',
       endpoint: path
     }).then(function(response) {
-      var shortestPathLength = response.paths[0].path.length + 1;
+      var shortestPathLength = response.paths[0].path.length - 1;
       return shortestPathLength;
     }).catch(function(err) {
       if (err.xhr.status === 404) {
