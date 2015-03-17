@@ -292,20 +292,32 @@ export class MHMedia extends MHObject {
   }
 
   /**
-  * mhObj.fetchShortestPath(mhid,force)
+  * mhObj.fetchShortestDistance(otherMhid)
   *
   * @param { otherMhid     } otherMhid - the MHID for the object to calculate shortest path
   * 
-  * @return { houndRequest }  - MediaHound request object for this shortest path
+  * @return { Number }  - Returns the shortest distance between to objects. 
+  *                       If there is no path between the two objects, returns `null`.
   *
   */
-  fetchShortestPath(otherMhid){
+  fetchShortestDistance(otherMhid){
     var path = this.subendpoint('shortestPath/' + otherMhid);
     return houndRequest({
       method: 'GET',
       endpoint: path
+    }).then(function(response) {
+      var shortestPathLength = response.paths[0].path.length + 1;
+      return shortestPathLength;
+    }).catch(function(err) {
+      if (err.xhr.status === 404) {
+        return null;
+      }
+      else {
+        throw err;
+      }
     });
   }
+    
 
   /* TODO?
    * mhMed.fetchTrailers()
