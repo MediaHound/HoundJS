@@ -294,9 +294,9 @@ export class MHMedia extends MHObject {
   /**
   * mhObj.fetchShortestDistance(otherMhid)
   *
-  * @param { otherMhid     } otherMhid - the MHID for the object to calculate shortest path
+  * @param { otherMhid } otherMhid - the MHID for the object to calculate shortest path.
   * 
-  * @return { Number }  - Returns the shortest distance between to objects. 
+  * @return { Number }  - Returns the shortest distance between the two objects. 
   *                       If there is no path between the two objects, returns `null`.
   *
   */
@@ -306,10 +306,15 @@ export class MHMedia extends MHObject {
       method: 'GET',
       endpoint: path
     }).then(function(response) {
-      var shortestPathLength = response.paths[0].path.length - 1;
-      return shortestPathLength;
+      // This method returns an array of shortest paths.
+      // Since we only care about the length, we can look at the first
+      // shortest path and calculate its length.
+      // The path includes both the start and mhid.
+      // We do not count the start as a 'step', so we subtract one.
+      return response.paths[0].path.length - 1;
     }).catch(function(err) {
       if (err.xhr.status === 404) {
+        // A 404 indicates there is no path between the two nodes.
         return null;
       }
       else {
