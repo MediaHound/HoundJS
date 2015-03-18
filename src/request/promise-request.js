@@ -113,12 +113,12 @@ var extraEncode = function(str){
       if( data ){
         if( typeof data === 'string'    ||
             data instanceof String      ||
-            data instanceof ArrayBuffer    
+            data instanceof ArrayBuffer
         ){
           // do nothing
-        } else if (FormData !== undefined && FormData !== null && data instanceof FormData){
+        } else if ( typeof FormData !== 'undefined' && data instanceof FormData){
           // do nothing
-        } else if (Blob !== undefined && Blob !== null && data instanceof Blob){
+        } else if ( typeof Blob !== 'undefined' && data instanceof Blob){
           // do nothing
         } else {
           data = JSON.stringify(data);

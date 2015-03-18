@@ -2560,7 +2560,7 @@ System.register("request/promise-request", [], function() {
           prop = null;
         }
         if (data) {
-          if (typeof data === 'string' || data instanceof String || data instanceof ArrayBuffer) {} else if (FormData !== undefined && FormData !== null && data instanceof FormData) {} else if (Blob !== undefined && Blob !== null && data instanceof Blob) {} else {
+          if (typeof data === 'string' || data instanceof String || data instanceof ArrayBuffer) {} else if (typeof FormData !== 'undefined' && data instanceof FormData) {} else if (typeof Blob !== 'undefined' && data instanceof Blob) {} else {
             data = JSON.stringify(data);
             if (headers == null) {
               headers = {'Content-Type': 'application/json'};
