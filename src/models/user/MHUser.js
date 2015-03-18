@@ -752,15 +752,15 @@ fetchOwnedCollections(view='full', size=12, force=true){
 */
 fetchSuggested(view='full', size=12, force=false){
   var path = this.subendpoint('suggested');
-  if( force || this.suggested === null || this.suggested.numberOfElements !== size ){
+  if( force || this.suggested === null ){
     this.suggested = pagedRequest({
       method: 'GET',
       endpoint: path,
       pageSize: size,
       params: {view}
     });
+
   }
-  //console.log(this.feedPagedRequest);
   return this.suggested;
 }
 

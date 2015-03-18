@@ -59,7 +59,6 @@ var defaults = {
 
       self.pagingInfo = response.pagingInfo || null;
 
-
       if(response.content !== undefined){
 
         if(response.content[0] !== undefined && response.content[0].object !== undefined){
@@ -190,7 +189,8 @@ var defaults = {
         if( !self.lastPage ){
           self.page += 1;
           //self._args.params.page = self.page;
-          self._args.params.pageNext = response.pagingInfo.next;
+          self._args.params.next = response.pagingInfo.next;
+        //  console.log('next page:',response.pagingInfo.next);
           delete self._args.params.page;
           //  self._args.params.pageNext = response.pagingInfo.next;
 
