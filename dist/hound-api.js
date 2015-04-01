@@ -2443,7 +2443,11 @@ System.register("models/internal/debug-helpers", [], function() {
     error: true
   };
   var isDevAndDebug = function() {
-    return window.mhDebug && (window.location.host === 'local.mediahound.com:2014');
+    if (typeof window !== 'undefined') {
+      return window.mhDebug && (window.location.host === 'local.mediahound.com:2014');
+    } else {
+      return false;
+    }
   };
   var log = function(override) {
     for (var args = [],
@@ -2505,8 +2509,15 @@ System.register("origin/hound-origin", [], function() {
 System.register("request/promise-request", [], function() {
   "use strict";
   var __moduleName = "request/promise-request";
-  if (!window.XMLHttpRequest || !("withCredentials" in new XMLHttpRequest())) {
-    throw new Error("No XMLHttpRequest 2 Object found, please update your browser.");
+  var xhrc;
+  if (typeof window !== 'undefined') {
+    if (!window.XMLHttpRequest || !("withCredentials" in new XMLHttpRequest())) {
+      throw new Error("No XMLHttpRequest 2 Object found, please update your browser.");
+    } else {
+      xhrc = window;
+    }
+  } else if (typeof window === 'undefined') {
+    xhrc = require("xmlhttprequest-cookie");
   }
   var extraEncode = function(str) {
     return encodeURIComponent(str).replace(/\-/g, "%2D").replace(/\_/g, "%5F").replace(/\./g, "%2E").replace(/\!/g, "%21").replace(/\~/g, "%7E").replace(/\*/g, "%2A").replace(/\'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29");
@@ -2520,7 +2531,7 @@ System.register("request/promise-request", [], function() {
             data = args.data || null,
             headers = args.headers || null,
             onprogress = args.onprogress || args.onProgress || null,
-            xhr = new XMLHttpRequest();
+            xhr = new xhrc.XMLHttpRequest();
         if (url === null) {
           throw new TypeError('url was null or undefined in arguments object', 'promiseRequest.js', 70);
         }
@@ -2541,7 +2552,7 @@ System.register("request/promise-request", [], function() {
           prop = null;
         }
         if (data) {
-          if (typeof data === 'string' || data instanceof String || data instanceof Blob || data instanceof ArrayBuffer || data instanceof FormData) {} else {
+          if (typeof data === 'string' || data instanceof String || data instanceof ArrayBuffer) {} else if (typeof FormData !== 'undefined' && data instanceof FormData) {} else if (typeof Blob !== 'undefined' && data instanceof Blob) {} else {
             data = JSON.stringify(data);
             if (headers == null) {
               headers = {'Content-Type': 'application/json'};
@@ -2778,7 +2789,7 @@ System.register("request/hound-paged-request", [], function() {
       return this.currentPromise.then(function(response) {
         if (!self.lastPage) {
           self.page += 1;
-          self._args.params.pageNext = response.pagingInfo.next;
+          self._args.params.next = response.pagingInfo.next;
           delete self._args.params.page;
           if (self.pagePromises[self.page] == null) {
             self.pagePromises[self.page] = houndRequest(self._args).then(setContentArray.bind(self));
@@ -3279,8 +3290,10 @@ System.register("models/base/MHObject", [], function() {
   var MHSocial = System.get("models/social/MHSocial").MHSocial;
   var childrenConstructors = {};
   var mhidLRU = new MHCache(1000);
-  if (window.location.host === 'local.mediahound.com:2014') {
-    window.mhidLRU = mhidLRU;
+  if (typeof window !== 'undefined') {
+    if (window.location.host === 'local.mediahound.com:2014') {
+      window.mhidLRU = mhidLRU;
+    }
   }
   var lastSocialRequestIdSym = Symbol('lastSocialRequestId'),
       socialSym = Symbol('social');
@@ -4021,7 +4034,6 @@ System.register("models/meta/MHContext", [], function() {
     }
     var connected = args.connected || null,
         preference = args.preference || null,
-        consumable = args.consumable || null,
         mediums = args.mediums || null,
         position = null,
         target = args.target || null;
@@ -4050,14 +4062,6 @@ System.register("models/meta/MHContext", [], function() {
         enumerable: true,
         writable: false,
         value: preference
-      });
-    }
-    if (consumable) {
-      Object.defineProperty(this, 'consumable', {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: consumable
       });
     }
     if (mediums) {
@@ -4338,7 +4342,7 @@ System.register("models/user/MHUser", [], function() {
       var size = arguments[1] !== (void 0) ? arguments[1] : 12;
       var force = arguments[2] !== (void 0) ? arguments[2] : false;
       var path = this.subendpoint('suggested');
-      if (force || this.suggested === null || this.suggested.numberOfElements !== size) {
+      if (force || this.suggested === null) {
         this.suggested = pagedRequest({
           method: 'GET',
           endpoint: path,
@@ -4857,10 +4861,13 @@ System.register("models/user/MHLoginSession", [], function() {
         withCredentials: true,
         headers: {}
       }).then((function(loginMap) {
-        console.log(loginMap);
-        return MHObject.fetchByMhid(loginMap.mhid).then(function(mhUser) {
-          return [loginMap, mhUser];
-        });
+        if (!loginMap.Error) {
+          return MHObject.fetchByMhid(loginMap.mhid).then(function(mhUser) {
+            return [loginMap, mhUser];
+          });
+        } else {
+          throw new Error(loginMap.Error);
+        }
       })).then((function(mhUserMap) {
         if (mhUserMap[0].access === false) {
           mhUserMap[1].settings = {
@@ -4878,12 +4885,16 @@ System.register("models/user/MHLoginSession", [], function() {
         access = user.access = user.settings.access;
         onboarded = user.onboarded = user.settings.onboarded;
         loggedInUser = user;
-        window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
-        sessionStorage.currentUser = JSON.stringify(loggedInUser);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
+        }
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.currentUser = JSON.stringify(loggedInUser);
+        }
         log('logging in:', loggedInUser);
         return loggedInUser;
       })).catch(function(error) {
-        throw new Error('Problem during login: ' + error, 'MHLoginSession.js');
+        throw new Error(error);
       });
     },
     logout: function() {
@@ -4901,7 +4912,9 @@ System.register("models/user/MHLoginSession", [], function() {
           document.cookie = (cookie.key + "=" + cookie.value + "; expires=" + expires + "; domain=.mediahound.com");
         }
       }));
-      window.dispatchEvent(MHUserLogoutEvent.create(loggedInUser));
+      if (typeof window !== undefined) {
+        window.dispatchEvent(MHUserLogoutEvent.create(loggedInUser));
+      }
       mhidLRU.removeAll();
       return Promise.resolve(loggedInUser).then(function(mhUser) {
         loggedInUser = null;
@@ -4920,7 +4933,7 @@ System.register("models/user/MHLoginSession", [], function() {
         withCredentials: true,
         headers: {}
       }).then((function(loginMap) {
-        if (restoreFromSessionStorage()) {
+        if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined' && restoreFromSessionStorage()) {
           var cachedUser = JSON.parse(window.sessionStorage.currentUser);
           if (cachedUser.mhid === loginMap.users[0].metadata.mhid || cachedUser.mhid === loginMap.users[0].mhid) {
             access = cachedUser.settings.access;
@@ -5751,27 +5764,22 @@ System.register("models/source/MHSourceModel", [], function() {
       }
     }
     var name = args.object.metadata.name || null,
-        mediums = args.context.mediums || null,
-        consumable = (typeof args.context.consumable === 'boolean') ? args.context.consumable : null;
-    if (name === null || consumable === null || mediums === null) {
+        mediums = args.context.mediums || null;
+    if (name === null) {
       console.warn('errored args: ', args);
       throw new TypeError('Name, consumable, or mediums null in args in MHSourceModel');
     }
-    mediums = mediums.map((function(v) {
-      return new MHSourceMedium(v, $__106);
-    }));
+    if (mediums != null) {
+      mediums = mediums.map((function(v) {
+        return new MHSourceMedium(v, $__106);
+      }));
+    }
     Object.defineProperties(this, {
       'name': {
         configurable: false,
         enumerable: true,
         writable: false,
         value: name
-      },
-      'consumable': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: consumable
       },
       'mediums': {
         configurable: false,
@@ -6010,6 +6018,21 @@ System.register("models/media/MHMedia", [], function() {
         });
       }
       return this.related;
+    },
+    fetchShortestDistance: function(otherMhid) {
+      var path = this.subendpoint('shortestPath/' + otherMhid);
+      return houndRequest({
+        method: 'GET',
+        endpoint: path
+      }).then(function(response) {
+        return response.paths[0].path.length - 1;
+      }).catch(function(err) {
+        if (err.xhr.status === 404) {
+          return null;
+        } else {
+          throw err;
+        }
+      });
     }
   }, {get rootEndpoint() {
       return 'graph/media';
@@ -7379,6 +7402,7 @@ System.register("search/quick-search", [], function() {
           v.metadata = {};
           v.metadata.mhid = v.mhid;
           v.metadata.name = v.name;
+          v.metadata.username = v.username || null;
           if (typeof v.primaryImageUrl === 'string') {
             v.primaryImage = {
               metadata: {
@@ -7434,6 +7458,9 @@ System.register("search/quick-search", [], function() {
       rtn[currType] = search[currType](query, size);
     }
     return rtn;
+  };
+  quickSearch.type = function(query, size, type) {
+    return search[type](query, size);
   };
   ;
   return {get quickSearch() {

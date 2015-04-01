@@ -55,11 +55,11 @@ export class MHSourceModel {
 
     var name        = args.object.metadata.name     || null,
         //logo        = args.logo     || null, // not created as MHImage because it has a different set of possible properties
-        mediums     = args.context.mediums  || null,
-        consumable  = (typeof args.context.consumable === 'boolean') ? args.context.consumable : null;
+        mediums     = args.context.mediums  || null;
+        //consumable  = (typeof args.context.consumable === 'boolean') ? args.context.consumable : null; //DEPRECATED
 
     // Required Props Check
-    if( name === null || consumable === null || mediums === null ){
+    if( name === null ){
       console.warn('errored args: ', args);
       throw new TypeError('Name, consumable, or mediums null in args in MHSourceModel');
     }
@@ -71,7 +71,10 @@ export class MHSourceModel {
     // }
 
     // Create MHSourceMediums
-    mediums = mediums.map( v => new MHSourceMedium(v, this) );
+    if(mediums!=null){
+      mediums = mediums.map( v => new MHSourceMedium(v, this) );
+    }
+
     //console.log('MHSourceModel',mediums);
 
     Object.defineProperties(this, {
@@ -80,12 +83,6 @@ export class MHSourceModel {
         enumerable:   true,
         writable:     false,
         value:        name
-      },
-      'consumable':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        consumable
       },
       'mediums':{
         configurable: false,

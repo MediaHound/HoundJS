@@ -5,6 +5,8 @@ import { log } from '../models/internal/debug-helpers';
 // Start Module
 import { promiseRequest } from './promise-request';
 
+import { MHSDK } from '../models/sdk/MHSDK';
+
 var extraEncode = promiseRequest.extraEncode,
     requestMap  = {},
     defaults    = {
@@ -66,6 +68,18 @@ export var houndRequest = function(args){
     // houndOrigin defined in hound-origin.js before import, must be fully qualified domain name
     args.url = houndOrigin + args.endpoint;
     delete args.endpoint;
+  }
+
+  // Set the OAuth access token if the client has configured OAuth.
+  if (MHSDK.MHAccessToken) {
+    if (args.params) {
+      args.params.accessToken = MHSDK.MHAccessToken;
+    }
+    else {
+      args.params = {
+        accessToken: MHSDK.MHAccessToken
+      };
+    }
   }
 
 

@@ -226,10 +226,14 @@ export class MHLoginSession {
         headers: {}
       })
       .then(loginMap => {
-        console.log(loginMap);
-        return MHObject.fetchByMhid(loginMap.mhid).then(function(mhUser){
-          return [loginMap,mhUser];
-        });
+        if(!loginMap.Error){
+          return MHObject.fetchByMhid(loginMap.mhid).then(function(mhUser){
+            return [loginMap,mhUser];
+          });
+        }
+        else{
+          throw new Error(loginMap.Error);
+        }
       })
       .then(mhUserMap => {
         if(mhUserMap[0].access === false){
@@ -254,14 +258,19 @@ export class MHLoginSession {
         onboarded = user.onboarded = user.settings.onboarded;
         loggedInUser = user;
 
-        window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
-        sessionStorage.currentUser = JSON.stringify(loggedInUser);
+        if(typeof window !== 'undefined'){
+          window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
+        }
+        if(typeof sessionStorage !== 'undefined'){
+          sessionStorage.currentUser = JSON.stringify(loggedInUser);
+        }
+
         log('logging in:',loggedInUser);
         return loggedInUser;
       })
       .catch(function(error){
         //console.error('Error on MHLoginSession.login', error.error, 'xhr: ', error.xhr);
-        throw new Error('Problem during login: '+error, 'MHLoginSession.js');
+        throw new Error(error);
       });
   }
 
@@ -289,7 +298,10 @@ export class MHLoginSession {
     });
 
     // Dispatch logout event
-    window.dispatchEvent(MHUserLogoutEvent.create(loggedInUser));
+    if(typeof window !== undefined){
+      window.dispatchEvent(MHUserLogoutEvent.create(loggedInUser));
+    }
+
 
     mhidLRU.removeAll();
 
@@ -319,7 +331,8 @@ export class MHLoginSession {
       })
       .then(loginMap => {
 
-        if(restoreFromSessionStorage()){
+        if( typeof window !== 'undefined' && typeof sessionStorage !== 'undefined' && restoreFromSessionStorage()){
+
           var cachedUser = JSON.parse(window.sessionStorage.currentUser);
           if(cachedUser.mhid === loginMap.users[0].metadata.mhid ||
              cachedUser.mhid === loginMap.users[0].mhid){

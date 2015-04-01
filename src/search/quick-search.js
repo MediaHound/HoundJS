@@ -73,6 +73,7 @@ buildSearchHelper = function(index){
           v.metadata = {};
           v.metadata.mhid = v.mhid;
           v.metadata.name = v.name;
+          v.metadata.username = v.username || null;
           if( typeof v.primaryImageUrl === 'string' ){
             v.primaryImage = {
               metadata:{
@@ -157,6 +158,15 @@ quickSearch.everything = function(query, size){
   }
 
   return rtn;
+};
+/*
+ * quickSearch.type(query, size)
+ *
+ *  returns a map of search promises
+ *
+ */
+quickSearch.type = function(query, size, type){
+  return search[type](query, size);
 };
 
 export { quickSearch };

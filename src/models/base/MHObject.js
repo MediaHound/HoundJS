@@ -13,8 +13,11 @@ var childrenConstructors = {};
 
 // Create Cache
 export var mhidLRU = new MHCache(1000);
-if( window.location.host === 'local.mediahound.com:2014' ){
-  window.mhidLRU = mhidLRU;
+
+if(typeof window !== 'undefined'){
+  if( window.location.host === 'local.mediahound.com:2014' ){
+    window.mhidLRU = mhidLRU;
+  }
 }
 
 // Symbols for Element hiding

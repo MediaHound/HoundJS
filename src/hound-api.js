@@ -21,14 +21,4 @@ export default {
   get pagedSearch()   { return pagedSearch;   }
 };
 
-
-// TODO for testing
-/*
-if( window.location.host === 'local.mediahound.com:2014' ){
-  window.houndapi = houndApi;
-  window.houndApi = houndApi;
-  window.houndAPI = houndApi;
-}
-*/
-
-
+//module.exports = System.get('hound-api').default;
