@@ -10,6 +10,9 @@
     'cleanup-model.js'
  */
 
+// SDK
+import { MHSDK }              from './sdk/MHSDK';
+
 // Base Models
 import { MHObject }           from './base/MHObject';
 //import { MHEmbeddedObject }   from './base/MHEmbeddedObject';
@@ -105,6 +108,7 @@ import { MHSourceModel }  from './source/MHSourceModel';
 delete MHObject.registerConstructor;
 
 export var models = {
+  get MHSDK()             { return MHSDK; },
   get MHObject()          { return MHObject; },
   //get MHEmbeddedObject()  { return MHEmbeddedObject; },
   //get MHEmbeddedRelation(){ return MHEmbeddedRelation; },
