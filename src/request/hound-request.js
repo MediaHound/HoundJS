@@ -73,11 +73,11 @@ export var houndRequest = function(args){
   // Set the OAuth access token if the client has configured OAuth.
   if (MHSDK.MHAccessToken) {
     if (args.params) {
-      args.params.accessToken = MHSDK.MHAccessToken;
+      args.params.access_token = MHSDK.MHAccessToken;
     }
     else {
       args.params = {
-        accessToken: MHSDK.MHAccessToken
+        access_token: MHSDK.MHAccessToken
       };
     }
   }
