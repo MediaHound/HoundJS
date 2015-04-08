@@ -65,9 +65,7 @@ var defaults = {
           this.pageid = response.content[0].object.metadata.mhid;
         }
 
-        var content = Promise.all(MHRelationalPair.createFromArray(response.content).map(function(relationalPair){
-          return relationalPair.object;
-        }));
+        var content = Promise.all(MHRelationalPair.createFromArray(response.content));
 
         return content.catch(function(err){
           console.warn(err);

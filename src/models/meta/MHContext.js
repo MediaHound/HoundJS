@@ -22,7 +22,8 @@ export class MHContext {
         //consumable  = args.consumable || null, //DEPRECATED
         mediums     = args.mediums  || null,
         position    = null,
-        target      = args.target || null;
+        target      = args.target || null,
+        relationships = args.relationships || null;
 
     if(args.sorting){
       position = args.sorting.position || args.sorting.importance || null;
@@ -70,6 +71,15 @@ export class MHContext {
         enumerable:   true,
         writable:     false,
         value:        mediums
+      });
+    }
+
+    if(relationships){
+      Object.defineProperty(this,'relationships',{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        relationships
       });
     }
 
