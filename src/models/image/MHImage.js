@@ -1,5 +1,6 @@
 
 import { MHObject } from '../base/MHObject';
+import { MHImageData } from './MHImageData';
 
 export class MHImage extends MHObject {
   /*  MHImage Constructor
@@ -39,40 +40,53 @@ export class MHImage extends MHObject {
     super(args);
 
     // Unique Properties
-    var url       = (typeof args.original.url === 'string') ? args.original.url.replace(/^http:|^https:/i, '') : null,
-        width     = args.original.width  || null,
-        height    = args.original.height || null,
-        isDefault = (typeof args.isDefault === 'boolean') ? args.isDefault : null;
+    var isDefault = (typeof args.isDefault === 'boolean') ? args.isDefault : null,
+        original  = (args.original != null) ? new MHImageData(args.original) : null,
+        thumbnail = (args.thumbnail != null) ? new MHImageData(args.thumbnail) : null,
+        small     = (args.small != null) ? new MHImageData(args.small) : null,
+        medium    = (args.medium != null) ? new MHImageData(args.medium) : null,
+        large     = (args.large != null) ? new MHImageData(args.large) : null;
 
     Object.defineProperties(this, {
-      'url':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        url
-      },
       'isDefault':{
         configurable: false,
         enumerable:   true,
         writable:     false,
         value:        isDefault
       },
-      'width':{
+      'original':{
         configurable: false,
         enumerable:   true,
         writable:     false,
-        value:        width
+        value:        original
       },
-      'height':{
+      'thumbnail':{
         configurable: false,
         enumerable:   true,
         writable:     false,
-        value:        height
+        value:        thumbnail
+      },
+      'small':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        small
+      },
+      'medium':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        medium
+      },
+      'large':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        large
       }
     });
 
   }
-
 
   static get mhidPrefix(){
     return 'mhimg';

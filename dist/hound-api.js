@@ -5605,29 +5605,19 @@ System.register("models/contributor/MHRealIndividualContributor", [], function()
       return MHRealIndividualContributor;
     }};
 });
-System.register("models/image/MHImage", [], function() {
+System.register("models/image/MHImageData", [], function() {
   "use strict";
-  var __moduleName = "models/image/MHImage";
-  var MHObject = System.get("models/base/MHObject").MHObject;
-  var MHImage = function MHImage(args) {
-    args = MHObject.parseArgs(args);
-    $traceurRuntime.superCall(this, $MHImage.prototype, "constructor", [args]);
-    var url = (typeof args.original.url === 'string') ? args.original.url.replace(/^http:|^https:/i, '') : null,
-        width = args.original.width || null,
-        height = args.original.height || null,
-        isDefault = (typeof args.isDefault === 'boolean') ? args.isDefault : null;
+  var __moduleName = "models/image/MHImageData";
+  var MHImageData = function MHImageData(args) {
+    var url = (typeof args.url === 'string') ? args.url.replace(/^http:|^https:/i, '') : null,
+        width = args.width || null,
+        height = args.height || null;
     Object.defineProperties(this, {
       'url': {
         configurable: false,
         enumerable: true,
         writable: false,
         value: url
-      },
-      'isDefault': {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: isDefault
       },
       'width': {
         configurable: false,
@@ -5640,6 +5630,64 @@ System.register("models/image/MHImage", [], function() {
         enumerable: true,
         writable: false,
         value: height
+      }
+    });
+  };
+  ($traceurRuntime.createClass)(MHImageData, {}, {});
+  return {get MHImageData() {
+      return MHImageData;
+    }};
+});
+System.register("models/image/MHImage", [], function() {
+  "use strict";
+  var __moduleName = "models/image/MHImage";
+  var MHObject = System.get("models/base/MHObject").MHObject;
+  var MHImageData = System.get("models/image/MHImageData").MHImageData;
+  var MHImage = function MHImage(args) {
+    args = MHObject.parseArgs(args);
+    $traceurRuntime.superCall(this, $MHImage.prototype, "constructor", [args]);
+    var isDefault = (typeof args.isDefault === 'boolean') ? args.isDefault : null,
+        original = (args.original != null) ? new MHImageData(args.original) : null,
+        thumbnail = (args.thumbnail != null) ? new MHImageData(args.thumbnail) : null,
+        small = (args.small != null) ? new MHImageData(args.small) : null,
+        medium = (args.medium != null) ? new MHImageData(args.medium) : null,
+        large = (args.large != null) ? new MHImageData(args.large) : null;
+    Object.defineProperties(this, {
+      'isDefault': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: isDefault
+      },
+      'original': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: original
+      },
+      'thumbnail': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: thumbnail
+      },
+      'small': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: small
+      },
+      'medium': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: medium
+      },
+      'large': {
+        configurable: false,
+        enumerable: true,
+        writable: false,
+        value: large
       }
     });
   };
