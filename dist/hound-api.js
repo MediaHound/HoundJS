@@ -6009,6 +6009,12 @@ System.register("models/media/MHMedia", [], function() {
         enumerable: false,
         writable: true,
         value: null
+      },
+      'related': {
+        configurable: false,
+        enumerable: false,
+        writable: true,
+        value: null
       }
     });
   };

@@ -95,6 +95,12 @@ export class MHMedia extends MHObject {
         enumerable:   false,
         writable:     true,
         value:        null
+      },
+      'related':{
+        configurable: false,
+        enumerable:   false,
+        writable:     true,
+        value:        null
       }
     });
   }
