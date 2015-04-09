@@ -2505,6 +2505,49 @@ System.register("models/internal/debug-helpers", [], function() {
     }
   };
 });
+System.register("models/sdk/MHSDK", [], function() {
+  "use strict";
+  var __moduleName = "models/sdk/MHSDK";
+  var _MHAccessToken = null;
+  var _MHClientId = null;
+  var _MHClientSecret = null;
+  var MHSDK = function MHSDK() {};
+  ($traceurRuntime.createClass)(MHSDK, {}, {
+    configure: function(clientId, clientSecret) {
+      _MHClientId = clientId;
+      _MHClientSecret = clientSecret;
+      return this.refreshOAuthToken();
+    },
+    refreshOAuthToken: function() {
+      var houndRequest = System.get('../../request/hound-request');
+      return houndRequest({
+        endpoint: 'cas/oauth2.0/accessToken',
+        params: {
+          client_id: _MHClientId,
+          client_secret: _MHClientSecret,
+          grant_type: 'client_credentials'
+        }
+      }).then(function(response) {
+        _MHAccessToken = response.accessToken;
+      });
+    },
+    get MHAccessToken() {
+      return _MHAccessToken;
+    }
+  });
+  return {get MHSDK() {
+      return MHSDK;
+    }};
+});
+System.register("origin/hound-origin", [], function() {
+  "use strict";
+  var __moduleName = "origin/hound-origin";
+  var houndOrigin = 'https://api-v10.mediahound.com/';
+  ;
+  return {get houndOrigin() {
+      return houndOrigin;
+    }};
+});
 System.register("request/promise-request", [], function() {
   "use strict";
   var __moduleName = "request/promise-request";
@@ -2614,61 +2657,6 @@ System.register("request/promise-request", [], function() {
       return $__default;
     }
   };
-});
-System.register("models/sdk/MHSDK", [], function() {
-  "use strict";
-  var __moduleName = "models/sdk/MHSDK";
-  var promiseRequest = System.get("request/promise-request").promiseRequest;
-  var responseThen = function(response) {
-    if (!!response) {
-      if (response.responseText != null && response.responseText !== '') {
-        return JSON.parse(response.responseText);
-      }
-      if (response.response != null && typeof response.response === 'string' && response.response !== '') {
-        return JSON.parse(response.response);
-      }
-      return response.status;
-    }
-    return response;
-  };
-  var _MHAccessToken = null;
-  var _MHClientId = null;
-  var _MHClientSecret = null;
-  var MHSDK = function MHSDK() {};
-  ($traceurRuntime.createClass)(MHSDK, {}, {
-    configure: function(clientId, clientSecret) {
-      _MHClientId = clientId;
-      _MHClientSecret = clientSecret;
-      return this.refreshOAuthToken();
-    },
-    refreshOAuthToken: function() {
-      return promiseRequest({
-        url: 'https://cas.mediahound.com/cas/oauth2.0/accessToken',
-        params: {
-          client_id: _MHClientId,
-          client_secret: _MHClientSecret,
-          grant_type: 'client_credentials'
-        }
-      }).then(responseThen).then(function(response) {
-        _MHAccessToken = response.accessToken;
-      });
-    },
-    get MHAccessToken() {
-      return _MHAccessToken;
-    }
-  });
-  return {get MHSDK() {
-      return MHSDK;
-    }};
-});
-System.register("origin/hound-origin", [], function() {
-  "use strict";
-  var __moduleName = "origin/hound-origin";
-  var houndOrigin = 'https://api-v10.mediahound.com/';
-  ;
-  return {get houndOrigin() {
-      return houndOrigin;
-    }};
 });
 System.register("request/hound-request", [], function() {
   "use strict";
