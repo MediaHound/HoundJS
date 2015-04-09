@@ -74,6 +74,7 @@ buildSearchHelper = function(index){
           v.metadata.mhid = v.mhid;
           v.metadata.name = v.name;
           v.metadata.username = v.username || null;
+          v.metadata.releaseDate = v.releaseDate;
           if( typeof v.primaryImageUrl === 'string' ){
             v.primaryImage = {
               metadata:{
