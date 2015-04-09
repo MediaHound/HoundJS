@@ -2511,11 +2511,14 @@ System.register("models/sdk/MHSDK", [], function() {
   var _MHAccessToken = null;
   var _MHClientId = null;
   var _MHClientSecret = null;
+  var _houndOrigin = null;
   var MHSDK = function MHSDK() {};
   ($traceurRuntime.createClass)(MHSDK, {}, {
     configure: function(clientId, clientSecret) {
+      var origin = arguments[2] !== (void 0) ? arguments[2] : 'https://api-v10.mediahound.com/';
       _MHClientId = clientId;
       _MHClientSecret = clientSecret;
+      _houndOrigin = origin;
       return this.refreshOAuthToken();
     },
     refreshOAuthToken: function() {
@@ -2533,19 +2536,13 @@ System.register("models/sdk/MHSDK", [], function() {
     },
     get MHAccessToken() {
       return _MHAccessToken;
+    },
+    get origin() {
+      return _houndOrigin;
     }
   });
   return {get MHSDK() {
       return MHSDK;
-    }};
-});
-System.register("origin/hound-origin", [], function() {
-  "use strict";
-  var __moduleName = "origin/hound-origin";
-  var houndOrigin = 'https://api-v10.mediahound.com/';
-  ;
-  return {get houndOrigin() {
-      return houndOrigin;
     }};
 });
 System.register("request/promise-request", [], function() {
@@ -2661,7 +2658,6 @@ System.register("request/promise-request", [], function() {
 System.register("request/hound-request", [], function() {
   "use strict";
   var __moduleName = "request/hound-request";
-  var houndOrigin = System.get("origin/hound-origin").houndOrigin;
   var log = System.get("models/internal/debug-helpers").log;
   var promiseRequest = System.get("request/promise-request").promiseRequest;
   var MHSDK = System.get("models/sdk/MHSDK").MHSDK;
@@ -2694,7 +2690,7 @@ System.register("request/hound-request", [], function() {
       defaults.withCredentials = true;
     }
     if (args.endpoint) {
-      args.url = houndOrigin + args.endpoint;
+      args.url = MHSDK.origin + args.endpoint;
       delete args.endpoint;
     }
     if (MHSDK.MHAccessToken) {
