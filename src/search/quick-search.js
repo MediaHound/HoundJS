@@ -97,6 +97,10 @@ buildSearchHelper = function(index){
         return parsed.content.map((v) => {
           try{
             mhObj = MHObject.create(v);
+            // Add contributor names to mhobject
+            if (v.contributorNames) {
+              mhObj.contributorNames = v.contributorNames;
+            }
             return mhObj;
           } catch(e) {
             warn('unrecognized mhid prefix: ', v.mhid);

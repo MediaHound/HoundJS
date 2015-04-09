@@ -7532,6 +7532,9 @@ System.register("search/quick-search", [], function() {
         return parsed.content.map((function(v) {
           try {
             mhObj = MHObject.create(v);
+            if (v.contributorNames) {
+              mhObj.contributorNames = v.contributorNames;
+            }
             return mhObj;
           } catch (e) {
             warn('unrecognized mhid prefix: ', v.mhid);
