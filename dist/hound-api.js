@@ -2519,7 +2519,7 @@ System.register("models/sdk/MHSDK", [], function() {
       return this.refreshOAuthToken();
     },
     refreshOAuthToken: function() {
-      var houndRequest = System.get('../../request/hound-request');
+      var houndRequest = System.get('request/hound-request').houndRequest;
       return houndRequest({
         endpoint: 'cas/oauth2.0/accessToken',
         params: {
