@@ -72,6 +72,7 @@ buildSearchHelper = function(index){
           //TEMP fix for Search Results
           v.metadata = {};
           v.metadata.mhid = v.mhid;
+          v.metadata.altId = v.altId;
           v.metadata.name = v.name;
           v.metadata.username = v.username || null;
           v.metadata.releaseDate = v.releaseDate;
