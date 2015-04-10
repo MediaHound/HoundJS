@@ -2511,14 +2511,15 @@ System.register("models/sdk/MHSDK", [], function() {
   var _MHAccessToken = null;
   var _MHClientId = null;
   var _MHClientSecret = null;
-  var _houndOrigin = null;
+  var _houndOrigin = 'https://api-v10.mediahound.com/';
   var MHSDK = function MHSDK() {};
   ($traceurRuntime.createClass)(MHSDK, {}, {
-    configure: function(clientId, clientSecret) {
-      var origin = arguments[2] !== (void 0) ? arguments[2] : 'https://api-v10.mediahound.com/';
+    configure: function(clientId, clientSecret, origin) {
       _MHClientId = clientId;
       _MHClientSecret = clientSecret;
-      _houndOrigin = origin;
+      if (origin) {
+        _houndOrigin = origin;
+      }
       return this.refreshOAuthToken();
     },
     refreshOAuthToken: function() {

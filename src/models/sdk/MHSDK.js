@@ -3,7 +3,7 @@ var _MHAccessToken = null;
 var _MHClientId = null;
 var _MHClientSecret = null;
 
-var _houndOrigin = null;
+var _houndOrigin = 'https://api-v10.mediahound.com/';
 
 export class MHSDK {
 
@@ -16,10 +16,12 @@ export class MHSDK {
    * @param   origin <String> - MediaHound network origin.
    * @returns <Promise> - A promise that resolves when the configuration is complete.
    */
-  static configure(clientId, clientSecret, origin='https://api-v10.mediahound.com/') {
+  static configure(clientId, clientSecret, origin) {
     _MHClientId = clientId;
     _MHClientSecret = clientSecret;
-    _houndOrigin = origin;
+    if (origin) {
+      _houndOrigin = origin;
+    }
 
     return this.refreshOAuthToken();
   }
