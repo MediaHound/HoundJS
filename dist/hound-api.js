@@ -5009,7 +5009,6 @@ System.register("models/user/MHLoginSession", [], function() {
       });
     }
   });
-  MHLoginSession.updateCount();
   return {get MHLoginSession() {
       return MHLoginSession;
     }};
