@@ -364,5 +364,3 @@ export class MHLoginSession {
       });
   }
 }
-
-MHLoginSession.updateCount();
