@@ -15,6 +15,7 @@ import { houndRequest } from '../../request/hound-request';
 // END TODO
 
 var sources;
+var sourcesPromise = null;
 
 // MediaHound SourceModel Object
 export class MHSourceModel {
@@ -108,8 +109,8 @@ export class MHSourceModel {
   static fetchAllSources(view="full",force=false){
     var path = 'graph/source/all';
 
-    if( force || this.sourcesPromise === null ){
-      this.sourcesPromise = houndRequest({
+    if( force || sourcesPromise === null ){
+      sourcesPromise = houndRequest({
         method  : 'GET',
         endpoint: path,
         params: {view}
@@ -130,7 +131,7 @@ export class MHSourceModel {
       });
     }
 
-    return this.sourcesPromise;
+    return sourcesPromise;
   }
 
   static get sources(){

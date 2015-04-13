@@ -5854,6 +5854,7 @@ System.register("models/source/MHSourceModel", [], function() {
   var MHSourceMedium = System.get("models/source/MHSourceMedium").MHSourceMedium;
   var houndRequest = System.get("request/hound-request").houndRequest;
   var sources;
+  var sourcesPromise = null;
   var MHSourceModel = function MHSourceModel(args) {
     var content = arguments[1] !== (void 0) ? arguments[1] : null;
     var $__3 = this;
@@ -5910,8 +5911,8 @@ System.register("models/source/MHSourceModel", [], function() {
       var view = arguments[0] !== (void 0) ? arguments[0] : "full";
       var force = arguments[1] !== (void 0) ? arguments[1] : false;
       var path = 'graph/source/all';
-      if (force || this.sourcesPromise === null) {
-        this.sourcesPromise = houndRequest({
+      if (force || sourcesPromise === null) {
+        sourcesPromise = houndRequest({
           method: 'GET',
           endpoint: path,
           params: {view: view}
@@ -5930,7 +5931,7 @@ System.register("models/source/MHSourceModel", [], function() {
           return obj;
         });
       }
-      return this.sourcesPromise;
+      return sourcesPromise;
     },
     get sources() {
       return sources;
