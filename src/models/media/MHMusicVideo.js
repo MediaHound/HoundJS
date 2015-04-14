@@ -44,6 +44,6 @@ export class MHMusicVideo extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHMusicVideo);
+  MHObject.registerConstructor(MHMusicVideo, 'MHMusicVideo');
 })();
 

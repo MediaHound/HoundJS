@@ -48,6 +48,6 @@ export class MHPeriodicalSeries extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHPeriodicalSeries);
+  MHObject.registerConstructor(MHPeriodicalSeries, 'MHPeriodicalSeries');
 })();
 

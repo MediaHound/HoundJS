@@ -81,5 +81,5 @@ export class MHFictionalGroupContributor extends MHContributor {
 }
 
 (function(){
-  MHObject.registerConstructor(MHFictionalGroupContributor);
+  MHObject.registerConstructor(MHFictionalGroupContributor, 'MHFictionalGroupContributor');
 }());

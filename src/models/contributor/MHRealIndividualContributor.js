@@ -74,5 +74,5 @@ export class MHRealIndividualContributor extends MHContributor {
 }
 
 (function(){
-  MHObject.registerConstructor(MHRealIndividualContributor);
+  MHObject.registerConstructor(MHRealIndividualContributor, 'MHRealIndividualContributor');
 }());

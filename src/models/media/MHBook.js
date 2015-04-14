@@ -52,6 +52,6 @@ export class MHBook extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHBook);
+  MHObject.registerConstructor(MHBook, 'MHBook');
 })();
 

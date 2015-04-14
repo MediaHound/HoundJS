@@ -416,5 +416,5 @@ export class MHCollection extends MHObject {
 }
 
 (function(){
-  MHObject.registerConstructor(MHCollection);
+  MHObject.registerConstructor(MHCollection, 'MHCollection');
 })();

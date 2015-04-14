@@ -55,6 +55,6 @@ export class MHAchievements extends MHTrait {
 }
 
 (function(){
-  MHObject.registerConstructor(MHAchievements);
+  MHObject.registerConstructor(MHAchievements, 'MHAchievements');
 })();
 

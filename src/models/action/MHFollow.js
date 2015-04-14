@@ -50,6 +50,6 @@ export class MHFollow extends MHAction {
 }
 
 (function(){
-  MHObject.registerConstructor(MHFollow);
+  MHObject.registerConstructor(MHFollow, 'MHFollow');
 })();
 

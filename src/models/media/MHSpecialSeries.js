@@ -48,6 +48,6 @@ export class MHSpecialSeries extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHSpecialSeries);
+  MHObject.registerConstructor(MHSpecialSeries, 'MHSpecialSeries');
 })();
 

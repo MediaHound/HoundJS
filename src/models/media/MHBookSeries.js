@@ -48,6 +48,6 @@ export class MHBookSeries extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHBookSeries);
+  MHObject.registerConstructor(MHBookSeries, 'MHBookSeries');
 })();
 

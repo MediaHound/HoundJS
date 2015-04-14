@@ -55,6 +55,6 @@ export class MHEra extends MHTrait {
 }
 
 (function(){
-  MHObject.registerConstructor(MHEra);
+  MHObject.registerConstructor(MHEra, 'MHEra');
 })();
 

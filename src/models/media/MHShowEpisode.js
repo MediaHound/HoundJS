@@ -51,6 +51,6 @@ export class MHShowEpisode extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHShowEpisode);
+  MHObject.registerConstructor(MHShowEpisode, 'MHShowEpisode');
 })();
 

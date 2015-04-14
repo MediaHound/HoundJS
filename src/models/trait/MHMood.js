@@ -55,6 +55,6 @@ export class MHMood extends MHTrait {
 }
 
 (function(){
-  MHObject.registerConstructor(MHMood);
+  MHObject.registerConstructor(MHMood, 'MHMood');
 })();
 

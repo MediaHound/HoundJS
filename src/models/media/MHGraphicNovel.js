@@ -48,6 +48,6 @@ export class MHGraphicNovel extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHGraphicNovel);
+  MHObject.registerConstructor(MHGraphicNovel, 'MHGraphicNovel');
 })();
 

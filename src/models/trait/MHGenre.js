@@ -55,6 +55,6 @@ export class MHGenre extends MHTrait {
 }
 
 (function(){
-  MHObject.registerConstructor(MHGenre);
+  MHObject.registerConstructor(MHGenre, 'MHGenre');
 })();
 

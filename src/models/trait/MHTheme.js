@@ -55,6 +55,6 @@ export class MHTheme extends MHTrait {
 }
 
 (function(){
-  MHObject.registerConstructor(MHTheme);
+  MHObject.registerConstructor(MHTheme, 'MHTheme');
 })();
 

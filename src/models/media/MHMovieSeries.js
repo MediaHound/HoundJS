@@ -48,6 +48,6 @@ export class MHMovieSeries extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHMovieSeries);
+  MHObject.registerConstructor(MHMovieSeries, 'MHMovieSeries');
 })();
 

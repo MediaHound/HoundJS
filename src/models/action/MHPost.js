@@ -88,6 +88,6 @@ export class MHPost extends MHAction {
 }
 
 (function(){
-  MHObject.registerConstructor(MHPost);
+  MHObject.registerConstructor(MHPost, 'MHPost');
 })();
 

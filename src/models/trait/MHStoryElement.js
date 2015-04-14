@@ -55,6 +55,6 @@ export class MHStoryElement extends MHTrait {
 }
 
 (function(){
-  MHObject.registerConstructor(MHStoryElement);
+  MHObject.registerConstructor(MHStoryElement, 'MHStoryElement');
 })();
 

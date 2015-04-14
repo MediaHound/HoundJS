@@ -50,5 +50,5 @@ export class MHAdd extends MHAction {
 }
 
 (function(){
-  MHObject.registerConstructor(MHAdd);
+  MHObject.registerConstructor(MHAdd, 'MHAdd');
 })();

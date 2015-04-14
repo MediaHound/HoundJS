@@ -83,5 +83,5 @@ export class MHRealGroupContributor extends MHContributor {
 }
 
 (function(){
-  MHObject.registerConstructor(MHRealGroupContributor);
+  MHObject.registerConstructor(MHRealGroupContributor, 'MHRealGroupContributor');
 }());

@@ -43,6 +43,6 @@ export class MHShowSeason extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHShowSeason);
+  MHObject.registerConstructor(MHShowSeason, 'MHShowSeason');
 })();
 

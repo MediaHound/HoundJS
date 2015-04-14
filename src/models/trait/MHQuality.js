@@ -55,6 +55,6 @@ export class MHQuality extends MHTrait {
 }
 
 (function(){
-  MHObject.registerConstructor(MHQuality);
+  MHObject.registerConstructor(MHQuality, 'MHQuality');
 })();
 

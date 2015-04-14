@@ -69,5 +69,5 @@ export class MHSource extends MHObject {
 }
 
 (function(){
-  MHObject.registerConstructor(MHSource);
+  MHObject.registerConstructor(MHSource, 'MHSource');
 })();

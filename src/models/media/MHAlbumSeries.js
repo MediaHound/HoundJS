@@ -45,6 +45,6 @@ export class MHAlbumSeries extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHAlbumSeries);
+  MHObject.registerConstructor(MHAlbumSeries, 'MHAlbumSeries');
 })();
 

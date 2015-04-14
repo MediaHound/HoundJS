@@ -55,6 +55,6 @@ export class MHStyleElement extends MHTrait {
 }
 
 (function(){
-  MHObject.registerConstructor(MHStyleElement);
+  MHObject.registerConstructor(MHStyleElement, 'MHStyleElement');
 })();
 

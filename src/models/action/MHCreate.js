@@ -50,6 +50,6 @@ export class MHCreate extends MHAction {
 }
 
 (function(){
-  MHObject.registerConstructor(MHCreate);
+  MHObject.registerConstructor(MHCreate, 'MHCreate');
 })();
 

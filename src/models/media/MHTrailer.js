@@ -48,6 +48,6 @@ export class MHTrailer extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHTrailer);
+  MHObject.registerConstructor(MHTrailer, 'MHTrailer');
 })();
 

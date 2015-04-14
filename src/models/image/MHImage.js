@@ -98,5 +98,5 @@ export class MHImage extends MHObject {
 }
 
 (function(){
-  MHObject.registerConstructor(MHImage);
+  MHObject.registerConstructor(MHImage, 'MHImage');
 }());

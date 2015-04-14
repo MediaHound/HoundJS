@@ -55,6 +55,6 @@ export class MHAudience extends MHTrait {
 }
 
 (function(){
-  MHObject.registerConstructor(MHAudience);
+  MHObject.registerConstructor(MHAudience, 'MHAudience');
 })();
 

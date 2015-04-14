@@ -55,6 +55,6 @@ export class MHMaterialSource extends MHTrait {
 }
 
 (function(){
-  MHObject.registerConstructor(MHMaterialSource);
+  MHObject.registerConstructor(MHMaterialSource, 'MHMaterialSource');
 })();
 

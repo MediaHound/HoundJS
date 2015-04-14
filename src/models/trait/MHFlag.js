@@ -55,6 +55,6 @@ export class MHFlag extends MHTrait {
 }
 
 (function(){
-  MHObject.registerConstructor(MHFlag);
+  MHObject.registerConstructor(MHFlag, 'MHFlag');
 })();
 

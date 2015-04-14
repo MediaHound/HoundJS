@@ -50,6 +50,6 @@ export class MHLike extends MHAction {
 }
 
 (function(){
-  MHObject.registerConstructor(MHLike);
+  MHObject.registerConstructor(MHLike, 'MHLike');
 })();
 

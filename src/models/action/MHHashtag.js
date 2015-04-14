@@ -96,5 +96,5 @@ export class MHHashtag extends MHAction {
 }
 
 (function(){
-  MHObject.registerConstructor(MHHashtag);
+  MHObject.registerConstructor(MHHashtag, 'MHHashtag');
 })();

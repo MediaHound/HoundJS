@@ -932,5 +932,5 @@ toString(){
 }
 
 (function(){
-  MHObject.registerConstructor(MHUser);
+  MHObject.registerConstructor(MHUser, 'MHUser');
 })();

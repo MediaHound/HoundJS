@@ -3433,7 +3433,7 @@ System.register("models/base/MHObject", [], function() {
       return $MHObject.isType(this);
     },
     get className() {
-      return this.constructor.name;
+      return this.constructor.mhName;
     },
     isEqualToMHObject: function(otherObj) {
       if (otherObj && otherObj.mhid) {
@@ -3448,7 +3448,7 @@ System.register("models/base/MHObject", [], function() {
       return false;
     },
     toString: function() {
-      return this.className + " with mhid " + this.mhid + " and name " + this.name;
+      return this.className + " with mhid " + this.mhid + " and name " + this.mhName;
     },
     get endpoint() {
       return this.constructor.rootEndpoint + '/' + this.mhid;
@@ -3625,11 +3625,8 @@ System.register("models/base/MHObject", [], function() {
       }
       return arr;
     },
-    registerConstructor: function(mhClass) {
-      if (mhClass.name === undefined) {
-        mhClass.name = mhClass.toString().match(/function (MH[A-Za-z]*)\(args\)/)[1];
-        log('shimmed mhClass.name to: ' + mhClass.name);
-      }
+    registerConstructor: function(mhClass, mhName) {
+      mhClass.mhName = mhName;
       var prefix = mhClass.mhidPrefix;
       if (typeof prefix !== 'undefined' && prefix !== null && !(prefix in childrenConstructors)) {
         Object.defineProperty(childrenConstructors, prefix, {
@@ -3659,7 +3656,7 @@ System.register("models/base/MHObject", [], function() {
     getClassNameFromMhid: function(mhid) {
       var pfx = $MHObject.getPrefixFromMhid(mhid);
       if (childrenConstructors[pfx]) {
-        return childrenConstructors[pfx].name;
+        return childrenConstructors[pfx].mhName;
       }
       return null;
     },
@@ -3844,7 +3841,7 @@ System.register("models/action/MHAdd", [], function() {
       return 'mhadd';
     }}, MHAction);
   (function() {
-    MHObject.registerConstructor(MHAdd);
+    MHObject.registerConstructor(MHAdd, 'MHAdd');
   })();
   return {get MHAdd() {
       return MHAdd;
@@ -3890,7 +3887,7 @@ System.register("models/action/MHComment", [], function() {
       return 'mhcmt';
     }}, MHAction);
   (function() {
-    MHObject.registerConstructor(MHComment);
+    MHObject.registerConstructor(MHComment, 'MHComment');
   })();
   return {get MHComment() {
       return MHComment;
@@ -3912,7 +3909,7 @@ System.register("models/action/MHCreate", [], function() {
       return 'mhcrt';
     }}, MHAction);
   (function() {
-    MHObject.registerConstructor(MHCreate);
+    MHObject.registerConstructor(MHCreate, 'MHCreate');
   })();
   return {get MHCreate() {
       return MHCreate;
@@ -3934,7 +3931,7 @@ System.register("models/action/MHFollow", [], function() {
       return 'mhflw';
     }}, MHAction);
   (function() {
-    MHObject.registerConstructor(MHFollow);
+    MHObject.registerConstructor(MHFollow, 'MHFollow');
   })();
   return {get MHFollow() {
       return MHFollow;
@@ -3992,7 +3989,7 @@ System.register("models/action/MHHashtag", [], function() {
     }
   }, MHAction);
   (function() {
-    MHObject.registerConstructor(MHHashtag);
+    MHObject.registerConstructor(MHHashtag, 'MHHashtag');
   })();
   return {get MHHashtag() {
       return MHHashtag;
@@ -4014,7 +4011,7 @@ System.register("models/action/MHLike", [], function() {
       return 'mhlke';
     }}, MHAction);
   (function() {
-    MHObject.registerConstructor(MHLike);
+    MHObject.registerConstructor(MHLike, 'MHLike');
   })();
   return {get MHLike() {
       return MHLike;
@@ -4064,7 +4061,7 @@ System.register("models/action/MHPost", [], function() {
     }
   }, MHAction);
   (function() {
-    MHObject.registerConstructor(MHPost);
+    MHObject.registerConstructor(MHPost, 'MHPost');
   })();
   return {get MHPost() {
       return MHPost;
@@ -4808,7 +4805,7 @@ System.register("models/user/MHUser", [], function() {
     }
   }, MHObject);
   (function() {
-    MHObject.registerConstructor(MHUser);
+    MHObject.registerConstructor(MHUser, 'MHUser');
   })();
   return {get MHUser() {
       return MHUser;
@@ -5280,7 +5277,7 @@ System.register("models/collection/MHCollection", [], function() {
     }
   }, MHObject);
   (function() {
-    MHObject.registerConstructor(MHCollection);
+    MHObject.registerConstructor(MHCollection, 'MHCollection');
   })();
   return {get MHCollection() {
       return MHCollection;
@@ -5413,7 +5410,7 @@ System.register("models/contributor/MHFictionalGroupContributor", [], function()
       return 'mhfgc';
     }}, MHContributor);
   (function() {
-    MHObject.registerConstructor(MHFictionalGroupContributor);
+    MHObject.registerConstructor(MHFictionalGroupContributor, 'MHFictionalGroupContributor');
   }());
   return {get MHFictionalGroupContributor() {
       return MHFictionalGroupContributor;
@@ -5472,7 +5469,7 @@ System.register("models/contributor/MHFictionalIndividualContributor", [], funct
       return 'mhfic';
     }}, MHContributor);
   (function() {
-    MHObject.registerConstructor(MHFictionalIndividualContributor);
+    MHObject.registerConstructor(MHFictionalIndividualContributor, 'MHFictionalIndividualContributor');
   }());
   return {get MHFictionalIndividualContributor() {
       return MHFictionalIndividualContributor;
@@ -5531,7 +5528,7 @@ System.register("models/contributor/MHRealGroupContributor", [], function() {
       return 'mhrgc';
     }}, MHContributor);
   (function() {
-    MHObject.registerConstructor(MHRealGroupContributor);
+    MHObject.registerConstructor(MHRealGroupContributor, 'MHRealGroupContributor');
   }());
   return {get MHRealGroupContributor() {
       return MHRealGroupContributor;
@@ -5583,7 +5580,7 @@ System.register("models/contributor/MHRealIndividualContributor", [], function()
       return 'mhric';
     }}, MHContributor);
   (function() {
-    MHObject.registerConstructor(MHRealIndividualContributor);
+    MHObject.registerConstructor(MHRealIndividualContributor, 'MHRealIndividualContributor');
   }());
   return {get MHRealIndividualContributor() {
       return MHRealIndividualContributor;
@@ -5685,7 +5682,7 @@ System.register("models/image/MHImage", [], function() {
     }
   }, MHObject);
   (function() {
-    MHObject.registerConstructor(MHImage);
+    MHObject.registerConstructor(MHImage, 'MHImage');
   }());
   return {get MHImage() {
       return MHImage;
@@ -6165,7 +6162,7 @@ System.register("models/media/MHAlbum", [], function() {
       return 'mhalb';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHAlbum);
+    MHObject.registerConstructor(MHAlbum, 'MHAlbum');
   })();
   return {get MHAlbum() {
       return MHAlbum;
@@ -6187,7 +6184,7 @@ System.register("models/media/MHAlbumSeries", [], function() {
       return 'mhals';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHAlbumSeries);
+    MHObject.registerConstructor(MHAlbumSeries, 'MHAlbumSeries');
   })();
   return {get MHAlbumSeries() {
       return MHAlbumSeries;
@@ -6209,7 +6206,7 @@ System.register("models/media/MHAnthology", [], function() {
       return 'mhath';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHAnthology);
+    MHObject.registerConstructor(MHAnthology, 'MHAnthology');
   })();
   return {get MHAnthology() {
       return MHAnthology;
@@ -6231,7 +6228,7 @@ System.register("models/media/MHBook", [], function() {
       return 'mhbok';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHBook);
+    MHObject.registerConstructor(MHBook, 'MHBook');
   })();
   return {get MHBook() {
       return MHBook;
@@ -6253,7 +6250,7 @@ System.register("models/media/MHBookSeries", [], function() {
       return 'mhbks';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHBookSeries);
+    MHObject.registerConstructor(MHBookSeries, 'MHBookSeries');
   })();
   return {get MHBookSeries() {
       return MHBookSeries;
@@ -6275,7 +6272,7 @@ System.register("models/media/MHComicBook", [], function() {
       return 'mhcbk';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHComicBook);
+    MHObject.registerConstructor(MHComicBook, 'MHComicBook');
   })();
   return {get MHComicBook() {
       return MHComicBook;
@@ -6297,7 +6294,7 @@ System.register("models/media/MHComicBookSeries", [], function() {
       return 'mhcbs';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHComicBookSeries);
+    MHObject.registerConstructor(MHComicBookSeries, 'MHComicBookSeries');
   })();
   return {get MHComicBookSeries() {
       return MHComicBookSeries;
@@ -6319,7 +6316,7 @@ System.register("models/media/MHGame", [], function() {
       return 'mhgam';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHGame);
+    MHObject.registerConstructor(MHGame, 'MHGame');
   })();
   return {get MHGame() {
       return MHGame;
@@ -6341,7 +6338,7 @@ System.register("models/media/MHGameSeries", [], function() {
       return 'mhgms';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHGameSeries);
+    MHObject.registerConstructor(MHGameSeries, 'MHGameSeries');
   })();
   return {get MHGameSeries() {
       return MHGameSeries;
@@ -6363,7 +6360,7 @@ System.register("models/media/MHGraphicNovel", [], function() {
       return 'mhgnl';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHGraphicNovel);
+    MHObject.registerConstructor(MHGraphicNovel, 'MHGraphicNovel');
   })();
   return {get MHGraphicNovel() {
       return MHGraphicNovel;
@@ -6385,7 +6382,7 @@ System.register("models/media/MHGraphicNovelSeries", [], function() {
       return 'mhgns';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHGraphicNovelSeries);
+    MHObject.registerConstructor(MHGraphicNovelSeries, 'MHGraphicNovelSeries');
   })();
   return {get MHGraphicNovelSeries() {
       return MHGraphicNovelSeries;
@@ -6407,7 +6404,7 @@ System.register("models/media/MHMovie", [], function() {
       return 'mhmov';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHMovie);
+    MHObject.registerConstructor(MHMovie, 'MHMovie');
   })();
   return {get MHMovie() {
       return MHMovie;
@@ -6429,7 +6426,7 @@ System.register("models/media/MHMovieSeries", [], function() {
       return 'mhmvs';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHMovieSeries);
+    MHObject.registerConstructor(MHMovieSeries, 'MHMovieSeries');
   })();
   return {get MHMovieSeries() {
       return MHMovieSeries;
@@ -6451,7 +6448,7 @@ System.register("models/media/MHMusicVideo", [], function() {
       return 'mhmsv';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHMusicVideo);
+    MHObject.registerConstructor(MHMusicVideo, 'MHMusicVideo');
   })();
   return {get MHMusicVideo() {
       return MHMusicVideo;
@@ -6473,7 +6470,7 @@ System.register("models/media/MHNovella", [], function() {
       return 'mhnov';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHNovella);
+    MHObject.registerConstructor(MHNovella, 'MHNovella');
   })();
   return {get MHNovella() {
       return MHNovella;
@@ -6495,7 +6492,7 @@ System.register("models/media/MHPeriodical", [], function() {
       return 'mhpdc';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHPeriodical);
+    MHObject.registerConstructor(MHPeriodical, 'MHPeriodical');
   })();
   return {get MHPeriodical() {
       return MHPeriodical;
@@ -6517,7 +6514,7 @@ System.register("models/media/MHPeriodicalSeries", [], function() {
       return 'mhpds';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHPeriodicalSeries);
+    MHObject.registerConstructor(MHPeriodicalSeries, 'MHPeriodicalSeries');
   })();
   return {get MHPeriodicalSeries() {
       return MHPeriodicalSeries;
@@ -6539,7 +6536,7 @@ System.register("models/media/MHShowEpisode", [], function() {
       return 'mhsep';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHShowEpisode);
+    MHObject.registerConstructor(MHShowEpisode, 'MHShowEpisode');
   })();
   return {get MHShowEpisode() {
       return MHShowEpisode;
@@ -6561,7 +6558,7 @@ System.register("models/media/MHShowSeason", [], function() {
       return 'mhssn';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHShowSeason);
+    MHObject.registerConstructor(MHShowSeason, 'MHShowSeason');
   })();
   return {get MHShowSeason() {
       return MHShowSeason;
@@ -6583,7 +6580,7 @@ System.register("models/media/MHShowSeries", [], function() {
       return 'mhsss';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHShowSeries);
+    MHObject.registerConstructor(MHShowSeries, 'MHShowSeries');
   })();
   return {get MHShowSeries() {
       return MHShowSeries;
@@ -6605,7 +6602,7 @@ System.register("models/media/MHSong", [], function() {
       return 'mhsng';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHSong);
+    MHObject.registerConstructor(MHSong, 'MHSong');
   })();
   return {get MHSong() {
       return MHSong;
@@ -6627,7 +6624,7 @@ System.register("models/media/MHSpecial", [], function() {
       return 'mhspc';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHSpecial);
+    MHObject.registerConstructor(MHSpecial, 'MHSpecial');
   })();
   return {get MHSpecial() {
       return MHSpecial;
@@ -6649,7 +6646,7 @@ System.register("models/media/MHSpecialSeries", [], function() {
       return 'mhsps';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHSpecialSeries);
+    MHObject.registerConstructor(MHSpecialSeries, 'MHSpecialSeries');
   })();
   return {get MHSpecialSeries() {
       return MHSpecialSeries;
@@ -6671,7 +6668,7 @@ System.register("models/media/MHTrailer", [], function() {
       return 'mhtrl';
     }}, MHMedia);
   (function() {
-    MHObject.registerConstructor(MHTrailer);
+    MHObject.registerConstructor(MHTrailer, 'MHTrailer');
   })();
   return {get MHTrailer() {
       return MHTrailer;
@@ -6713,7 +6710,7 @@ System.register("models/source/MHSource", [], function() {
       return 'mhsrc';
     }}, MHObject);
   (function() {
-    MHObject.registerConstructor(MHSource);
+    MHObject.registerConstructor(MHSource, 'MHSource');
   })();
   return {get MHSource() {
       return MHSource;
@@ -6741,7 +6738,7 @@ System.register("models/source/MHSubscription", [], function() {
       return 'mhsubtemp';
     }}, MHObject);
   (function() {
-    MHObject.registerConstructor(MHSubscription);
+    MHObject.registerConstructor(MHSubscription, 'MHSubscription');
   })();
   return {get MHSubscription() {
       return MHSubscription;
@@ -6793,7 +6790,7 @@ System.register("models/trait/MHAchievements", [], function() {
       return 'mhach';
     }}, MHTrait);
   (function() {
-    MHObject.registerConstructor(MHAchievements);
+    MHObject.registerConstructor(MHAchievements, 'MHAchievements');
   })();
   return {get MHAchievements() {
       return MHAchievements;
@@ -6822,7 +6819,7 @@ System.register("models/trait/MHAudience", [], function() {
       return 'mhaud';
     }}, MHTrait);
   (function() {
-    MHObject.registerConstructor(MHAudience);
+    MHObject.registerConstructor(MHAudience, 'MHAudience');
   })();
   return {get MHAudience() {
       return MHAudience;
@@ -6851,7 +6848,7 @@ System.register("models/trait/MHEra", [], function() {
       return 'mhera';
     }}, MHTrait);
   (function() {
-    MHObject.registerConstructor(MHEra);
+    MHObject.registerConstructor(MHEra, 'MHEra');
   })();
   return {get MHEra() {
       return MHEra;
@@ -6880,7 +6877,7 @@ System.register("models/trait/MHFlag", [], function() {
       return 'mhflg';
     }}, MHTrait);
   (function() {
-    MHObject.registerConstructor(MHFlag);
+    MHObject.registerConstructor(MHFlag, 'MHFlag');
   })();
   return {get MHFlag() {
       return MHFlag;
@@ -6909,7 +6906,7 @@ System.register("models/trait/MHGenre", [], function() {
       return 'mhgnr';
     }}, MHTrait);
   (function() {
-    MHObject.registerConstructor(MHGenre);
+    MHObject.registerConstructor(MHGenre, 'MHGenre');
   })();
   return {get MHGenre() {
       return MHGenre;
@@ -6938,7 +6935,7 @@ System.register("models/trait/MHGraphGenre", [], function() {
       return 'mhgrg';
     }}, MHTrait);
   (function() {
-    MHObject.registerConstructor(MHGraphGenre);
+    MHObject.registerConstructor(MHGraphGenre, 'MHGraphGenre');
   })();
   return {get MHGraphGenre() {
       return MHGraphGenre;
@@ -6967,7 +6964,7 @@ System.register("models/trait/MHMaterialSource", [], function() {
       return 'mhmts';
     }}, MHTrait);
   (function() {
-    MHObject.registerConstructor(MHMaterialSource);
+    MHObject.registerConstructor(MHMaterialSource, 'MHMaterialSource');
   })();
   return {get MHMaterialSource() {
       return MHMaterialSource;
@@ -6996,7 +6993,7 @@ System.register("models/trait/MHMood", [], function() {
       return 'mhmod';
     }}, MHTrait);
   (function() {
-    MHObject.registerConstructor(MHMood);
+    MHObject.registerConstructor(MHMood, 'MHMood');
   })();
   return {get MHMood() {
       return MHMood;
@@ -7025,7 +7022,7 @@ System.register("models/trait/MHQuality", [], function() {
       return 'mhqlt';
     }}, MHTrait);
   (function() {
-    MHObject.registerConstructor(MHQuality);
+    MHObject.registerConstructor(MHQuality, 'MHQuality');
   })();
   return {get MHQuality() {
       return MHQuality;
@@ -7054,7 +7051,7 @@ System.register("models/trait/MHStoryElement", [], function() {
       return 'mhstr';
     }}, MHTrait);
   (function() {
-    MHObject.registerConstructor(MHStoryElement);
+    MHObject.registerConstructor(MHStoryElement, 'MHStoryElement');
   })();
   return {get MHStoryElement() {
       return MHStoryElement;
@@ -7083,7 +7080,7 @@ System.register("models/trait/MHStyleElement", [], function() {
       return 'mhsty';
     }}, MHTrait);
   (function() {
-    MHObject.registerConstructor(MHStyleElement);
+    MHObject.registerConstructor(MHStyleElement, 'MHStyleElement');
   })();
   return {get MHStyleElement() {
       return MHStyleElement;
@@ -7112,7 +7109,7 @@ System.register("models/trait/MHSubGenre", [], function() {
       return 'mhsgn';
     }}, MHTrait);
   (function() {
-    MHObject.registerConstructor(MHSubGenre);
+    MHObject.registerConstructor(MHSubGenre, 'MHSubGenre');
   })();
   return {get MHSubGenre() {
       return MHSubGenre;
@@ -7141,7 +7138,7 @@ System.register("models/trait/MHTheme", [], function() {
       return 'mhthm';
     }}, MHTrait);
   (function() {
-    MHObject.registerConstructor(MHTheme);
+    MHObject.registerConstructor(MHTheme, 'MHTheme');
   })();
   return {get MHTheme() {
       return MHTheme;
@@ -7162,7 +7159,7 @@ System.register("models/trait/MHTraitGroup", [], function() {
       return 'mhtrg';
     }}, MHObject);
   (function() {
-    MHObject.registerConstructor(MHTraitGroup);
+    MHObject.registerConstructor(MHTraitGroup, 'MHTraitGroup');
   })();
   return {get MHTraitGroup() {
       return MHTraitGroup;

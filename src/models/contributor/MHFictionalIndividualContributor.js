@@ -81,5 +81,5 @@ export class MHFictionalIndividualContributor extends MHContributor {
 }
 
 (function(){
-  MHObject.registerConstructor(MHFictionalIndividualContributor);
+  MHObject.registerConstructor(MHFictionalIndividualContributor, 'MHFictionalIndividualContributor');
 }());

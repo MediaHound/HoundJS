@@ -77,6 +77,6 @@ export class MHComment extends MHAction {
 }
 
 (function(){
-  MHObject.registerConstructor(MHComment);
+  MHObject.registerConstructor(MHComment, 'MHComment');
 })();
 

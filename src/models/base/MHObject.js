@@ -316,12 +316,13 @@ export class MHObject {
    * @return { Boolean }                - Success(true) or Fail(false)
    *
    */
-  static registerConstructor(mhClass){
+  static registerConstructor(mhClass, mhName){
     // Add class name if function.name is not native
-    if( mhClass.name === undefined ){
-      mhClass.name = mhClass.toString().match(/function (MH[A-Za-z]*)\(args\)/)[1];
-      log('shimmed mhClass.name to: ' + mhClass.name);
-    }
+    // if( mhClass.name === undefined ){
+    //   mhClass.name = mhClass.toString().match(/function (MH[A-Za-z]*)\(args\)/)[1];
+    //   log('shimmed mhClass.name to: ' + mhClass.name);
+    // }
+    mhClass.mhName = mhName;
     //log('registering constructor: ' + mhClass.name);
 
     var prefix = mhClass.mhidPrefix;
@@ -380,7 +381,7 @@ export class MHObject {
   static getClassNameFromMhid(mhid){
     var pfx = MHObject.getPrefixFromMhid(mhid);
     if( childrenConstructors[pfx] ){
-      return childrenConstructors[pfx].name;
+      return childrenConstructors[pfx].mhName;
     }
     return null;
   }
@@ -477,7 +478,7 @@ export class MHObject {
    * @property {string} className - the string class name for this object, ie: MHUser, MHMovie, MHPost, etc.
    */
   get className(){
-    return this.constructor.name;
+    return this.constructor.mhName;
   }
 
   /**
@@ -511,7 +512,7 @@ export class MHObject {
 
   // TODO Could change as needed
   toString(){
-    return this.className + " with mhid " + this.mhid + " and name " + this.name;
+    return this.className + " with mhid " + this.mhid + " and name " + this.mhName;
   }
 
   /**

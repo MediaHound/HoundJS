@@ -58,5 +58,5 @@ export class MHSubscription extends MHObject {
 }
 
 (function(){
-  MHObject.registerConstructor(MHSubscription);
+  MHObject.registerConstructor(MHSubscription, 'MHSubscription');
 })();

@@ -48,6 +48,6 @@ export class MHAnthology extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHAnthology);
+  MHObject.registerConstructor(MHAnthology, 'MHAnthology');
 })();
 

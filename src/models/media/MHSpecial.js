@@ -49,6 +49,6 @@ export class MHSpecial extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHSpecial);
+  MHObject.registerConstructor(MHSpecial, 'MHSpecial');
 })();
 

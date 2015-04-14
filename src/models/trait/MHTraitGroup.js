@@ -41,6 +41,6 @@ export class MHTraitGroup extends MHObject {
 }
 
 (function(){
-  MHObject.registerConstructor(MHTraitGroup);
+  MHObject.registerConstructor(MHTraitGroup, 'MHTraitGroup');
 })();
 

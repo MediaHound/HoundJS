@@ -57,6 +57,6 @@ export class MHSong extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHSong);
+  MHObject.registerConstructor(MHSong, 'MHSong');
 })();
 

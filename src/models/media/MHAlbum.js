@@ -45,5 +45,5 @@ export class MHAlbum extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHAlbum);
+  MHObject.registerConstructor(MHAlbum, 'MHAlbum');
 })();

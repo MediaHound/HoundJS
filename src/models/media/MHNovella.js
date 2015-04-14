@@ -48,6 +48,6 @@ export class MHNovella extends MHMedia {
 }
 
 (function(){
-  MHObject.registerConstructor(MHNovella);
+  MHObject.registerConstructor(MHNovella, 'MHNovella');
 })();
 
