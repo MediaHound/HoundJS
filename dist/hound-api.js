@@ -5943,12 +5943,13 @@ System.register("models/media/MHMedia", [], function() {
   var __moduleName = "models/media/MHMedia";
   var MHObject = System.get("models/base/MHObject").MHObject;
   var MHSourceModel = System.get("models/source/MHSourceModel").MHSourceModel;
+  var MHRelationalPair = System.get("models/base/MHRelationalPair").MHRelationalPair;
   var houndRequest = System.get("request/hound-request").houndRequest;
   var pagedRequest = System.get("request/hound-paged-request").pagedRequest;
   var MHMedia = function MHMedia(args) {
     args = MHObject.parseArgs(args);
     $traceurRuntime.superCall(this, $MHMedia.prototype, "constructor", [args]);
-    var keyContributors = (!!args.keyContributors) ? MHObject.createFromArray(args.keyContributors) : null;
+    var keyContributors = (!!args.keyContributors) ? MHRelationalPair.createFromArray(args.keyContributors) : null;
     Object.defineProperties(this, {
       'keyContributors': {
         configurable: false,

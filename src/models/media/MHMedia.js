@@ -2,7 +2,7 @@
 import { MHObject } from '../base/MHObject';
 import { MHSourceModel } from '../source/MHSourceModel';
 
-//import { MHRelationalPair } from '../base/MHRelationalPair';
+import { MHRelationalPair } from '../base/MHRelationalPair';
 //import { MHEmbeddedRelation } from '../base/MHEmbeddedRelation';
 
 import { houndRequest } from '../../request/hound-request';
@@ -42,7 +42,7 @@ export class MHMedia extends MHObject {
     super(args);
 
     // Default MHMedia unique objects to null
-    var keyContributors   = (!!args.keyContributors) ? MHObject.createFromArray(args.keyContributors) : null;
+    var keyContributors   = (!!args.keyContributors) ? MHRelationalPair.createFromArray(args.keyContributors) : null;
 
     // Create imutable properties
     //  releaseDate
@@ -301,8 +301,8 @@ export class MHMedia extends MHObject {
   * mhObj.fetchShortestDistance(otherMhid)
   *
   * @param { otherMhid } otherMhid - the MHID for the object to calculate shortest path.
-  * 
-  * @return { Number }  - Returns the shortest distance between the two objects. 
+  *
+  * @return { Number }  - Returns the shortest distance between the two objects.
   *                       If there is no path between the two objects, returns `null`.
   *
   */
@@ -328,7 +328,7 @@ export class MHMedia extends MHObject {
       }
     });
   }
-    
+
 
   /* TODO?
    * mhMed.fetchTrailers()
