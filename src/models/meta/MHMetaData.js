@@ -113,7 +113,7 @@ export class MHMetaData {
       });
     }
 
-    if(args.releaseDate){
+    if(releaseDate){
       if( isNaN(releaseDate) ){
         releaseDate = null;
       }

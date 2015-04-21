@@ -3146,7 +3146,7 @@ System.register("models/meta/MHMetaData", [], function() {
         value: isDefault
       });
     }
-    if (args.releaseDate) {
+    if (releaseDate) {
       if (isNaN(releaseDate)) {
         releaseDate = null;
       } else if (releaseDate === 'Invalid Date') {
