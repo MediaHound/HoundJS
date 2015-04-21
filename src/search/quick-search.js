@@ -79,7 +79,7 @@ buildSearchHelper = function(index){
           if( typeof v.primaryImageUrl === 'string' ){
             v.primaryImage = {
               metadata:{
-                mhid: 'mhimgPlaceHolderSearchShim',
+                mhid: 'mhimgPlaceHolderSearchShim-'+v.mhid,
                 isDefault: false
               },
               original:{
@@ -97,7 +97,7 @@ buildSearchHelper = function(index){
         var mhObj;
         return parsed.content.map((v) => {
           try{
-            mhObj = MHObject.create(v);
+            mhObj = MHObject.create(v, false);
             // Add contributor names to mhobject
             if (v.contributorNames) {
               mhObj.contributorNames = v.contributorNames;

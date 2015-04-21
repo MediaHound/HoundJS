@@ -3558,6 +3558,7 @@ System.register("models/base/MHObject", [], function() {
       throw new TypeError('Args was object without mhid!', 'MHObject.js', 189);
     },
     create: function(args) {
+      var saveToLRU = arguments[1] !== (void 0) ? arguments[1] : true;
       if (args instanceof Array) {
         log('trying to create MHObject that is new: ' + args);
         return args.map(function(value) {
@@ -3589,6 +3590,9 @@ System.register("models/base/MHObject", [], function() {
           var prefix = $MHObject.getPrefixFromMhid(mhid);
           log(prefix, new childrenConstructors[prefix](args));
           mhObj = new childrenConstructors[prefix](args);
+          if (saveToLRU) {
+            mhidLRU.putMHObj(mhObj);
+          }
           return mhObj;
         } else {
           mhObj = args;
@@ -6037,7 +6041,7 @@ System.register("models/media/MHMedia", [], function() {
       return this.content;
     },
     fetchSources: function() {
-      var force = arguments[0] !== (void 0) ? arguments[0] : true;
+      var force = arguments[0] !== (void 0) ? arguments[0] : false;
       var self = this,
           path = this.subendpoint('sources');
       if (MHSourceModel.sources === null || MHSourceModel.sources === undefined) {
@@ -7518,7 +7522,7 @@ System.register("search/quick-search", [], function() {
           if (typeof v.primaryImageUrl === 'string') {
             v.primaryImage = {
               metadata: {
-                mhid: 'mhimgPlaceHolderSearchShim',
+                mhid: 'mhimgPlaceHolderSearchShim-' + v.mhid,
                 isDefault: false
               },
               original: {url: v.primaryImageUrl}
@@ -7531,7 +7535,7 @@ System.register("search/quick-search", [], function() {
         var mhObj;
         return parsed.content.map((function(v) {
           try {
-            mhObj = MHObject.create(v);
+            mhObj = MHObject.create(v, false);
             if (v.contributorNames) {
               mhObj.contributorNames = v.contributorNames;
             }

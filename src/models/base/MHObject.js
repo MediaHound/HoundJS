@@ -201,7 +201,7 @@ export class MHObject {
    *
    * returns null if can't find associated class
    */
-  static create(args){
+  static create(args, saveToLRU=true){
     if( args instanceof Array ){
       log('trying to create MHObject that is new: ' + args);
       //return args.map(MHObject.create); // <-- should probably be this once all MHObjs are done
@@ -251,6 +251,9 @@ export class MHObject {
         //   mhidLRU.putMHObj(mhObj);
         // }
         //console.log('creating... ',prefix,': ', mhObj);
+        if (saveToLRU) {
+          mhidLRU.putMHObj(mhObj);
+        }
         return mhObj;
       }
       else{

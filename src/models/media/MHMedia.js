@@ -168,7 +168,7 @@ export class MHMedia extends MHObject {
    * @return { Promise } - resolves to
    *
    */
-  fetchSources(force=true){
+  fetchSources(force=false){
     var self = this,
         path = this.subendpoint('sources');
 
