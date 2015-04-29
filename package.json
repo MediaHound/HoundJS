@@ -13,7 +13,7 @@
     "prepublish": "gulp"
   },
   "publishConfig": {
-    "registry": "http://esb.mediahound.com:8081/nexus/content/repositories/npm-all/"
+    "registry": "http://esb.mediahound.com:8081/nexus/content/repositories/npm-hound/"
   },
   "repository": {
     "type": "git",
