@@ -101,7 +101,18 @@ var extraEncode = function(str){
             }
             if( typeof params[prop] === 'string' || params[prop] instanceof String ){
               url += encodeURIComponent(prop) + '=' + extraEncode(params[prop]).replace('%20', '+');
-            } else {
+            }
+            else if (Array.isArray(params[prop]) || params[prop] instanceof Array ){
+              for (var p of params[prop]) {
+                url += encodeURIComponent(prop) + '=' + extraEncode(p).replace('%20', '+');
+                url += '&';
+              }
+
+              if (params[prop].length > 0) {
+                url = url.slice(0, -1); // Remove last & character
+              }
+            }
+            else {
               url += encodeURIComponent(prop) + '=' + extraEncode(JSON.stringify(params[prop])).replace('%20', '+');
             }
           }

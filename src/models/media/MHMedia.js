@@ -297,6 +297,20 @@ export class MHMedia extends MHObject {
     return this.related;
   }
 
+  static fetchRelatedTo(medias, view='full', size=12){
+    var mhids = medias.map( m => m.metadata.mhid );
+    var path = this.rootEndpoint + '/related';
+    return pagedRequest({
+      method: 'GET',
+      endpoint: path,
+      pageSize: size,
+      params: {
+        view: view,
+        ids: mhids
+      }
+    });
+  }
+
   /**
   * mhObj.fetchShortestDistance(otherMhid)
   *

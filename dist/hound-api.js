@@ -2584,6 +2584,18 @@ System.register("request/promise-request", [], function() {
               }
               if (typeof params[prop] === 'string' || params[prop] instanceof String) {
                 url += encodeURIComponent(prop) + '=' + extraEncode(params[prop]).replace('%20', '+');
+              } else if (Array.isArray(params[prop]) || params[prop] instanceof Array) {
+                for (var $__0 = params[prop][Symbol.iterator](),
+                    $__1; !($__1 = $__0.next()).done; ) {
+                  var p = $__1.value;
+                  {
+                    url += encodeURIComponent(prop) + '=' + extraEncode(p).replace('%20', '+');
+                    url += '&';
+                  }
+                }
+                if (params[prop].length > 0) {
+                  url = url.slice(0, -1);
+                }
               } else {
                 url += encodeURIComponent(prop) + '=' + extraEncode(JSON.stringify(params[prop])).replace('%20', '+');
               }
@@ -6144,9 +6156,28 @@ System.register("models/media/MHMedia", [], function() {
         }
       });
     }
-  }, {get rootEndpoint() {
+  }, {
+    get rootEndpoint() {
       return 'graph/media';
-    }}, MHObject);
+    },
+    fetchRelatedTo: function(medias) {
+      var view = arguments[1] !== (void 0) ? arguments[1] : 'full';
+      var size = arguments[2] !== (void 0) ? arguments[2] : 12;
+      var mhids = medias.map((function(m) {
+        return m.metadata.mhid;
+      }));
+      var path = this.rootEndpoint + '/related';
+      return pagedRequest({
+        method: 'GET',
+        endpoint: path,
+        pageSize: size,
+        params: {
+          view: view,
+          ids: mhids
+        }
+      });
+    }
+  }, MHObject);
   return {get MHMedia() {
       return MHMedia;
     }};
