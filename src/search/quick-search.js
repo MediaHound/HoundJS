@@ -85,8 +85,35 @@ buildSearchHelper = function(index){
               original:{
                 url: v.primaryImageUrl
               }
-
             };
+
+            // thumb
+            if (typeof v.primaryImageUrlThumbnail === 'string') {
+              v.primaryImage.thumbnail = {
+                url: v.primaryImageUrlThumbnail
+              };
+            }
+
+            // small
+            if (typeof v.primaryImageUrlSmall === 'string') {
+              v.primaryImage.small = {
+                url: v.primaryImageUrlSmall
+              };
+            }
+
+            // medium
+            if (typeof v.primaryImageUrlMedium === 'string') {
+              v.primaryImage.medium = {
+                url: v.primaryImageUrlMedium
+              };
+            }
+
+            // large
+            if (typeof v.primaryImageUrlLarge === 'string') {
+              v.primaryImage.large = {
+                url: v.primaryImageUrlLarge
+              };
+            }
           }
           return v;
         });

@@ -7558,6 +7558,18 @@ System.register("search/quick-search", [], function() {
               },
               original: {url: v.primaryImageUrl}
             };
+            if (typeof v.primaryImageUrlThumbnail === 'string') {
+              v.primaryImage.thumbnail = {url: v.primaryImageUrlThumbnail};
+            }
+            if (typeof v.primaryImageUrlSmall === 'string') {
+              v.primaryImage.small = {url: v.primaryImageUrlSmall};
+            }
+            if (typeof v.primaryImageUrlMedium === 'string') {
+              v.primaryImage.medium = {url: v.primaryImageUrlMedium};
+            }
+            if (typeof v.primaryImageUrlLarge === 'string') {
+              v.primaryImage.large = {url: v.primaryImageUrlLarge};
+            }
           }
           return v;
         }));
