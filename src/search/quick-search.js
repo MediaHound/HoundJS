@@ -80,37 +80,37 @@ buildSearchHelper = function(index){
             v.primaryImage = {
               metadata:{
                 mhid: 'mhimgPlaceHolderSearchShim-'+v.mhid,
-                isDefault: false
-              },
-              original:{
-                url: v.primaryImageUrl
+                isDefault: false,
+                original: {
+                  url: v.primaryImageUrl
+                }
               }
             };
 
             // thumb
             if (typeof v.primaryImageUrlThumbnail === 'string') {
-              v.primaryImage.thumbnail = {
+              v.primaryImage.metadata.thumbnail = {
                 url: v.primaryImageUrlThumbnail
               };
             }
 
             // small
             if (typeof v.primaryImageUrlSmall === 'string') {
-              v.primaryImage.small = {
+              v.primaryImage.metadata.small = {
                 url: v.primaryImageUrlSmall
               };
             }
 
             // medium
             if (typeof v.primaryImageUrlMedium === 'string') {
-              v.primaryImage.medium = {
+              v.primaryImage.metadata.medium = {
                 url: v.primaryImageUrlMedium
               };
             }
 
             // large
             if (typeof v.primaryImageUrlLarge === 'string') {
-              v.primaryImage.large = {
+              v.primaryImage.metadata.large = {
                 url: v.primaryImageUrlLarge
               };
             }

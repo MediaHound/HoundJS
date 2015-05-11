@@ -12,7 +12,7 @@ export class MHImageData {
    */
   constructor(args){
     // Unique Properties
-    var url       = (typeof args.url === 'string') ? args.url.replace(/^http:|^https:/i, '') : null,
+    var url       = (typeof args.url === 'string') ? args.url : null,
         width     = args.width  || null,
         height    = args.height || null;
 

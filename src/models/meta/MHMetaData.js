@@ -1,3 +1,5 @@
+import { MHImageData } from '../image/MHImageData';
+
 export class MHMetaData {
   /*  MHMetaData Constructor
    *
@@ -29,7 +31,14 @@ export class MHMetaData {
         isDefault   = args.isDefault || null,
         averageColor = args.averageColor || null,
         createdDate = new Date(args.createdDate*1000),
-        releaseDate = new Date(args.releaseDate*1000);
+        releaseDate = new Date(args.releaseDate*1000),
+
+        // Images
+        original  = (args.original != null) ? new MHImageData(args.original) : null,
+        thumbnail = (args.thumbnail != null) ? new MHImageData(args.thumbnail) : null,
+        small     = (args.small != null) ? new MHImageData(args.small) : null,
+        medium    = (args.medium != null) ? new MHImageData(args.medium) : null,
+        large     = (args.large != null) ? new MHImageData(args.large) : null;
 
 
     if(name){
@@ -158,6 +167,50 @@ export class MHMetaData {
         writable:     false,
         value:        mhid
     });
+
+
+
+
+    if(original){
+      Object.defineProperty(this,'original',{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        original
+      });
+    }
+    if(thumbnail){
+      Object.defineProperty(this,'thumbnail',{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        thumbnail
+      });
+    }
+    if(small){
+      Object.defineProperty(this,'small',{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        small
+      });
+    }
+    if(medium){
+      Object.defineProperty(this,'medium',{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        medium
+      });
+    }
+    if(large){
+      Object.defineProperty(this,'large',{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        large
+      });
+    }
   }
 
 }
