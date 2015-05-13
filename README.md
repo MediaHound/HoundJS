@@ -1,6 +1,17 @@
-Hello, this will be the final resting place of the JavaScript Library for interfacing with the MediaHound API.
+# HoundJS
 
-TODO: Set up, test test test, publish, profit
+The MediaHound Javascript SDK
 
-I will eventually write up a full tutorial on setting up a private repo with bower but this youtube video is a good start: http://youtu.be/ExU_ZcONHxs
+## Development
 
+1. Clone the repo into a local folder
+2. cd into project folder
+3. run `npm install`
+4. run `gulp`
+
+## Publishing
+
+To publish an update to the houndjs library:
+
+1. Update the `package.json` version follwing Semantic Versioning
+2. run `npm publish` (this will perform a `gulp` build before publishing)
