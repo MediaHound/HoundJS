@@ -160,7 +160,6 @@ export class MHMedia extends MHObject {
     return this.content;
   }
 
-
   /* TODO: DocJS
    * mhMed.fetchSources()
    *

@@ -270,7 +270,7 @@ export class MHCollection extends MHObject {
     var path = this.subendpoint(sub),
         mhids = contents.map(v => {
           if( v instanceof MHObject){
-            if(!v instanceof MHAction){
+            if(!(v instanceof MHAction)){
               return v.mhid;
             }
             else{
