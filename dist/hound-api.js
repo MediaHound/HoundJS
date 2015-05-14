@@ -6007,12 +6007,6 @@ System.register("models/media/MHMedia", [], function() {
         writable: true,
         value: null
       },
-      'images': {
-        configurable: false,
-        enumerable: false,
-        writable: true,
-        value: null
-      },
       'sources': {
         configurable: false,
         enumerable: false,
@@ -6079,21 +6073,6 @@ System.register("models/media/MHMedia", [], function() {
         });
       }
       return this.content;
-    },
-    fetchImages: function() {
-      var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-      var size = arguments[1] !== (void 0) ? arguments[1] : 20;
-      var force = arguments[2] !== (void 0) ? arguments[2] : false;
-      var path = this.subendpoint('images');
-      if (force || this.images === null) {
-        this.images = pagedRequest({
-          method: 'GET',
-          endpoint: path,
-          pageSize: size,
-          params: {view: view}
-        });
-      }
-      return this.images;
     },
     fetchSources: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;

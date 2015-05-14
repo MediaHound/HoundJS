@@ -745,7 +745,6 @@ export class MHObject {
         params: { view }
       });
     }
-    //console.log(this.feedPagedRequest);
     return this.images;
   }
 

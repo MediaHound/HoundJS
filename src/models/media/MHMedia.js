@@ -72,12 +72,6 @@ export class MHMedia extends MHObject {
         writable:     true,
         value:        null
       },
-      'images':{
-        configurable: false,
-        enumerable:   false,
-        writable:     true,
-        value:        null
-      },
       'sources':{
         configurable: false,
         enumerable:   false,
@@ -165,29 +159,6 @@ export class MHMedia extends MHObject {
     //console.log(this.feedPagedRequest);
     return this.content;
   }
-
-  /* TODO: DocJS
-  * mhMed.fetchImages()
-  *
-  * @param force { Boolean } - force refetch of content
-  * @return { Promise } - resolves to
-  *
-  */
-
-  fetchImages(view='full', size=20, force=false){
-    var path = this.subendpoint('images');
-    if( force || this.images === null ){
-      this.images = pagedRequest({
-        method: 'GET',
-        endpoint: path,
-        pageSize: size,
-        params: { view }
-      });
-    }
-    //console.log(this.feedPagedRequest);
-    return this.images;
-  }
-
 
   /* TODO: DocJS
    * mhMed.fetchSources()
