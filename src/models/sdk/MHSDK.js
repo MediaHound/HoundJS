@@ -13,7 +13,7 @@ export class MHSDK {
    *
    * @param   clientId <String> - OAuth Client Identifier
    * @param   clientSecret <String> - OAuth Client Secret
-   * @param   origin <String> - MediaHound network origin.
+   * @param   origin <String> - (Optional) MediaHound network origin.
    * @returns <Promise> - A promise that resolves when the configuration is complete.
    */
   static configure(clientId, clientSecret, origin) {
