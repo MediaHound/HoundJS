@@ -3506,6 +3506,12 @@ System.register("models/base/MHObject", [], function() {
         enumerable: false,
         writable: true,
         value: null
+      },
+      'images': {
+        configurable: false,
+        enumerable: false,
+        writable: true,
+        value: null
       }
     });
   };
@@ -3586,6 +3592,21 @@ System.register("models/base/MHObject", [], function() {
       var size = arguments[1] !== (void 0) ? arguments[1] : 12;
       var force = arguments[2] !== (void 0) ? arguments[2] : false;
       return this.fetchFeed(view, size, force).currentPromise;
+    },
+    fetchImages: function() {
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+      var size = arguments[1] !== (void 0) ? arguments[1] : 20;
+      var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      var path = this.subendpoint('images');
+      if (force || this.images === null) {
+        this.images = pagedRequest({
+          method: 'GET',
+          endpoint: path,
+          pageSize: size,
+          params: {view: view}
+        });
+      }
+      return this.images;
     },
     takeAction: function(action) {
       var $__6 = this;
@@ -5244,7 +5265,7 @@ System.register("models/collection/MHCollection", [], function() {
       var path = this.subendpoint(sub),
           mhids = contents.map((function(v) {
             if (v instanceof MHObject) {
-              if (!v instanceof MHAction) {
+              if (!(v instanceof MHAction)) {
                 return v.mhid;
               } else {
                 console.error('MHActions including like, favorite, create, and post cannot be collected. Please resubmit with actual content.');
@@ -5986,6 +6007,12 @@ System.register("models/media/MHMedia", [], function() {
         writable: true,
         value: null
       },
+      'images': {
+        configurable: false,
+        enumerable: false,
+        writable: true,
+        value: null
+      },
       'sources': {
         configurable: false,
         enumerable: false,
@@ -6052,6 +6079,21 @@ System.register("models/media/MHMedia", [], function() {
         });
       }
       return this.content;
+    },
+    fetchImages: function() {
+      var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+      var size = arguments[1] !== (void 0) ? arguments[1] : 20;
+      var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      var path = this.subendpoint('images');
+      if (force || this.images === null) {
+        this.images = pagedRequest({
+          method: 'GET',
+          endpoint: path,
+          pageSize: size,
+          params: {view: view}
+        });
+      }
+      return this.images;
     },
     fetchSources: function() {
       var force = arguments[0] !== (void 0) ? arguments[0] : false;
