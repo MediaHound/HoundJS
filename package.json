@@ -1,6 +1,6 @@
 {
   "name": "houndjs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "The MediaHound JavaScript library",
   "keywords": ["MediaHound", "Media", "Entertainment"],
   "homepage": "http://www.mediahound.com",
@@ -9,6 +9,7 @@
   "engines": {
     "node": ">=0.10"
   },
+  "main": "dist/hound-api.js",
   "scripts": {
     "prepublish": "gulp"
   },
