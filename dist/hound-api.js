@@ -8702,11 +8702,7 @@ System.registerModule("search/quick-search.js", [], function() {
       extraEncode = houndRequest.extraEncode,
       types = ['all', 'movie', 'song', 'album', 'tvseries', 'book', 'game', 'person', 'collection', 'user'],
       makeEndpoint = function(searchType, query) {
-        if (searchType === 'all') {
-          return 'search/' + searchType + '/find/' + extraEncode(query) + '/autocomplete';
-        } else {
-          return 'search/' + searchType + '/' + extraEncode(query) + '';
-        }
+        return 'search/' + searchType + '/' + extraEncode(query) + '';
       },
       makeParams = function(size, type) {
         var params;
