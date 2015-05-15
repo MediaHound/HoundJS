@@ -123,7 +123,7 @@ export class MHUser extends MHObject {
   static get mhidPrefix() { return 'mhusr'; }
 
   get isCurrentUser(){
-    var currentUser = System.get('../../src/models/user/MHLoginSession').MHLoginSession.currentUser;
+    var currentUser = System.get('../../src/models/user/MHLoginSession.js').MHLoginSession.currentUser;
     //console.warn('circular dep: (currentUser) ', currentUser);
     return this.isEqualToMHObject(currentUser);
   }
@@ -621,7 +621,7 @@ setProfileImage(image){
   })
   .then(function(primaryImage){
 
-    // var MHLoginSession = System.get('../../src/models/user/MHLoginSession').MHLoginSession;
+    // var MHLoginSession = System.get('../../src/models/user/MHLoginSession.js').MHLoginSession;
     // //console.warn('circular dep: ', MHLoginSession);
     //var img = new MHImage(primaryImage);
     //MHLoginSession.updatedProfileImage(img);

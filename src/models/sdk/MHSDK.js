@@ -27,7 +27,7 @@ export class MHSDK {
   }
 
   static refreshOAuthToken() {
-    var houndRequest = System.get('request/hound-request').houndRequest;
+    var houndRequest = System.get('request/hound-request.js').houndRequest;
     return houndRequest({
       endpoint: 'cas/oauth2.0/accessToken',
       params: {

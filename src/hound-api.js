@@ -20,5 +20,3 @@ export default {
   get quickSearch()   { return quickSearch;   },
   get pagedSearch()   { return pagedSearch;   }
 };
-
-//module.exports = System.get('hound-api').default;

@@ -77,7 +77,9 @@ var concatCompiled = function(){
       './build/compiled/hound-api.register.js'
     ])
       .pipe(replace(/\.\.\/\.\.\/src\//g, ''))
-      .pipe(replace('System.get("hound-api.js" + \'\');', 'module.exports = System.get("hound-api.js" + \'\').default;'))
+      .pipe(replace(
+        'System.get("hound-api.js" + \'\');',
+        'if (typeof module !== \'undefined\' && typeof module.exports !== \'undefined\') { module.exports = System.get("hound-api.js" + \'\').default; }'))
       .pipe(concat('hound-api.js'))
       .pipe(gulp.dest(paths.dist));
 };

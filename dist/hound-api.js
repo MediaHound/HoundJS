@@ -3529,7 +3529,7 @@ System.registerModule("models/sdk/MHSDK.js", [], function() {
         return this.refreshOAuthToken();
       },
       refreshOAuthToken: function() {
-        var houndRequest = System.get('request/hound-request').houndRequest;
+        var houndRequest = System.get('request/hound-request.js').houndRequest;
         return houndRequest({
           endpoint: 'cas/oauth2.0/accessToken',
           params: {
@@ -3811,7 +3811,7 @@ System.registerModule("request/hound-paged-request.js", [], function() {
         return defaults.page;
       },
       setContentArray = function(response) {
-        var MHRelationalPair = System.get('models/base/MHRelationalPair').MHRelationalPair;
+        var MHRelationalPair = System.get('models/base/MHRelationalPair.js').MHRelationalPair;
         var self = this;
         self.pagingInfo = response.pagingInfo || null;
         if (response.content !== undefined) {
@@ -4076,7 +4076,7 @@ System.registerModule("models/internal/MHCache.js", [], function() {
       },
       restoreFromLocalStorage: function() {
         var storageKey = arguments[0] !== (void 0) ? arguments[0] : 'mhLocalCache';
-        var MHObject = System.get('models/base/MHObject').MHObject;
+        var MHObject = System.get('models/base/MHObject.js').MHObject;
         if (!localStorage || typeof localStorage[storageKey] === 'undefined') {
           log('nothing stored');
           return ;
@@ -4867,28 +4867,28 @@ System.registerModule("models/base/MHObject.js", [], function() {
         return null;
       },
       isMedia: function(toCheck) {
-        return toCheck instanceof System.get('models/media/MHMedia').MHMedia;
+        return toCheck instanceof System.get('models/media/MHMedia.js').MHMedia;
       },
       isContributor: function(toCheck) {
-        return toCheck instanceof System.get('models/contributor/MHContributor').MHContributor;
+        return toCheck instanceof System.get('models/contributor/MHContributor.js').MHContributor;
       },
       isAction: function(toCheck) {
-        return toCheck instanceof System.get('models/action/MHAction').MHAction;
+        return toCheck instanceof System.get('models/action/MHAction.js').MHAction;
       },
       isUser: function(toCheck) {
-        return toCheck instanceof System.get('models/user/MHUser').MHUser;
+        return toCheck instanceof System.get('models/user/MHUser.js').MHUser;
       },
       isCollection: function(toCheck) {
-        return toCheck instanceof System.get('models/collection/MHCollection').MHCollection;
+        return toCheck instanceof System.get('models/collection/MHCollection.js').MHCollection;
       },
       isImage: function(toCheck) {
-        return toCheck instanceof System.get('models/image/MHImage').MHImage;
+        return toCheck instanceof System.get('models/image/MHImage.js').MHImage;
       },
       isTrait: function(toCheck) {
-        return toCheck instanceof System.get('models/trait/MHTrait').MHTrait;
+        return toCheck instanceof System.get('models/trait/MHTrait.js').MHTrait;
       },
       isSource: function(toCheck) {
-        return toCheck instanceof System.get('models/source/MHSource').MHSource;
+        return toCheck instanceof System.get('models/source/MHSource.js').MHSource;
       },
       isType: function(obj) {
         var type = '';
@@ -5507,7 +5507,7 @@ System.registerModule("models/user/MHUser.js", [], function() {
     }
     return ($traceurRuntime.createClass)(MHUser, {
       get isCurrentUser() {
-        var currentUser = System.get('models/user/MHLoginSession').MHLoginSession.currentUser;
+        var currentUser = System.get('models/user/MHLoginSession.js').MHLoginSession.currentUser;
         return this.isEqualToMHObject(currentUser);
       },
       setPassword: function(password, newPassword) {
@@ -8857,4 +8857,4 @@ System.registerModule("hound-api.js", [], function() {
     }
   };
 });
-module.exports = System.get("hound-api.js" + '').default;
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') { module.exports = System.get("hound-api.js" + '').default; }

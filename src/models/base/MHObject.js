@@ -412,35 +412,35 @@ export class MHObject {
   //    instanceof only works if the object being checked was created
   //    in the same global scope as the constructor function it is being checked against
   static isMedia(toCheck){
-    return toCheck instanceof System.get('../../src/models/media/MHMedia').MHMedia;
+    return toCheck instanceof System.get('../../src/models/media/MHMedia.js').MHMedia;
   }
 
   static isContributor(toCheck){
-    return toCheck instanceof System.get('../../src/models/contributor/MHContributor').MHContributor;
+    return toCheck instanceof System.get('../../src/models/contributor/MHContributor.js').MHContributor;
   }
 
   static isAction(toCheck){
-    return toCheck instanceof System.get('../../src/models/action/MHAction').MHAction;
+    return toCheck instanceof System.get('../../src/models/action/MHAction.js').MHAction;
   }
 
   static isUser(toCheck){
-    return toCheck instanceof System.get('../../src/models/user/MHUser').MHUser;
+    return toCheck instanceof System.get('../../src/models/user/MHUser.js').MHUser;
   }
 
   static isCollection(toCheck){
-    return toCheck instanceof System.get('../../src/models/collection/MHCollection').MHCollection;
+    return toCheck instanceof System.get('../../src/models/collection/MHCollection.js').MHCollection;
   }
 
   static isImage(toCheck){
-    return toCheck instanceof System.get('../../src/models/image/MHImage').MHImage;
+    return toCheck instanceof System.get('../../src/models/image/MHImage.js').MHImage;
   }
 
   static isTrait(toCheck){
-    return toCheck instanceof System.get('../../src/models/trait/MHTrait').MHTrait;
+    return toCheck instanceof System.get('../../src/models/trait/MHTrait.js').MHTrait;
   }
 
   static isSource(toCheck){
-    return toCheck instanceof System.get('../../src/models/source/MHSource').MHSource;
+    return toCheck instanceof System.get('../../src/models/source/MHSource.js').MHSource;
   }
 
 

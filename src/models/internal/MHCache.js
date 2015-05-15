@@ -285,7 +285,7 @@ export class MHCache {
    * @param {string='mhLocalCache'} storageKey
    */
   restoreFromLocalStorage(storageKey='mhLocalCache'){
-    var MHObject = System.get('../../src/models/base/MHObject').MHObject;
+    var MHObject = System.get('../../src/models/base/MHObject.js').MHObject;
     //console.log('circular dep: ', MHObject);
 
     if( !localStorage || typeof localStorage[storageKey] === 'undefined' ){
