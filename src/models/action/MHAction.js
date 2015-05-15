@@ -1,6 +1,6 @@
 
-import { MHObject } from '../base/MHObject';
-//import { houndRequest } from '../../request/hound-request';
+import { MHObject } from '../base/MHObject.js';
+//import { houndRequest } from '../../request/hound-request.js';
 
 // MediaHound Action Object
 export class MHAction extends MHObject {

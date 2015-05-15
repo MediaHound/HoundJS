@@ -9,10 +9,10 @@
  *
  */
 
-import { warn, error } from '../models/internal/debug-helpers';
+import { warn, error } from '../models/internal/debug-helpers.js';
 
-import { houndRequest } from '../request/hound-request';
-import { MHObject } from '../models/base/MHObject';
+import { houndRequest } from '../request/hound-request.js';
+import { MHObject } from '../models/base/MHObject.js';
 
 var i, prop, buildSearchHelper, quickSearch,
     search        = {},

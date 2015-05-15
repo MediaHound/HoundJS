@@ -1,6 +1,6 @@
 
-import { MHObject } from '../base/MHObject';
-import { MHMedia } from './MHMedia';
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
 
 // MediaHound Movie Series Object
 export class MHMovieSeries extends MHMedia {

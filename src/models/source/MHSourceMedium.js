@@ -2,7 +2,7 @@
 // TODO
 //- (SourceMethod*)methodForType:(NSString*)type;
 
-import { MHSourceMethod } from './MHSourceMethod';
+import { MHSourceMethod } from './MHSourceMethod.js';
 
 // MediaHound SourceMedium Object
 export class MHSourceMedium {

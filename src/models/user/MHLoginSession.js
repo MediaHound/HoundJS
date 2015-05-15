@@ -1,10 +1,10 @@
 
-import { log, warn, error } from '../internal/debug-helpers';
+import { log, warn, error } from '../internal/debug-helpers.js';
 
-import { MHObject, mhidLRU } from '../base/MHObject';
-import { MHUser } from './MHUser';
+import { MHObject, mhidLRU } from '../base/MHObject.js';
+import { MHUser } from './MHUser.js';
 
-import { houndRequest } from '../../request/hound-request';
+import { houndRequest } from '../../request/hound-request.js';
 
 /* taken from iOS
  *

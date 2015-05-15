@@ -1,7 +1,7 @@
 
-import { MHObject } from '../base/MHObject';
-import { MHSourceMedium } from './MHSourceMedium';
-import { houndRequest } from '../../request/hound-request';
+import { MHObject } from '../base/MHObject.js';
+import { MHSourceMedium } from './MHSourceMedium.js';
+import { houndRequest } from '../../request/hound-request.js';
 
 // TODO
 //@property (strong, nonatomic, readonly) NSString* logoName;

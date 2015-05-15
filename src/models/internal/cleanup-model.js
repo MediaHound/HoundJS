@@ -1,5 +1,5 @@
 
-import { MHObject } from '../base/MHObject';
+import { MHObject } from '../base/MHObject.js';
 
 // Remove register constructor
 delete MHObject.registerConstructor;

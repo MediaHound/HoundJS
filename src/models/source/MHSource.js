@@ -1,5 +1,5 @@
 
-import { MHObject } from '../base/MHObject';
+import { MHObject } from '../base/MHObject.js';
 
 // MediaHound Source Master Object
 export class MHSource extends MHObject {

@@ -1,13 +1,13 @@
 /*global System, Blob, File */
 
-import { log } from '../internal/debug-helpers';
+import { log } from '../internal/debug-helpers.js';
 
-import { MHObject, mhidLRU } from '../base/MHObject';
-import { MHRelationalPair } from '../base/MHRelationalPair';
-//import { MHImage } from '../image/MHImage';
+import { MHObject, mhidLRU } from '../base/MHObject.js';
+import { MHRelationalPair } from '../base/MHRelationalPair.js';
+//import { MHImage } from '../image/MHImage.js';
 
-import { houndRequest } from '../../request/hound-request';
-import { pagedRequest } from '../../request/hound-paged-request';
+import { houndRequest } from '../../request/hound-request.js';
+import { pagedRequest } from '../../request/hound-paged-request.js';
 
 // MediaHound User Object
 export class MHUser extends MHObject {

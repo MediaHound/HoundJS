@@ -1,6 +1,6 @@
 
-import { MHObject } from '../base/MHObject';
-import { MHMedia } from './MHMedia';
+import { MHObject } from '../base/MHObject.js';
+import { MHMedia } from './MHMedia.js';
 
 // MediaHound Special Media Object
 // TV Special is the most common use case

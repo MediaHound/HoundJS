@@ -1,6 +1,6 @@
 
-import { MHObject, mhidLRU } from './MHObject';
-import { MHContext } from '../meta/MHContext';
+import { MHObject, mhidLRU } from './MHObject.js';
+import { MHContext } from '../meta/MHContext.js';
 
 // MediaHound Relational Pair Object
 export class MHRelationalPair {

@@ -1,6 +1,6 @@
 
-import { MHObject } from '../base/MHObject';
-import { pagedRequest } from '../../request/hound-paged-request';
+import { MHObject } from '../base/MHObject.js';
+import { pagedRequest } from '../../request/hound-paged-request.js';
 
 // MediaHound Contributor Object
 export class MHContributor extends MHObject {

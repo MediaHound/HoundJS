@@ -1,6 +1,6 @@
 /*global System */
 
-import { houndRequest } from './hound-request';
+import { houndRequest } from './hound-request.js';
 
 // Start Module
 var defaults = {

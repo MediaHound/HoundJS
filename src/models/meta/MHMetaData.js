@@ -1,4 +1,4 @@
-import { MHImageData } from '../image/MHImageData';
+import { MHImageData } from '../image/MHImageData.js';
 
 export class MHMetaData {
   /*  MHMetaData Constructor

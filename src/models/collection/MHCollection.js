@@ -1,13 +1,13 @@
 
-import { log } from '../internal/debug-helpers';
+import { log } from '../internal/debug-helpers.js';
 
-import { MHObject } from '../base/MHObject';
-import { MHAction } from '../action/MHAction';
-import { MHLoginSession } from '../user/MHLoginSession';
-//import { MHRelationalPair } from '../base/MHRelationalPair';
+import { MHObject } from '../base/MHObject.js';
+import { MHAction } from '../action/MHAction.js';
+import { MHLoginSession } from '../user/MHLoginSession.js';
+//import { MHRelationalPair } from '../base/MHRelationalPair.js';
 
-import { houndRequest } from '../../request/hound-request';
-import { pagedRequest } from '../../request/hound-paged-request';
+import { houndRequest } from '../../request/hound-request.js';
+import { pagedRequest } from '../../request/hound-paged-request.js';
 
 /**
  * @classdesc Mediahound Collection Object (MHCollection) inherits from MHObject

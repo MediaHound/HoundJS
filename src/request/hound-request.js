@@ -1,10 +1,10 @@
 
-import { log } from '../models/internal/debug-helpers';
+import { log } from '../models/internal/debug-helpers.js';
 
 // Start Module
-import { promiseRequest } from './promise-request';
+import { promiseRequest } from './promise-request.js';
 
-import { MHSDK } from '../models/sdk/MHSDK';
+import { MHSDK } from '../models/sdk/MHSDK.js';
 
 var extraEncode = promiseRequest.extraEncode,
     requestMap  = {},
