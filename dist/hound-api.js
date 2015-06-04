@@ -6855,7 +6855,8 @@ System.registerModule("models/source/MHSourceFormat.js", [], function() {
       var type = args.type || null,
           price = args.price,
           launchInfo = args.launchInfo || null,
-          timePeriod = args.timePeriod || null;
+          timePeriod = args.timePeriod || null,
+          contentCount = args.contentCount || null;
       Object.defineProperties(this, {
         'type': {
           configurable: false,
@@ -6880,6 +6881,12 @@ System.registerModule("models/source/MHSourceFormat.js", [], function() {
           enumerable: true,
           writable: false,
           value: timePeriod
+        },
+        'contentCount': {
+          configurable: false,
+          enumerable: true,
+          writable: false,
+          value: contentCount
         },
         'method': {
           configurable: false,

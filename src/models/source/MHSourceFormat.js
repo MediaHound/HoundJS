@@ -32,7 +32,8 @@ export class MHSourceFormat {
     var type        = args.type       || null,
         price       = args.price,
         launchInfo  = args.launchInfo || null,
-        timePeriod  = args.timePeriod || null;
+        timePeriod  = args.timePeriod || null,
+        contentCount = args.contentCount || null;
 
     // if( type === null || price === null || launchInfo === null ){
     //   throw new TypeError('Required info not defined on argument map in MHSourceFormat', 'MHSourceFormat.js', 41);
@@ -64,6 +65,12 @@ export class MHSourceFormat {
         enumerable:true,
         writable:false,
         value: timePeriod
+      },
+      'contentCount':{
+        configurable:false,
+        enumerable:true,
+        writable:false,
+        value: contentCount
       },
       'method':{
         configurable:false,
