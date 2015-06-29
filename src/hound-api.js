@@ -8,15 +8,13 @@ import { pagedRequest } from './request/hound-paged-request.js';
 import { models } from './models/all-models.js';
 
 // Import Search Helpers
-import { quickSearch } from './search/quick-search.js';
-import { pagedSearch } from './search/paged-search.js';
+import { MHSearch } from './search/MHSearch.js';
 
-export { request, pagedRequest, models, quickSearch, pagedSearch };
+export { request, pagedRequest, models, MHSearch };
 
 export default {
   get models()        { return models;        },
   get request()       { return request;       },
   get pagedRequest()  { return pagedRequest;  },
-  get quickSearch()   { return quickSearch;   },
-  get pagedSearch()   { return pagedSearch;   }
+  get MHSearch()      { return MHSearch;      }
 };
