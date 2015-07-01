@@ -8679,139 +8679,80 @@ System.registerModule("models/all-models.js", [], function() {
       return models;
     }};
 });
-System.registerModule("search/paged-search.js", [], function() {
+System.registerModule("search/MHSearch.js", [], function() {
   "use strict";
-  var __moduleName = "search/paged-search.js";
-  var pagedSearch = function() {};
-  var $__default = pagedSearch;
-  return {
-    get pagedSearch() {
-      return pagedSearch;
-    },
-    get default() {
-      return $__default;
-    }
-  };
-});
-System.registerModule("search/quick-search.js", [], function() {
-  "use strict";
-  var __moduleName = "search/quick-search.js";
-  var $__0 = System.get("models/internal/debug-helpers.js"),
-      warn = $__0.warn,
-      error = $__0.error;
+  var __moduleName = "search/MHSearch.js";
   var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var i,
-      prop,
-      buildSearchHelper,
-      quickSearch,
-      search = {},
-      extraEncode = houndRequest.extraEncode,
-      types = ['all', 'movie', 'song', 'album', 'tvseries', 'book', 'game', 'person', 'collection', 'user'],
-      makeEndpoint = function(searchType, query) {
-        return 'search/' + searchType + '/' + extraEncode(query) + '';
-      },
-      makeParams = function(size, type) {
-        var params;
-        if (type === 'all') {
-          params = {page: 0};
-        } else {
-          params = {};
-        }
-        params['page.size'] = (typeof size === 'number') ? size : 8;
-        return params;
-      },
-      makeSearchRequest = function(searchType, query, size) {
-        return houndRequest({
-          method: 'GET',
-          endpoint: makeEndpoint(searchType, query),
-          params: makeParams(size, searchType)
-        });
-      };
-  buildSearchHelper = function(index) {
-    search[types[index]] = function(query, size) {
-      return makeSearchRequest(types[index], query, size).then((function(parsed) {
-        parsed.content = parsed.content.map((function(v) {
-          v.metadata = {};
-          v.metadata.mhid = v.mhid;
-          v.metadata.altId = v.altId;
-          v.metadata.name = v.name;
-          v.metadata.username = v.username || null;
-          v.metadata.releaseDate = v.releaseDate;
-          if (typeof v.primaryImageUrl === 'string') {
-            v.primaryImage = {metadata: {
-                mhid: 'mhimgPlaceHolderSearchShim-' + v.mhid,
-                isDefault: false,
-                original: {url: v.primaryImageUrl}
-              }};
-            if (typeof v.primaryImageUrlThumbnail === 'string') {
-              v.primaryImage.metadata.thumbnail = {url: v.primaryImageUrlThumbnail};
-            }
-            if (typeof v.primaryImageUrlSmall === 'string') {
-              v.primaryImage.metadata.small = {url: v.primaryImageUrlSmall};
-            }
-            if (typeof v.primaryImageUrlMedium === 'string') {
-              v.primaryImage.metadata.medium = {url: v.primaryImageUrlMedium};
-            }
-            if (typeof v.primaryImageUrlLarge === 'string') {
-              v.primaryImage.metadata.large = {url: v.primaryImageUrlLarge};
-            }
-          }
-          return v;
+  var MHRelationalPair = System.get("models/base/MHRelationalPair.js").MHRelationalPair;
+  var MHSearch = (function() {
+    function MHSearch() {}
+    return ($traceurRuntime.createClass)(MHSearch, {}, {
+      fetchResultsForSearchTerm: function(searchTerm, scopes) {
+        var size = arguments[2] !== (void 0) ? arguments[2] : 12;
+        var makeEndpoint = function(query) {
+          return 'search/all/' + houndRequest.extraEncode(query);
+        },
+            makeParams = function(scopes, size) {
+              var params = {
+                pageSize: (typeof size === 'number') ? size : 8,
+                v: '2'
+              };
+              if (Array.isArray(scopes) && scopes.indexOf(MHSearch.SCOPE_ALL) === -1) {
+                params.types = scopes;
+              }
+              return params;
+            },
+            makeSearchRequest = function(searchTerm, scopes, size) {
+              return houndRequest({
+                method: 'GET',
+                endpoint: makeEndpoint(searchTerm),
+                params: makeParams(scopes, size)
+              });
+            };
+        return makeSearchRequest(searchTerm, scopes, size).then((function(response) {
+          return Promise.all(MHRelationalPair.createFromArray(response.content));
         }));
-        return parsed;
-      })).then((function(parsed) {
-        var mhObj;
-        return parsed.content.map((function(v) {
-          try {
-            mhObj = MHObject.create(v, false);
-            if (v.contributorNames) {
-              mhObj.contributorNames = v.contributorNames;
-            }
-            return mhObj;
-          } catch (e) {
-            warn('unrecognized mhid prefix: ', v.mhid);
-            error(e);
-            return v;
-          }
-        }));
-      }));
-    };
-  };
-  for (i = 0; i < types.length; i++) {
-    buildSearchHelper(i);
-  }
-  quickSearch = function(query, size) {
-    var j,
-        typeMap = {};
-    return Promise.all(types.map(function(v) {
-      return search[v](query, size);
-    })).then(function(results) {
-      for (j = 0; j < types.length; j++) {
-        typeMap[types[j]] = results[j];
+      },
+      get SCOPE_ALL() {
+        return 'all';
+      },
+      get SCOPE_MOVIE() {
+        return 'movie';
+      },
+      get SCOPE_SONG() {
+        return 'song';
+      },
+      get SCOPE_ALBUM() {
+        return 'album';
+      },
+      get SCOPE_SHOWSERIES() {
+        return 'showseries';
+      },
+      get SCOPE_SHOWSEASON() {
+        return 'showseason';
+      },
+      get SCOPE_SHOWEPISODE() {
+        return 'showepisode';
+      },
+      get SCOPE_BOOK() {
+        return 'book';
+      },
+      get SCOPE_GAME() {
+        return 'game';
+      },
+      get SCOPE_COLLECTION() {
+        return 'collection';
+      },
+      get SCOPE_USER() {
+        return 'user';
+      },
+      get SCOPE_CONTRIBUTOR() {
+        return 'contributor';
       }
-      return typeMap;
     });
-  };
-  for (prop in search) {
-    if (search.hasOwnProperty(prop)) {
-      quickSearch[prop] = search[prop];
-    }
-  }
-  quickSearch.everything = function(query, size) {
-    var currType,
-        i = 0,
-        rtn = {};
-    for (currType = types[i]; i < types.length; currType = types[++i]) {
-      rtn[currType] = search[currType](query, size);
-    }
-    return rtn;
-  };
-  quickSearch.type = function(query, size, type) {
-    return search[type](query, size);
-  };
-  return {get quickSearch() {
-      return quickSearch;
+  }());
+  return {get MHSearch() {
+      return MHSearch;
     }};
 });
 System.registerModule("hound-api.js", [], function() {
@@ -8820,8 +8761,7 @@ System.registerModule("hound-api.js", [], function() {
   var request = System.get("request/hound-request.js").houndRequest;
   var pagedRequest = System.get("request/hound-paged-request.js").pagedRequest;
   var models = System.get("models/all-models.js").models;
-  var quickSearch = System.get("search/quick-search.js").quickSearch;
-  var pagedSearch = System.get("search/paged-search.js").pagedSearch;
+  var MHSearch = System.get("search/MHSearch.js").MHSearch;
   var $__default = {
     get models() {
       return models;
@@ -8832,11 +8772,8 @@ System.registerModule("hound-api.js", [], function() {
     get pagedRequest() {
       return pagedRequest;
     },
-    get quickSearch() {
-      return quickSearch;
-    },
-    get pagedSearch() {
-      return pagedSearch;
+    get MHSearch() {
+      return MHSearch;
     }
   };
   return {
@@ -8849,11 +8786,8 @@ System.registerModule("hound-api.js", [], function() {
     get models() {
       return models;
     },
-    get quickSearch() {
-      return quickSearch;
-    },
-    get pagedSearch() {
-      return pagedSearch;
+    get MHSearch() {
+      return MHSearch;
     },
     get default() {
       return $__default;
