@@ -78,7 +78,7 @@ export class MHCollection extends MHObject {
       'firstContentImage':{
         configurable: false,
         enumerable:   true,
-        writable:     false,
+        writable:     true,
         value:        firstContentImage
       },
       'description':{
@@ -90,7 +90,7 @@ export class MHCollection extends MHObject {
       'primaryOwner':{
         configurable: false,
         enumerable:   true,
-        writable:     false,
+        writable:     true,
         value:        primaryOwner
       },
       // Promises
@@ -149,6 +149,23 @@ export class MHCollection extends MHObject {
    */
   toString(){
     return super.toString() + ' and description ' + this.description;
+  }
+
+  mergeWithData(parsedArgs) {
+    super.mergeWithData(parsedArgs);
+
+    if (!this.firstContentImage && parsedArgs.firstContentImage) {
+      var firstContentImage = MHObject.create(parsedArgs.firstContentImage);
+      if (firstContentImage) {
+        this.firstContentImage = firstContentImage;
+      }
+    }
+    if (!this.primaryOwner && parsedArgs.primaryOwner) {
+      var primaryOwner = MHObject.create(parsedArgs.primaryOwner);
+      if (primaryOwner) {
+        this.primaryOwner = primaryOwner;
+      }
+    }
   }
 
   /**

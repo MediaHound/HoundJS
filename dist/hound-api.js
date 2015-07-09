@@ -4556,7 +4556,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
         Object.defineProperty(this, 'primaryGroup', {
           configurable: false,
           enumerable: true,
-          writable: false,
+          writable: true,
           value: primaryGroup
         });
       }
@@ -4564,7 +4564,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
         Object.defineProperty(this, 'primaryImage', {
           configurable: false,
           enumerable: true,
-          writable: false,
+          writable: true,
           value: primaryImage
         });
       }
@@ -4572,7 +4572,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
         Object.defineProperty(this, 'secondaryImage', {
           configurable: false,
           enumerable: true,
-          writable: false,
+          writable: true,
           value: secondaryImage
         });
       }
@@ -4633,6 +4633,26 @@ System.registerModule("models/base/MHObject.js", [], function() {
       },
       toString: function() {
         return this.className + " with mhid " + this.mhid + " and name " + this.mhName;
+      },
+      mergeWithData: function(parsedArgs) {
+        if (!this.primaryImage && parsedArgs.primaryImage) {
+          var primaryImage = MHObject.create(parsedArgs.primaryImage);
+          if (primaryImage) {
+            this.primaryImage = primaryImage;
+          }
+        }
+        if (!this.secondaryImage && parsedArgs.secondaryImage) {
+          var secondaryImage = MHObject.create(parsedArgs.secondaryImage);
+          if (secondaryImage) {
+            this.secondaryImage = secondaryImage;
+          }
+        }
+        if (!this.primaryGroup && parsedArgs.primaryGroup) {
+          var primaryGroup = MHObject.create(parsedArgs.primaryGroup);
+          if (primaryGroup) {
+            this.primaryGroup = primaryGroup;
+          }
+        }
       },
       get endpoint() {
         return this.constructor.rootEndpoint + '/' + this.mhid;
@@ -4784,7 +4804,11 @@ System.registerModule("models/base/MHObject.js", [], function() {
             args.mhid = mhid;
             if (mhidLRU.has(args.metadata.mhid) || mhidLRU.has(args.mhid)) {
               log('getting from cache in create: ' + args.metadata.mhid);
-              return mhidLRU.get(args.metadata.mhid);
+              var foundObject = mhidLRU.get(args.metadata.mhid);
+              if (foundObject) {
+                foundObject.mergeWithData(args);
+              }
+              return foundObject;
             }
             var prefix = MHObject.getPrefixFromMhid(mhid);
             log(prefix, new childrenConstructors[prefix](args));
@@ -4798,6 +4822,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
             return mhObj;
           }
         } catch (err) {
+          console.log(err);
           if (err instanceof TypeError) {
             if (err.message === 'undefined is not a function') {
               warn('Unknown mhid prefix, see args object: ', args);
@@ -5352,9 +5377,7 @@ System.registerModule("models/meta/MHContext.js", [], function() {
 System.registerModule("models/base/MHRelationalPair.js", [], function() {
   "use strict";
   var __moduleName = "models/base/MHRelationalPair.js";
-  var $__0 = System.get("models/base/MHObject.js"),
-      MHObject = $__0.MHObject,
-      mhidLRU = $__0.mhidLRU;
+  var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHContext = System.get("models/meta/MHContext.js").MHContext;
   var MHRelationalPair = (function() {
     function MHRelationalPair(args) {
@@ -5378,7 +5401,7 @@ System.registerModule("models/base/MHRelationalPair.js", [], function() {
         args.context.target = args.object.metadata.mhid;
         context = new MHContext(args.context);
       }
-      object = mhidLRU.has(args.object.metadata.mhid) ? mhidLRU.get(args.object.metadata.mhid) : MHObject.create(args.object) || null;
+      object = MHObject.create(args.object) || null;
       if (context == null || object == null) {
         console.warn('Either context or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);
       }
@@ -6273,7 +6296,7 @@ System.registerModule("models/collection/MHCollection.js", [], function() {
         'firstContentImage': {
           configurable: false,
           enumerable: true,
-          writable: false,
+          writable: true,
           value: firstContentImage
         },
         'description': {
@@ -6285,7 +6308,7 @@ System.registerModule("models/collection/MHCollection.js", [], function() {
         'primaryOwner': {
           configurable: false,
           enumerable: true,
-          writable: false,
+          writable: true,
           value: primaryOwner
         },
         'ownersPromise': {
@@ -6323,6 +6346,21 @@ System.registerModule("models/collection/MHCollection.js", [], function() {
       },
       toString: function() {
         return $traceurRuntime.superGet(this, MHCollection.prototype, "toString").call(this) + ' and description ' + this.description;
+      },
+      mergeWithData: function(parsedArgs) {
+        $traceurRuntime.superGet(this, MHCollection.prototype, "mergeWithData").call(this, parsedArgs);
+        if (!this.firstContentImage && parsedArgs.firstContentImage) {
+          var firstContentImage = MHObject.create(parsedArgs.firstContentImage);
+          if (firstContentImage) {
+            this.firstContentImage = firstContentImage;
+          }
+        }
+        if (!this.primaryOwner && parsedArgs.primaryOwner) {
+          var primaryOwner = MHObject.create(parsedArgs.primaryOwner);
+          if (primaryOwner) {
+            this.primaryOwner = primaryOwner;
+          }
+        }
       },
       editMetaData: function(name, description) {
         var path = this.subendpoint('update'),
@@ -7121,7 +7159,7 @@ System.registerModule("models/media/MHMedia.js", [], function() {
         'keyContributors': {
           configurable: false,
           enumerable: true,
-          writable: false,
+          writable: true,
           value: keyContributors
         },
         'collections': {
@@ -7171,6 +7209,15 @@ System.registerModule("models/media/MHMedia.js", [], function() {
     return ($traceurRuntime.createClass)(MHMedia, {
       toString: function() {
         return $traceurRuntime.superGet(this, MHMedia.prototype, "toString").call(this) + ' and releaseDate ' + this.releaseDate;
+      },
+      mergeWithData: function(parsedArgs) {
+        $traceurRuntime.superGet(this, MHMedia.prototype, "mergeWithData").call(this, parsedArgs);
+        if (!this.keyContributors && parsedArgs.keyContributors) {
+          var keyContributors = MHRelationalPair.createFromArray(parsedArgs.keyContributors);
+          if (keyContributors) {
+            this.keyContributors = keyContributors;
+          }
+        }
       },
       fetchCollections: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';

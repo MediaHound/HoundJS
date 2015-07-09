@@ -92,7 +92,7 @@ export class MHObject {
       Object.defineProperty(this,'primaryGroup',{
         configurable: false,
         enumerable:   true,
-        writable:     false,
+        writable:     true,
         value:        primaryGroup
       });
     }
@@ -101,7 +101,7 @@ export class MHObject {
       Object.defineProperty(this,'primaryImage',{
         configurable: false,
         enumerable:   true,
-        writable:     false,
+        writable:     true,
         value:        primaryImage
       });
     }
@@ -110,7 +110,7 @@ export class MHObject {
       Object.defineProperty(this,'secondaryImage',{
         configurable: false,
         enumerable:   true,
-        writable:     false,
+        writable:     true,
         value:        secondaryImage
       });
     }
@@ -243,7 +243,11 @@ export class MHObject {
 
         if( mhidLRU.has(args.metadata.mhid) || mhidLRU.has(args.mhid) ){
           log('getting from cache in create: ' + args.metadata.mhid);
-          return mhidLRU.get(args.metadata.mhid);
+          var foundObject = mhidLRU.get(args.metadata.mhid);
+          if (foundObject) {
+            foundObject.mergeWithData(args);
+          }
+          return foundObject;
         }
 
         var prefix = MHObject.getPrefixFromMhid(mhid);
@@ -270,6 +274,7 @@ export class MHObject {
 
     } catch (err) {
       //log(err);
+      console.log(err);
       if( err instanceof TypeError ) {
         if( err.message === 'undefined is not a function' ) {
           warn('Unknown mhid prefix, see args object: ', args);
@@ -522,6 +527,29 @@ export class MHObject {
   // TODO Could change as needed
   toString(){
     return this.className + " with mhid " + this.mhid + " and name " + this.mhName;
+  }
+
+  mergeWithData(parsedArgs) {
+    if (!this.primaryImage && parsedArgs.primaryImage) {
+      var primaryImage = MHObject.create(parsedArgs.primaryImage);
+      if (primaryImage) {
+        this.primaryImage = primaryImage;
+      }
+    }
+
+    if (!this.secondaryImage && parsedArgs.secondaryImage) {
+      var secondaryImage = MHObject.create(parsedArgs.secondaryImage);
+      if (secondaryImage) {
+        this.secondaryImage = secondaryImage;
+      }
+    }
+
+    if (!this.primaryGroup && parsedArgs.primaryGroup) {
+      var primaryGroup = MHObject.create(parsedArgs.primaryGroup);
+      if (primaryGroup) {
+        this.primaryGroup = primaryGroup;
+      }
+    }
   }
 
   /**

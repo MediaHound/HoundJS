@@ -50,7 +50,7 @@ export class MHMedia extends MHObject {
       'keyContributors':{
         configurable: false,
         enumerable:   true,
-        writable:     false,
+        writable:     true,
         value:        keyContributors
       },
       // 'primaryGroup':{
@@ -115,6 +115,17 @@ export class MHMedia extends MHObject {
   // Could change as needed
   toString(){
     return super.toString() + ' and releaseDate ' + this.releaseDate;
+  }
+
+  mergeWithData(parsedArgs) {
+    super.mergeWithData(parsedArgs);
+
+    if (!this.keyContributors && parsedArgs.keyContributors) {
+      var keyContributors = MHRelationalPair.createFromArray(parsedArgs.keyContributors);
+      if (keyContributors) {
+        this.keyContributors = keyContributors;
+      }
+    }
   }
 
   /* TODO: REMOVE ids.map to fetchByMhid

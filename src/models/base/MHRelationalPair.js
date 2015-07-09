@@ -1,5 +1,5 @@
 
-import { MHObject, mhidLRU } from './MHObject.js';
+import { MHObject } from './MHObject.js';
 import { MHContext } from '../meta/MHContext.js';
 
 // MediaHound Relational Pair Object
@@ -39,7 +39,7 @@ export class MHRelationalPair {
       context = new MHContext(args.context);
     }
 
-     object = mhidLRU.has(args.object.metadata.mhid) ? mhidLRU.get(args.object.metadata.mhid) : MHObject.create(args.object) || null;
+    object = MHObject.create(args.object) || null;
 
     if( context == null || object == null ){
       console.warn('Either context or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);
