@@ -22,7 +22,6 @@ paths.houndApiJs    = paths.src   + '/hound-api.js';
 paths.buildCompiled = paths.build + '/compiled';
 
 // Traceur command line commands
-var traceurOpts = '--symbols';
 var traceurCmds = {
   single: {
     register : paths.traceur + ' ' + paths.houndApiJs + ' --out ' + paths.buildCompiled + '/hound-api.register.js --modules=register' // <-- this is the important one that is used to build distribution right now

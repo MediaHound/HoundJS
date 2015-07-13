@@ -40,21 +40,8 @@ export class MHSubscription extends MHObject {
     });
   }
 
-  static get mhidPrefix() { return 'mhsubtemp'; }
-
-  // Could change as needed
-  toString(){
-    return super.toString();
-  }
-
-  /* TODO
-  *
-  * Fetching Stuff
-  *  fetchAvailableSources
-  *  fetchDesiredSource
-  *
-  */
-
+  static get mhidPrefix()   { return 'mhsub'; }
+  static get rootEndpoint() { return 'graph/subscription'; }
 }
 
 (function(){

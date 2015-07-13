@@ -685,7 +685,7 @@ static fetchByUsername(username, view='full', force=false){
 *
 */
 static fetchFeaturedUsers(){
-  var path = MHUser.rootEndpoint + '/featured';
+  var path = this.rootSubednpoint('featured');
   return houndRequest({
     method  : 'GET',
     endpoint: path
@@ -707,16 +707,7 @@ static fetchFeaturedUsers(){
 */
 fetchInterestFeed(view='full', size=12, force=false){
   var path = this.subendpoint('interestFeed');
-
-  if( force || this.interestFeed === null ){
-    this.interestFeed = pagedRequest({
-      method          : 'GET',
-      endpoint        : path,
-      pageSize        : size,
-      params:{ view }
-    });
-  }
-  return this.interestFeed;
+  return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
 }
 
 /* TODO: remove console.log debug stuffs
@@ -728,16 +719,7 @@ fetchInterestFeed(view='full', size=12, force=false){
 
 fetchOwnedCollections(view='full', size=12, force=true){
   var path = this.subendpoint('ownedCollections');
-  if( force || this.ownedCollections === null ){
-    this.ownedCollections = pagedRequest({
-      method: 'GET',
-      endpoint: path,
-      pageSize: size,
-      params: { view }
-    });
-  }
-  //console.log(this.feedPagedRequest);
-  return this.ownedCollections;
+  return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
 }
 
 /**
@@ -752,35 +734,22 @@ fetchOwnedCollections(view='full', size=12, force=true){
 */
 fetchSuggested(view='full', size=12, force=false){
   var path = this.subendpoint('suggested');
-  if( force || this.suggested === null ){
-    this.suggested = pagedRequest({
-      method: 'GET',
-      endpoint: path,
-      pageSize: size,
-      params: {view}
-    });
-
-  }
-  return this.suggested;
+  return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
 }
 
 /**
-* mhUser.fetchFollowed()
+* mhUser.fetchFollowing()
 * @param force {boolean=false}
 * @returns {Promise}
 */
-fetchFollowed(view='full', size=12, force=false){
+fetchFollowing(view='full', size=12, force=false){
   var path = this.subendpoint('following');
-  if( force || this.following === null ){
-    this.following = pagedRequest({
-      method: 'GET',
-      endpoint: path,
-      pageSize: size,
-      params: {view}
-    });
-  }
-  console.log(this.following);
-  return this.following;
+  return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
+}
+
+fetchFollowers(view='full', size=12, force=false){
+  var path = this.subendpoint('followers');
+  return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
 }
 
 /*

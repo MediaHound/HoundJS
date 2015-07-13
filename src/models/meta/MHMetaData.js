@@ -1,22 +1,6 @@
 import { MHImageData } from '../image/MHImageData.js';
 
 export class MHMetaData {
-  /*  MHMetaData Constructor
-   *
-   * MediaHound Object constructors take a single parameter {Object | JSON String}
-   * If the argument is an object properties will be read and placed properly
-   *  if a prop doesn't exist and is optional it will be replaced with a null value.
-   * If the argument is a string it will be passed through JSON.parse and then the constructor will continue as normal.
-   *
-   *  @param args - { Object | JSON String }
-   *
-   *  Required Param Props
-   *      name            - { String }
-   *      mhid            - { MHMediaData }
-   *      altid           - { MHMediaData }
-   *      createdDate     - { Date }
-   *
-   */
   constructor(args){
 
     // Unique Properties

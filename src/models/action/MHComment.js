@@ -52,11 +52,6 @@ export class MHComment extends MHAction {
 
   static get mhidPrefix() { return 'mhcmt'; }
 
-  // Could change as needed
-  toString(){
-    return super.toString();
-  }
-
   /*
    * TODO docJS
    */

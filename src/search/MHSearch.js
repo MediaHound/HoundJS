@@ -6,29 +6,28 @@ export class MHSearch {
   static fetchResultsForSearchTerm(searchTerm, scopes, size=12){
 
     var makeEndpoint = function(query){
-          return 'search/all/' + houndRequest.extraEncode(query);
-        },
+      return 'search/all/' + houndRequest.extraEncode(query);
+    };
 
-        makeParams = function(scopes, size){
-          var params = {
-            pageSize: (typeof size === 'number') ? size : 8,
-            v: '2' // TODO: Remove this once v=2 is no longer needed.
-          };
+    var makeParams = function(scopes, size){
+      var params = {
+        pageSize: (typeof size === 'number') ? size : 8
+      };
 
-          if (Array.isArray(scopes) && scopes.indexOf(MHSearch.SCOPE_ALL) === -1) {
-            params.types = scopes;
-          }
+      if (Array.isArray(scopes) && scopes.indexOf(MHSearch.SCOPE_ALL) === -1) {
+        params.types = scopes;
+      }
 
-          return params;
-        },
+      return params;
+    };
 
-        makeSearchRequest = function(searchTerm, scopes, size){
-          return houndRequest({
-              method: 'GET',
-              endpoint: makeEndpoint(searchTerm),
-              params: makeParams(scopes, size)
-            });
-        };
+    var makeSearchRequest = function(searchTerm, scopes, size){
+      return houndRequest({
+          method: 'GET',
+          endpoint: makeEndpoint(searchTerm),
+          params: makeParams(scopes, size)
+        });
+    };
 
     return makeSearchRequest(searchTerm, scopes, size)
       .then(response => {

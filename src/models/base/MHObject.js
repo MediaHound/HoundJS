@@ -28,6 +28,16 @@ var lastSocialRequestIdSym = Symbol('lastSocialRequestId'),
 
 // Base MediaHound Object
 export class MHObject {
+
+  initializeProperty(name, initialValue) {
+    Object.defineProperty(this, name, {
+        configurable: false,
+        enumerable:   true,
+        writable:     true,
+        value:        initialValue
+      });
+  }
+
   /** MHObject Constructor
    *  @constructor
    * MediaHound Object constructors take a single parameter {Object | JSON String}
@@ -68,80 +78,20 @@ export class MHObject {
           this.social = new MHSocial(args.social);
         }
 
-    // Create imutable properties
+    // TODO: Remove mhid, name, and altId from living here.
+    //       They belong in metadata.
+    self.initializeProperty('mhid', mhid);
+    self.initializeProperty('name', name);
+    self.initializeProperty('altId', altId);
 
-    if(name){
-      Object.defineProperty(this,'name',{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        name
-      });
-    }
+    self.initializeProperty('metadata', metadata);
+    self.initializeProperty('primaryGroup', primaryGroup);
+    self.initializeProperty('primaryImage', primaryImage);
+    self.initializeProperty('secondaryImage', secondaryImage);
 
-    if(altid){
-      Object.defineProperty(this,'altId',{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        altid
-      });
-    }
-
-    if(primaryGroup){
-      Object.defineProperty(this,'primaryGroup',{
-        configurable: false,
-        enumerable:   true,
-        writable:     true,
-        value:        primaryGroup
-      });
-    }
-
-    if(primaryImage){
-      Object.defineProperty(this,'primaryImage',{
-        configurable: false,
-        enumerable:   true,
-        writable:     true,
-        value:        primaryImage
-      });
-    }
-
-    if(secondaryImage){
-      Object.defineProperty(this,'secondaryImage',{
-        configurable: false,
-        enumerable:   true,
-        writable:     true,
-        value:        secondaryImage
-      });
-    }
-    //  mhid, name, primaryImage, createdDate, etc...
-    Object.defineProperties(this, {
-      'mhid':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        mhid
-      },
-      'metadata':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        metadata
-      },
-      // Promises
-      'feed':{
-        configurable: false,
-        enumerable:   false,
-        writable:     true,
-        value:        null
-      },
-      'images':{
-        configurable: false,
-        enumerable:   false,
-        writable:     true,
-        value:        null
-      }
-    });
+    // Private properties
+    self.initializeProperty('feed', null);
+    self.initializeProperty('images', null);
   }
 
   /** @property {MHSocial} social */
@@ -643,7 +593,7 @@ export class MHObject {
    * Children override
    *
    */
-  static get rootEndpoint(){ return null; }
+  static get rootEndpoint() { return null; }
 
   /**
    * MHObject.rootEndpointForMhid(mhid)
@@ -686,11 +636,17 @@ export class MHObject {
    *
    */
   subendpoint(sub){
-    //log(typeof sub);
     if( typeof sub !== 'string' && !(sub instanceof String) ){
       throw new TypeError('Sub not of type string or undefined in (MHObject).subendpoint.');
     }
     return this.endpoint + '/' + sub;
+  }
+
+  static rootSubendpoint(sub) {
+    if( typeof sub !== 'string' && !(sub instanceof String) ){
+      throw new TypeError('Sub not of type string or undefined in (MHObject).rootSubendpoint.');
+    }
+    return this.rootEndpoint + '/' + sub;
   }
 
   /**
@@ -729,16 +685,7 @@ export class MHObject {
    */
   fetchFeed(view='full', size=12, force=false){
     var path = this.subendpoint('feed');
-    if( force || this.feed === null || this.feed.numberOfElements !== size ){
-      this.feed = pagedRequest({
-        method: 'GET',
-        endpoint: path,
-        pageSize: size,
-        params: { view }
-      });
-    }
-    //console.log(this.feed);
-    return this.feed;
+    return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
   }
 
   /** TODO: TEST
@@ -765,16 +712,19 @@ export class MHObject {
 
   fetchImages(view='full', size=20, force=false){
     var path = this.subendpoint('images');
-    if( force || this.images === null ){
-      this.images = pagedRequest({
-        method: 'GET',
-        endpoint: path,
-        pageSize: size,
-        params: { view }
-      });
-    }
-    return this.images;
+    return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
   }
+
+  /*
+   * mhContributor.fetchCollections(force)
+   *
+   * @return { Promise }  - resolves to server response of collections for this MediaHound object
+   *
+   */
+   fetchCollections(view='full', size=12, force=true){
+     var path = this.subendpoint('collections');
+     return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
+   }
 
   /**
    *
@@ -829,5 +779,39 @@ export class MHObject {
         }
         throw err;
       });
+  }
+
+  responseCacheKeyForPath(path) {
+    return "__cached_" + path;
+  }
+  cachedResponseForPath(path) {
+    var cacheKey = this.responseCacheKeyForPath(path);
+    return this.cachedResponses[cacheKey];
+  }
+  setCachedResponse(response, path) {
+    var cacheKey = this.responseCacheKeyForPath(path);
+    this.cachedResponses[cacheKey] = response;
+  }
+
+  fetchPagedEndpoint(path, view, size, force) {
+    if (!force) {
+      var cached = this.cachedResponseForPath(path);
+      if (cached) {
+        return cached;
+      }
+    }
+
+    var promise = pagedRequest({
+      method: 'GET',
+      endpoint: path,
+      pageSize: size,
+      params: {
+        view: view
+      }
+    });
+
+    this.setCachedResponse(promise, path);
+
+    return promise;
   }
 }

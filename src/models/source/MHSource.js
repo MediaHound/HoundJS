@@ -28,44 +28,30 @@ export class MHSource extends MHObject {
     args = MHObject.parseArgs(args);
     super(args);
 
-        var mediums = (args.allMediums) ? args.allMediums : null,
-            subscriptions = (args.subscriptions) ? args.subscriptions : null;
+    var mediums = (args.allMediums) ? args.allMediums : null,
+        subscriptions = (args.subscriptions) ? args.subscriptions : null;
 
-        if(subscriptions !== null){
-          subscriptions = subscriptions.map( v => MHObject.create(v) );
-        }
+    if(subscriptions !== null){
+      subscriptions = subscriptions.map( v => MHObject.create(v) );
+    }
 
-        Object.defineProperties(this, {
-          'mediums':{
-            configurable: false,
-            enumerable:   true,
-            writable:     false,
-            value:        mediums
-          },
-          'subscriptions':{
-            configurable: false,
-            enumerable:   true,
-            writable:     false,
-            value:        subscriptions
-          }
-        });
+    Object.defineProperties(this, {
+      'mediums':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        mediums
+      },
+      'subscriptions':{
+        configurable: false,
+        enumerable:   true,
+        writable:     false,
+        value:        subscriptions
+      }
+    });
   }
 
   static get mhidPrefix() { return 'mhsrc'; }
-
-  // Could change as needed
-  toString(){
-    return super.toString();
-  }
-
-  /* TODO
-   *
-   * Fetching Stuff
-   *  fetchAvailableSources
-   *  fetchDesiredSource
-   *
-   */
-
 }
 
 (function(){
