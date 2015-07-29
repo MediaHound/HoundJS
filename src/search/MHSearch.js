@@ -1,44 +1,33 @@
 
 import { houndRequest } from '../request/hound-request.js';
 import { MHRelationalPair } from '../models/base/MHRelationalPair.js';
+import { jsonCreateFromData } from '../models/internal/jsonParse.js';
 
 export class MHSearch {
   static fetchResultsForSearchTerm(searchTerm, scopes, size=12){
+    var path = 'search/all/' + houndRequest.extraEncode(searchTerm);
 
-    var makeEndpoint = function(query){
-      return 'search/all/' + houndRequest.extraEncode(query);
+    var params = {
+      pageSize: size
     };
 
-    var makeParams = function(scopes, size){
-      var params = {
-        pageSize: (typeof size === 'number') ? size : 8
-      };
+    if (Array.isArray(scopes) && scopes.indexOf(MHSearch.SCOPE_ALL) === -1) {
+      params.types = scopes;
+    }
 
-      if (Array.isArray(scopes) && scopes.indexOf(MHSearch.SCOPE_ALL) === -1) {
-        params.types = scopes;
-      }
-
-      return params;
-    };
-
-    var makeSearchRequest = function(searchTerm, scopes, size){
-      return houndRequest({
-          method: 'GET',
-          endpoint: makeEndpoint(searchTerm),
-          params: makeParams(scopes, size)
-        });
-    };
-
-    return makeSearchRequest(searchTerm, scopes, size)
-      .then(response => {
-        return Promise.all(MHRelationalPair.createFromArray(response.content));
-      });
+    return houndRequest({
+      method: 'GET',
+      endpoint: path,
+      params: params
+    }).then(response => {
+      return jsonCreateFromData(response.content, [MHRelationalPair]);
+    });
   }
 
   // Static Search Scopes enums
   static get SCOPE_ALL()           { return 'all'; }
   static get SCOPE_MOVIE()         { return 'movie'; }
-  static get SCOPE_SONG()          { return 'song'; }
+  static get SCOPE_TRACK()         { return 'track'; }
   static get SCOPE_ALBUM()         { return 'album'; }
   static get SCOPE_SHOWSERIES()    { return 'showseries'; }
   static get SCOPE_SHOWSEASON()    { return 'showseason'; }

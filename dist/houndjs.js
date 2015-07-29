@@ -3447,6 +3447,120 @@ System.registerModule("traceur-runtime@0.0.89/src/runtime/polyfills/polyfills.js
 });
 System.get("traceur-runtime@0.0.89/src/runtime/polyfills/polyfills.js" + '');
 
+System.registerModule("models/internal/jsonParse.js", [], function() {
+  "use strict";
+  var __moduleName = "models/internal/jsonParse.js";
+  var mapValueToType = function(rawValue, type) {
+    var initialValue = null;
+    if (typeof type === 'object') {
+      if (type) {
+        if (type instanceof Array) {
+          var innerType = type[0];
+          if (rawValue !== null && rawValue !== undefined) {
+            initialValue = rawValue.map((function(v) {
+              try {
+                return mapValueToType(v, innerType);
+              } catch (e) {
+                console.log(e);
+                return v;
+              }
+            }));
+          }
+        } else {
+          if (type.mapper && typeof type.mapper === 'function') {
+            initialValue = (rawValue !== null && rawValue !== undefined) ? type.mapper(rawValue) : null;
+          }
+        }
+      }
+    } else if (type === String) {
+      initialValue = rawValue || null;
+    } else if (type === Number) {
+      initialValue = Number(rawValue) || null;
+    } else if (type === Boolean) {
+      initialValue = Boolean(rawValue) || null;
+    } else if (type === Object) {
+      initialValue = rawValue || null;
+    } else if (type === Date) {
+      initialValue = new Date(rawValue * 1000);
+      if (isNaN(initialValue)) {
+        initialValue = null;
+      } else if (initialValue === 'Invalid Date') {
+        initialValue = null;
+      } else {
+        initialValue = new Date(initialValue.valueOf() + initialValue.getTimezoneOffset() * 60000);
+      }
+    } else if (typeof type === 'function') {
+      initialValue = (rawValue !== null && rawValue !== undefined) ? new type(rawValue) : null;
+    }
+    return initialValue;
+  };
+  var setPropertyFromArgs = function(args, obj, name, type, optional, merge) {
+    if (!obj[name]) {
+      var rawValue = args[name];
+      var convertedValue = mapValueToType(rawValue, type);
+      if (!optional && !convertedValue) {
+        throw TypeError('non-optional field `' + name + '` found null value. Args:', args);
+      }
+      if (convertedValue) {
+        if (merge) {
+          obj[name] = convertedValue;
+        } else {
+          Object.defineProperty(obj, name, {
+            configurable: false,
+            enumerable: true,
+            writable: true,
+            value: convertedValue
+          });
+        }
+      }
+    }
+  };
+  var jsonParseArgs = function(args, obj, merge) {
+    var properties = obj.jsonProperties;
+    for (var name in properties) {
+      if (properties.hasOwnProperty(name)) {
+        var value = properties[name];
+        var optional = true;
+        var type = void 0;
+        if (typeof value === 'object') {
+          if (value.type !== undefined) {
+            type = value.type;
+          } else if (value.mapper !== undefined) {
+            type = value;
+          } else if (value instanceof Array) {
+            type = value;
+          }
+          if (value.optional !== undefined) {
+            optional = value.optional;
+          }
+        } else {
+          type = value;
+        }
+        setPropertyFromArgs(args, obj, name, type, optional, merge);
+      }
+    }
+  };
+  var jsonCreateWithArgs = function(args, obj) {
+    jsonParseArgs(args, obj, false);
+  };
+  var jsonMergeWithArgs = function(args, obj) {
+    jsonParseArgs(args, obj, true);
+  };
+  var jsonCreateFromData = function(arr, type) {
+    return mapValueToType(arr, type);
+  };
+  return {
+    get jsonCreateWithArgs() {
+      return jsonCreateWithArgs;
+    },
+    get jsonMergeWithArgs() {
+      return jsonMergeWithArgs;
+    },
+    get jsonCreateFromData() {
+      return jsonCreateFromData;
+    }
+  };
+});
 System.registerModule("models/internal/debug-helpers.js", [], function() {
   "use strict";
   var __moduleName = "models/internal/debug-helpers.js";
@@ -3788,6 +3902,7 @@ System.registerModule("request/hound-paged-request.js", [], function() {
   "use strict";
   var __moduleName = "request/hound-paged-request.js";
   var houndRequest = System.get("request/hound-request.js").houndRequest;
+  var jsonCreateFromData = System.get("models/internal/jsonParse.js").jsonCreateFromData;
   var defaults = {
     headers: {'Accept': 'application/json'},
     page: 0,
@@ -3818,14 +3933,10 @@ System.registerModule("request/hound-paged-request.js", [], function() {
           if (response.content[0] !== undefined && response.content[0].object !== undefined) {
             this.pageid = response.content[0].object.metadata.mhid;
           }
-          var content = Promise.all(MHRelationalPair.createFromArray(response.content));
-          return content.catch(function(err) {
-            console.warn(err);
-          }).then(function(mhObjs) {
-            Array.prototype.push.apply(self.content, mhObjs);
-            response.content = mhObjs;
-            return response;
-          });
+          var content = jsonCreateFromData(response.content, [MHRelationalPair]);
+          Array.prototype.push.apply(self.content, content);
+          response.content = content;
+          return response;
         } else {
           console.warn('content array is undefined or empty in setContentArray MHRelationalPair', self);
         }
@@ -3941,11 +4052,11 @@ System.registerModule("models/internal/MHCache.js", [], function() {
         }
       },
       putMHObj: function(mhObj) {
-        if (mhObj && mhObj.mhid && mhObj.username) {
-          return this.put(mhObj.mhid, mhObj, mhObj.username);
+        if (mhObj && mhObj.metadata.mhid && mhObj.metadata.username) {
+          return this.put(mhObj.metadata.mhid, mhObj, mhObj.metadata.username);
         }
-        if (mhObj && mhObj.mhid) {
-          return this.put(mhObj.mhid, mhObj, mhObj.altId);
+        if (mhObj && mhObj.metadata.mhid) {
+          return this.put(mhObj.metadata.mhid, mhObj, mhObj.metadata.altId);
         }
       },
       shift: function() {
@@ -4086,7 +4197,7 @@ System.registerModule("models/internal/MHCache.js", [], function() {
             stored = JSON.parse(localStorage[storageKey]);
         for (; i < stored.length; i++) {
           curr = MHObject.create(stored[i]);
-          if (curr && !this.has(curr.mhid)) {
+          if (curr && !this.has(curr.metadata.mhid)) {
             log('adding to cache: ', curr);
             this.putMHObj(curr);
           }
@@ -4101,269 +4212,191 @@ System.registerModule("models/internal/MHCache.js", [], function() {
 System.registerModule("models/image/MHImageData.js", [], function() {
   "use strict";
   var __moduleName = "models/image/MHImageData.js";
+  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
   var MHImageData = (function() {
     function MHImageData(args) {
-      var url = (typeof args.url === 'string') ? args.url : null,
-          width = args.width || null,
-          height = args.height || null;
-      Object.defineProperties(this, {
-        'url': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: url
-        },
-        'width': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: width
-        },
-        'height': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: height
-        }
-      });
+      jsonCreateWithArgs(args, this);
     }
-    return ($traceurRuntime.createClass)(MHImageData, {}, {});
+    return ($traceurRuntime.createClass)(MHImageData, {get jsonProperties() {
+        return {
+          url: String,
+          width: Number,
+          height: Number
+        };
+      }}, {});
   }());
   return {get MHImageData() {
       return MHImageData;
     }};
 });
-System.registerModule("models/meta/MHMetaData.js", [], function() {
+System.registerModule("models/meta/MHMetadata.js", [], function() {
   "use strict";
-  var __moduleName = "models/meta/MHMetaData.js";
+  var __moduleName = "models/meta/MHMetadata.js";
   var MHImageData = System.get("models/image/MHImageData.js").MHImageData;
-  var MHMetaData = (function() {
-    function MHMetaData(args) {
-      var mhid = args.mhid || null,
-          altid = args.altid || null,
-          name = args.name || null,
-          description = args.description || null,
-          message = args.message || null,
-          mixlist = args.mixlist || null,
-          username = args.username || null,
-          email = args.email || null,
-          isDefault = args.isDefault || null,
-          averageColor = args.averageColor || null,
-          createdDate = new Date(args.createdDate * 1000),
-          releaseDate = new Date(args.releaseDate * 1000),
-          original = (args.original != null) ? new MHImageData(args.original) : null,
-          thumbnail = (args.thumbnail != null) ? new MHImageData(args.thumbnail) : null,
-          small = (args.small != null) ? new MHImageData(args.small) : null,
-          medium = (args.medium != null) ? new MHImageData(args.medium) : null,
-          large = (args.large != null) ? new MHImageData(args.large) : null;
-      if (name) {
-        Object.defineProperty(this, 'name', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: name
-        });
-      }
-      if (altid) {
-        Object.defineProperty(this, 'altId', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: altid
-        });
-      }
-      if (username) {
-        Object.defineProperty(this, 'username', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: username
-        });
-      }
-      if (email) {
-        Object.defineProperty(this, 'email', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: email
-        });
-      }
-      if (description) {
-        Object.defineProperty(this, 'description', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        });
-      }
-      if (message) {
-        Object.defineProperty(this, 'message', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: message
-        });
-      }
-      if (mixlist) {
-        Object.defineProperty(this, 'mixlist', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: mixlist
-        });
-      }
-      if (averageColor) {
-        Object.defineProperty(this, 'averageColor', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: averageColor
-        });
-      }
-      if (isDefault) {
-        Object.defineProperty(this, 'isDefault', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: isDefault
-        });
-      }
-      if (releaseDate) {
-        if (isNaN(releaseDate)) {
-          releaseDate = null;
-        } else if (releaseDate === 'Invalid Date') {
-          releaseDate = null;
-        } else {
-          releaseDate = new Date(releaseDate.valueOf() + releaseDate.getTimezoneOffset() * 60000);
-        }
-        Object.defineProperty(this, 'releaseDate', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: releaseDate
-        });
-      }
-      if (args.createdDate) {
-        if (isNaN(createdDate)) {
-          createdDate = null;
-        } else if (createdDate === 'Invalid Date') {
-          createdDate = null;
-        } else {
-          createdDate = new Date(createdDate.valueOf() + createdDate.getTimezoneOffset());
-        }
-        Object.defineProperty(this, 'createdDate', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: createdDate
-        });
-      }
-      Object.defineProperty(this, 'mhid', {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: mhid
-      });
-      if (original) {
-        Object.defineProperty(this, 'original', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: original
-        });
-      }
-      if (thumbnail) {
-        Object.defineProperty(this, 'thumbnail', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: thumbnail
-        });
-      }
-      if (small) {
-        Object.defineProperty(this, 'small', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: small
-        });
-      }
-      if (medium) {
-        Object.defineProperty(this, 'medium', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: medium
-        });
-      }
-      if (large) {
-        Object.defineProperty(this, 'large', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: large
-        });
-      }
+  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
+  var MHMetadata = (function() {
+    function MHMetadata(args) {
+      jsonCreateWithArgs(args, this);
     }
-    return ($traceurRuntime.createClass)(MHMetaData, {}, {});
+    return ($traceurRuntime.createClass)(MHMetadata, {get jsonProperties() {
+        return {
+          mhid: {
+            type: String,
+            optional: false
+          },
+          altId: String,
+          name: String,
+          description: String,
+          createdDate: Date
+        };
+      }}, {});
   }());
-  return {get MHMetaData() {
-      return MHMetaData;
-    }};
+  var MHMediaMetadata = (function($__super) {
+    function MHMediaMetadata() {
+      $traceurRuntime.superConstructor(MHMediaMetadata).apply(this, arguments);
+    }
+    return ($traceurRuntime.createClass)(MHMediaMetadata, {get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHMediaMetadata.prototype, "jsonProperties"), {releaseDate: Date});
+      }}, {}, $__super);
+  }(MHMetadata));
+  var MHUserMetadata = (function($__super) {
+    function MHUserMetadata() {
+      $traceurRuntime.superConstructor(MHUserMetadata).apply(this, arguments);
+    }
+    return ($traceurRuntime.createClass)(MHUserMetadata, {get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHUserMetadata.prototype, "jsonProperties"), {
+          username: {
+            type: String,
+            optional: false
+          },
+          email: String
+        });
+      }}, {}, $__super);
+  }(MHMetadata));
+  var MHCollectionMetadata = (function($__super) {
+    function MHCollectionMetadata() {
+      $traceurRuntime.superConstructor(MHCollectionMetadata).apply(this, arguments);
+    }
+    return ($traceurRuntime.createClass)(MHCollectionMetadata, {get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHCollectionMetadata.prototype, "jsonProperties"), {mixlist: String});
+      }}, {}, $__super);
+  }(MHMetadata));
+  var MHActionMetadata = (function($__super) {
+    function MHActionMetadata() {
+      $traceurRuntime.superConstructor(MHActionMetadata).apply(this, arguments);
+    }
+    return ($traceurRuntime.createClass)(MHActionMetadata, {get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHActionMetadata.prototype, "jsonProperties"), {message: String});
+      }}, {}, $__super);
+  }(MHMetadata));
+  var MHImageMetadata = (function($__super) {
+    function MHImageMetadata() {
+      $traceurRuntime.superConstructor(MHImageMetadata).apply(this, arguments);
+    }
+    return ($traceurRuntime.createClass)(MHImageMetadata, {get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHImageMetadata.prototype, "jsonProperties"), {
+          isDefault: Boolean,
+          averageColor: String,
+          thumbnail: MHImageData,
+          small: MHImageData,
+          medium: MHImageData,
+          large: MHImageData,
+          original: MHImageData
+        });
+      }}, {}, $__super);
+  }(MHMetadata));
+  var MHSubscriptionMetadata = (function($__super) {
+    function MHSubscriptionMetadata() {
+      $traceurRuntime.superConstructor(MHSubscriptionMetadata).apply(this, arguments);
+    }
+    return ($traceurRuntime.createClass)(MHSubscriptionMetadata, {get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHSubscriptionMetadata.prototype, "jsonProperties"), {
+          timePeriod: String,
+          price: String,
+          currency: String,
+          mediums: String
+        });
+      }}, {}, $__super);
+  }(MHMetadata));
+  var MHSourceMetadata = (function($__super) {
+    function MHSourceMetadata() {
+      $traceurRuntime.superConstructor(MHSourceMetadata).apply(this, arguments);
+    }
+    return ($traceurRuntime.createClass)(MHSourceMetadata, {get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHSourceMetadata.prototype, "jsonProperties"), {connectable: Boolean});
+      }}, {}, $__super);
+  }(MHMetadata));
+  var MHContributorMetadata = (function($__super) {
+    function MHContributorMetadata() {
+      $traceurRuntime.superConstructor(MHContributorMetadata).apply(this, arguments);
+    }
+    return ($traceurRuntime.createClass)(MHContributorMetadata, {}, {}, $__super);
+  }(MHMetadata));
+  var MHHashtagMetadata = (function($__super) {
+    function MHHashtagMetadata() {
+      $traceurRuntime.superConstructor(MHHashtagMetadata).apply(this, arguments);
+    }
+    return ($traceurRuntime.createClass)(MHHashtagMetadata, {}, {}, $__super);
+  }(MHMetadata));
+  var MHTraitMetadata = (function($__super) {
+    function MHTraitMetadata() {
+      $traceurRuntime.superConstructor(MHTraitMetadata).apply(this, arguments);
+    }
+    return ($traceurRuntime.createClass)(MHTraitMetadata, {}, {}, $__super);
+  }(MHMetadata));
+  return {
+    get MHMetadata() {
+      return MHMetadata;
+    },
+    get MHMediaMetadata() {
+      return MHMediaMetadata;
+    },
+    get MHUserMetadata() {
+      return MHUserMetadata;
+    },
+    get MHCollectionMetadata() {
+      return MHCollectionMetadata;
+    },
+    get MHActionMetadata() {
+      return MHActionMetadata;
+    },
+    get MHImageMetadata() {
+      return MHImageMetadata;
+    },
+    get MHSubscriptionMetadata() {
+      return MHSubscriptionMetadata;
+    },
+    get MHSourceMetadata() {
+      return MHSourceMetadata;
+    },
+    get MHContributorMetadata() {
+      return MHContributorMetadata;
+    },
+    get MHHashtagMetadata() {
+      return MHHashtagMetadata;
+    },
+    get MHTraitMetadata() {
+      return MHTraitMetadata;
+    }
+  };
 });
 System.registerModule("models/social/MHSocial.js", [], function() {
   "use strict";
   var __moduleName = "models/social/MHSocial.js";
+  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
   var MHSocial = (function() {
     function MHSocial(args) {
-      if (typeof args === 'string' || args instanceof String) {
-        try {
-          args = JSON.parse(args);
-        } catch (e) {
-          throw new TypeError('Args typeof string but not JSON in MHSocial', 'MHSocial.js', 28);
-        }
-      }
-      var $__4 = true;
-      var $__5 = false;
-      var $__6 = undefined;
-      try {
-        for (var $__2 = void 0,
-            $__1 = (MHSocial.members)[$traceurRuntime.toProperty(Symbol.iterator)](); !($__4 = ($__2 = $__1.next()).done); $__4 = true) {
-          var prop = $__2.value;
-          {
-            var curr = typeof args[prop] === 'undefined' ? null : args[prop];
-            Object.defineProperty(this, prop, {
-              configurable: false,
-              enumerable: true,
-              writable: false,
-              value: curr
-            });
-          }
-        }
-      } catch ($__7) {
-        $__5 = true;
-        $__6 = $__7;
-      } finally {
-        try {
-          if (!$__4 && $__1.return != null) {
-            $__1.return();
-          }
-        } finally {
-          if ($__5) {
-            throw $__6;
-          }
-        }
-      }
+      jsonCreateWithArgs(args, this);
     }
     return ($traceurRuntime.createClass)(MHSocial, {
       isEqualToMHSocial: function(otherObj) {
-        var $__4 = true;
-        var $__5 = false;
-        var $__6 = undefined;
+        var $__5 = true;
+        var $__6 = false;
+        var $__7 = undefined;
         try {
-          for (var $__2 = void 0,
-              $__1 = (MHSocial.members)[$traceurRuntime.toProperty(Symbol.iterator)](); !($__4 = ($__2 = $__1.next()).done); $__4 = true) {
-            var prop = $__2.value;
+          for (var $__3 = void 0,
+              $__2 = (Object.keys(this.jsonProperties))[$traceurRuntime.toProperty(Symbol.iterator)](); !($__5 = ($__3 = $__2.next()).done); $__5 = true) {
+            var prop = $__3.value;
             {
               if (typeof this[prop] === 'number' && typeof otherObj[prop] === 'number' && this[prop] === otherObj[prop]) {
                 continue;
@@ -4373,17 +4406,17 @@ System.registerModule("models/social/MHSocial.js", [], function() {
               return false;
             }
           }
-        } catch ($__7) {
-          $__5 = true;
-          $__6 = $__7;
+        } catch ($__8) {
+          $__6 = true;
+          $__7 = $__8;
         } finally {
           try {
-            if (!$__4 && $__1.return != null) {
-              $__1.return();
+            if (!$__5 && $__2.return != null) {
+              $__2.return();
             }
           } finally {
-            if ($__5) {
-              throw $__6;
+            if ($__6) {
+              throw $__7;
             }
           }
         }
@@ -4426,13 +4459,13 @@ System.registerModule("models/social/MHSocial.js", [], function() {
           default:
             break;
         }
-        var $__4 = true;
-        var $__5 = false;
-        var $__6 = undefined;
+        var $__5 = true;
+        var $__6 = false;
+        var $__7 = undefined;
         try {
-          for (var $__2 = void 0,
-              $__1 = (MHSocial.members)[$traceurRuntime.toProperty(Symbol.iterator)](); !($__4 = ($__2 = $__1.next()).done); $__4 = true) {
-            var prop = $__2.value;
+          for (var $__3 = void 0,
+              $__2 = (Object.keys(this.jsonProperties))[$traceurRuntime.toProperty(Symbol.iterator)](); !($__5 = ($__3 = $__2.next()).done); $__5 = true) {
+            var prop = $__3.value;
             {
               if (prop === toChange) {
                 newArgs[prop] = newValue;
@@ -4443,21 +4476,38 @@ System.registerModule("models/social/MHSocial.js", [], function() {
               }
             }
           }
-        } catch ($__7) {
-          $__5 = true;
-          $__6 = $__7;
+        } catch ($__8) {
+          $__6 = true;
+          $__7 = $__8;
         } finally {
           try {
-            if (!$__4 && $__1.return != null) {
-              $__1.return();
+            if (!$__5 && $__2.return != null) {
+              $__2.return();
             }
           } finally {
-            if ($__5) {
-              throw $__6;
+            if ($__6) {
+              throw $__7;
             }
           }
         }
         return new MHSocial(newArgs);
+      },
+      get jsonProperties() {
+        return {
+          'likers': Number,
+          'followers': Number,
+          'collectors': Number,
+          'mentioners': Number,
+          'following': Number,
+          'ownedCollections': Number,
+          'items': Number,
+          'userLikes': Boolean,
+          'userDislikes': Boolean,
+          'userFollows': Boolean,
+          'isFeatured': Boolean,
+          'userConnected': Boolean,
+          'userPreference': Boolean
+        };
       }
     }, {
       get LIKE() {
@@ -4489,9 +4539,6 @@ System.registerModule("models/social/MHSocial.js", [], function() {
       },
       get COMMENT() {
         return 'comment';
-      },
-      get members() {
-        return ['likers', 'followers', 'collectors', 'mentioners', 'following', 'ownedCollections', 'items', 'userLikes', 'userDislikes', 'userFollows'];
       }
     });
   }());
@@ -4506,12 +4553,16 @@ System.registerModule("models/base/MHObject.js", [], function() {
       log = $__0.log,
       warn = $__0.warn,
       error = $__0.error;
+  var $__1 = System.get("models/internal/jsonParse.js"),
+      jsonCreateWithArgs = $__1.jsonCreateWithArgs,
+      jsonMergeWithArgs = $__1.jsonMergeWithArgs;
   var houndRequest = System.get("request/hound-request.js").houndRequest;
   var pagedRequest = System.get("request/hound-paged-request.js").pagedRequest;
   var MHCache = System.get("models/internal/MHCache.js").MHCache;
-  var MHMetaData = System.get("models/meta/MHMetaData.js").MHMetaData;
+  var MHMetadata = System.get("models/meta/MHMetadata.js").MHMetadata;
   var MHSocial = System.get("models/social/MHSocial.js").MHSocial;
   var childrenConstructors = {};
+  var __cachedRootResponses = {};
   var mhidLRU = new MHCache(1000);
   if (typeof window !== 'undefined') {
     if (window.location.host === 'local.mediahound.com:2014') {
@@ -4522,88 +4573,18 @@ System.registerModule("models/base/MHObject.js", [], function() {
       socialSym = Symbol('social');
   var MHObject = (function() {
     function MHObject(args) {
-      args = MHObject.parseArgs(args);
-      if (typeof args.metadata.mhid === 'undefined' || args.metadata.mhid === null) {
-        throw new TypeError('mhid is null or undefined', 'MHObject.js', 89);
-      }
-      var metadata = new MHMetaData(args.metadata) || null,
-          mhid = args.metadata.mhid || null,
-          altid = args.metadata.altId || null,
-          name = args.metadata.name || null,
-          primaryImage = (args.primaryImage != null) ? MHObject.create(args.primaryImage) : null,
-          primaryGroup = (args.primaryGroup != null && args.primaryGroup !== undefined) ? MHObject.create(args.primaryGroup.object) : null,
-          secondaryImage = (args.secondaryImage != null) ? MHObject.create(args.secondaryImage) : null;
-      if (args.social) {
-        this.social = new MHSocial(args.social);
-      }
-      if (name) {
-        Object.defineProperty(this, 'name', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: name
-        });
-      }
-      if (altid) {
-        Object.defineProperty(this, 'altId', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: altid
-        });
-      }
-      if (primaryGroup) {
-        Object.defineProperty(this, 'primaryGroup', {
-          configurable: false,
-          enumerable: true,
-          writable: true,
-          value: primaryGroup
-        });
-      }
-      if (primaryImage) {
-        Object.defineProperty(this, 'primaryImage', {
-          configurable: false,
-          enumerable: true,
-          writable: true,
-          value: primaryImage
-        });
-      }
-      if (secondaryImage) {
-        Object.defineProperty(this, 'secondaryImage', {
-          configurable: false,
-          enumerable: true,
-          writable: true,
-          value: secondaryImage
-        });
-      }
-      Object.defineProperties(this, {
-        'mhid': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: mhid
-        },
-        'metadata': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: metadata
-        },
-        'feed': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        },
-        'images': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        }
-      });
+      jsonCreateWithArgs(args, this);
+      this.cachedResponses = {};
     }
     return ($traceurRuntime.createClass)(MHObject, {
+      get jsonProperties() {
+        return {
+          metadata: MHMetadata,
+          primaryImage: {mapper: MHObject.create},
+          secondaryImage: {mapper: MHObject.create},
+          social: MHSocial
+        };
+      },
       get social() {
         return this[socialSym] || null;
       },
@@ -4620,8 +4601,8 @@ System.registerModule("models/base/MHObject.js", [], function() {
         return this.constructor.mhName;
       },
       isEqualToMHObject: function(otherObj) {
-        if (otherObj && otherObj.mhid) {
-          return this.metadata.mhid === otherObj.mhid;
+        if (otherObj && otherObj.metadata.mhid) {
+          return this.metadata.mhid === otherObj.metadata.mhid;
         }
         return false;
       },
@@ -4632,30 +4613,13 @@ System.registerModule("models/base/MHObject.js", [], function() {
         return false;
       },
       toString: function() {
-        return this.className + " with mhid " + this.mhid + " and name " + this.mhName;
+        return this.className + " with mhid " + this.metadata.mhid + " and name " + this.mhName;
       },
-      mergeWithData: function(parsedArgs) {
-        if (!this.primaryImage && parsedArgs.primaryImage) {
-          var primaryImage = MHObject.create(parsedArgs.primaryImage);
-          if (primaryImage) {
-            this.primaryImage = primaryImage;
-          }
-        }
-        if (!this.secondaryImage && parsedArgs.secondaryImage) {
-          var secondaryImage = MHObject.create(parsedArgs.secondaryImage);
-          if (secondaryImage) {
-            this.secondaryImage = secondaryImage;
-          }
-        }
-        if (!this.primaryGroup && parsedArgs.primaryGroup) {
-          var primaryGroup = MHObject.create(parsedArgs.primaryGroup);
-          if (primaryGroup) {
-            this.primaryGroup = primaryGroup;
-          }
-        }
+      mergeWithData: function(args) {
+        jsonMergeWithArgs(args, this);
       },
       get endpoint() {
-        return this.constructor.rootEndpoint + '/' + this.mhid;
+        return this.constructor.rootEndpoint + '/' + this.metadata.mhid;
       },
       subendpoint: function(sub) {
         if (typeof sub !== 'string' && !(sub instanceof String)) {
@@ -4665,7 +4629,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
       },
       fetchSocial: function() {
         var force = arguments[0] !== (void 0) ? arguments[0] : false;
-        var $__6 = this;
+        var $__7 = this;
         var path = this.subendpoint('social');
         if (!force && this.social instanceof MHSocial) {
           return Promise.resolve(this.social);
@@ -4674,7 +4638,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
           method: 'GET',
           endpoint: path
         }).then(((function(parsed) {
-          return $__6.social = new MHSocial(parsed);
+          return $__7.social = new MHSocial(parsed);
         })).bind(this)).catch(function(err) {
           console.warn('fetchSocial:', err);
         });
@@ -4684,39 +4648,24 @@ System.registerModule("models/base/MHObject.js", [], function() {
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
         var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('feed');
-        if (force || this.feed === null || this.feed.numberOfElements !== size) {
-          this.feed = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.feed;
-      },
-      fetchFeedPage: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        return this.fetchFeed(view, size, force).currentPromise;
+        return this.fetchPagedEndpoint(path, view, size, force);
       },
       fetchImages: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 20;
         var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('images');
-        if (force || this.images === null) {
-          this.images = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.images;
+        return this.fetchPagedEndpoint(path, view, size, force);
+      },
+      fetchCollections: function() {
+        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
+        var force = arguments[2] !== (void 0) ? arguments[2] : true;
+        var path = this.subendpoint('collections');
+        return this.fetchPagedEndpoint(path, view, size, force);
       },
       takeAction: function(action) {
-        var $__6 = this;
+        var $__7 = this;
         if (typeof action !== 'string' && !(action instanceof String)) {
           throw new TypeError('Action not of type String or undefined');
         }
@@ -4739,43 +4688,45 @@ System.registerModule("models/base/MHObject.js", [], function() {
           endpoint: path
         }).then((function(socialRes) {
           var newSocial = new MHSocial(socialRes.social);
-          if ($__6[lastSocialRequestIdSym] === requestId) {
+          if ($__7[lastSocialRequestIdSym] === requestId) {
             self.social = newSocial;
           }
           return newSocial;
         })).catch((function(err) {
-          if ($__6[lastSocialRequestIdSym] === requestId) {
+          if ($__7[lastSocialRequestIdSym] === requestId) {
             self.social = original;
           }
           throw err;
         }));
-      }
-    }, {
-      parseArgs: function(args) {
-        var type = typeof args;
-        if (type === 'object' && !(args instanceof String) && args.metadata.mhid) {
-          return args;
-        }
-        if (type === 'string' || args instanceof String) {
-          try {
-            args = JSON.parse(args);
-            return args;
-          } catch (e) {
-            error('JSON.parse failed at MHObject.parseArgs:170. Exception to follow.');
-            throw e;
+      },
+      responseCacheKeyForPath: function(path) {
+        return "__cached_" + path;
+      },
+      cachedResponseForPath: function(path) {
+        var cacheKey = this.responseCacheKeyForPath(path);
+        return this.cachedResponses[cacheKey];
+      },
+      setCachedResponse: function(response, path) {
+        var cacheKey = this.responseCacheKeyForPath(path);
+        this.cachedResponses[cacheKey] = response;
+      },
+      fetchPagedEndpoint: function(path, view, size, force) {
+        if (!force) {
+          var cached = this.cachedResponseForPath(path);
+          if (cached) {
+            return cached;
           }
         }
-        if (type === 'undefined' || args === null) {
-          throw new TypeError('Args is undefined!', 'MHObject.js', 176);
-        }
-        if (args instanceof Array) {
-          throw new TypeError('MHObject arguments cannot be of type Array. Must be JSON String or Object of named parameters.', 'MHObject.js', 180);
-        }
-        if (args instanceof Error || args.Error || args.error) {
-          throw (args.error || args.Error || args);
-        }
-        throw new TypeError('Args was object without mhid!', 'MHObject.js', 189);
-      },
+        var promise = pagedRequest({
+          method: 'GET',
+          endpoint: path,
+          pageSize: size,
+          params: {view: view}
+        });
+        this.setCachedResponse(promise, path);
+        return promise;
+      }
+    }, {
       create: function(args) {
         var saveToLRU = arguments[1] !== (void 0) ? arguments[1] : true;
         if (args instanceof Array) {
@@ -4797,10 +4748,9 @@ System.registerModule("models/base/MHObject.js", [], function() {
               "name": args.name
             };
           }
-          args = MHObject.parseArgs(args);
           var mhid = args.metadata.mhid || args.mhid || undefined;
           var mhObj;
-          if (mhid !== 'undefined' && mhid !== null && args instanceof Object && this.isEmpty(args) !== 0) {
+          if (mhid !== 'undefined' && mhid !== null && args instanceof Object) {
             args.mhid = mhid;
             if (mhidLRU.has(args.metadata.mhid) || mhidLRU.has(args.mhid)) {
               log('getting from cache in create: ' + args.metadata.mhid);
@@ -4823,6 +4773,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
           }
         } catch (err) {
           console.log(err);
+          console.log(err.stack);
           if (err instanceof TypeError) {
             if (err.message === 'undefined is not a function') {
               warn('Unknown mhid prefix, see args object: ', args);
@@ -4832,26 +4783,6 @@ System.registerModule("models/base/MHObject.js", [], function() {
           return null;
         }
         return null;
-      },
-      createFromArray: function(arr) {
-        if (Array.isArray(arr)) {
-          return arr.map((function(v) {
-            try {
-              return MHObject.create(v);
-            } catch (e) {
-              return v;
-            }
-          }));
-        } else if (arr && arr.length > 0) {
-          var i = 0,
-              len = arr.length,
-              newArry = [];
-          for (; i < len; i++) {
-            newArry.push(MHObject.create(arr[i]));
-          }
-          return newArry;
-        }
-        return arr;
       },
       registerConstructor: function(mhClass, mhName) {
         mhClass.mhName = mhName;
@@ -4866,9 +4797,6 @@ System.registerModule("models/base/MHObject.js", [], function() {
           return true;
         }
         return false;
-      },
-      isEmpty: function(obj) {
-        return Object.keys(obj).length;
       },
       get prefixes() {
         return Object.keys(childrenConstructors);
@@ -4970,21 +4898,6 @@ System.registerModule("models/base/MHObject.js", [], function() {
           return newObj;
         });
       },
-      fetchByMhids: function(mhids) {
-        var view = arguments[1] !== (void 0) ? arguments[1] : "basic";
-        if (mhids.map) {
-          return mhids.map(MHObject.fetchByMhid);
-        } else if (mhids.length > 0) {
-          var i,
-              mhObjs = [];
-          for (i = 0; i < mhids.length; i++) {
-            mhObjs.push(MHObject.fetchByMhid(mhids[i], view));
-          }
-          return mhObjs;
-        }
-        warn('Reached fallback return statement in MHObject.fetchByMhids', mhids);
-        return mhids || null;
-      },
       get rootEndpoint() {
         return null;
       },
@@ -4999,6 +4912,40 @@ System.registerModule("models/base/MHObject.js", [], function() {
           throw new Error('Could not find correct class, unknown mhid: ' + mhid);
         }
         return mhClass.rootEndpoint;
+      },
+      rootSubendpoint: function(sub) {
+        if (typeof sub !== 'string' && !(sub instanceof String)) {
+          throw new TypeError('Sub not of type string or undefined in (MHObject).rootSubendpoint.');
+        }
+        return this.rootEndpoint + '/' + sub;
+      },
+      rootResponseCacheKeyForPath: function(path) {
+        return "___root_cached_" + path;
+      },
+      cachedRootResponseForPath: function(path) {
+        var cacheKey = this.rootResponseCacheKeyForPath(path);
+        return __cachedRootResponses[cacheKey];
+      },
+      setCachedRootResponse: function(response, path) {
+        var cacheKey = this.rootResponseCacheKeyForPath(path);
+        __cachedRootResponses[cacheKey] = response;
+      },
+      fetchRootPagedEndpoint: function(path, params, view, size, force) {
+        if (!force) {
+          var cached = this.cachedRootResponseForPath(path);
+          if (cached) {
+            return cached;
+          }
+        }
+        params.view = view;
+        var promise = pagedRequest({
+          method: 'GET',
+          endpoint: path,
+          pageSize: size,
+          params: params
+        });
+        this.setCachedRootResponse(promise, path);
+        return promise;
       }
     });
   }());
@@ -5015,38 +4962,17 @@ System.registerModule("models/action/MHAction.js", [], function() {
   "use strict";
   var __moduleName = "models/action/MHAction.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
+  var MHActionMetadata = System.get("models/meta/MHMetadata.js").MHActionMetadata;
   var MHAction = (function($__super) {
-    function MHAction(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHAction).call(this, args);
-      var message = args.metadata.message || null,
-          primaryOwner = (args.primaryOwner != null) ? MHObject.create(args.primaryOwner) : null,
-          primaryMention = (args.primaryMention != null) ? MHObject.create(args.primaryMention) : null;
-      if (message) {
-        Object.defineProperty(this, 'message', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: message
-        });
-      }
-      Object.defineProperties(this, {
-        "primaryOwner": {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: primaryOwner
-        },
-        "primaryMention": {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: primaryMention
-        }
-      });
+    function MHAction() {
+      $traceurRuntime.superConstructor(MHAction).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHAction, {toString: function() {
-        return $traceurRuntime.superGet(this, MHAction.prototype, "toString").call(this);
+    return ($traceurRuntime.createClass)(MHAction, {get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHAction.prototype, "jsonProperties"), {
+          metadata: MHActionMetadata,
+          primaryOwner: {mapper: MHObject.create},
+          primaryMention: {mapper: MHObject.create}
+        });
       }}, {get rootEndpoint() {
         return 'graph/action';
       }}, $__super);
@@ -5061,13 +4987,10 @@ System.registerModule("models/action/MHAdd.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHAction = System.get("models/action/MHAction.js").MHAction;
   var MHAdd = (function($__super) {
-    function MHAdd(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHAdd).call(this, args);
+    function MHAdd() {
+      $traceurRuntime.superConstructor(MHAdd).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHAdd, {toString: function() {
-        return $traceurRuntime.superGet(this, MHAdd.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHAdd, {}, {get mhidPrefix() {
         return 'mhadd';
       }}, $__super);
   }(MHAction));
@@ -5083,38 +5006,11 @@ System.registerModule("models/action/MHComment.js", [], function() {
   var __moduleName = "models/action/MHComment.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHAction = System.get("models/action/MHAction.js").MHAction;
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
   var MHComment = (function($__super) {
-    function MHComment(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHComment).call(this, args);
-      Object.defineProperties(this, {'parentPromise': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        }});
+    function MHComment() {
+      $traceurRuntime.superConstructor(MHComment).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHComment, {
-      toString: function() {
-        return $traceurRuntime.superGet(this, MHComment.prototype, "toString").call(this);
-      },
-      fetchParentAction: function() {
-        var force = arguments[0] !== (void 0) ? arguments[0] : false;
-        var $__3 = this;
-        var path = this.subendpoint('parent');
-        if (force || this.parentPromise === null) {
-          this.parentPromise = houndRequest({
-            method: 'GET',
-            endpoint: path
-          }).catch(((function(err) {
-            $__3.parentPromise = null;
-            throw err;
-          })).bind(this));
-        }
-        return this.parentPromise;
-      }
-    }, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHComment, {}, {get mhidPrefix() {
         return 'mhcmt';
       }}, $__super);
   }(MHAction));
@@ -5131,13 +5027,10 @@ System.registerModule("models/action/MHCreate.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHAction = System.get("models/action/MHAction.js").MHAction;
   var MHCreate = (function($__super) {
-    function MHCreate(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHCreate).call(this, args);
+    function MHCreate() {
+      $traceurRuntime.superConstructor(MHCreate).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHCreate, {toString: function() {
-        return $traceurRuntime.superGet(this, MHCreate.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHCreate, {}, {get mhidPrefix() {
         return 'mhcrt';
       }}, $__super);
   }(MHAction));
@@ -5154,13 +5047,10 @@ System.registerModule("models/action/MHFollow.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHAction = System.get("models/action/MHAction.js").MHAction;
   var MHFollow = (function($__super) {
-    function MHFollow(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHFollow).call(this, args);
+    function MHFollow() {
+      $traceurRuntime.superConstructor(MHFollow).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHFollow, {toString: function() {
-        return $traceurRuntime.superGet(this, MHFollow.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHFollow, {}, {get mhidPrefix() {
         return 'mhflw';
       }}, $__super);
   }(MHAction));
@@ -5171,78 +5061,16 @@ System.registerModule("models/action/MHFollow.js", [], function() {
       return MHFollow;
     }};
 });
-System.registerModule("models/action/MHHashtag.js", [], function() {
-  "use strict";
-  var __moduleName = "models/action/MHHashtag.js";
-  var $__0 = System.get("models/base/MHObject.js"),
-      MHObject = $__0.MHObject,
-      mhidLRU = $__0.mhidLRU;
-  var MHAction = System.get("models/action/MHAction.js").MHAction;
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var MHHashtag = (function($__super) {
-    function MHHashtag(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHHashtag).call(this, args);
-    }
-    return ($traceurRuntime.createClass)(MHHashtag, {toString: function() {
-        return $traceurRuntime.superGet(this, MHHashtag.prototype, "toString").call(this);
-      }}, {
-      get rootEndpoint() {
-        return 'graph/hashtag';
-      },
-      get mhidPrefix() {
-        return 'mhhtg';
-      },
-      fetchByTag: function(tag) {
-        var view = arguments[1] !== (void 0) ? arguments[1] : 'basic';
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        if (!tag || (typeof tag !== 'string' && !(tag instanceof String))) {
-          throw new TypeError('Hashtag not of type String in fetchByTag');
-        }
-        if (MHObject.getPrefixFromMhid(tag) != null) {
-          throw new TypeError('Passed mhid to fetchByTag, please use MHObject.fetchByMhid for this request.');
-        }
-        if (view === null || view === undefined) {
-          view = 'basic';
-        }
-        console.log('in fetchByTag, looking for: ' + tag);
-        if (!force && mhidLRU.hasAltId(tag)) {
-          return Promise.resolve(mhidLRU.getByAltId(tag));
-        }
-        var path = MHHashtag.rootEndpoint + '/lookup/' + tag,
-            newObj;
-        return houndRequest({
-          method: 'GET',
-          endpoint: path,
-          withCredentials: true
-        }).then(function(response) {
-          newObj = MHObject.create(response);
-          mhidLRU.putMHObj(newObj);
-          return newObj;
-        });
-      }
-    }, $__super);
-  }(MHAction));
-  (function() {
-    MHObject.registerConstructor(MHHashtag, 'MHHashtag');
-  })();
-  return {get MHHashtag() {
-      return MHHashtag;
-    }};
-});
 System.registerModule("models/action/MHLike.js", [], function() {
   "use strict";
   var __moduleName = "models/action/MHLike.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHAction = System.get("models/action/MHAction.js").MHAction;
   var MHLike = (function($__super) {
-    function MHLike(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHLike).call(this, args);
+    function MHLike() {
+      $traceurRuntime.superConstructor(MHLike).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHLike, {toString: function() {
-        return $traceurRuntime.superGet(this, MHLike.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHLike, {}, {get mhidPrefix() {
         return 'mhlke';
       }}, $__super);
   }(MHAction));
@@ -5260,13 +5088,10 @@ System.registerModule("models/action/MHPost.js", [], function() {
   var MHAction = System.get("models/action/MHAction.js").MHAction;
   var houndRequest = System.get("request/hound-request.js").houndRequest;
   var MHPost = (function($__super) {
-    function MHPost(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHPost).call(this, args);
+    function MHPost() {
+      $traceurRuntime.superConstructor(MHPost).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHPost, {toString: function() {
-        return $traceurRuntime.superGet(this, MHPost.prototype, "toString").call(this);
-      }}, {
+    return ($traceurRuntime.createClass)(MHPost, {}, {
       get mhidPrefix() {
         return 'mhpst';
       },
@@ -5276,9 +5101,9 @@ System.registerModule("models/action/MHPost.js", [], function() {
         })) || !(primaryMention instanceof MHObject)) {
           throw new TypeError("Can't create post without message string, mentions array, and primary mention object.");
         }
-        var path = MHPost.rootEndpoint + '/new',
+        var path = this.rootSubendpoint('new'),
             mentionedMhids = mentions.map((function(m) {
-              return m.mhid;
+              return m.metadata.mhid;
             }));
         return houndRequest({
           method: 'POST',
@@ -5286,7 +5111,7 @@ System.registerModule("models/action/MHPost.js", [], function() {
           data: {
             'message': message,
             'mentions': mentionedMhids,
-            'primaryMention': primaryMention.mhid
+            'primaryMention': primaryMention.metadata.mhid
           }
         }).then((function(res) {
           mentions.forEach((function(m) {
@@ -5304,145 +5129,187 @@ System.registerModule("models/action/MHPost.js", [], function() {
       return MHPost;
     }};
 });
+System.registerModule("models/source/MHSourceFormat.js", [], function() {
+  "use strict";
+  var __moduleName = "models/source/MHSourceFormat.js";
+  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
+  var MHSourceFormat = (function() {
+    function MHSourceFormat(args) {
+      jsonCreateWithArgs(args, this);
+    }
+    return ($traceurRuntime.createClass)(MHSourceFormat, {
+      get jsonProperties() {
+        return {
+          type: String,
+          price: String,
+          currency: String,
+          timePeriod: String,
+          launchInfo: Object,
+          contentCount: Number
+        };
+      },
+      get displayPrice() {
+        return '$' + this.price;
+      }
+    }, {});
+  }());
+  return {get MHSourceFormat() {
+      return MHSourceFormat;
+    }};
+});
+System.registerModule("models/source/MHSourceMethod.js", [], function() {
+  "use strict";
+  var __moduleName = "models/source/MHSourceMethod.js";
+  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
+  var MHSourceFormat = System.get("models/source/MHSourceFormat.js").MHSourceFormat;
+  var MHSourceMethod = (function() {
+    function MHSourceMethod(args) {
+      jsonCreateWithArgs(args, this);
+    }
+    return ($traceurRuntime.createClass)(MHSourceMethod, {
+      get jsonProperties() {
+        return {
+          type: String,
+          formats: [MHSourceFormat]
+        };
+      },
+      formatForType: function(type) {
+        return this.formats.filter((function(format) {
+          return format.type === type;
+        }))[0];
+      }
+    }, {
+      get TYPE_PURCHASE() {
+        return 'purchase';
+      },
+      get TYPE_RENTAL() {
+        return 'rental';
+      },
+      get TYPE_SUBSCRIPTION() {
+        return 'subscription';
+      },
+      get TYPE_ADSUPPORTED() {
+        return 'adSupported';
+      }
+    });
+  }());
+  return {get MHSourceMethod() {
+      return MHSourceMethod;
+    }};
+});
+System.registerModule("models/source/MHSourceMedium.js", [], function() {
+  "use strict";
+  var __moduleName = "models/source/MHSourceMedium.js";
+  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
+  var MHSourceMethod = System.get("models/source/MHSourceMethod.js").MHSourceMethod;
+  var MHSourceMedium = (function() {
+    function MHSourceMedium(args) {
+      jsonCreateWithArgs(args, this);
+    }
+    return ($traceurRuntime.createClass)(MHSourceMedium, {
+      get jsonProperties() {
+        return {
+          type: String,
+          methods: [MHSourceMethod]
+        };
+      },
+      methodForType: function(type) {
+        return this.methods.filter((function(method) {
+          return method.type === type;
+        }))[0];
+      }
+    }, {
+      get TYPE_STREAM() {
+        return 'stream';
+      },
+      get TYPE_DOWNLOAD() {
+        return 'download';
+      },
+      get TYPE_DELIVER() {
+        return 'deliver';
+      },
+      get TYPE_PICKUP() {
+        return 'pickup';
+      },
+      get TYPE_ATTEND() {
+        return 'attend';
+      }
+    });
+  }());
+  return {get MHSourceMedium() {
+      return MHSourceMedium;
+    }};
+});
 System.registerModule("models/meta/MHContext.js", [], function() {
   "use strict";
   var __moduleName = "models/meta/MHContext.js";
+  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
+  var MHObject = System.get("models/base/MHObject.js").MHObject;
+  var MHSourceMedium = System.get("models/source/MHSourceMedium.js").MHSourceMedium;
+  var MHSorting = (function() {
+    function MHSorting(args) {
+      jsonCreateWithArgs(args, this);
+    }
+    return ($traceurRuntime.createClass)(MHSorting, {get jsonProperties() {
+        return {
+          importance: Number,
+          position: Number
+        };
+      }}, {});
+  }());
+  var MHRelationship = (function() {
+    function MHRelationship(args) {
+      jsonCreateWithArgs(args, this);
+    }
+    return ($traceurRuntime.createClass)(MHRelationship, {get jsonProperties() {
+        return {
+          contribution: String,
+          role: String,
+          object: {mapper: MHObject.create}
+        };
+      }}, {});
+  }());
   var MHContext = (function() {
     function MHContext(args) {
-      if (args === undefined) {
-        return ;
-      }
-      var connected = args.connected || null,
-          preference = args.preference || null,
-          mediums = args.mediums || null,
-          position = null,
-          target = args.target || null,
-          relationships = args.relationships || null;
-      if (args.sorting) {
-        position = args.sorting.position || args.sorting.importance || null;
-      }
-      if (position != null) {
-        Object.defineProperty(this, 'position', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: position
-        });
-      }
-      if (connected) {
-        Object.defineProperty(this, 'connected', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: connected
-        });
-      }
-      if (preference) {
-        Object.defineProperty(this, 'preference', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: preference
-        });
-      }
-      if (mediums) {
-        Object.defineProperty(this, 'mediums', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: mediums
-        });
-      }
-      if (relationships) {
-        Object.defineProperty(this, 'relationships', {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: relationships
-        });
-      }
-      Object.defineProperty(this, 'target', {
-        configurable: false,
-        enumerable: true,
-        writable: false,
-        value: target
-      });
+      jsonCreateWithArgs(args, this);
     }
-    return ($traceurRuntime.createClass)(MHContext, {}, {});
+    return ($traceurRuntime.createClass)(MHContext, {get jsonProperties() {
+        return {
+          consumable: Boolean,
+          sorting: MHSorting,
+          relationships: [MHRelationship],
+          mediums: [MHSourceMedium]
+        };
+      }}, {});
   }());
-  return {get MHContext() {
+  return {
+    get MHSorting() {
+      return MHSorting;
+    },
+    get MHRelationship() {
+      return MHRelationship;
+    },
+    get MHContext() {
       return MHContext;
-    }};
+    }
+  };
 });
 System.registerModule("models/base/MHRelationalPair.js", [], function() {
   "use strict";
   var __moduleName = "models/base/MHRelationalPair.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHContext = System.get("models/meta/MHContext.js").MHContext;
+  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
   var MHRelationalPair = (function() {
     function MHRelationalPair(args) {
-      var context,
-          object;
-      if (args == null) {
-        throw new TypeError('Args is null or undefined in MHRelationalPair constructor.');
-      }
-      if (typeof args === 'string' || args instanceof String) {
-        try {
-          args = JSON.parse(args);
-        } catch (e) {
-          throw new TypeError('Args typeof string but not valid JSON in MHRelationalPair', 'MHRelationalPair.js', 15);
-        }
-      }
-      if (args.context) {
-        args.context.target = args.object.metadata.mhid;
-        context = new MHContext(args.context);
-      } else {
-        args.context = {};
-        args.context.target = args.object.metadata.mhid;
-        context = new MHContext(args.context);
-      }
-      object = MHObject.create(args.object) || null;
-      if (context == null || object == null) {
-        console.warn('Either context or object was not defined in MHRelationalPair', 'MHRelationalPair.js', 23);
-      }
-      Object.defineProperties(this, {
-        'context': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: context
-        },
-        'object': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: object
-        }
-      });
+      jsonCreateWithArgs(args, this);
     }
-    return ($traceurRuntime.createClass)(MHRelationalPair, {toString: function() {
-        return this.object.name + ' at position ' + this.position;
-      }}, {createFromArray: function(arr) {
-        if (Array.isArray(arr)) {
-          return arr.map((function(v) {
-            try {
-              return new MHRelationalPair(v);
-            } catch (e) {
-              console.log(e);
-              return v;
-            }
-          }));
-        } else if (arr && arr.length > 0) {
-          var i = 0,
-              len = arr.length,
-              newArry = [];
-          for (; i < len; i++) {
-            newArry.push(new MHRelationalPair(arr[i]));
-          }
-          return newArry;
-        }
-        return arr;
-      }});
+    return ($traceurRuntime.createClass)(MHRelationalPair, {get jsonProperties() {
+        return {
+          context: MHContext,
+          object: {mapper: MHObject.create}
+        };
+      }}, {});
   }());
   return {get MHRelationalPair() {
       return MHRelationalPair;
@@ -5456,79 +5323,17 @@ System.registerModule("models/user/MHUser.js", [], function() {
       MHObject = $__1.MHObject,
       mhidLRU = $__1.mhidLRU;
   var MHRelationalPair = System.get("models/base/MHRelationalPair.js").MHRelationalPair;
+  var MHUserMetadata = System.get("models/meta/MHMetadata.js").MHUserMetadata;
   var houndRequest = System.get("request/hound-request.js").houndRequest;
   var pagedRequest = System.get("request/hound-paged-request.js").pagedRequest;
   var MHUser = (function($__super) {
-    function MHUser(args) {
-      args = MHObject.parseArgs(args);
-      if (typeof args.metadata.username === 'undefined' || args.metadata.username === null) {
-        throw new TypeError('Username is null or undefined', 'MHUser.js', 39);
-      }
-      $traceurRuntime.superConstructor(MHUser).call(this, args);
-      var username = args.metadata.username,
-          email = args.metadata.email || null,
-          firstname = args.metadata.firstname || args.metadata.firstName || null,
-          lastname = args.metadata.lastname || args.metadata.lastName || null;
-      if (firstname == null || lastname == null) {
-        var regex = new RegExp('((?:[a-z][a-z]+))(\\s+)((?:[a-z][a-z]+))', ["i"]);
-        var test = regex.exec(args.metadata.name);
-        if (test != null) {
-          firstname = test[1];
-          lastname = test[3];
-        }
-      }
-      Object.defineProperties(this, {
-        'username': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: username
-        },
-        'email': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: email
-        },
-        'firstName': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: firstname
-        },
-        'lastName': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: lastname
-        },
-        'interestFeed': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        },
-        'ownedCollections': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        },
-        'followed': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        },
-        'suggested': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        }
-      });
+    function MHUser() {
+      $traceurRuntime.superConstructor(MHUser).apply(this, arguments);
     }
     return ($traceurRuntime.createClass)(MHUser, {
+      get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHUser.prototype, "jsonProperties"), {metadata: MHUserMetadata});
+      },
       get isCurrentUser() {
         var currentUser = System.get('models/user/MHLoginSession.js').MHLoginSession.currentUser;
         return this.isEqualToMHObject(currentUser);
@@ -5601,61 +5406,35 @@ System.registerModule("models/user/MHUser.js", [], function() {
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
         var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('interestFeed');
-        if (force || this.interestFeed === null) {
-          this.interestFeed = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.interestFeed;
+        return this.fetchPagedEndpoint(path, view, size, force);
       },
       fetchOwnedCollections: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
         var force = arguments[2] !== (void 0) ? arguments[2] : true;
         var path = this.subendpoint('ownedCollections');
-        if (force || this.ownedCollections === null) {
-          this.ownedCollections = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.ownedCollections;
+        return this.fetchPagedEndpoint(path, view, size, force);
       },
       fetchSuggested: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
         var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('suggested');
-        if (force || this.suggested === null) {
-          this.suggested = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.suggested;
+        return this.fetchPagedEndpoint(path, view, size, force);
       },
-      fetchFollowed: function() {
+      fetchFollowing: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
         var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('following');
-        if (force || this.following === null) {
-          this.following = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        console.log(this.following);
-        return this.following;
+        return this.fetchPagedEndpoint(path, view, size, force);
+      },
+      fetchFollowers: function() {
+        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
+        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+        var path = this.subendpoint('followers');
+        return this.fetchPagedEndpoint(path, view, size, force);
       },
       fetchServiceSettings: function(serv) {
         var service = serv || null;
@@ -5711,9 +5490,6 @@ System.registerModule("models/user/MHUser.js", [], function() {
           });
         }
         return this.facebookFriends;
-      },
-      toString: function() {
-        return $traceurRuntime.superGet(this, MHUser.prototype, "toString").call(this) + ' and username ' + this.username;
       }
     }, {
       get mhidPrefix() {
@@ -5993,7 +5769,7 @@ System.registerModule("models/user/MHUser.js", [], function() {
         });
       },
       fetchFeaturedUsers: function() {
-        var path = MHUser.rootEndpoint + '/featured';
+        var path = this.rootSubendpoint('featured');
         return houndRequest({
           method: 'GET',
           endpoint: path
@@ -6262,105 +6038,19 @@ System.registerModule("models/collection/MHCollection.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHAction = System.get("models/action/MHAction.js").MHAction;
   var MHLoginSession = System.get("models/user/MHLoginSession.js").MHLoginSession;
+  var MHCollectionMetadata = System.get("models/meta/MHMetadata.js").MHCollectionMetadata;
   var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var pagedRequest = System.get("request/hound-paged-request.js").pagedRequest;
   var MHCollection = (function($__super) {
-    function MHCollection(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHCollection).call(this, args);
-      var mixlist = (typeof args.metadata.mixlist === 'string') ? args.metadata.mixlist.toLowerCase() : null,
-          firstContentImage = (args.firstContentImage != null) ? MHObject.create(args.firstContentImage) : null,
-          primaryOwner = (args.primaryOwner != null) ? MHObject.create(args.primaryOwner) : null,
-          description = args.metadata.description || null;
-      switch (mixlist) {
-        case 'none':
-          mixlist = MHCollection.MIXLIST_TYPE_NONE;
-          break;
-        case 'partial':
-          mixlist = MHCollection.MIXLIST_TYPE_PARTIAL;
-          break;
-        case 'full':
-          mixlist = MHCollection.MIXLIST_TYPE_FULL;
-          break;
-        default:
-          mixlist = MHCollection.MIXLIST_TYPE_NONE;
-          break;
-      }
-      Object.defineProperties(this, {
-        'mixlist': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: mixlist
-        },
-        'firstContentImage': {
-          configurable: false,
-          enumerable: true,
-          writable: true,
-          value: firstContentImage
-        },
-        'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        },
-        'primaryOwner': {
-          configurable: false,
-          enumerable: true,
-          writable: true,
-          value: primaryOwner
-        },
-        'ownersPromise': {
-          configurable: false,
-          enumerable: true,
-          writable: true,
-          value: null
-        },
-        'content': {
-          configurable: false,
-          enumerable: true,
-          writable: true,
-          value: null
-        },
-        'mixlistPromise': {
-          configurable: false,
-          enumerable: true,
-          writable: true,
-          value: null
-        }
-      });
+    function MHCollection() {
+      $traceurRuntime.superConstructor(MHCollection).apply(this, arguments);
     }
     return ($traceurRuntime.createClass)(MHCollection, {
-      get mixlistTypeString() {
-        switch (this.mixlist) {
-          case MHCollection.MIXLIST_TYPE_NONE:
-            return 'none';
-          case MHCollection.MIXLIST_TYPE_PARTIAL:
-            return 'partial';
-          case MHCollection.MIXLIST_TYPE_FULL:
-            return 'full';
-          default:
-            return 'none';
-        }
-      },
-      toString: function() {
-        return $traceurRuntime.superGet(this, MHCollection.prototype, "toString").call(this) + ' and description ' + this.description;
-      },
-      mergeWithData: function(parsedArgs) {
-        $traceurRuntime.superGet(this, MHCollection.prototype, "mergeWithData").call(this, parsedArgs);
-        if (!this.firstContentImage && parsedArgs.firstContentImage) {
-          var firstContentImage = MHObject.create(parsedArgs.firstContentImage);
-          if (firstContentImage) {
-            this.firstContentImage = firstContentImage;
-          }
-        }
-        if (!this.primaryOwner && parsedArgs.primaryOwner) {
-          var primaryOwner = MHObject.create(parsedArgs.primaryOwner);
-          if (primaryOwner) {
-            this.primaryOwner = primaryOwner;
-          }
-        }
+      get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHCollection.prototype, "jsonProperties"), {
+          metadata: MHCollectionMetadata,
+          firstContentImage: {mapper: MHObject.create},
+          primaryOwner: {mapper: MHObject.create}
+        });
       },
       editMetaData: function(name, description) {
         var path = this.subendpoint('update'),
@@ -6442,59 +6132,35 @@ System.registerModule("models/collection/MHCollection.js", [], function() {
         }
       },
       fetchOwners: function() {
-        var force = arguments[0] !== (void 0) ? arguments[0] : false;
-        var $__6 = this;
+        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
+        var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('owners');
-        if (force || this.ownersPromise === null) {
-          this.ownersPromise = houndRequest({
-            method: 'GET',
-            endpoint: path
-          }).catch(((function(err) {
-            $__6.ownersPromise = null;
-            throw err;
-          })).bind(this));
-        }
-        return this.ownersPromise;
+        return this.fetchPagedEndpoint(path, view, size, force);
       },
       fetchContent: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
         var force = arguments[2] !== (void 0) ? arguments[2] : true;
         var path = this.subendpoint('content');
-        if (force || this.content === null) {
-          this.content = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.content;
+        return this.fetchPagedEndpoint(path, view, size, force);
       },
       fetchMixlist: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 20;
         var force = arguments[2] !== (void 0) ? arguments[2] : true;
         var path = this.subendpoint('mixlist');
-        if (force || this.mixlistPromise === null) {
-          this.mixlistPromise = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.mixlistPromise;
+        return this.fetchPagedEndpoint(path, view, size, force);
       }
     }, {
       get MIXLIST_TYPE_NONE() {
-        return 0;
+        return 'none';
       },
       get MIXLIST_TYPE_PARTIAL() {
-        return 1;
+        return 'partial';
       },
       get MIXLIST_TYPE_FULL() {
-        return 2;
+        return 'full';
       },
       get mhidPrefix() {
         return 'mhcol';
@@ -6503,15 +6169,13 @@ System.registerModule("models/collection/MHCollection.js", [], function() {
         return 'graph/collection';
       },
       createWithName: function(name, description) {
-        var path = MHCollection.rootEndpoint + '/new',
-            data = {};
+        var path = this.rootSubendpoint('new');
+        var data = {};
+        if (name) {
+          data.name = name;
+        }
         if (description) {
-          data = {
-            "name": name,
-            "description": description
-          };
-        } else if (name) {
-          data = {"name": name};
+          data.description = description;
         }
         return houndRequest({
           method: 'POST',
@@ -6525,15 +6189,6 @@ System.registerModule("models/collection/MHCollection.js", [], function() {
           }
           return newCollection;
         });
-      },
-      fetchFeaturedCollections: function() {
-        var path = MHCollection.rootEndpoint + '/featured';
-        return houndRequest({
-          method: 'GET',
-          endpoint: path
-        }).then((function(res) {
-          return Promise.all(MHObject.fetchByMhids(res));
-        }));
       }
     }, $__super);
   }(MHObject));
@@ -6548,70 +6203,29 @@ System.registerModule("models/contributor/MHContributor.js", [], function() {
   "use strict";
   var __moduleName = "models/contributor/MHContributor.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var pagedRequest = System.get("request/hound-paged-request.js").pagedRequest;
+  var MHContributorMetadata = System.get("models/meta/MHMetadata.js").MHContributorMetadata;
   var MHContributor = (function($__super) {
-    function MHContributor(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHContributor).call(this, args);
-      Object.defineProperties(this, {
-        'media': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        },
-        'collections': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        }
-      });
+    function MHContributor() {
+      $traceurRuntime.superConstructor(MHContributor).apply(this, arguments);
     }
     return ($traceurRuntime.createClass)(MHContributor, {
+      get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHContributor.prototype, "jsonProperties"), {metadata: MHContributorMetadata});
+      },
       get isGroup() {
         return !this.isIndividual;
       },
       get isFictional() {
         return !this.isReal;
       },
-      toString: function() {
-        return $traceurRuntime.superGet(this, MHContributor.prototype, "toString").call(this);
-      },
       fetchMedia: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : true;
+        var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('media');
-        if (force || this.media === null) {
-          this.media = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.media;
-      },
-      fetchCollections: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : true;
-        var path = this.subendpoint('collections');
-        if (force || this.collections === null) {
-          this.collections = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.collections;
+        return this.fetchPagedEndpoint(path, view, size, force);
       }
     }, {get rootEndpoint() {
-        if (this.prototype.isFictional && this.prototype.isReal != null) {
-          return 'graph/character';
-        }
         return 'graph/contributor';
       }}, $__super);
   }(MHObject));
@@ -6624,17 +6238,9 @@ System.registerModule("models/contributor/MHFictionalGroupContributor.js", [], f
   var __moduleName = "models/contributor/MHFictionalGroupContributor.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHContributor = System.get("models/contributor/MHContributor.js").MHContributor;
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
   var MHFictionalGroupContributor = (function($__super) {
-    function MHFictionalGroupContributor(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHFictionalGroupContributor).call(this, args);
-      Object.defineProperties(this, {'contributorsPromise': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        }});
+    function MHFictionalGroupContributor() {
+      $traceurRuntime.superConstructor(MHFictionalGroupContributor).apply(this, arguments);
     }
     return ($traceurRuntime.createClass)(MHFictionalGroupContributor, {
       get isIndividual() {
@@ -6643,30 +6249,12 @@ System.registerModule("models/contributor/MHFictionalGroupContributor.js", [], f
       get isReal() {
         return false;
       },
-      toString: function() {
-        return $traceurRuntime.superGet(this, MHFictionalGroupContributor.prototype, "toString").call(this);
-      },
       fetchContributors: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
-        var force = arguments[1] !== (void 0) ? arguments[1] : false;
-        var $__3 = this;
+        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
+        var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('contributors');
-        if (force || this.contributorsPromise === null) {
-          this.contributorsPromise = houndRequest({
-            method: 'GET',
-            endpoint: path,
-            params: {'view': view}
-          }).catch(((function(err) {
-            $__3.contributorsPromise = null;
-            throw err;
-          })).bind(this)).then(function(parsed) {
-            if (view === 'full' && Array.isArray(parsed)) {
-              parsed = MHObject.create(parsed);
-            }
-            return parsed;
-          });
-        }
-        return this.contributorsPromise;
+        return this.fetchPagedEndpoint(path, view, size, force);
       }
     }, {get mhidPrefix() {
         return 'mhfgc';
@@ -6684,17 +6272,9 @@ System.registerModule("models/contributor/MHFictionalIndividualContributor.js", 
   var __moduleName = "models/contributor/MHFictionalIndividualContributor.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHContributor = System.get("models/contributor/MHContributor.js").MHContributor;
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
   var MHFictionalIndividualContributor = (function($__super) {
-    function MHFictionalIndividualContributor(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHFictionalIndividualContributor).call(this, args);
-      Object.defineProperties(this, {'contributorsPromise': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        }});
+    function MHFictionalIndividualContributor() {
+      $traceurRuntime.superConstructor(MHFictionalIndividualContributor).apply(this, arguments);
     }
     return ($traceurRuntime.createClass)(MHFictionalIndividualContributor, {
       get isIndividual() {
@@ -6703,30 +6283,12 @@ System.registerModule("models/contributor/MHFictionalIndividualContributor.js", 
       get isReal() {
         return false;
       },
-      toString: function() {
-        return $traceurRuntime.superGet(this, MHFictionalIndividualContributor.prototype, "toString").call(this);
-      },
       fetchContributors: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
-        var force = arguments[1] !== (void 0) ? arguments[1] : false;
-        var $__3 = this;
+        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
+        var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('contributors');
-        if (force || this.contributorsPromise === null) {
-          this.contributorsPromise = houndRequest({
-            method: 'GET',
-            endpoint: path,
-            params: {'view': view}
-          }).catch(((function(err) {
-            $__3.contributorsPromise = null;
-            throw err;
-          })).bind(this)).then(function(parsed) {
-            if (view === 'full' && Array.isArray(parsed)) {
-              parsed = MHObject.create(parsed);
-            }
-            return parsed;
-          });
-        }
-        return this.contributorsPromise;
+        return this.fetchPagedEndpoint(path, view, size, force);
       }
     }, {get mhidPrefix() {
         return 'mhfic';
@@ -6744,17 +6306,9 @@ System.registerModule("models/contributor/MHRealGroupContributor.js", [], functi
   var __moduleName = "models/contributor/MHRealGroupContributor.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHContributor = System.get("models/contributor/MHContributor.js").MHContributor;
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
   var MHRealGroupContributor = (function($__super) {
-    function MHRealGroupContributor(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHRealGroupContributor).call(this, args);
-      Object.defineProperties(this, {'charactersPromise': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        }});
+    function MHRealGroupContributor() {
+      $traceurRuntime.superConstructor(MHRealGroupContributor).apply(this, arguments);
     }
     return ($traceurRuntime.createClass)(MHRealGroupContributor, {
       get isIndividual() {
@@ -6763,30 +6317,12 @@ System.registerModule("models/contributor/MHRealGroupContributor.js", [], functi
       get isReal() {
         return true;
       },
-      toString: function() {
-        return $traceurRuntime.superGet(this, MHRealGroupContributor.prototype, "toString").call(this);
-      },
       fetchCharacters: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'ids';
-        var force = arguments[1] !== (void 0) ? arguments[1] : false;
-        var $__3 = this;
+        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
+        var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('characters');
-        if (force || this.charactersPromise === null) {
-          this.charactersPromise = houndRequest({
-            method: 'GET',
-            endpoint: path,
-            params: {'view': view}
-          }).catch(((function(err) {
-            $__3.charactersPromise = null;
-            throw err;
-          })).bind(this)).then(function(parsed) {
-            if (view === 'full' && Array.isArray(parsed)) {
-              parsed = MHObject.create(parsed);
-            }
-            return parsed;
-          });
-        }
-        return this.charactersPromise;
+        return this.fetchPagedEndpoint(path, view, size, force);
       }
     }, {get mhidPrefix() {
         return 'mhrgc';
@@ -6804,17 +6340,9 @@ System.registerModule("models/contributor/MHRealIndividualContributor.js", [], f
   var __moduleName = "models/contributor/MHRealIndividualContributor.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHContributor = System.get("models/contributor/MHContributor.js").MHContributor;
-  var pagedRequest = System.get("request/hound-paged-request.js").pagedRequest;
   var MHRealIndividualContributor = (function($__super) {
-    function MHRealIndividualContributor(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHRealIndividualContributor).call(this, args);
-      Object.defineProperties(this, {'characters': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        }});
+    function MHRealIndividualContributor() {
+      $traceurRuntime.superConstructor(MHRealIndividualContributor).apply(this, arguments);
     }
     return ($traceurRuntime.createClass)(MHRealIndividualContributor, {
       get isIndividual() {
@@ -6823,23 +6351,12 @@ System.registerModule("models/contributor/MHRealIndividualContributor.js", [], f
       get isReal() {
         return true;
       },
-      toString: function() {
-        return $traceurRuntime.superGet(this, MHRealIndividualContributor.prototype, "toString").call(this);
-      },
       fetchCharacters: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
         var force = arguments[2] !== (void 0) ? arguments[2] : true;
         var path = this.subendpoint('characters');
-        if (force || this.characters === null) {
-          this.characters = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.characters;
+        return this.fetchPagedEndpoint(path, view, size, force);
       }
     }, {get mhidPrefix() {
         return 'mhric';
@@ -6852,16 +6369,61 @@ System.registerModule("models/contributor/MHRealIndividualContributor.js", [], f
       return MHRealIndividualContributor;
     }};
 });
+System.registerModule("models/hashtag/MHHashtag.js", [], function() {
+  "use strict";
+  var __moduleName = "models/hashtag/MHHashtag.js";
+  var MHObject = System.get("models/base/MHObject.js").MHObject;
+  var houndRequest = System.get("request/hound-request.js").houndRequest;
+  var MHHashtagMetadata = System.get("models/meta/MHMetadata.js").MHHashtagMetadata;
+  var MHHashtag = (function($__super) {
+    function MHHashtag() {
+      $traceurRuntime.superConstructor(MHHashtag).apply(this, arguments);
+    }
+    return ($traceurRuntime.createClass)(MHHashtag, {get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHHashtag.prototype, "jsonProperties"), {metadata: MHHashtagMetadata});
+      }}, {
+      get mhidPrefix() {
+        return 'mhhtg';
+      },
+      get rootEndpoint() {
+        return 'graph/hashtag';
+      },
+      fetchByName: function(name) {
+        var view = arguments[1] !== (void 0) ? arguments[1] : 'full';
+        if (!name || (typeof name !== 'string' && !(name instanceof String))) {
+          throw new TypeError('Hashtag not of type String in fetchByTag');
+        }
+        var path = this.rootSubendpoint('/lookup/' + name);
+        return houndRequest({
+          method: 'GET',
+          endpoint: path,
+          params: {view: view}
+        }).then(function(response) {
+          var newObj = MHObject.create(response);
+          return newObj;
+        });
+      }
+    }, $__super);
+  }(MHObject));
+  (function() {
+    MHObject.registerConstructor(MHHashtag, 'MHHashtag');
+  })();
+  return {get MHHashtag() {
+      return MHHashtag;
+    }};
+});
 System.registerModule("models/image/MHImage.js", [], function() {
   "use strict";
   var __moduleName = "models/image/MHImage.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
+  var MHImageMetadata = System.get("models/meta/MHMetadata.js").MHImageMetadata;
   var MHImage = (function($__super) {
-    function MHImage(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHImage).call(this, args);
+    function MHImage() {
+      $traceurRuntime.superConstructor(MHImage).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHImage, {}, {
+    return ($traceurRuntime.createClass)(MHImage, {get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHImage.prototype, "jsonProperties"), {metadata: MHImageMetadata});
+      }}, {
       get mhidPrefix() {
         return 'mhimg';
       },
@@ -6877,466 +6439,52 @@ System.registerModule("models/image/MHImage.js", [], function() {
       return MHImage;
     }};
 });
-System.registerModule("models/source/MHSourceFormat.js", [], function() {
-  "use strict";
-  var __moduleName = "models/source/MHSourceFormat.js";
-  var MHSourceFormat = (function() {
-    function MHSourceFormat(args) {
-      var method = arguments[1] !== (void 0) ? arguments[1] : null;
-      if (typeof args === 'string' || args instanceof String) {
-        try {
-          args = JSON.parse(args);
-        } catch (e) {
-          throw new TypeError('Args typeof string but not JSON in MHSourceFormat', 'MHSourceFormat.js', 28);
-        }
-      }
-      var type = args.type || null,
-          price = args.price,
-          launchInfo = args.launchInfo || null,
-          timePeriod = args.timePeriod || null,
-          contentCount = args.contentCount || null;
-      Object.defineProperties(this, {
-        'type': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: type
-        },
-        'price': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: price
-        },
-        'launchInfo': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: launchInfo
-        },
-        'timePeriod': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: timePeriod
-        },
-        'contentCount': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: contentCount
-        },
-        'method': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: method
-        }
-      });
-    }
-    return ($traceurRuntime.createClass)(MHSourceFormat, {get displayPrice() {
-        return '$' + this.price;
-      }}, {});
-  }());
-  return {get MHSourceFormat() {
-      return MHSourceFormat;
-    }};
-});
-System.registerModule("models/source/MHSourceMethod.js", [], function() {
-  "use strict";
-  var __moduleName = "models/source/MHSourceMethod.js";
-  var MHSourceFormat = System.get("models/source/MHSourceFormat.js").MHSourceFormat;
-  var MHSourceMethod = (function() {
-    function MHSourceMethod(args) {
-      var medium = arguments[1] !== (void 0) ? arguments[1] : null;
-      var $__1 = this;
-      if (typeof args === 'string' || args instanceof String) {
-        try {
-          args = JSON.parse(args);
-        } catch (e) {
-          throw new TypeError('Args typeof string but not JSON in MHSourceMethod', 'MHSourceMethod.js', 28);
-        }
-      }
-      var type = args.type || null,
-          formats = args.formats || null;
-      if (type === null || formats === null) {
-        throw new TypeError('Type or formats not defined on args array in MHSourceMethod', 'MHSourceMethod.js', 41);
-      }
-      formats = formats.map((function(v) {
-        return new MHSourceFormat(v, $__1);
-      }));
-      Object.defineProperties(this, {
-        'type': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: type
-        },
-        'formats': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: formats
-        },
-        'medium': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: medium
-        }
-      });
-    }
-    return ($traceurRuntime.createClass)(MHSourceMethod, {}, {get TYPES() {
-        return ['purchase', 'rental', 'subscription', 'adSupported'];
-      }});
-  }());
-  return {get MHSourceMethod() {
-      return MHSourceMethod;
-    }};
-});
-System.registerModule("models/source/MHSourceMedium.js", [], function() {
-  "use strict";
-  var __moduleName = "models/source/MHSourceMedium.js";
-  var MHSourceMethod = System.get("models/source/MHSourceMethod.js").MHSourceMethod;
-  var MHSourceMedium = (function() {
-    function MHSourceMedium(args) {
-      var source = arguments[1] !== (void 0) ? arguments[1] : null;
-      var $__1 = this;
-      if (typeof args === 'string' || args instanceof String) {
-        try {
-          args = JSON.parse(args);
-        } catch (e) {
-          throw new TypeError('Args typeof string but not JSON in MHSourceMedium', 'MHSourceMedium.js', 28);
-        }
-      }
-      var type = args.type || null,
-          methods = args.methods || null;
-      if (type === null || methods === null) {
-        throw new TypeError('Type or methods not defined on args in MHSourceMedium');
-      }
-      methods = methods.map((function(v) {
-        return new MHSourceMethod(v, $__1);
-      }));
-      Object.defineProperties(this, {
-        'type': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: type
-        },
-        'methods': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: methods
-        },
-        'source': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: source
-        }
-      });
-    }
-    return ($traceurRuntime.createClass)(MHSourceMedium, {}, {get TYPES() {
-        return ['stream', 'download', 'deliver', 'pickup', 'attend'];
-      }});
-  }());
-  return {get MHSourceMedium() {
-      return MHSourceMedium;
-    }};
-});
-System.registerModule("models/source/MHSourceModel.js", [], function() {
-  "use strict";
-  var __moduleName = "models/source/MHSourceModel.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHSourceMedium = System.get("models/source/MHSourceMedium.js").MHSourceMedium;
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var sources;
-  var sourcesPromise = null;
-  var MHSourceModel = (function() {
-    function MHSourceModel(args) {
-      var content = arguments[1] !== (void 0) ? arguments[1] : null;
-      var $__3 = this;
-      if (typeof args === 'string' || args instanceof String) {
-        try {
-          args = JSON.parse(args);
-        } catch (e) {
-          throw new TypeError('Args typeof string but not JSON in MHSourceModel', 'MHSourceModel.js', 28);
-        }
-      }
-      var name = args.object.metadata.name || null,
-          mediums = args.context.mediums || null;
-      if (name === null) {
-        console.warn('errored args: ', args);
-        throw new TypeError('Name, consumable, or mediums null in args in MHSourceModel');
-      }
-      if (mediums != null) {
-        mediums = mediums.map((function(v) {
-          return new MHSourceMedium(v, $__3);
-        }));
-      }
-      Object.defineProperties(this, {
-        'name': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: name
-        },
-        'mediums': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: mediums
-        },
-        'content': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: content
-        }
-      });
-    }
-    return ($traceurRuntime.createClass)(MHSourceModel, {getAllFormats: function() {
-        var allFormats = [];
-        this.mediums.forEach(function(medium) {
-          medium.methods.forEach(function(method) {
-            allFormats = allFormats.concat(method.formats);
-            console.log(allFormats);
-          });
-        });
-        return allFormats;
-      }}, {
-      fetchAllSources: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : "full";
-        var force = arguments[1] !== (void 0) ? arguments[1] : false;
-        var path = 'graph/source/all';
-        if (force || sourcesPromise === null) {
-          sourcesPromise = houndRequest({
-            method: 'GET',
-            endpoint: path,
-            params: {view: view}
-          }).then(function(parsed) {
-            var content = parsed.content;
-            return content.map((function(v) {
-              return MHObject.create(v.object);
-            }));
-          }).then(function(arr) {
-            var obj = {};
-            arr.forEach(function(source) {
-              var name = source.metadata.name;
-              obj[name] = source;
-            });
-            sources = obj;
-            return obj;
-          });
-        }
-        return sourcesPromise;
-      },
-      get sources() {
-        return sources;
-      }
-    });
-  }());
-  return {get MHSourceModel() {
-      return MHSourceModel;
-    }};
-});
 System.registerModule("models/media/MHMedia.js", [], function() {
   "use strict";
   var __moduleName = "models/media/MHMedia.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHSourceModel = System.get("models/source/MHSourceModel.js").MHSourceModel;
   var MHRelationalPair = System.get("models/base/MHRelationalPair.js").MHRelationalPair;
+  var MHMediaMetadata = System.get("models/meta/MHMetadata.js").MHMediaMetadata;
   var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var pagedRequest = System.get("request/hound-paged-request.js").pagedRequest;
   var MHMedia = (function($__super) {
-    function MHMedia(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHMedia).call(this, args);
-      var keyContributors = (!!args.keyContributors) ? MHRelationalPair.createFromArray(args.keyContributors) : null;
-      Object.defineProperties(this, {
-        'keyContributors': {
-          configurable: false,
-          enumerable: true,
-          writable: true,
-          value: keyContributors
-        },
-        'collections': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        },
-        'content': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        },
-        'sources': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        },
-        'contributors': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        },
-        'characters': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        },
-        'traits': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        },
-        'related': {
-          configurable: false,
-          enumerable: false,
-          writable: true,
-          value: null
-        }
-      });
+    function MHMedia() {
+      $traceurRuntime.superConstructor(MHMedia).apply(this, arguments);
     }
     return ($traceurRuntime.createClass)(MHMedia, {
-      toString: function() {
-        return $traceurRuntime.superGet(this, MHMedia.prototype, "toString").call(this) + ' and releaseDate ' + this.releaseDate;
-      },
-      mergeWithData: function(parsedArgs) {
-        $traceurRuntime.superGet(this, MHMedia.prototype, "mergeWithData").call(this, parsedArgs);
-        if (!this.keyContributors && parsedArgs.keyContributors) {
-          var keyContributors = MHRelationalPair.createFromArray(parsedArgs.keyContributors);
-          if (keyContributors) {
-            this.keyContributors = keyContributors;
-          }
-        }
-      },
-      fetchCollections: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
-        var force = arguments[2] !== (void 0) ? arguments[2] : true;
-        var path = this.subendpoint('collections');
-        if (force || this.collections === null) {
-          this.collections = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.collections;
+      get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHMedia.prototype, "jsonProperties"), {
+          metadata: MHMediaMetadata,
+          keyContributors: [MHRelationalPair],
+          primaryGroup: MHRelationalPair
+        });
       },
       fetchContent: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 20;
-        var force = arguments[2] !== (void 0) ? arguments[2] : true;
+        var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('content');
-        if (force || this.content === null) {
-          this.content = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.content;
+        return this.fetchPagedEndpoint(path, view, size, force);
       },
       fetchSources: function() {
-        var force = arguments[0] !== (void 0) ? arguments[0] : false;
-        var self = this,
-            path = this.subendpoint('sources');
-        if (MHSourceModel.sources === null || MHSourceModel.sources === undefined) {
-          MHSourceModel.fetchAllSources("full", true);
-        }
-        if (force || this.sources === null) {
-          this.sources = houndRequest({
-            method: 'GET',
-            endpoint: path
-          }).catch((function(err) {
-            self.sources = null;
-            throw err;
-          })).then(function(parsed) {
-            var content = parsed.content;
-            return content.map((function(v) {
-              return new MHSourceModel(v, self);
-            }));
-          });
-        }
-        return this.sources;
-      },
-      fetchAvailableSources: function() {
-        return this.fetchSources();
-      },
-      fetchDesiredSource: function() {
-        return this.fetchAvailableSources();
+        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
+        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+        var path = this.subendpoint('sources');
+        return this.fetchPagedEndpoint(path, view, size, force);
       },
       fetchContributors: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
         var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('contributors');
-        if (force || this.contributors === null) {
-          this.contributors = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.contributors;
-      },
-      fetchCharacters: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        var path = this.subendpoint('characters');
-        if (force || this.characters === null) {
-          this.characters = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.characters;
-      },
-      fetchTraits: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        var path = this.subendpoint('traits');
-        if (force || this.traits === null) {
-          this.traits = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.traits;
+        return this.fetchPagedEndpoint(path, view, size, force);
       },
       fetchRelated: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
         var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('related');
-        if (force || this.related === null) {
-          this.related = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.related;
+        return this.fetchPagedEndpoint(path, view, size, force);
       },
       fetchShortestDistance: function(otherMhid) {
         var path = this.subendpoint('shortestPath/' + otherMhid);
@@ -7360,19 +6508,13 @@ System.registerModule("models/media/MHMedia.js", [], function() {
       fetchRelatedTo: function(medias) {
         var view = arguments[1] !== (void 0) ? arguments[1] : 'full';
         var size = arguments[2] !== (void 0) ? arguments[2] : 12;
+        var force = arguments[3] !== (void 0) ? arguments[3] : false;
         var mhids = medias.map((function(m) {
           return m.metadata.mhid;
         }));
-        var path = this.rootEndpoint + '/related';
-        return pagedRequest({
-          method: 'GET',
-          endpoint: path,
-          pageSize: size,
-          params: {
-            view: view,
-            ids: mhids
-          }
-        });
+        var path = this.rootSubendpoint('related');
+        var params = {ids: mhids};
+        return this.fetchRootPagedEndpoint(path, params, view, size, force);
       }
     }, $__super);
   }(MHObject));
@@ -7386,13 +6528,10 @@ System.registerModule("models/media/MHAlbum.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHAlbum = (function($__super) {
-    function MHAlbum(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHAlbum).call(this, args);
+    function MHAlbum() {
+      $traceurRuntime.superConstructor(MHAlbum).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHAlbum, {toString: function() {
-        return $traceurRuntime.superGet(this, MHAlbum.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHAlbum, {}, {get mhidPrefix() {
         return 'mhalb';
       }}, $__super);
   }(MHMedia));
@@ -7409,13 +6548,10 @@ System.registerModule("models/media/MHAlbumSeries.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHAlbumSeries = (function($__super) {
-    function MHAlbumSeries(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHAlbumSeries).call(this, args);
+    function MHAlbumSeries() {
+      $traceurRuntime.superConstructor(MHAlbumSeries).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHAlbumSeries, {toString: function() {
-        return $traceurRuntime.superGet(this, MHAlbumSeries.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHAlbumSeries, {}, {get mhidPrefix() {
         return 'mhals';
       }}, $__super);
   }(MHMedia));
@@ -7432,13 +6568,10 @@ System.registerModule("models/media/MHAnthology.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHAnthology = (function($__super) {
-    function MHAnthology(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHAnthology).call(this, args);
+    function MHAnthology() {
+      $traceurRuntime.superConstructor(MHAnthology).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHAnthology, {toString: function() {
-        return $traceurRuntime.superGet(this, MHAnthology.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHAnthology, {}, {get mhidPrefix() {
         return 'mhath';
       }}, $__super);
   }(MHMedia));
@@ -7455,13 +6588,10 @@ System.registerModule("models/media/MHBook.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHBook = (function($__super) {
-    function MHBook(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHBook).call(this, args);
+    function MHBook() {
+      $traceurRuntime.superConstructor(MHBook).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHBook, {toString: function() {
-        return $traceurRuntime.superGet(this, MHBook.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHBook, {}, {get mhidPrefix() {
         return 'mhbok';
       }}, $__super);
   }(MHMedia));
@@ -7478,13 +6608,10 @@ System.registerModule("models/media/MHBookSeries.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHBookSeries = (function($__super) {
-    function MHBookSeries(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHBookSeries).call(this, args);
+    function MHBookSeries() {
+      $traceurRuntime.superConstructor(MHBookSeries).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHBookSeries, {toString: function() {
-        return $traceurRuntime.superGet(this, MHBookSeries.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHBookSeries, {}, {get mhidPrefix() {
         return 'mhbks';
       }}, $__super);
   }(MHMedia));
@@ -7501,13 +6628,10 @@ System.registerModule("models/media/MHComicBook.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHComicBook = (function($__super) {
-    function MHComicBook(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHComicBook).call(this, args);
+    function MHComicBook() {
+      $traceurRuntime.superConstructor(MHComicBook).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHComicBook, {toString: function() {
-        return $traceurRuntime.superGet(this, MHComicBook.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHComicBook, {}, {get mhidPrefix() {
         return 'mhcbk';
       }}, $__super);
   }(MHMedia));
@@ -7524,13 +6648,10 @@ System.registerModule("models/media/MHComicBookSeries.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHComicBookSeries = (function($__super) {
-    function MHComicBookSeries(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHComicBookSeries).call(this, args);
+    function MHComicBookSeries() {
+      $traceurRuntime.superConstructor(MHComicBookSeries).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHComicBookSeries, {toString: function() {
-        return $traceurRuntime.superGet(this, MHComicBookSeries.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHComicBookSeries, {}, {get mhidPrefix() {
         return 'mhcbs';
       }}, $__super);
   }(MHMedia));
@@ -7547,13 +6668,10 @@ System.registerModule("models/media/MHGame.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHGame = (function($__super) {
-    function MHGame(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHGame).call(this, args);
+    function MHGame() {
+      $traceurRuntime.superConstructor(MHGame).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHGame, {toString: function() {
-        return $traceurRuntime.superGet(this, MHGame.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHGame, {}, {get mhidPrefix() {
         return 'mhgam';
       }}, $__super);
   }(MHMedia));
@@ -7570,13 +6688,10 @@ System.registerModule("models/media/MHGameSeries.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHGameSeries = (function($__super) {
-    function MHGameSeries(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHGameSeries).call(this, args);
+    function MHGameSeries() {
+      $traceurRuntime.superConstructor(MHGameSeries).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHGameSeries, {toString: function() {
-        return $traceurRuntime.superGet(this, MHGameSeries.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHGameSeries, {}, {get mhidPrefix() {
         return 'mhgms';
       }}, $__super);
   }(MHMedia));
@@ -7593,13 +6708,10 @@ System.registerModule("models/media/MHGraphicNovel.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHGraphicNovel = (function($__super) {
-    function MHGraphicNovel(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHGraphicNovel).call(this, args);
+    function MHGraphicNovel() {
+      $traceurRuntime.superConstructor(MHGraphicNovel).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHGraphicNovel, {toString: function() {
-        return $traceurRuntime.superGet(this, MHGraphicNovel.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHGraphicNovel, {}, {get mhidPrefix() {
         return 'mhgnl';
       }}, $__super);
   }(MHMedia));
@@ -7616,13 +6728,10 @@ System.registerModule("models/media/MHGraphicNovelSeries.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHGraphicNovelSeries = (function($__super) {
-    function MHGraphicNovelSeries(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHGraphicNovelSeries).call(this, args);
+    function MHGraphicNovelSeries() {
+      $traceurRuntime.superConstructor(MHGraphicNovelSeries).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHGraphicNovelSeries, {toString: function() {
-        return $traceurRuntime.superGet(this, MHGraphicNovelSeries.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHGraphicNovelSeries, {}, {get mhidPrefix() {
         return 'mhgns';
       }}, $__super);
   }(MHMedia));
@@ -7639,13 +6748,10 @@ System.registerModule("models/media/MHMovie.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHMovie = (function($__super) {
-    function MHMovie(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHMovie).call(this, args);
+    function MHMovie() {
+      $traceurRuntime.superConstructor(MHMovie).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHMovie, {toString: function() {
-        return $traceurRuntime.superGet(this, MHMovie.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHMovie, {}, {get mhidPrefix() {
         return 'mhmov';
       }}, $__super);
   }(MHMedia));
@@ -7662,13 +6768,10 @@ System.registerModule("models/media/MHMovieSeries.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHMovieSeries = (function($__super) {
-    function MHMovieSeries(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHMovieSeries).call(this, args);
+    function MHMovieSeries() {
+      $traceurRuntime.superConstructor(MHMovieSeries).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHMovieSeries, {toString: function() {
-        return $traceurRuntime.superGet(this, MHMovieSeries.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHMovieSeries, {}, {get mhidPrefix() {
         return 'mhmvs';
       }}, $__super);
   }(MHMedia));
@@ -7685,13 +6788,10 @@ System.registerModule("models/media/MHMusicVideo.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHMusicVideo = (function($__super) {
-    function MHMusicVideo(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHMusicVideo).call(this, args);
+    function MHMusicVideo() {
+      $traceurRuntime.superConstructor(MHMusicVideo).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHMusicVideo, {toString: function() {
-        return $traceurRuntime.superGet(this, MHMusicVideo.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHMusicVideo, {}, {get mhidPrefix() {
         return 'mhmsv';
       }}, $__super);
   }(MHMedia));
@@ -7708,13 +6808,10 @@ System.registerModule("models/media/MHNovella.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHNovella = (function($__super) {
-    function MHNovella(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHNovella).call(this, args);
+    function MHNovella() {
+      $traceurRuntime.superConstructor(MHNovella).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHNovella, {toString: function() {
-        return $traceurRuntime.superGet(this, MHNovella.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHNovella, {}, {get mhidPrefix() {
         return 'mhnov';
       }}, $__super);
   }(MHMedia));
@@ -7731,13 +6828,10 @@ System.registerModule("models/media/MHPeriodical.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHPeriodical = (function($__super) {
-    function MHPeriodical(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHPeriodical).call(this, args);
+    function MHPeriodical() {
+      $traceurRuntime.superConstructor(MHPeriodical).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHPeriodical, {toString: function() {
-        return $traceurRuntime.superGet(this, MHPeriodical.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHPeriodical, {}, {get mhidPrefix() {
         return 'mhpdc';
       }}, $__super);
   }(MHMedia));
@@ -7754,13 +6848,10 @@ System.registerModule("models/media/MHPeriodicalSeries.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHPeriodicalSeries = (function($__super) {
-    function MHPeriodicalSeries(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHPeriodicalSeries).call(this, args);
+    function MHPeriodicalSeries() {
+      $traceurRuntime.superConstructor(MHPeriodicalSeries).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHPeriodicalSeries, {toString: function() {
-        return $traceurRuntime.superGet(this, MHPeriodicalSeries.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHPeriodicalSeries, {}, {get mhidPrefix() {
         return 'mhpds';
       }}, $__super);
   }(MHMedia));
@@ -7777,13 +6868,10 @@ System.registerModule("models/media/MHShowEpisode.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHShowEpisode = (function($__super) {
-    function MHShowEpisode(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHShowEpisode).call(this, args);
+    function MHShowEpisode() {
+      $traceurRuntime.superConstructor(MHShowEpisode).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHShowEpisode, {toString: function() {
-        return $traceurRuntime.superGet(this, MHShowEpisode.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHShowEpisode, {}, {get mhidPrefix() {
         return 'mhsep';
       }}, $__super);
   }(MHMedia));
@@ -7800,13 +6888,10 @@ System.registerModule("models/media/MHShowSeason.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHShowSeason = (function($__super) {
-    function MHShowSeason(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHShowSeason).call(this, args);
+    function MHShowSeason() {
+      $traceurRuntime.superConstructor(MHShowSeason).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHShowSeason, {toString: function() {
-        return $traceurRuntime.superGet(this, MHShowSeason.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHShowSeason, {}, {get mhidPrefix() {
         return 'mhssn';
       }}, $__super);
   }(MHMedia));
@@ -7823,13 +6908,10 @@ System.registerModule("models/media/MHShowSeries.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHShowSeries = (function($__super) {
-    function MHShowSeries(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHShowSeries).call(this, args);
+    function MHShowSeries() {
+      $traceurRuntime.superConstructor(MHShowSeries).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHShowSeries, {toString: function() {
-        return $traceurRuntime.superGet(this, MHShowSeries.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHShowSeries, {}, {get mhidPrefix() {
         return 'mhsss';
       }}, $__super);
   }(MHMedia));
@@ -7840,42 +6922,16 @@ System.registerModule("models/media/MHShowSeries.js", [], function() {
       return MHShowSeries;
     }};
 });
-System.registerModule("models/media/MHSong.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHSong.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHSong = (function($__super) {
-    function MHSong(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHSong).call(this, args);
-    }
-    return ($traceurRuntime.createClass)(MHSong, {toString: function() {
-        return $traceurRuntime.superGet(this, MHSong.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
-        return 'mhsng';
-      }}, $__super);
-  }(MHMedia));
-  (function() {
-    MHObject.registerConstructor(MHSong, 'MHSong');
-  })();
-  return {get MHSong() {
-      return MHSong;
-    }};
-});
 System.registerModule("models/media/MHSpecial.js", [], function() {
   "use strict";
   var __moduleName = "models/media/MHSpecial.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHSpecial = (function($__super) {
-    function MHSpecial(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHSpecial).call(this, args);
+    function MHSpecial() {
+      $traceurRuntime.superConstructor(MHSpecial).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHSpecial, {toString: function() {
-        return $traceurRuntime.superGet(this, MHSpecial.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHSpecial, {}, {get mhidPrefix() {
         return 'mhspc';
       }}, $__super);
   }(MHMedia));
@@ -7892,13 +6948,10 @@ System.registerModule("models/media/MHSpecialSeries.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHSpecialSeries = (function($__super) {
-    function MHSpecialSeries(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHSpecialSeries).call(this, args);
+    function MHSpecialSeries() {
+      $traceurRuntime.superConstructor(MHSpecialSeries).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHSpecialSeries, {toString: function() {
-        return $traceurRuntime.superGet(this, MHSpecialSeries.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHSpecialSeries, {}, {get mhidPrefix() {
         return 'mhsps';
       }}, $__super);
   }(MHMedia));
@@ -7909,19 +6962,36 @@ System.registerModule("models/media/MHSpecialSeries.js", [], function() {
       return MHSpecialSeries;
     }};
 });
+System.registerModule("models/media/MHTrack.js", [], function() {
+  "use strict";
+  var __moduleName = "models/media/MHTrack.js";
+  var MHObject = System.get("models/base/MHObject.js").MHObject;
+  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
+  var MHTrack = (function($__super) {
+    function MHTrack() {
+      $traceurRuntime.superConstructor(MHTrack).apply(this, arguments);
+    }
+    return ($traceurRuntime.createClass)(MHTrack, {}, {get mhidPrefix() {
+        return 'mhsng';
+      }}, $__super);
+  }(MHMedia));
+  (function() {
+    MHObject.registerConstructor(MHTrack, 'MHTrack');
+  })();
+  return {get MHTrack() {
+      return MHTrack;
+    }};
+});
 System.registerModule("models/media/MHTrailer.js", [], function() {
   "use strict";
   var __moduleName = "models/media/MHTrailer.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
   var MHTrailer = (function($__super) {
-    function MHTrailer(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHTrailer).call(this, args);
+    function MHTrailer() {
+      $traceurRuntime.superConstructor(MHTrailer).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHTrailer, {toString: function() {
-        return $traceurRuntime.superGet(this, MHTrailer.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHTrailer, {}, {get mhidPrefix() {
         return 'mhtrl';
       }}, $__super);
   }(MHMedia));
@@ -7936,37 +7006,31 @@ System.registerModule("models/source/MHSource.js", [], function() {
   "use strict";
   var __moduleName = "models/source/MHSource.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
+  var MHSourceMetadata = System.get("models/meta/MHMetadata.js").MHSourceMetadata;
   var MHSource = (function($__super) {
-    function MHSource(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHSource).call(this, args);
-      var mediums = (args.allMediums) ? args.allMediums : null,
-          subscriptions = (args.subscriptions) ? args.subscriptions : null;
-      if (subscriptions !== null) {
-        subscriptions = subscriptions.map((function(v) {
-          return MHObject.create(v);
-        }));
-      }
-      Object.defineProperties(this, {
-        'mediums': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: mediums
-        },
-        'subscriptions': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: subscriptions
-        }
-      });
+    function MHSource() {
+      $traceurRuntime.superConstructor(MHSource).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHSource, {toString: function() {
-        return $traceurRuntime.superGet(this, MHSource.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHSource, {get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHSource.prototype, "jsonProperties"), {
+          metadata: MHSourceMetadata,
+          subscriptions: [{mapper: MHObject.create}]
+        });
+      }}, {
+      get rootEndpoint() {
+        return 'graph/source';
+      },
+      get mhidPrefix() {
         return 'mhsrc';
-      }}, $__super);
+      },
+      fetchAllSources: function() {
+        var view = arguments[0] !== (void 0) ? arguments[0] : "full";
+        var size = arguments[1] !== (void 0) ? arguments[1] : 100;
+        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+        var path = this.rootSubendpoint('all');
+        return this.fetchRootPagedEndpoint(path, {}, view, size, force);
+      }
+    }, $__super);
   }(MHObject));
   (function() {
     MHObject.registerConstructor(MHSource, 'MHSource');
@@ -7979,23 +7043,21 @@ System.registerModule("models/source/MHSubscription.js", [], function() {
   "use strict";
   var __moduleName = "models/source/MHSubscription.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
+  var MHSubscriptionMetadata = System.get("models/meta/MHMetadata.js").MHSubscriptionMetadata;
   var MHSubscription = (function($__super) {
-    function MHSubscription(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHSubscription).call(this, args);
-      var mediums = (args.metadata.mediums) ? args.metadata.mediums : null;
-      Object.defineProperties(this, {'mediums': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: mediums
-        }});
+    function MHSubscription() {
+      $traceurRuntime.superConstructor(MHSubscription).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHSubscription, {toString: function() {
-        return $traceurRuntime.superGet(this, MHSubscription.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
-        return 'mhsubtemp';
-      }}, $__super);
+    return ($traceurRuntime.createClass)(MHSubscription, {get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHSubscription.prototype, "jsonProperties"), {metadata: MHSubscriptionMetadata});
+      }}, {
+      get mhidPrefix() {
+        return 'mhsub';
+      },
+      get rootEndpoint() {
+        return 'graph/subscription';
+      }
+    }, $__super);
   }(MHObject));
   (function() {
     MHObject.registerConstructor(MHSubscription, 'MHSubscription');
@@ -8008,54 +7070,39 @@ System.registerModule("models/trait/MHTrait.js", [], function() {
   "use strict";
   var __moduleName = "models/trait/MHTrait.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
+  var MHTraitMetadata = System.get("models/meta/MHMetadata.js").MHTraitMetadata;
   var MHTrait = (function($__super) {
-    function MHTrait(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHTrait).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+    function MHTrait() {
+      $traceurRuntime.superConstructor(MHTrait).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHTrait, {toString: function() {
-        return $traceurRuntime.superGet(this, MHTrait.prototype, "toString").call(this);
-      }}, {}, $__super);
+    return ($traceurRuntime.createClass)(MHTrait, {get jsonProperties() {
+        return Object.assign({}, $traceurRuntime.superGet(this, MHTrait.prototype, "jsonProperties"), {metadata: MHTraitMetadata});
+      }}, {get rootEndpoint() {
+        return 'graph/trait';
+      }}, $__super);
   }(MHObject));
   return {get MHTrait() {
       return MHTrait;
     }};
 });
-System.registerModule("models/trait/MHAchievements.js", [], function() {
+System.registerModule("models/trait/MHAchievement.js", [], function() {
   "use strict";
-  var __moduleName = "models/trait/MHAchievements.js";
+  var __moduleName = "models/trait/MHAchievement.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHAchievements = (function($__super) {
-    function MHAchievements(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHAchievements).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+  var MHAchievement = (function($__super) {
+    function MHAchievement() {
+      $traceurRuntime.superConstructor(MHAchievement).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHAchievements, {toString: function() {
-        return $traceurRuntime.superGet(this, MHAchievements.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHAchievement, {}, {get mhidPrefix() {
         return 'mhach';
       }}, $__super);
   }(MHTrait));
   (function() {
-    MHObject.registerConstructor(MHAchievements, 'MHAchievements');
+    MHObject.registerConstructor(MHAchievement, 'MHAchievement');
   })();
-  return {get MHAchievements() {
-      return MHAchievements;
+  return {get MHAchievement() {
+      return MHAchievement;
     }};
 });
 System.registerModule("models/trait/MHAudience.js", [], function() {
@@ -8064,20 +7111,10 @@ System.registerModule("models/trait/MHAudience.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
   var MHAudience = (function($__super) {
-    function MHAudience(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHAudience).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+    function MHAudience() {
+      $traceurRuntime.superConstructor(MHAudience).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHAudience, {toString: function() {
-        return $traceurRuntime.superGet(this, MHAudience.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHAudience, {}, {get mhidPrefix() {
         return 'mhaud';
       }}, $__super);
   }(MHTrait));
@@ -8094,20 +7131,10 @@ System.registerModule("models/trait/MHEra.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
   var MHEra = (function($__super) {
-    function MHEra(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHEra).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+    function MHEra() {
+      $traceurRuntime.superConstructor(MHEra).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHEra, {toString: function() {
-        return $traceurRuntime.superGet(this, MHEra.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHEra, {}, {get mhidPrefix() {
         return 'mhera';
       }}, $__super);
   }(MHTrait));
@@ -8124,20 +7151,10 @@ System.registerModule("models/trait/MHFlag.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
   var MHFlag = (function($__super) {
-    function MHFlag(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHFlag).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+    function MHFlag() {
+      $traceurRuntime.superConstructor(MHFlag).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHFlag, {toString: function() {
-        return $traceurRuntime.superGet(this, MHFlag.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHFlag, {}, {get mhidPrefix() {
         return 'mhflg';
       }}, $__super);
   }(MHTrait));
@@ -8154,20 +7171,10 @@ System.registerModule("models/trait/MHGenre.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
   var MHGenre = (function($__super) {
-    function MHGenre(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHGenre).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+    function MHGenre() {
+      $traceurRuntime.superConstructor(MHGenre).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHGenre, {toString: function() {
-        return $traceurRuntime.superGet(this, MHGenre.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHGenre, {}, {get mhidPrefix() {
         return 'mhgnr';
       }}, $__super);
   }(MHTrait));
@@ -8184,20 +7191,10 @@ System.registerModule("models/trait/MHGraphGenre.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
   var MHGraphGenre = (function($__super) {
-    function MHGraphGenre(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHGraphGenre).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+    function MHGraphGenre() {
+      $traceurRuntime.superConstructor(MHGraphGenre).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHGraphGenre, {toString: function() {
-        return $traceurRuntime.superGet(this, MHGraphGenre.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHGraphGenre, {}, {get mhidPrefix() {
         return 'mhgrg';
       }}, $__super);
   }(MHTrait));
@@ -8214,20 +7211,10 @@ System.registerModule("models/trait/MHMaterialSource.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
   var MHMaterialSource = (function($__super) {
-    function MHMaterialSource(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHMaterialSource).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+    function MHMaterialSource() {
+      $traceurRuntime.superConstructor(MHMaterialSource).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHMaterialSource, {toString: function() {
-        return $traceurRuntime.superGet(this, MHMaterialSource.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHMaterialSource, {}, {get mhidPrefix() {
         return 'mhmts';
       }}, $__super);
   }(MHTrait));
@@ -8244,20 +7231,10 @@ System.registerModule("models/trait/MHMood.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
   var MHMood = (function($__super) {
-    function MHMood(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHMood).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+    function MHMood() {
+      $traceurRuntime.superConstructor(MHMood).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHMood, {toString: function() {
-        return $traceurRuntime.superGet(this, MHMood.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHMood, {}, {get mhidPrefix() {
         return 'mhmod';
       }}, $__super);
   }(MHTrait));
@@ -8274,20 +7251,10 @@ System.registerModule("models/trait/MHQuality.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
   var MHQuality = (function($__super) {
-    function MHQuality(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHQuality).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+    function MHQuality() {
+      $traceurRuntime.superConstructor(MHQuality).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHQuality, {toString: function() {
-        return $traceurRuntime.superGet(this, MHQuality.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHQuality, {}, {get mhidPrefix() {
         return 'mhqlt';
       }}, $__super);
   }(MHTrait));
@@ -8304,20 +7271,10 @@ System.registerModule("models/trait/MHStoryElement.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
   var MHStoryElement = (function($__super) {
-    function MHStoryElement(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHStoryElement).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+    function MHStoryElement() {
+      $traceurRuntime.superConstructor(MHStoryElement).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHStoryElement, {toString: function() {
-        return $traceurRuntime.superGet(this, MHStoryElement.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHStoryElement, {}, {get mhidPrefix() {
         return 'mhstr';
       }}, $__super);
   }(MHTrait));
@@ -8334,20 +7291,10 @@ System.registerModule("models/trait/MHStyleElement.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
   var MHStyleElement = (function($__super) {
-    function MHStyleElement(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHStyleElement).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+    function MHStyleElement() {
+      $traceurRuntime.superConstructor(MHStyleElement).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHStyleElement, {toString: function() {
-        return $traceurRuntime.superGet(this, MHStyleElement.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHStyleElement, {}, {get mhidPrefix() {
         return 'mhsty';
       }}, $__super);
   }(MHTrait));
@@ -8364,20 +7311,10 @@ System.registerModule("models/trait/MHSubGenre.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
   var MHSubGenre = (function($__super) {
-    function MHSubGenre(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHSubGenre).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+    function MHSubGenre() {
+      $traceurRuntime.superConstructor(MHSubGenre).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHSubGenre, {toString: function() {
-        return $traceurRuntime.superGet(this, MHSubGenre.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHSubGenre, {}, {get mhidPrefix() {
         return 'mhsgn';
       }}, $__super);
   }(MHTrait));
@@ -8394,20 +7331,10 @@ System.registerModule("models/trait/MHTheme.js", [], function() {
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
   var MHTheme = (function($__super) {
-    function MHTheme(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHTheme).call(this, args);
-      var description = args.description || null;
-      Object.defineProperties(this, {'description': {
-          configurable: false,
-          enumerable: true,
-          writable: false,
-          value: description
-        }});
+    function MHTheme() {
+      $traceurRuntime.superConstructor(MHTheme).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHTheme, {toString: function() {
-        return $traceurRuntime.superGet(this, MHTheme.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
+    return ($traceurRuntime.createClass)(MHTheme, {}, {get mhidPrefix() {
         return 'mhthm';
       }}, $__super);
   }(MHTrait));
@@ -8418,31 +7345,75 @@ System.registerModule("models/trait/MHTheme.js", [], function() {
       return MHTheme;
     }};
 });
-System.registerModule("models/trait/MHTraitGroup.js", [], function() {
+System.registerModule("search/MHSearch.js", [], function() {
   "use strict";
-  var __moduleName = "models/trait/MHTraitGroup.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTraitGroup = (function($__super) {
-    function MHTraitGroup(args) {
-      args = MHObject.parseArgs(args);
-      $traceurRuntime.superConstructor(MHTraitGroup).call(this, args);
-    }
-    return ($traceurRuntime.createClass)(MHTraitGroup, {toString: function() {
-        return $traceurRuntime.superGet(this, MHTraitGroup.prototype, "toString").call(this);
-      }}, {get mhidPrefix() {
-        return 'mhtrg';
-      }}, $__super);
-  }(MHObject));
-  (function() {
-    MHObject.registerConstructor(MHTraitGroup, 'MHTraitGroup');
-  })();
-  return {get MHTraitGroup() {
-      return MHTraitGroup;
+  var __moduleName = "search/MHSearch.js";
+  var houndRequest = System.get("request/hound-request.js").houndRequest;
+  var MHRelationalPair = System.get("models/base/MHRelationalPair.js").MHRelationalPair;
+  var jsonCreateFromData = System.get("models/internal/jsonParse.js").jsonCreateFromData;
+  var MHSearch = (function() {
+    function MHSearch() {}
+    return ($traceurRuntime.createClass)(MHSearch, {}, {
+      fetchResultsForSearchTerm: function(searchTerm, scopes) {
+        var size = arguments[2] !== (void 0) ? arguments[2] : 12;
+        var path = 'search/all/' + houndRequest.extraEncode(searchTerm);
+        var params = {pageSize: size};
+        if (Array.isArray(scopes) && scopes.indexOf(MHSearch.SCOPE_ALL) === -1) {
+          params.types = scopes;
+        }
+        return houndRequest({
+          method: 'GET',
+          endpoint: path,
+          params: params
+        }).then((function(response) {
+          return jsonCreateFromData(response.content, [MHRelationalPair]);
+        }));
+      },
+      get SCOPE_ALL() {
+        return 'all';
+      },
+      get SCOPE_MOVIE() {
+        return 'movie';
+      },
+      get SCOPE_TRACK() {
+        return 'track';
+      },
+      get SCOPE_ALBUM() {
+        return 'album';
+      },
+      get SCOPE_SHOWSERIES() {
+        return 'showseries';
+      },
+      get SCOPE_SHOWSEASON() {
+        return 'showseason';
+      },
+      get SCOPE_SHOWEPISODE() {
+        return 'showepisode';
+      },
+      get SCOPE_BOOK() {
+        return 'book';
+      },
+      get SCOPE_GAME() {
+        return 'game';
+      },
+      get SCOPE_COLLECTION() {
+        return 'collection';
+      },
+      get SCOPE_USER() {
+        return 'user';
+      },
+      get SCOPE_CONTRIBUTOR() {
+        return 'contributor';
+      }
+    });
+  }());
+  return {get MHSearch() {
+      return MHSearch;
     }};
 });
-System.registerModule("models/all-models.js", [], function() {
+System.registerModule("hound-api.js", [], function() {
   "use strict";
-  var __moduleName = "models/all-models.js";
+  var __moduleName = "hound-api.js";
   var MHSDK = System.get("models/sdk/MHSDK.js").MHSDK;
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHRelationalPair = System.get("models/base/MHRelationalPair.js").MHRelationalPair;
@@ -8453,7 +7424,7 @@ System.registerModule("models/all-models.js", [], function() {
   var MHLike = System.get("models/action/MHLike.js").MHLike;
   var MHFollow = System.get("models/action/MHFollow.js").MHFollow;
   var MHPost = System.get("models/action/MHPost.js").MHPost;
-  var MHHashtag = System.get("models/action/MHHashtag.js").MHHashtag;
+  var MHHashtag = System.get("models/hashtag/MHHashtag.js").MHHashtag;
   var MHUser = System.get("models/user/MHUser.js").MHUser;
   var MHLoginSession = System.get("models/user/MHLoginSession.js").MHLoginSession;
   var MHSocial = System.get("models/social/MHSocial.js").MHSocial;
@@ -8478,16 +7449,15 @@ System.registerModule("models/all-models.js", [], function() {
   var MHShowEpisode = System.get("models/media/MHShowEpisode.js").MHShowEpisode;
   var MHShowSeason = System.get("models/media/MHShowSeason.js").MHShowSeason;
   var MHShowSeries = System.get("models/media/MHShowSeries.js").MHShowSeries;
-  var MHSong = System.get("models/media/MHSong.js").MHSong;
+  var MHTrack = System.get("models/media/MHTrack.js").MHTrack;
   var MHSpecial = System.get("models/media/MHSpecial.js").MHSpecial;
   var MHSpecialSeries = System.get("models/media/MHSpecialSeries.js").MHSpecialSeries;
   var MHTrailer = System.get("models/media/MHTrailer.js").MHTrailer;
   var MHCollection = System.get("models/collection/MHCollection.js").MHCollection;
   var MHContext = System.get("models/meta/MHContext.js").MHContext;
-  var MHMetaData = System.get("models/meta/MHMetaData.js").MHMetaData;
+  var MHMetadata = System.get("models/meta/MHMetadata.js").MHMetadata;
   var MHImage = System.get("models/image/MHImage.js").MHImage;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHTraitGroup = System.get("models/trait/MHTraitGroup.js").MHTraitGroup;
   var MHGenre = System.get("models/trait/MHGenre.js").MHGenre;
   var MHSubGenre = System.get("models/trait/MHSubGenre.js").MHSubGenre;
   var MHMood = System.get("models/trait/MHMood.js").MHMood;
@@ -8496,7 +7466,7 @@ System.registerModule("models/all-models.js", [], function() {
   var MHStoryElement = System.get("models/trait/MHStoryElement.js").MHStoryElement;
   var MHMaterialSource = System.get("models/trait/MHMaterialSource.js").MHMaterialSource;
   var MHTheme = System.get("models/trait/MHTheme.js").MHTheme;
-  var MHAchievements = System.get("models/trait/MHAchievements.js").MHAchievements;
+  var MHAchievement = System.get("models/trait/MHAchievement.js").MHAchievement;
   var MHEra = System.get("models/trait/MHEra.js").MHEra;
   var MHAudience = System.get("models/trait/MHAudience.js").MHAudience;
   var MHFlag = System.get("models/trait/MHFlag.js").MHFlag;
@@ -8511,9 +7481,9 @@ System.registerModule("models/all-models.js", [], function() {
   var MHSourceFormat = System.get("models/source/MHSourceFormat.js").MHSourceFormat;
   var MHSourceMethod = System.get("models/source/MHSourceMethod.js").MHSourceMethod;
   var MHSourceMedium = System.get("models/source/MHSourceMedium.js").MHSourceMedium;
-  var MHSourceModel = System.get("models/source/MHSourceModel.js").MHSourceModel;
+  var MHSearch = System.get("search/MHSearch.js").MHSearch;
   delete MHObject.registerConstructor;
-  var models = {
+  var $__default = {
     get MHSDK() {
       return MHSDK;
     },
@@ -8619,8 +7589,8 @@ System.registerModule("models/all-models.js", [], function() {
     get MHShowSeries() {
       return MHShowSeries;
     },
-    get MHSong() {
-      return MHSong;
+    get MHTrack() {
+      return MHTrack;
     },
     get MHSpecial() {
       return MHSpecial;
@@ -8640,14 +7610,11 @@ System.registerModule("models/all-models.js", [], function() {
     get MHContext() {
       return MHContext;
     },
-    get MHMetaData() {
-      return MHMetaData;
+    get MHMetadata() {
+      return MHMetadata;
     },
     get MHTrait() {
       return MHTrait;
-    },
-    get MHTraitGroup() {
-      return MHTraitGroup;
     },
     get MHGenre() {
       return MHGenre;
@@ -8673,8 +7640,8 @@ System.registerModule("models/all-models.js", [], function() {
     get MHTheme() {
       return MHTheme;
     },
-    get MHAchievements() {
-      return MHAchievements;
+    get MHAchievement() {
+      return MHAchievement;
     },
     get MHEra() {
       return MHEra;
@@ -8718,127 +7685,12 @@ System.registerModule("models/all-models.js", [], function() {
     get MHSourceMedium() {
       return MHSourceMedium;
     },
-    get MHSourceModel() {
-      return MHSourceModel;
-    }
-  };
-  return {get models() {
-      return models;
-    }};
-});
-System.registerModule("search/MHSearch.js", [], function() {
-  "use strict";
-  var __moduleName = "search/MHSearch.js";
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var MHRelationalPair = System.get("models/base/MHRelationalPair.js").MHRelationalPair;
-  var MHSearch = (function() {
-    function MHSearch() {}
-    return ($traceurRuntime.createClass)(MHSearch, {}, {
-      fetchResultsForSearchTerm: function(searchTerm, scopes) {
-        var size = arguments[2] !== (void 0) ? arguments[2] : 12;
-        var makeEndpoint = function(query) {
-          return 'search/all/' + houndRequest.extraEncode(query);
-        },
-            makeParams = function(scopes, size) {
-              var params = {
-                pageSize: (typeof size === 'number') ? size : 8,
-                v: '2'
-              };
-              if (Array.isArray(scopes) && scopes.indexOf(MHSearch.SCOPE_ALL) === -1) {
-                params.types = scopes;
-              }
-              return params;
-            },
-            makeSearchRequest = function(searchTerm, scopes, size) {
-              return houndRequest({
-                method: 'GET',
-                endpoint: makeEndpoint(searchTerm),
-                params: makeParams(scopes, size)
-              });
-            };
-        return makeSearchRequest(searchTerm, scopes, size).then((function(response) {
-          return Promise.all(MHRelationalPair.createFromArray(response.content));
-        }));
-      },
-      get SCOPE_ALL() {
-        return 'all';
-      },
-      get SCOPE_MOVIE() {
-        return 'movie';
-      },
-      get SCOPE_SONG() {
-        return 'song';
-      },
-      get SCOPE_ALBUM() {
-        return 'album';
-      },
-      get SCOPE_SHOWSERIES() {
-        return 'showseries';
-      },
-      get SCOPE_SHOWSEASON() {
-        return 'showseason';
-      },
-      get SCOPE_SHOWEPISODE() {
-        return 'showepisode';
-      },
-      get SCOPE_BOOK() {
-        return 'book';
-      },
-      get SCOPE_GAME() {
-        return 'game';
-      },
-      get SCOPE_COLLECTION() {
-        return 'collection';
-      },
-      get SCOPE_USER() {
-        return 'user';
-      },
-      get SCOPE_CONTRIBUTOR() {
-        return 'contributor';
-      }
-    });
-  }());
-  return {get MHSearch() {
-      return MHSearch;
-    }};
-});
-System.registerModule("hound-api.js", [], function() {
-  "use strict";
-  var __moduleName = "hound-api.js";
-  var request = System.get("request/hound-request.js").houndRequest;
-  var pagedRequest = System.get("request/hound-paged-request.js").pagedRequest;
-  var models = System.get("models/all-models.js").models;
-  var MHSearch = System.get("search/MHSearch.js").MHSearch;
-  var $__default = {
-    get models() {
-      return models;
-    },
-    get request() {
-      return request;
-    },
-    get pagedRequest() {
-      return pagedRequest;
-    },
     get MHSearch() {
       return MHSearch;
     }
   };
-  return {
-    get request() {
-      return request;
-    },
-    get pagedRequest() {
-      return pagedRequest;
-    },
-    get models() {
-      return models;
-    },
-    get MHSearch() {
-      return MHSearch;
-    },
-    get default() {
+  return {get default() {
       return $__default;
-    }
-  };
+    }};
 });
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') { module.exports = System.get("hound-api.js" + '').default; }

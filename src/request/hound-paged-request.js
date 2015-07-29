@@ -1,6 +1,7 @@
 /*global System */
 
 import { houndRequest } from './hound-request.js';
+import { jsonCreateFromData } from '../models/internal/jsonParse.js';
 
 // Start Module
 var defaults = {
@@ -52,7 +53,6 @@ var defaults = {
     //   return response;
     // },
     setContentArray = function(response){
-      //console.log(response);
       var MHRelationalPair = System.get('../../src/models/base/MHRelationalPair.js').MHRelationalPair;
 
       var self = this;
@@ -65,16 +65,11 @@ var defaults = {
           this.pageid = response.content[0].object.metadata.mhid;
         }
 
-        var content = Promise.all(MHRelationalPair.createFromArray(response.content));
+        var content = jsonCreateFromData(response.content, [MHRelationalPair]);
 
-        return content.catch(function(err){
-          console.warn(err);
-        }).then(function(mhObjs){
-          Array.prototype.push.apply(self.content, mhObjs);
-          response.content = mhObjs;
-          return response;
-        });
-
+        Array.prototype.push.apply(self.content, content);
+        response.content = content;
+        return response;
       }
       else{
         console.warn('content array is undefined or empty in setContentArray MHRelationalPair',self);

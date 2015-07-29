@@ -4,6 +4,7 @@ import { log } from '../internal/debug-helpers.js';
 
 import { MHObject, mhidLRU } from '../base/MHObject.js';
 import { MHRelationalPair } from '../base/MHRelationalPair.js';
+import { MHUserMetadata } from '../meta/MHMetadata.js';
 //import { MHImage } from '../image/MHImage.js';
 
 import { houndRequest } from '../../request/hound-request.js';
@@ -11,132 +12,21 @@ import { pagedRequest } from '../../request/hound-paged-request.js';
 
 // MediaHound User Object
 export class MHUser extends MHObject {
-  /* MHUser Constructor
-  *
-  * MediaHound Object constructors take a single parameter {Object | JSON String}
-  * If the argument is an object properties will be read and placed properly
-  *  if a prop doesn't exist and is optional it will be replaced with a null value.
-  * If the argument is a string it will be passed through JSON.parse and then the constructor will continue as normal.
-  *
-  *  @param args - { Object | JSON String }
-  *
-  * Inherited From MHObject
-  *    Require Param Props
-  *      metadata.mhid    - { MediaHound ID string }
-  *
-  *    Optional Param Props
-  *      metadata.name   - { String }
-  *      primaryImage    - { MHImage }
-  *      metadata.createdDate     - { String | Date }
-  *
-  * MHUser Param Props
-  *    Required
-  *      metadata.username        - { String }
-  *
-  *    Optional
-  *      metadata.email           - { String<Email> }
-  *      metadata.phonenumber     - { String<phone> | Number? }
-  *      metadata.firstName       - { String }
-  *      metadata.lastName        - { String }
-  *
-  */
-  constructor(args) {
-    args = MHObject.parseArgs(args);
 
-    if( typeof args.metadata.username === 'undefined' || args.metadata.username === null ){
-      throw new TypeError('Username is null or undefined', 'MHUser.js', 39);
-    }
-    // Call Super Constructor
-    super(args);
-
-    // Default MHUser unique non-required objects to null
-    var username = args.metadata.username,
-    email       = args.metadata.email        || null,
-    firstname   = args.metadata.firstname    || args.metadata.firstName   || null,
-    lastname    = args.metadata.lastname     || args.metadata.lastName    || null;
-
-    if(firstname == null || lastname == null){
-
-      var regex = new RegExp('((?:[a-z][a-z]+))(\\s+)((?:[a-z][a-z]+))',["i"]);
-      var test = regex.exec(args.metadata.name);
-      if(test != null){
-        firstname = test[1];
-        lastname = test[3];
-      }
-
-    }
-    // Create imutable properties
-    //  username, email, phonenumber, firstname, lastname
-    Object.defineProperties(this, {
-      'username':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        username
-      },
-      'email':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        email
-      },
-      'firstName':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        firstname
-      },
-      'lastName':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        lastname
-      },
-      // Promises
-      'interestFeed':{
-        configurable: false,
-        enumerable:   false,
-        writable:     true,
-        value:        null
-      },
-      'ownedCollections':{
-        configurable: false,
-        enumerable:   false,
-        writable:     true,
-        value:        null
-      },
-      'followed':{
-        configurable: false,
-        enumerable:   false,
-        writable:     true,
-        value:        null
-      },
-      'suggested':{
-        configurable: false,
-        enumerable:   false,
-        writable:     true,
-        value:        null
-      }
+  get jsonProperties() {
+    return Object.assign({}, super.jsonProperties, {
+      metadata: MHUserMetadata
     });
   }
 
-  static get mhidPrefix() { return 'mhusr'; }
+  static get mhidPrefix()   { return 'mhusr'; }
+  static get rootEndpoint() { return 'graph/user'; }
 
   get isCurrentUser(){
     var currentUser = System.get('../../src/models/user/MHLoginSession.js').MHLoginSession.currentUser;
     //console.warn('circular dep: (currentUser) ', currentUser);
     return this.isEqualToMHObject(currentUser);
   }
-
-  /**
-  * MHUser.rootEndpoint
-  *
-  * @static
-  * @property
-  * @return { String } - the endpoint for User info, ex: 'graph/user'
-  *
-  */
-  static get rootEndpoint(){ return 'graph/user'; }
 
   /*
   * Register New User on MediaHound
@@ -685,7 +575,7 @@ static fetchByUsername(username, view='full', force=false){
 *
 */
 static fetchFeaturedUsers(){
-  var path = this.rootSubednpoint('featured');
+  var path = this.rootSubendpoint('featured');
   return houndRequest({
     method  : 'GET',
     endpoint: path
@@ -707,7 +597,7 @@ static fetchFeaturedUsers(){
 */
 fetchInterestFeed(view='full', size=12, force=false){
   var path = this.subendpoint('interestFeed');
-  return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
+  return this.fetchPagedEndpoint(path, view, size, force);
 }
 
 /* TODO: remove console.log debug stuffs
@@ -719,7 +609,7 @@ fetchInterestFeed(view='full', size=12, force=false){
 
 fetchOwnedCollections(view='full', size=12, force=true){
   var path = this.subendpoint('ownedCollections');
-  return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
+  return this.fetchPagedEndpoint(path, view, size, force);
 }
 
 /**
@@ -734,7 +624,7 @@ fetchOwnedCollections(view='full', size=12, force=true){
 */
 fetchSuggested(view='full', size=12, force=false){
   var path = this.subendpoint('suggested');
-  return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
+  return this.fetchPagedEndpoint(path, view, size, force);
 }
 
 /**
@@ -744,12 +634,12 @@ fetchSuggested(view='full', size=12, force=false){
 */
 fetchFollowing(view='full', size=12, force=false){
   var path = this.subendpoint('following');
-  return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
+  return this.fetchPagedEndpoint(path, view, size, force);
 }
 
 fetchFollowers(view='full', size=12, force=false){
   var path = this.subendpoint('followers');
-  return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
+  return this.fetchPagedEndpoint(path, view, size, force);
 }
 
 /*
@@ -890,13 +780,6 @@ fetchFacebookFriends(view='full', size=12, force=false){
   }
   return this.facebookFriends;
 
-}
-
-
-
-// Could change as needed
-toString(){
-  return super.toString() + ' and username ' + this.username;
 }
 }
 

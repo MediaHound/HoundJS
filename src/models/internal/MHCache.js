@@ -67,11 +67,11 @@ export class MHCache {
 
   // convenience for putting an MHObject
   putMHObj(mhObj){
-    if( mhObj && mhObj.mhid && mhObj.username ){
-      return this.put(mhObj.mhid, mhObj, mhObj.username);
+    if( mhObj && mhObj.metadata.mhid && mhObj.metadata.username ){
+      return this.put(mhObj.metadata.mhid, mhObj, mhObj.metadata.username);
     }
-    if( mhObj && mhObj.mhid ){
-      return this.put(mhObj.mhid, mhObj, mhObj.altId);
+    if( mhObj && mhObj.metadata.mhid ){
+      return this.put(mhObj.metadata.mhid, mhObj, mhObj.metadata.altId);
     }
   }
 
@@ -297,7 +297,7 @@ export class MHCache {
 
     for( ; i < stored.length ; i++ ){
       curr = MHObject.create(stored[i]);
-      if( curr && !this.has(curr.mhid) ){
+      if( curr && !this.has(curr.metadata.mhid) ){
         log('adding to cache: ', curr);
         this.putMHObj(curr);
       }

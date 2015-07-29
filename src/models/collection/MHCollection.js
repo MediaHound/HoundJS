@@ -4,116 +4,32 @@ import { log } from '../internal/debug-helpers.js';
 import { MHObject } from '../base/MHObject.js';
 import { MHAction } from '../action/MHAction.js';
 import { MHLoginSession } from '../user/MHLoginSession.js';
+import { MHCollectionMetadata } from '../meta/MHMetadata.js';
 //import { MHRelationalPair } from '../base/MHRelationalPair.js';
 
 import { houndRequest } from '../../request/hound-request.js';
-import { pagedRequest } from '../../request/hound-paged-request.js';
 
 /**
  * @classdesc Mediahound Collection Object (MHCollection) inherits from MHObject
  */
 export class MHCollection extends MHObject {
-  /**
-   * MediaHound Object constructors take a single parameter {Object | JSON String}
-   * If the argument is an object properties will be read and placed properly
-   *  if a prop doesn't exist and is optional it will be replaced with a null value.
-   * If the argument is a string it will be passed through JSON.parse and then the constructor will continue as normal.
-   *
-   * @constructor
-   * @param {Object|JSON} args - Object map that describes a MediaHound Collection Object
-   * @param {MHID} args.mhid - A valid MediaHound Collection ID
-   * @param {string} [args.name=null] - The name of this collection
-   * @param {MHImage} [args.primaryImage=null] - the primary image url of this MHCollection object
-   * @param {Date} [args.createdDate=null] - The date this MHCollection was created
-   * @param {string} [args.description=null] - A description for this MHCollection
-   * @returns {MHCollection} The MHCollection described by args
-   *
-   * Inherited from MHObject
-   *    Require Param Props
-   *      mhid    - { MediaHound ID string }
-   *
-   *    Optional Param Props
-   *      name            - { String }
-   *      primaryImage    - { MHImage }
-   *      createdDate     - { String | Date }
-   *
-   * MHCollection
-   *    Optional Param Props
-   *      description     - { String }
-   *
-   */
-  constructor(args) {
-    args = MHObject.parseArgs(args);
 
-    super(args);
-
-    // mixlist = 'none', 'partial', 'full'
-
-    var firstContentImage = (args.firstContentImage != null) ? MHObject.create(args.firstContentImage) : null,
-        primaryOwner = (args.primaryOwner != null) ? MHObject.create(args.primaryOwner) : null;
-
-    switch(mixlist){
-      case 'none':
-           mixlist = MHCollection.MIXLIST_TYPE_NONE;
-           break;
-      case 'partial':
-           mixlist = MHCollection.MIXLIST_TYPE_PARTIAL;
-           break;
-      case 'full':
-           mixlist = MHCollection.MIXLIST_TYPE_FULL;
-           break;
-      default:
-           mixlist = MHCollection.MIXLIST_TYPE_NONE;
-           break;
-    }
-
-    self.initializeProperty('firstContentImage', firstContentImage);
-    self.initializeProperty('primaryOwner', primaryOwner);
+  get jsonProperties() {
+    return Object.assign({}, super.jsonProperties, {
+      metadata: MHCollectionMetadata,
+      firstContentImage: { mapper: MHObject.create },
+      primaryOwner: { mapper: MHObject.create }
+    });
   }
 
   // Static Mixlist enums
-  static get MIXLIST_TYPE_NONE()   { return 0; }
-  static get MIXLIST_TYPE_PARTIAL(){ return 1; }
-  static get MIXLIST_TYPE_FULL()   { return 2; }
+  static get MIXLIST_TYPE_NONE()   { return 'none'; }
+  static get MIXLIST_TYPE_PARTIAL(){ return 'partial'; }
+  static get MIXLIST_TYPE_FULL()   { return 'full'; }
 
-  get mixlistTypeString(){
-    switch(this.mixlist){
-      case MHCollection.MIXLIST_TYPE_NONE:
-        return 'none';
-      case MHCollection.MIXLIST_TYPE_PARTIAL:
-        return 'partial';
-      case MHCollection.MIXLIST_TYPE_FULL:
-        return 'full';
-      default:
-        return 'none';
-    }
-  }
 
-  /** @property {string} - the prefix for MHCollection mhids */
-  static get mhidPrefix() { return 'mhcol'; }
-
-  /**
-   * @property {string} - the api endpoint for the MHCollection class
-   * @static
-   */
-  static get rootEndpoint(){ return 'graph/collection'; }
-
-  mergeWithData(parsedArgs) {
-    super.mergeWithData(parsedArgs);
-
-    if (!this.firstContentImage && parsedArgs.firstContentImage) {
-      var firstContentImage = MHObject.create(parsedArgs.firstContentImage);
-      if (firstContentImage) {
-        this.firstContentImage = firstContentImage;
-      }
-    }
-    if (!this.primaryOwner && parsedArgs.primaryOwner) {
-      var primaryOwner = MHObject.create(parsedArgs.primaryOwner);
-      if (primaryOwner) {
-        this.primaryOwner = primaryOwner;
-      }
-    }
-  }
+  static get mhidPrefix()   { return 'mhcol'; }
+  static get rootEndpoint() { return 'graph/collection'; }
 
   /**
    * @param {string} name - the name of the new collection for the currently logged in user.
@@ -121,17 +37,14 @@ export class MHCollection extends MHObject {
    * @static
    */
   static createWithName(name, description){
-    var path = MHCollection.rootEndpoint + '/new',
-    data = {};
+    var path = this.rootSubendpoint('new');
+    var data = {};
 
-    if(description){
-      data = {
-        "name":name,
-        "description":description
-      };
+    if (name){
+      data.name = name;
     }
-    else if(name){
-      data = { "name":name };
+    if (description){
+      data.description = description;
     }
 
     return houndRequest({
@@ -281,12 +194,12 @@ export class MHCollection extends MHObject {
    */
   fetchOwners(view='full', size=12, force=false){
     var path = this.subendpoint('owners');
-    return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
+    return this.fetchPagedEndpoint(path, view, size, force);
   }
 
   fetchContent(view='full', size=12, force=true){
     var path = this.subendpoint('content');
-    return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
+    return this.fetchPagedEndpoint(path, view, size, force);
   }
 
   /**
@@ -295,7 +208,7 @@ export class MHCollection extends MHObject {
    */
   fetchMixlist(view='full', size=20, force=true){
     var path = this.subendpoint('mixlist');
-    return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
+    return this.fetchPagedEndpoint(path, view, size, force);
   }
 }
 

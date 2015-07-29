@@ -1,9 +1,16 @@
 
 import { MHObject } from '../base/MHObject.js';
-import { pagedRequest } from '../../request/hound-paged-request.js';
+import { MHContributorMetadata } from '../meta/MHMetadata.js';
 
 // MediaHound Contributor Object
 export class MHContributor extends MHObject {
+
+  get jsonProperties() {
+    return Object.assign({}, super.jsonProperties, {
+      metadata: MHContributorMetadata
+    });
+  }
+
   /*
    * TODO DocJS
    */
@@ -18,21 +25,13 @@ export class MHContributor extends MHObject {
     return !this.isReal;
   }
 
-  /*
-   * TODO DocJS
-   */
-  static get rootEndpoint(){
-    if( this.prototype.isFictional && this.prototype.isReal != null ){
-      return 'graph/character';
-    }
-    return 'graph/contributor';
-  }
+  static get rootEndpoint(){ return 'graph/contributor'; }
 
   /*
    * TODO DocJS
    */
-   fetchMedia(view='full', size=12, force=true){
+   fetchMedia(view='full', size=12, force=false){
      var path = this.subendpoint('media');
-     return this.fetchPagedEndpoint(path, view=view, size=size, force=force);
+     return this.fetchPagedEndpoint(path, view, size, force);
    }
 }
