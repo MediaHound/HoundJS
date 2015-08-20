@@ -27,13 +27,17 @@ var mapValueToType = function(rawValue, type) {
     }
   }
   else if (type === String) {
-    initialValue = rawValue || null;
+    initialValue = (rawValue !== null && rawValue !== undefined) ? String(rawValue) : null;
   }
   else if (type === Number) {
-    initialValue = Number(rawValue) || null;
+    initialValue = (rawValue !== null && rawValue !== undefined) ? Number(rawValue) : null;
+
+    if (Number.isNaN(initialValue)) {
+      initialValue = null;
+    }
   }
   else if (type === Boolean) {
-    initialValue = Boolean(rawValue) || null;
+    initialValue = (rawValue !== null && rawValue !== undefined) ? Boolean(rawValue) : null;
   }
   else if (type === Object) {
     initialValue = rawValue || null;
@@ -123,6 +127,6 @@ export var jsonMergeWithArgs = function(args, obj) {
   jsonParseArgs(args, obj, true);
 };
 
-export var jsonCreateFromData = function(arr, type) {
+export var jsonCreateFromArrayData = function(arr, type) {
   return mapValueToType(arr, type);
 };

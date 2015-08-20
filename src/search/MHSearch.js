@@ -1,7 +1,7 @@
 
 import { houndRequest } from '../request/hound-request.js';
 import { MHRelationalPair } from '../models/base/MHRelationalPair.js';
-import { jsonCreateFromData } from '../models/internal/jsonParse.js';
+import { jsonCreateFromArrayData } from '../models/internal/jsonParse.js';
 
 export class MHSearch {
   static fetchResultsForSearchTerm(searchTerm, scopes, size=12){
@@ -20,7 +20,7 @@ export class MHSearch {
       endpoint: path,
       params: params
     }).then(response => {
-      return jsonCreateFromData(response.content, [MHRelationalPair]);
+      return jsonCreateFromArrayData(response.content, [MHRelationalPair]);
     });
   }
 

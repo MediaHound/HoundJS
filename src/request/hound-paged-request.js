@@ -1,7 +1,7 @@
 /*global System */
 
 import { houndRequest } from './hound-request.js';
-import { jsonCreateFromData } from '../models/internal/jsonParse.js';
+import { jsonCreateFromArrayData } from '../models/internal/jsonParse.js';
 
 // Start Module
 var defaults = {
@@ -65,7 +65,7 @@ var defaults = {
           this.pageid = response.content[0].object.metadata.mhid;
         }
 
-        var content = jsonCreateFromData(response.content, [MHRelationalPair]);
+        var content = jsonCreateFromArrayData(response.content, [MHRelationalPair]);
 
         Array.prototype.push.apply(self.content, content);
         response.content = content;
