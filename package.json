@@ -1,15 +1,18 @@
 {
   "name": "houndjs",
   "version": "0.3.0",
-  "description": "The MediaHound JavaScript library",
+  "description": "The MediaHound JavaScript Library",
   "keywords": [
     "MediaHound",
     "Media",
-    "Entertainment"
+    "Entertainment",
+    "Movies",
+    "Music",
+    "TV"
   ],
   "homepage": "http://www.mediahound.com",
-  "bugs": "https://bitbucket.org/mediahound/hound-js-api/issues",
-  "license": "http://www.mediahound.com/license",
+  "bugs": "https://github.com/mediahound/houndjs/issues",
+  "license": "Apache",
   "engines": {
     "node": ">=0.10"
   },
@@ -22,7 +25,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/mediahound/hound-js-api"
+    "url": "https://github.com/MediaHound/houndjs.git"
   },
   "dependencies": {
     "xmlhttprequest": "^1.7.0",
