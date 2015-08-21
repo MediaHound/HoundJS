@@ -29,7 +29,7 @@ export class MHSearch {
       });
     }
 
-    promise.then(function(response) {
+    return promise.then(function(response) {
       var pagedResponse = new MHPagedResponse(response);
 
       pagedResponse.fetchNextOperation = (newNext => {

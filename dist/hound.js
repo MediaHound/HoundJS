@@ -7422,7 +7422,7 @@ System.registerModule("search/MHSearch.js", [], function() {
             params: params
           });
         }
-        promise.then(function(response) {
+        return promise.then(function(response) {
           var $__4 = this;
           var pagedResponse = new MHPagedResponse(response);
           pagedResponse.fetchNextOperation = (function(newNext) {
