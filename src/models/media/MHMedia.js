@@ -1,7 +1,7 @@
 
 import { MHObject } from '../base/MHObject.js';
 
-import { MHRelationalPair } from '../base/MHRelationalPair.js';
+import { MHRelationalPair } from '../container/MHRelationalPair.js';
 import { MHMediaMetadata } from '../meta/MHMetadata.js';
 
 import { houndRequest } from '../../request/hound-request.js';

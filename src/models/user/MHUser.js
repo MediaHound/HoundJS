@@ -3,12 +3,11 @@
 import { log } from '../internal/debug-helpers.js';
 
 import { MHObject, mhidLRU } from '../base/MHObject.js';
-import { MHRelationalPair } from '../base/MHRelationalPair.js';
+import { MHRelationalPair } from '../container/MHRelationalPair.js';
 import { MHUserMetadata } from '../meta/MHMetadata.js';
 //import { MHImage } from '../image/MHImage.js';
 
 import { houndRequest } from '../../request/hound-request.js';
-import { pagedRequest } from '../../request/hound-paged-request.js';
 
 // MediaHound User Object
 export class MHUser extends MHObject {
@@ -746,18 +745,8 @@ fetchServiceSettings(serv){
 *
 */
 fetchTwitterFollowers(view='full', size=12, force=false){
-
   var path = this.subendpoint('settings')+'/twitter/friends';
-  if( force || this.twitterFollowers === null ){
-    this.twitterFollowers = pagedRequest({
-      method: 'GET',
-      endpoint: path,
-      pageSize: size,
-      params: {view}
-    });
-  }
-  return this.twitterFollowers;
-
+  return this.fetchPagedEndpoint(path, view, size, force);
 }
 
 
@@ -768,17 +757,8 @@ fetchTwitterFollowers(view='full', size=12, force=false){
 *
 */
 fetchFacebookFriends(view='full', size=12, force=false){
-
   var path = this.subendpoint('settings')+'/facebook/friends';
-  if( force || this.facebookFriends === null ){
-    this.facebookFriends = pagedRequest({
-      method: 'GET',
-      endpoint: path,
-      pageSize: size,
-      params: {view}
-    });
-  }
-  return this.facebookFriends;
+  return this.fetchPagedEndpoint(path, view, size, force);
 
 }
 }

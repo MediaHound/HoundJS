@@ -1,26 +1,42 @@
 
 import { houndRequest } from '../request/hound-request.js';
-import { MHRelationalPair } from '../models/base/MHRelationalPair.js';
-import { jsonCreateFromArrayData } from '../models/internal/jsonParse.js';
+import { MHPagedResponse } from '../models/container/MHPagedResponse.js';
 
 export class MHSearch {
-  static fetchResultsForSearchTerm(searchTerm, scopes, size=12){
+  static fetchResultsForSearchTerm(searchTerm, scopes, size=12, next=null){
     var path = 'search/all/' + houndRequest.extraEncode(searchTerm);
 
-    var params = {
-      pageSize: size
-    };
+    var promise;
+    if (next) {
+      promise = houndRequest({
+        method: 'GET',
+        url: next,
+      });
+    }
+    else {
+      var params = {
+        pageSize: size
+      };
 
-    if (Array.isArray(scopes) && scopes.indexOf(MHSearch.SCOPE_ALL) === -1) {
-      params.types = scopes;
+      if (Array.isArray(scopes) && scopes.indexOf(MHSearch.SCOPE_ALL) === -1) {
+        params.types = scopes;
+      }
+
+      promise = houndRequest({
+        method  : 'GET',
+        endpoint: path,
+        params: params
+      });
     }
 
-    return houndRequest({
-      method: 'GET',
-      endpoint: path,
-      params: params
-    }).then(response => {
-      return jsonCreateFromArrayData(response.content, [MHRelationalPair]);
+    promise.then(function(response) {
+      var pagedResponse = new MHPagedResponse(response);
+
+      pagedResponse.fetchNextOperation = (newNext => {
+        return this.fetchResultsForSearchTerm(searchTerm, scopes, size, newNext);
+      });
+
+      return pagedResponse;
     });
   }
 

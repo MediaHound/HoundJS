@@ -3526,123 +3526,6 @@ System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/polyfills.js
 });
 System.get("traceur-runtime@0.0.91/src/runtime/polyfills/polyfills.js" + '');
 
-System.registerModule("models/internal/jsonParse.js", [], function() {
-  "use strict";
-  var __moduleName = "models/internal/jsonParse.js";
-  var mapValueToType = function(rawValue, type) {
-    var initialValue = null;
-    if (typeof type === 'object') {
-      if (type) {
-        if (type instanceof Array) {
-          var innerType = type[0];
-          if (rawValue !== null && rawValue !== undefined) {
-            initialValue = rawValue.map(function(v) {
-              try {
-                return mapValueToType(v, innerType);
-              } catch (e) {
-                console.log(e);
-                return v;
-              }
-            });
-          }
-        } else {
-          if (type.mapper && typeof type.mapper === 'function') {
-            initialValue = (rawValue !== null && rawValue !== undefined) ? type.mapper(rawValue) : null;
-          }
-        }
-      }
-    } else if (type === String) {
-      initialValue = (rawValue !== null && rawValue !== undefined) ? String(rawValue) : null;
-    } else if (type === Number) {
-      initialValue = (rawValue !== null && rawValue !== undefined) ? Number(rawValue) : null;
-      if (Number.isNaN(initialValue)) {
-        initialValue = null;
-      }
-    } else if (type === Boolean) {
-      initialValue = (rawValue !== null && rawValue !== undefined) ? Boolean(rawValue) : null;
-    } else if (type === Object) {
-      initialValue = rawValue || null;
-    } else if (type === Date) {
-      initialValue = new Date(rawValue * 1000);
-      if (isNaN(initialValue)) {
-        initialValue = null;
-      } else if (initialValue === 'Invalid Date') {
-        initialValue = null;
-      } else {
-        initialValue = new Date(initialValue.valueOf() + initialValue.getTimezoneOffset() * 60000);
-      }
-    } else if (typeof type === 'function') {
-      initialValue = (rawValue !== null && rawValue !== undefined) ? new type(rawValue) : null;
-    }
-    return initialValue;
-  };
-  var setPropertyFromArgs = function(args, obj, name, type, optional, merge) {
-    if (!obj[name]) {
-      var rawValue = args[name];
-      var convertedValue = mapValueToType(rawValue, type);
-      if (!optional && !convertedValue) {
-        throw TypeError('non-optional field `' + name + '` found null value. Args:', args);
-      }
-      if (convertedValue) {
-        if (merge) {
-          obj[name] = convertedValue;
-        } else {
-          Object.defineProperty(obj, name, {
-            configurable: false,
-            enumerable: true,
-            writable: true,
-            value: convertedValue
-          });
-        }
-      }
-    }
-  };
-  var jsonParseArgs = function(args, obj, merge) {
-    var properties = obj.jsonProperties;
-    for (var name in properties) {
-      if (properties.hasOwnProperty(name)) {
-        var value = properties[name];
-        var optional = true;
-        var type = void 0;
-        if (typeof value === 'object') {
-          if (value.type !== undefined) {
-            type = value.type;
-          } else if (value.mapper !== undefined) {
-            type = value;
-          } else if (value instanceof Array) {
-            type = value;
-          }
-          if (value.optional !== undefined) {
-            optional = value.optional;
-          }
-        } else {
-          type = value;
-        }
-        setPropertyFromArgs(args, obj, name, type, optional, merge);
-      }
-    }
-  };
-  var jsonCreateWithArgs = function(args, obj) {
-    jsonParseArgs(args, obj, false);
-  };
-  var jsonMergeWithArgs = function(args, obj) {
-    jsonParseArgs(args, obj, true);
-  };
-  var jsonCreateFromArrayData = function(arr, type) {
-    return mapValueToType(arr, type);
-  };
-  return {
-    get jsonCreateWithArgs() {
-      return jsonCreateWithArgs;
-    },
-    get jsonMergeWithArgs() {
-      return jsonMergeWithArgs;
-    },
-    get jsonCreateFromArrayData() {
-      return jsonCreateFromArrayData;
-    }
-  };
-});
 System.registerModule("models/internal/debug-helpers.js", [], function() {
   "use strict";
   var __moduleName = "models/internal/debug-helpers.js";
@@ -3979,126 +3862,6 @@ System.registerModule("request/hound-request.js", [], function() {
     }
   };
 });
-System.registerModule("request/hound-paged-request.js", [], function() {
-  "use strict";
-  var __moduleName = "request/hound-paged-request.js";
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var jsonCreateFromArrayData = System.get("models/internal/jsonParse.js").jsonCreateFromArrayData;
-  var defaults = {
-    headers: {'Accept': 'application/json'},
-    page: 0,
-    pageSize: 10,
-    startingPage: 0,
-    withCredentials: false
-  },
-      getPageSize = function(args) {
-        if (typeof args.pageSize === 'number') {
-          return args.pageSize;
-        }
-        return defaults.pageSize;
-      },
-      getStartingPage = function(args) {
-        if (typeof args.pagingInfo === 'string') {
-          return args.pagingInfo;
-        }
-        if (args.params != null && typeof args.params.page === 'string') {
-          return args.params.page;
-        }
-        return defaults.page;
-      },
-      setContentArray = function(response) {
-        var MHRelationalPair = System.get('../models/base/MHRelationalPair.js').MHRelationalPair;
-        var self = this;
-        self.pagingInfo = response.pagingInfo || null;
-        if (response.content !== undefined) {
-          if (response.content[0] !== undefined && response.content[0].object !== undefined) {
-            this.pageid = response.content[0].object.metadata.mhid;
-          }
-          var content = jsonCreateFromArrayData(response.content, [MHRelationalPair]);
-          Array.prototype.push.apply(self.content, content);
-          response.content = content;
-          return response;
-        } else {
-          console.warn('content array is undefined or empty in setContentArray MHRelationalPair', self);
-        }
-      };
-  var PagedRequest = function() {
-    function PagedRequest(args) {
-      if (args.method == null || args.endpoint == null) {
-        throw new TypeError('Method or Endpoint was not defined on pagedRequest argument map');
-      }
-      var pageSize = getPageSize(args),
-          startingPage = getStartingPage(args),
-          myArgs = args;
-      if (pageSize <= 0) {
-        pageSize = defaults.pageSize;
-      }
-      if (startingPage < 0) {
-        startingPage = defaults.startingPage;
-      }
-      myArgs.params = myArgs.params || {};
-      myArgs.params.page = startingPage;
-      myArgs.params.pageSize = pageSize;
-      delete myArgs.pageSize;
-      delete myArgs.startingPage;
-      this.content = [];
-      this.pagePromises = [];
-      this.page = startingPage;
-      this._args = myArgs;
-      this.pagePromises[this.page] = houndRequest(this._args).then(setContentArray.bind(this));
-      Object.defineProperties(this, {'pageSize': {
-          configurable: false,
-          enumerable: true,
-          writeable: false,
-          value: pageSize
-        }});
-      return this;
-    }
-    return ($traceurRuntime.createClass)(PagedRequest, {
-      get currentPromise() {
-        return this.pagePromises[this.page];
-      },
-      next: function() {
-        var self = this;
-        return this.currentPromise.then(function(response) {
-          if (!self.lastPage) {
-            self.page += 1;
-            self._args.params.next = response.pagingInfo.next;
-            delete self._args.params.page;
-            if (self.pagePromises[self.page] == null) {
-              self.pagePromises[self.page] = houndRequest(self._args).then(setContentArray.bind(self));
-            }
-            return self.pagePromises[self.page];
-          }
-          return response;
-        });
-      },
-      prev: function() {
-        var self = this;
-        return this.currentPromise.then(function(response) {
-          if (!self.firstPage) {
-            self.page -= 1;
-            self._args.params.pageNext = self.pagePromises[self.page].pagingInfo.next;
-            delete self._args.params.page;
-            if (self.pagePromises[self.page] == null) {
-              self.pagePromises[self.page] = houndRequest(self._args).then(setContentArray.bind(self));
-            }
-            return self.pagePromises[self.page];
-          }
-          return response;
-        });
-      }
-    }, {get extraEncode() {
-        return houndRequest.extraEncode;
-      }});
-  }();
-  var pagedRequest = function(a) {
-    return new PagedRequest(a);
-  };
-  return {get pagedRequest() {
-      return pagedRequest;
-    }};
-});
 System.registerModule("models/internal/MHCache.js", [], function() {
   "use strict";
   var __moduleName = "models/internal/MHCache.js";
@@ -4289,6 +4052,123 @@ System.registerModule("models/internal/MHCache.js", [], function() {
   return {get MHCache() {
       return MHCache;
     }};
+});
+System.registerModule("models/internal/jsonParse.js", [], function() {
+  "use strict";
+  var __moduleName = "models/internal/jsonParse.js";
+  var mapValueToType = function(rawValue, type) {
+    var initialValue = null;
+    if (typeof type === 'object') {
+      if (type) {
+        if (type instanceof Array) {
+          var innerType = type[0];
+          if (rawValue !== null && rawValue !== undefined) {
+            initialValue = rawValue.map(function(v) {
+              try {
+                return mapValueToType(v, innerType);
+              } catch (e) {
+                console.log(e);
+                return v;
+              }
+            });
+          }
+        } else {
+          if (type.mapper && typeof type.mapper === 'function') {
+            initialValue = (rawValue !== null && rawValue !== undefined) ? type.mapper(rawValue) : null;
+          }
+        }
+      }
+    } else if (type === String) {
+      initialValue = (rawValue !== null && rawValue !== undefined) ? String(rawValue) : null;
+    } else if (type === Number) {
+      initialValue = (rawValue !== null && rawValue !== undefined) ? Number(rawValue) : null;
+      if (Number.isNaN(initialValue)) {
+        initialValue = null;
+      }
+    } else if (type === Boolean) {
+      initialValue = (rawValue !== null && rawValue !== undefined) ? Boolean(rawValue) : null;
+    } else if (type === Object) {
+      initialValue = rawValue || null;
+    } else if (type === Date) {
+      initialValue = new Date(rawValue * 1000);
+      if (isNaN(initialValue)) {
+        initialValue = null;
+      } else if (initialValue === 'Invalid Date') {
+        initialValue = null;
+      } else {
+        initialValue = new Date(initialValue.valueOf() + initialValue.getTimezoneOffset() * 60000);
+      }
+    } else if (typeof type === 'function') {
+      initialValue = (rawValue !== null && rawValue !== undefined) ? new type(rawValue) : null;
+    }
+    return initialValue;
+  };
+  var setPropertyFromArgs = function(args, obj, name, type, optional, merge) {
+    if (!obj[name]) {
+      var rawValue = args[name];
+      var convertedValue = mapValueToType(rawValue, type);
+      if (!optional && !convertedValue) {
+        throw TypeError('non-optional field `' + name + '` found null value. Args:', args);
+      }
+      if (convertedValue) {
+        if (merge) {
+          obj[name] = convertedValue;
+        } else {
+          Object.defineProperty(obj, name, {
+            configurable: false,
+            enumerable: true,
+            writable: true,
+            value: convertedValue
+          });
+        }
+      }
+    }
+  };
+  var jsonParseArgs = function(args, obj, merge) {
+    var properties = obj.jsonProperties;
+    for (var name in properties) {
+      if (properties.hasOwnProperty(name)) {
+        var value = properties[name];
+        var optional = true;
+        var type = void 0;
+        if (typeof value === 'object') {
+          if (value.type !== undefined) {
+            type = value.type;
+          } else if (value.mapper !== undefined) {
+            type = value;
+          } else if (value instanceof Array) {
+            type = value;
+          }
+          if (value.optional !== undefined) {
+            optional = value.optional;
+          }
+        } else {
+          type = value;
+        }
+        setPropertyFromArgs(args, obj, name, type, optional, merge);
+      }
+    }
+  };
+  var jsonCreateWithArgs = function(args, obj) {
+    jsonParseArgs(args, obj, false);
+  };
+  var jsonMergeWithArgs = function(args, obj) {
+    jsonParseArgs(args, obj, true);
+  };
+  var jsonCreateFromArrayData = function(arr, type) {
+    return mapValueToType(arr, type);
+  };
+  return {
+    get jsonCreateWithArgs() {
+      return jsonCreateWithArgs;
+    },
+    get jsonMergeWithArgs() {
+      return jsonMergeWithArgs;
+    },
+    get jsonCreateFromArrayData() {
+      return jsonCreateFromArrayData;
+    }
+  };
 });
 System.registerModule("models/image/MHImageData.js", [], function() {
   "use strict";
@@ -4638,10 +4518,10 @@ System.registerModule("models/base/MHObject.js", [], function() {
       jsonCreateWithArgs = $__1.jsonCreateWithArgs,
       jsonMergeWithArgs = $__1.jsonMergeWithArgs;
   var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var pagedRequest = System.get("request/hound-paged-request.js").pagedRequest;
   var MHCache = System.get("models/internal/MHCache.js").MHCache;
   var MHMetadata = System.get("models/meta/MHMetadata.js").MHMetadata;
   var MHSocial = System.get("models/social/MHSocial.js").MHSocial;
+  var MHPagedResponse = System.get('../container/MHPagedResponse.js');
   var childrenConstructors = {};
   var __cachedRootResponses = {};
   var mhidLRU = new MHCache(1000);
@@ -4710,7 +4590,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
       },
       fetchSocial: function() {
         var force = arguments[0] !== (void 0) ? arguments[0] : false;
-        var $__9 = this;
+        var $__8 = this;
         var path = this.subendpoint('social');
         if (!force && this.social instanceof MHSocial) {
           return Promise.resolve(this.social);
@@ -4719,7 +4599,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
           method: 'GET',
           endpoint: path
         }).then((function(parsed) {
-          return $__9.social = new MHSocial(parsed);
+          return $__8.social = new MHSocial(parsed);
         }).bind(this)).catch(function(err) {
           console.warn('fetchSocial:', err);
         });
@@ -4746,7 +4626,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
         return this.fetchPagedEndpoint(path, view, size, force);
       },
       takeAction: function(action) {
-        var $__9 = this;
+        var $__8 = this;
         if (typeof action !== 'string' && !(action instanceof String)) {
           throw new TypeError('Action not of type String or undefined');
         }
@@ -4769,12 +4649,12 @@ System.registerModule("models/base/MHObject.js", [], function() {
           endpoint: path
         }).then(function(socialRes) {
           var newSocial = new MHSocial(socialRes.social);
-          if ($__9[lastSocialRequestIdSym] === requestId) {
+          if ($__8[lastSocialRequestIdSym] === requestId) {
             self.social = newSocial;
           }
           return newSocial;
         }).catch(function(err) {
-          if ($__9[lastSocialRequestIdSym] === requestId) {
+          if ($__8[lastSocialRequestIdSym] === requestId) {
             self.social = original;
           }
           throw err;
@@ -4792,19 +4672,38 @@ System.registerModule("models/base/MHObject.js", [], function() {
         this.cachedResponses[cacheKey] = response;
       },
       fetchPagedEndpoint: function(path, view, size, force) {
-        if (!force) {
+        var next = arguments[4] !== (void 0) ? arguments[4] : null;
+        if (!force && !next) {
           var cached = this.cachedResponseForPath(path);
           if (cached) {
             return cached;
           }
         }
-        var promise = pagedRequest({
-          method: 'GET',
-          endpoint: path,
-          pageSize: size,
-          params: {view: view}
+        var promise;
+        if (next) {
+          promise = houndRequest({
+            method: 'GET',
+            url: next
+          });
+        } else {
+          promise = houndRequest({
+            method: 'GET',
+            endpoint: path,
+            pageSize: size,
+            params: {view: view}
+          });
+        }
+        promise.then(function(response) {
+          var $__8 = this;
+          var pagedResponse = new MHPagedResponse(response);
+          pagedResponse.fetchNextOperation = (function(newNext) {
+            return $__8.fetchPagedEndpoint(path, view, size, force, newNext);
+          });
+          return pagedResponse;
         });
-        this.setCachedResponse(promise, path);
+        if (!next) {
+          this.setCachedResponse(promise, path);
+        }
         return promise;
       }
     }, {
@@ -5012,20 +4911,39 @@ System.registerModule("models/base/MHObject.js", [], function() {
         __cachedRootResponses[cacheKey] = response;
       },
       fetchRootPagedEndpoint: function(path, params, view, size, force) {
-        if (!force) {
+        var next = arguments[5] !== (void 0) ? arguments[5] : null;
+        if (!force && !next) {
           var cached = this.cachedRootResponseForPath(path);
           if (cached) {
             return cached;
           }
         }
-        params.view = view;
-        var promise = pagedRequest({
-          method: 'GET',
-          endpoint: path,
-          pageSize: size,
-          params: params
+        var promise;
+        if (next) {
+          promise = houndRequest({
+            method: 'GET',
+            url: next
+          });
+        } else {
+          params.view = view;
+          promise = houndRequest({
+            method: 'GET',
+            endpoint: path,
+            pageSize: size,
+            params: params
+          });
+        }
+        promise.then(function(response) {
+          var $__8 = this;
+          var pagedResponse = new MHPagedResponse(response);
+          pagedResponse.fetchNextOperation = (function(newNext) {
+            return $__8.fetchRootPagedEndpoint(path, params, view, size, force, newNext);
+          });
+          return pagedResponse;
         });
-        this.setCachedRootResponse(promise, path);
+        if (!next) {
+          this.setCachedRootResponse(promise, path);
+        }
         return promise;
       }
     });
@@ -5321,23 +5239,11 @@ System.registerModule("models/source/MHSourceMedium.js", [], function() {
       return MHSourceMedium;
     }};
 });
-System.registerModule("models/meta/MHContext.js", [], function() {
+System.registerModule("models/container/MHRelationship.js", [], function() {
   "use strict";
-  var __moduleName = "models/meta/MHContext.js";
+  var __moduleName = "models/container/MHRelationship.js";
   var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
   var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHSourceMedium = System.get("models/source/MHSourceMedium.js").MHSourceMedium;
-  var MHSorting = function() {
-    function MHSorting(args) {
-      jsonCreateWithArgs(args, this);
-    }
-    return ($traceurRuntime.createClass)(MHSorting, {get jsonProperties() {
-        return {
-          importance: Number,
-          position: Number
-        };
-      }}, {});
-  }();
   var MHRelationship = function() {
     function MHRelationship(args) {
       jsonCreateWithArgs(args, this);
@@ -5350,6 +5256,36 @@ System.registerModule("models/meta/MHContext.js", [], function() {
         };
       }}, {});
   }();
+  return {get MHRelationship() {
+      return MHRelationship;
+    }};
+});
+System.registerModule("models/container/MHSorting.js", [], function() {
+  "use strict";
+  var __moduleName = "models/container/MHSorting.js";
+  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
+  var MHSorting = function() {
+    function MHSorting(args) {
+      jsonCreateWithArgs(args, this);
+    }
+    return ($traceurRuntime.createClass)(MHSorting, {get jsonProperties() {
+        return {
+          importance: Number,
+          position: Number
+        };
+      }}, {});
+  }();
+  return {get MHSorting() {
+      return MHSorting;
+    }};
+});
+System.registerModule("models/container/MHContext.js", [], function() {
+  "use strict";
+  var __moduleName = "models/container/MHContext.js";
+  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
+  var MHRelationship = System.get("models/container/MHRelationship.js").MHRelationship;
+  var MHSorting = System.get("models/container/MHSorting.js").MHSorting;
+  var MHSourceMedium = System.get("models/source/MHSourceMedium.js").MHSourceMedium;
   var MHContext = function() {
     function MHContext(args) {
       jsonCreateWithArgs(args, this);
@@ -5363,23 +5299,15 @@ System.registerModule("models/meta/MHContext.js", [], function() {
         };
       }}, {});
   }();
-  return {
-    get MHSorting() {
-      return MHSorting;
-    },
-    get MHRelationship() {
-      return MHRelationship;
-    },
-    get MHContext() {
+  return {get MHContext() {
       return MHContext;
-    }
-  };
+    }};
 });
-System.registerModule("models/base/MHRelationalPair.js", [], function() {
+System.registerModule("models/container/MHRelationalPair.js", [], function() {
   "use strict";
-  var __moduleName = "models/base/MHRelationalPair.js";
+  var __moduleName = "models/container/MHRelationalPair.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHContext = System.get("models/meta/MHContext.js").MHContext;
+  var MHContext = System.get("models/container/MHContext.js").MHContext;
   var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
   var MHRelationalPair = function() {
     function MHRelationalPair(args) {
@@ -5403,10 +5331,9 @@ System.registerModule("models/user/MHUser.js", [], function() {
   var $__1 = System.get("models/base/MHObject.js"),
       MHObject = $__1.MHObject,
       mhidLRU = $__1.mhidLRU;
-  var MHRelationalPair = System.get("models/base/MHRelationalPair.js").MHRelationalPair;
+  var MHRelationalPair = System.get("models/container/MHRelationalPair.js").MHRelationalPair;
   var MHUserMetadata = System.get("models/meta/MHMetadata.js").MHUserMetadata;
   var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var pagedRequest = System.get("request/hound-paged-request.js").pagedRequest;
   var MHUser = function($__super) {
     function MHUser() {
       $traceurRuntime.superConstructor(MHUser).apply(this, arguments);
@@ -5547,30 +5474,14 @@ System.registerModule("models/user/MHUser.js", [], function() {
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
         var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('settings') + '/twitter/friends';
-        if (force || this.twitterFollowers === null) {
-          this.twitterFollowers = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.twitterFollowers;
+        return this.fetchPagedEndpoint(path, view, size, force);
       },
       fetchFacebookFriends: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
         var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('settings') + '/facebook/friends';
-        if (force || this.facebookFriends === null) {
-          this.facebookFriends = pagedRequest({
-            method: 'GET',
-            endpoint: path,
-            pageSize: size,
-            params: {view: view}
-          });
-        }
-        return this.facebookFriends;
+        return this.fetchPagedEndpoint(path, view, size, force);
       }
     }, {
       get mhidPrefix() {
@@ -6280,6 +6191,62 @@ System.registerModule("models/collection/MHCollection.js", [], function() {
       return MHCollection;
     }};
 });
+System.registerModule("models/container/MHPagingInfo.js", [], function() {
+  "use strict";
+  var __moduleName = "models/container/MHPagingInfo.js";
+  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
+  var MHPagingInfo = function() {
+    function MHPagingInfo(args) {
+      jsonCreateWithArgs(args, this);
+    }
+    return ($traceurRuntime.createClass)(MHPagingInfo, {get jsonProperties() {
+        return {next: String};
+      }}, {});
+  }();
+  return {get MHPagingInfo() {
+      return MHPagingInfo;
+    }};
+});
+System.registerModule("models/container/MHPagedResponse.js", [], function() {
+  "use strict";
+  var __moduleName = "models/container/MHPagedResponse.js";
+  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
+  var MHPagingInfo = System.get("models/container/MHPagingInfo.js").MHPagingInfo;
+  var MHRelationalPair = System.get("models/container/MHRelationalPair.js").MHRelationalPair;
+  var MHPagedResponse = function() {
+    function MHPagedResponse(args) {
+      this.cachedNextResponse = null;
+      this.fetchNextOperation = null;
+      jsonCreateWithArgs(args, this);
+    }
+    return ($traceurRuntime.createClass)(MHPagedResponse, {
+      get jsonProperties() {
+        return {
+          content: [MHRelationalPair],
+          pagingInfo: MHPagingInfo
+        };
+      },
+      get hasMorePages() {
+        return (this.pagingInfo.next !== undefined && this.pagingInfo.next !== null);
+      },
+      fetchNext: function() {
+        var cachedResponse = this.cachedNextResponse;
+        if (cachedResponse) {
+          return new Promise(function(resolve) {
+            resolve(cachedResponse);
+          });
+        }
+        return this.fetchNextOperation(this.pagingInfo.next).then(function(response) {
+          this.cachedNextResponse = response;
+          return response;
+        });
+      }
+    }, {});
+  }();
+  return {get MHPagedResponse() {
+      return MHPagedResponse;
+    }};
+});
 System.registerModule("models/contributor/MHContributor.js", [], function() {
   "use strict";
   var __moduleName = "models/contributor/MHContributor.js";
@@ -6524,7 +6491,7 @@ System.registerModule("models/media/MHMedia.js", [], function() {
   "use strict";
   var __moduleName = "models/media/MHMedia.js";
   var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHRelationalPair = System.get("models/base/MHRelationalPair.js").MHRelationalPair;
+  var MHRelationalPair = System.get("models/container/MHRelationalPair.js").MHRelationalPair;
   var MHMediaMetadata = System.get("models/meta/MHMetadata.js").MHMediaMetadata;
   var houndRequest = System.get("request/hound-request.js").houndRequest;
   var MHMedia = function($__super) {
@@ -7430,24 +7397,38 @@ System.registerModule("search/MHSearch.js", [], function() {
   "use strict";
   var __moduleName = "search/MHSearch.js";
   var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var MHRelationalPair = System.get("models/base/MHRelationalPair.js").MHRelationalPair;
-  var jsonCreateFromArrayData = System.get("models/internal/jsonParse.js").jsonCreateFromArrayData;
+  var MHPagedResponse = System.get("models/container/MHPagedResponse.js").MHPagedResponse;
   var MHSearch = function() {
     function MHSearch() {}
     return ($traceurRuntime.createClass)(MHSearch, {}, {
       fetchResultsForSearchTerm: function(searchTerm, scopes) {
         var size = arguments[2] !== (void 0) ? arguments[2] : 12;
+        var next = arguments[3] !== (void 0) ? arguments[3] : null;
         var path = 'search/all/' + houndRequest.extraEncode(searchTerm);
-        var params = {pageSize: size};
-        if (Array.isArray(scopes) && scopes.indexOf(MHSearch.SCOPE_ALL) === -1) {
-          params.types = scopes;
+        var promise;
+        if (next) {
+          promise = houndRequest({
+            method: 'GET',
+            url: next
+          });
+        } else {
+          var params = {pageSize: size};
+          if (Array.isArray(scopes) && scopes.indexOf(MHSearch.SCOPE_ALL) === -1) {
+            params.types = scopes;
+          }
+          promise = houndRequest({
+            method: 'GET',
+            endpoint: path,
+            params: params
+          });
         }
-        return houndRequest({
-          method: 'GET',
-          endpoint: path,
-          params: params
-        }).then(function(response) {
-          return jsonCreateFromArrayData(response.content, [MHRelationalPair]);
+        promise.then(function(response) {
+          var $__4 = this;
+          var pagedResponse = new MHPagedResponse(response);
+          pagedResponse.fetchNextOperation = (function(newNext) {
+            return $__4.fetchResultsForSearchTerm(searchTerm, scopes, size, newNext);
+          });
+          return pagedResponse;
         });
       },
       get SCOPE_ALL() {
@@ -7497,7 +7478,6 @@ System.registerModule("hound-api.js", [], function() {
   var __moduleName = "hound-api.js";
   var MHSDK = System.get("models/sdk/MHSDK.js").MHSDK;
   var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHRelationalPair = System.get("models/base/MHRelationalPair.js").MHRelationalPair;
   var MHAction = System.get("models/action/MHAction.js").MHAction;
   var MHAdd = System.get("models/action/MHAdd.js").MHAdd;
   var MHComment = System.get("models/action/MHComment.js").MHComment;
@@ -7535,9 +7515,11 @@ System.registerModule("hound-api.js", [], function() {
   var MHSpecialSeries = System.get("models/media/MHSpecialSeries.js").MHSpecialSeries;
   var MHTrailer = System.get("models/media/MHTrailer.js").MHTrailer;
   var MHCollection = System.get("models/collection/MHCollection.js").MHCollection;
-  var MHContext = System.get("models/meta/MHContext.js").MHContext;
   var MHMetadata = System.get("models/meta/MHMetadata.js").MHMetadata;
   var MHImage = System.get("models/image/MHImage.js").MHImage;
+  var MHContext = System.get("models/container/MHContext.js").MHContext;
+  var MHPagedResponse = System.get("models/container/MHPagedResponse.js").MHPagedResponse;
+  var MHRelationalPair = System.get("models/container/MHRelationalPair.js").MHRelationalPair;
   var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
   var MHGenre = System.get("models/trait/MHGenre.js").MHGenre;
   var MHSubGenre = System.get("models/trait/MHSubGenre.js").MHSubGenre;

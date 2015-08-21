@@ -5,7 +5,6 @@ import { MHObject } from '../base/MHObject.js';
 import { MHAction } from '../action/MHAction.js';
 import { MHLoginSession } from '../user/MHLoginSession.js';
 import { MHCollectionMetadata } from '../meta/MHMetadata.js';
-//import { MHRelationalPair } from '../base/MHRelationalPair.js';
 
 import { houndRequest } from '../../request/hound-request.js';
 

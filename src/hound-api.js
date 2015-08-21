@@ -5,7 +5,6 @@ import { MHSDK }              from './models/sdk/MHSDK.js';
 
 // Base Models
 import { MHObject }           from './models/base/MHObject.js';
-import { MHRelationalPair }   from './models/base/MHRelationalPair.js';
 
 
 // Action Models
@@ -55,10 +54,13 @@ import { MHTrailer }            from './models/media/MHTrailer.js';
 
 import { MHCollection } from './models/collection/MHCollection.js';
 
-import { MHContext } from './models/meta/MHContext.js';
 import { MHMetadata } from './models/meta/MHMetadata.js';
 
 import { MHImage } from './models/image/MHImage.js';
+
+import { MHContext } from './models/container/MHContext.js';
+import { MHPagedResponse } from './models/container/MHPagedResponse.js';
+import { MHRelationalPair }   from './models/container/MHRelationalPair.js';
 
 
 // Trait Models

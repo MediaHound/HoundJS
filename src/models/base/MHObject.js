@@ -3,11 +3,12 @@ import { log, warn, error } from '../internal/debug-helpers.js';
 import { jsonCreateWithArgs, jsonMergeWithArgs } from '../internal/jsonParse.js';
 
 import { houndRequest } from '../../request/hound-request.js';
-import { pagedRequest } from '../../request/hound-paged-request.js';
 
 import { MHCache } from '../internal/MHCache.js';
 import { MHMetadata } from '../meta/MHMetadata.js';
 import { MHSocial } from '../social/MHSocial.js';
+
+var MHPagedResponse = System.get('../container/MHPagedResponse.js');
 
 var childrenConstructors = {};
 var __cachedRootResponses = {};
@@ -633,46 +634,89 @@ export class MHObject {
     __cachedRootResponses[cacheKey] = response;
   }
 
-  fetchPagedEndpoint(path, view, size, force) {
-    if (!force) {
+  fetchPagedEndpoint(path, view, size, force, next=null) {
+    if (!force && !next) {
       var cached = this.cachedResponseForPath(path);
       if (cached) {
         return cached;
       }
     }
 
-    var promise = pagedRequest({
-      method: 'GET',
-      endpoint: path,
-      pageSize: size,
-      params: {
-        view: view
-      }
+    var promise;
+
+    if (next) {
+      promise = houndRequest({
+        method: 'GET',
+        url: next,
+      });
+    }
+    else {
+      promise = houndRequest({
+        method: 'GET',
+        endpoint: path,
+        pageSize: size,
+        params: {
+          view: view
+        }
+      });
+    }
+
+    promise.then(function(response) {
+      var pagedResponse = new MHPagedResponse(response);
+
+      pagedResponse.fetchNextOperation = (newNext => {
+        return this.fetchPagedEndpoint(path, view, size, force, newNext);
+      });
+
+      return pagedResponse;
     });
 
-    this.setCachedResponse(promise, path);
+    if (!next) {
+      this.setCachedResponse(promise, path);
+    }
 
     return promise;
   }
 
-  static fetchRootPagedEndpoint(path, params, view, size, force) {
-    if (!force) {
+  static fetchRootPagedEndpoint(path, params, view, size, force, next=null) {
+    if (!force && !next) {
       var cached = this.cachedRootResponseForPath(path);
       if (cached) {
         return cached;
       }
     }
 
-    params.view = view;
+    var promise;
+    if (next) {
+      promise = houndRequest({
+        method: 'GET',
+        url: next,
+      });
+    }
+    else {
+      params.view = view;
 
-    var promise = pagedRequest({
+      promise = houndRequest({
         method  : 'GET',
         endpoint: path,
         pageSize: size,
         params: params
       });
+    }
 
-    this.setCachedRootResponse(promise, path);
+    promise.then(function(response) {
+      var pagedResponse = new MHPagedResponse(response);
+
+      pagedResponse.fetchNextOperation = (newNext => {
+        return this.fetchRootPagedEndpoint(path, params, view, size, force, newNext);
+      });
+
+      return pagedResponse;
+    });
+
+    if (!next) {
+      this.setCachedRootResponse(promise, path);
+    }
 
     return promise;
   }
