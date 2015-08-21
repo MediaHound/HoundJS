@@ -1,7 +1,6 @@
 
 import { log } from '../models/internal/debug-helpers.js';
 
-// Start Module
 import { promiseRequest } from './promise-request.js';
 
 import { MHSDK } from '../models/sdk/MHSDK.js';
@@ -15,9 +14,7 @@ var extraEncode = promiseRequest.extraEncode,
       withCredentials: true
     },
     responseThen = function(response){
-      //log('hound-request: ', response);
       if( !!response ){
-        // currently no XML support only JSON text else return status
         if( response.responseText != null && response.responseText !== ''){
           return JSON.parse(response.responseText);
         }
@@ -116,7 +113,6 @@ export var houndRequest = function(args){
         err => { delete requestMap[args.url]; throw err; }
       )
       .then(responseThen);
-      //.then(x => {log(x); return x;});
 
     return requestMap[args.url];
   }
@@ -125,7 +121,6 @@ export var houndRequest = function(args){
   // else POST request
   return promiseRequest(args)
     .then(responseThen);
-    //.then(x => {log(x); return x;});
 };
 
 Object.defineProperty(houndRequest, 'extraEncode', {

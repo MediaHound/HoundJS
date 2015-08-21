@@ -117,7 +117,7 @@ var defaults = {
       }
 
       // Page Size and Starting Page
-      var pageSize      = getPageSize(args),
+      var pageSize  = getPageSize(args),
       startingPage  = getStartingPage(args),
       myArgs        = args;
 
@@ -218,36 +218,7 @@ var defaults = {
         return response;
       });
   }
-
-  // // .jumpTo(n)
-  // //  needs testing
-  // jumpTo(n){
-  //   if( n < 0 ){ n = 0; }
-  //   if( n >= this.totalPages ){
-  //     n = this.totalPages;
-  //     //throw TypeError("Can't jump to page that doesn't exist.");
-  //   }
-  //
-  //   if( this.pagePromises[n] == null ){
-  //     // needs request
-  //     var self = this;
-  //     return this.currentPromise
-  //       .then(function(){
-  //         self.page = n;
-  //         self._args.params.page = self.page;
-  //         self.pagePromises[self.page] = houndRequest(self._args)
-  //                                         .then(setInfo.bind(self))
-  //                                         .then(setContentArray.bind(self));
-  //         return self.pagePromises[self.page];
-  //       });
-  //   } else if( this.page !== n ){
-  //     this.page = n;
-  //     return this.pagePromises[this.page];
-  //   }
-  //   return this.currentPromise;
-  // }
-
-} // end class
+}
 
 // Create and export factory function
 export var pagedRequest = function(a){ return new PagedRequest(a); };
