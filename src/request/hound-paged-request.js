@@ -18,9 +18,6 @@ var defaults = {
       if( typeof args.pageSize === 'number' ){
         return args.pageSize;
       }
-      // if( args.params != null && typeof args.params['pageSize'] === 'number' ){
-      //   return args.params['pageSize'];
-      // }
       return defaults.pageSize;
     },
     // get starting page number from args helper
@@ -33,25 +30,7 @@ var defaults = {
       }
       return defaults.page;
     },
-    // deprecated setContentForPage Then Helpers, use 'call' or 'bind' to set proper this reference
-    // setContentForPage = function(pageNumber, pageSize, newContent){
-    //   var i = 0, length = newContent.length;
-    //   for( ; i < length ; i++ ){
-    //     this.content[pageNumber*pageSize + i] = newContent[i];
-    //   }
-    // },
-    //deprecated setInfo
-    // setInfo = function(response){
-    //
-    //   //set: lastPage, firstPage, totalPages, numberOfElements, totalElements
-    //   // this.firstPage        = response.firstPage || response.first;
-    //   // this.lastPage         = response.lastPage  || response.last;
-    //   // this.page             = response.number;
-    //   // this.totalPages       = response.totalPages;
-    //   // this.numberOfElements = response.numberOfElements;
-    //   // this.totalElements    = response.totalElements;
-    //   return response;
-    // },
+
     setContentArray = function(response){
       var MHRelationalPair = System.get('../../src/models/base/MHRelationalPair.js').MHRelationalPair;
 
