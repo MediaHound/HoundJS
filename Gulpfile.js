@@ -8,7 +8,7 @@ var gulp        = require('gulp'),
     runSequence = require('run-sequence'),
     execFile    = require('child_process').execFile;
 
-var libName = 'houndjs'
+var libName = 'hound'
 
 // Paths for tasks
 var paths = {

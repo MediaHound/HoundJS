@@ -16,7 +16,7 @@
   "engines": {
     "node": ">=0.10"
   },
-  "main": "dist/houndjs.js",
+  "main": "dist/hound.js",
   "scripts": {
     "prepublish": "gulp"
   },

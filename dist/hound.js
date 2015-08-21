@@ -3767,14 +3767,13 @@ System.registerModule("request/promise-request.js", [], function() {
   },
       promiseRequest = function(args) {
         var prop,
-            rtnPromise,
             method = args.method || 'GET',
             url = args.url || null,
             params = args.params || null,
             data = args.data || null,
             headers = args.headers || null,
             withCreds = (args.withCredentials !== undefined) ? args.withCredentials : true,
-            onprogress = args.onprogress || args.onProgress || null,
+            onprogress = args.onprogress || null,
             xhr = new xhrc.XMLHttpRequest();
         if (url === null) {
           throw new TypeError('url was null or undefined in arguments object', 'promiseRequest.js', 70);
@@ -3844,7 +3843,7 @@ System.registerModule("request/promise-request.js", [], function() {
             }
           }
         }
-        rtnPromise = new Promise(function(resolve, reject) {
+        return new Promise(function(resolve, reject) {
           xhr.onreadystatechange = function() {
             if (this.readyState === 4) {
               if (this.status >= 200 && this.status < 300) {
@@ -3870,7 +3869,6 @@ System.registerModule("request/promise-request.js", [], function() {
             xhr.send();
           }
         });
-        return rtnPromise;
       };
   Object.defineProperty(promiseRequest, 'extraEncode', {
     configurable: false,

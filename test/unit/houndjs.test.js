@@ -1,4 +1,4 @@
-var houndjs = require('../../dist/houndjs.js');
+var houndjs = require('../../dist/hound.js');
 
 describe('houndjs', function() {
   it('exposes expected main objects', function() {

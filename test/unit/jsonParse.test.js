@@ -1,4 +1,4 @@
-var houndjs = require('../../dist/houndjs.js');
+var houndjs = require('../../dist/hound.js');
 
 var jsonParse = System.get("models/internal/jsonParse.js");
 
