@@ -8,8 +8,6 @@ import { MHCache } from '../internal/MHCache.js';
 import { MHMetadata } from '../meta/MHMetadata.js';
 import { MHSocial } from '../social/MHSocial.js';
 
-var MHPagedResponse = System.get('../container/MHPagedResponse.js');
-
 var childrenConstructors = {};
 var __cachedRootResponses = {};
 
@@ -654,14 +652,15 @@ export class MHObject {
       promise = houndRequest({
         method: 'GET',
         endpoint: path,
-        pageSize: size,
         params: {
+          pageSize: size,
           view: view
         }
       });
     }
 
-    promise.then(function(response) {
+    var finalPromise = promise.then(function(response) {
+      var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
       var pagedResponse = new MHPagedResponse(response);
 
       pagedResponse.fetchNextOperation = (newNext => {
@@ -672,10 +671,10 @@ export class MHObject {
     });
 
     if (!next) {
-      this.setCachedResponse(promise, path);
+      this.setCachedResponse(finalPromise, path);
     }
 
-    return promise;
+    return finalPromise;
   }
 
   static fetchRootPagedEndpoint(path, params, view, size, force, next=null) {
@@ -695,16 +694,17 @@ export class MHObject {
     }
     else {
       params.view = view;
+      params.pageSize = size;
 
       promise = houndRequest({
         method  : 'GET',
         endpoint: path,
-        pageSize: size,
         params: params
       });
     }
 
-    promise.then(function(response) {
+    var finalPromise = promise.then(function(response) {
+      var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
       var pagedResponse = new MHPagedResponse(response);
 
       pagedResponse.fetchNextOperation = (newNext => {
@@ -715,9 +715,9 @@ export class MHObject {
     });
 
     if (!next) {
-      this.setCachedRootResponse(promise, path);
+      this.setCachedRootResponse(finalPromise, path);
     }
 
-    return promise;
+    return finalPromise;
   }
 }

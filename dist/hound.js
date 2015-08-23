@@ -4521,7 +4521,6 @@ System.registerModule("models/base/MHObject.js", [], function() {
   var MHCache = System.get("models/internal/MHCache.js").MHCache;
   var MHMetadata = System.get("models/meta/MHMetadata.js").MHMetadata;
   var MHSocial = System.get("models/social/MHSocial.js").MHSocial;
-  var MHPagedResponse = System.get('../container/MHPagedResponse.js');
   var childrenConstructors = {};
   var __cachedRootResponses = {};
   var mhidLRU = new MHCache(1000);
@@ -4689,12 +4688,15 @@ System.registerModule("models/base/MHObject.js", [], function() {
           promise = houndRequest({
             method: 'GET',
             endpoint: path,
-            pageSize: size,
-            params: {view: view}
+            params: {
+              pageSize: size,
+              view: view
+            }
           });
         }
-        promise.then(function(response) {
+        var finalPromise = promise.then(function(response) {
           var $__8 = this;
+          var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
           var pagedResponse = new MHPagedResponse(response);
           pagedResponse.fetchNextOperation = (function(newNext) {
             return $__8.fetchPagedEndpoint(path, view, size, force, newNext);
@@ -4702,9 +4704,9 @@ System.registerModule("models/base/MHObject.js", [], function() {
           return pagedResponse;
         });
         if (!next) {
-          this.setCachedResponse(promise, path);
+          this.setCachedResponse(finalPromise, path);
         }
-        return promise;
+        return finalPromise;
       }
     }, {
       create: function(args) {
@@ -4926,15 +4928,16 @@ System.registerModule("models/base/MHObject.js", [], function() {
           });
         } else {
           params.view = view;
+          params.pageSize = size;
           promise = houndRequest({
             method: 'GET',
             endpoint: path,
-            pageSize: size,
             params: params
           });
         }
-        promise.then(function(response) {
+        var finalPromise = promise.then(function(response) {
           var $__8 = this;
+          var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
           var pagedResponse = new MHPagedResponse(response);
           pagedResponse.fetchNextOperation = (function(newNext) {
             return $__8.fetchRootPagedEndpoint(path, params, view, size, force, newNext);
@@ -4942,9 +4945,9 @@ System.registerModule("models/base/MHObject.js", [], function() {
           return pagedResponse;
         });
         if (!next) {
-          this.setCachedRootResponse(promise, path);
+          this.setCachedRootResponse(finalPromise, path);
         }
-        return promise;
+        return finalPromise;
       }
     });
   }();
