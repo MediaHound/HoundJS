@@ -3595,7 +3595,7 @@ System.registerModule("models/sdk/MHSDK.js", [], function() {
   var _MHAccessToken = null;
   var _MHClientId = null;
   var _MHClientSecret = null;
-  var _houndOrigin = 'https://api-v10.mediahound.com/';
+  var _houndOrigin = 'https://api-v11.mediahound.com/';
   var MHSDK = function() {
     function MHSDK() {}
     return ($traceurRuntime.createClass)(MHSDK, {}, {
@@ -6136,14 +6136,14 @@ System.registerModule("models/collection/MHCollection.js", [], function() {
       fetchContent: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : true;
+        var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('content');
         return this.fetchPagedEndpoint(path, view, size, force);
       },
       fetchMixlist: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 20;
-        var force = arguments[2] !== (void 0) ? arguments[2] : true;
+        var force = arguments[2] !== (void 0) ? arguments[2] : false;
         var path = this.subendpoint('mixlist');
         return this.fetchPagedEndpoint(path, view, size, force);
       }
@@ -6299,13 +6299,6 @@ System.registerModule("models/contributor/MHFictionalGroupContributor.js", [], f
       },
       get isReal() {
         return false;
-      },
-      fetchContributors: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        var path = this.subendpoint('contributors');
-        return this.fetchPagedEndpoint(path, view, size, force);
       }
     }, {get mhidPrefix() {
         return 'mhfgc';
@@ -6333,13 +6326,6 @@ System.registerModule("models/contributor/MHFictionalIndividualContributor.js", 
       },
       get isReal() {
         return false;
-      },
-      fetchContributors: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        var path = this.subendpoint('contributors');
-        return this.fetchPagedEndpoint(path, view, size, force);
       }
     }, {get mhidPrefix() {
         return 'mhfic';
@@ -6367,13 +6353,6 @@ System.registerModule("models/contributor/MHRealGroupContributor.js", [], functi
       },
       get isReal() {
         return true;
-      },
-      fetchCharacters: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        var path = this.subendpoint('characters');
-        return this.fetchPagedEndpoint(path, view, size, force);
       }
     }, {get mhidPrefix() {
         return 'mhrgc';
@@ -6401,13 +6380,6 @@ System.registerModule("models/contributor/MHRealIndividualContributor.js", [], f
       },
       get isReal() {
         return true;
-      },
-      fetchCharacters: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : true;
-        var path = this.subendpoint('characters');
-        return this.fetchPagedEndpoint(path, view, size, force);
       }
     }, {get mhidPrefix() {
         return 'mhric';
