@@ -13,5 +13,5 @@ export class MHAction extends MHObject {
     });
   }
 
-  static get rootEndpoint(){ return 'graph/action'; }
+  static get rootEndpoint() { return 'graph/action'; }
 }
