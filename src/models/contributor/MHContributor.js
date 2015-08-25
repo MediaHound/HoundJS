@@ -14,23 +14,23 @@ export class MHContributor extends MHObject {
   /*
    * TODO DocJS
    */
-  get isGroup(){
+  get isGroup() {
     return !this.isIndividual;
   }
 
   /*
    * TODO DocJS
    */
-  get isFictional(){
+  get isFictional() {
     return !this.isReal;
   }
 
-  static get rootEndpoint(){ return 'graph/contributor'; }
+  static get rootEndpoint() { return 'graph/contributor'; }
 
   /*
    * TODO DocJS
    */
-   fetchMedia(view='full', size=12, force=false){
+   fetchMedia(view='full', size=12, force=false) {
      var path = this.subendpoint('media');
      return this.fetchPagedEndpoint(path, view, size, force);
    }
