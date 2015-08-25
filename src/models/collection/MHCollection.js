@@ -68,7 +68,7 @@ export class MHCollection extends MHObject {
   * @returns {Promise<MHCollection>} - a Promise that resolves to the newly created MHCollection
   * @static
   */
-  editMetaData(name,description){
+  editMetaData(name, description){
     var path = this.subendpoint('update'),
     data = {};
 
@@ -196,7 +196,7 @@ export class MHCollection extends MHObject {
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
-  fetchContent(view='full', size=12, force=true){
+  fetchContent(view='full', size=12, force=false){
     var path = this.subendpoint('content');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
@@ -205,7 +205,7 @@ export class MHCollection extends MHObject {
    * @param {boolean} force - whether to force a call to the server instead of using the cached mixlistPromise
    * @returns {Promise} - a promise that resolves to the list of mixlist content for this MHCollection
    */
-  fetchMixlist(view='full', size=20, force=true){
+  fetchMixlist(view='full', size=20, force=false){
     var path = this.subendpoint('mixlist');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
