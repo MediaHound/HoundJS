@@ -7448,9 +7448,9 @@ System.registerModule("search/MHSearch.js", [], function() {
       return MHSearch;
     }};
 });
-System.registerModule("hound-api.js", [], function() {
+System.registerModule("hound.js", [], function() {
   "use strict";
-  var __moduleName = "hound-api.js";
+  var __moduleName = "hound.js";
   var MHSDK = System.get("models/sdk/MHSDK.js").MHSDK;
   var MHObject = System.get("models/base/MHObject.js").MHObject;
   var MHAction = System.get("models/action/MHAction.js").MHAction;
@@ -7731,4 +7731,4 @@ System.registerModule("hound-api.js", [], function() {
       return $__default;
     }};
 });
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') { module.exports = System.get("hound-api.js" + '').default; }
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') { module.exports = System.get("hound.js" + '').default; }

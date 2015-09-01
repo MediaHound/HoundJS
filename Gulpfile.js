@@ -14,7 +14,7 @@ var libName = 'hound';
 var paths = {
   src: {
     js: 'src/**/*.js',
-    mainEntryPoint: 'src/hound-api.js'
+    mainEntryPoint: 'src/hound.js'
   },
 
   build: {
@@ -73,8 +73,8 @@ gulp.task('dist', function(done) {
     return gulp.src([paths.traceur.runtime, paths.build.library])
       .pipe(replace(/\.\.\/src\//g, ''))
       .pipe(replace(
-        'System.get("hound-api.js" + \'\');',
-        'if (typeof module !== \'undefined\' && typeof module.exports !== \'undefined\') { module.exports = System.get("hound-api.js" + \'\').default; }'))
+        'System.get("hound.js" + \'\');',
+        'if (typeof module !== \'undefined\' && typeof module.exports !== \'undefined\') { module.exports = System.get("hound.js" + \'\').default; }'))
       .pipe(concat(paths.dist.lib.full))
       .pipe(gulp.dest(paths.dist.dir))
       .pipe(uglify())
