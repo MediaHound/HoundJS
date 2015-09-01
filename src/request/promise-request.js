@@ -75,7 +75,10 @@ var extraEncode = function(str){
 
       // Add params
       if( params !== null ){
-        url += '?';
+        // If the URL already contains a ?, then we won't add one
+        if (url.indexOf('?') === -1) {
+          url += '?';
+        }
         for( prop in params ){
           if( params.hasOwnProperty(prop) ){
             if( url[url.length-1] !== '?' ){

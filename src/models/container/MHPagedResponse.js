@@ -31,7 +31,7 @@ export class MHPagedResponse {
     }
 
     return this.fetchNextOperation(this.pagingInfo.next)
-      .then(function(response) {
+      .then(response => {
         this.cachedNextResponse = response;
         return response;
       });

@@ -3662,7 +3662,9 @@ System.registerModule("request/promise-request.js", [], function() {
           throw new TypeError('url was null or undefined in arguments object', 'promiseRequest.js', 70);
         }
         if (params !== null) {
-          url += '?';
+          if (url.indexOf('?') === -1) {
+            url += '?';
+          }
           for (prop in params) {
             if (params.hasOwnProperty(prop)) {
               if (url[url.length - 1] !== '?') {
@@ -4672,6 +4674,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
       },
       fetchPagedEndpoint: function(path, view, size, force) {
         var next = arguments[4] !== (void 0) ? arguments[4] : null;
+        var $__8 = this;
         if (!force && !next) {
           var cached = this.cachedResponseForPath(path);
           if (cached) {
@@ -4695,7 +4698,6 @@ System.registerModule("models/base/MHObject.js", [], function() {
           });
         }
         var finalPromise = promise.then(function(response) {
-          var $__8 = this;
           var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
           var pagedResponse = new MHPagedResponse(response);
           pagedResponse.fetchNextOperation = (function(newNext) {
@@ -4802,28 +4804,28 @@ System.registerModule("models/base/MHObject.js", [], function() {
         return null;
       },
       isMedia: function(toCheck) {
-        return toCheck instanceof System.get('../models/media/MHMedia.js').MHMedia;
+        return toCheck instanceof System.get('models/media/MHMedia.js').MHMedia;
       },
       isContributor: function(toCheck) {
-        return toCheck instanceof System.get('../models/contributor/MHContributor.js').MHContributor;
+        return toCheck instanceof System.get('models/contributor/MHContributor.js').MHContributor;
       },
       isAction: function(toCheck) {
-        return toCheck instanceof System.get('../models/action/MHAction.js').MHAction;
+        return toCheck instanceof System.get('models/action/MHAction.js').MHAction;
       },
       isUser: function(toCheck) {
-        return toCheck instanceof System.get('../models/user/MHUser.js').MHUser;
+        return toCheck instanceof System.get('models/user/MHUser.js').MHUser;
       },
       isCollection: function(toCheck) {
-        return toCheck instanceof System.get('../models/collection/MHCollection.js').MHCollection;
+        return toCheck instanceof System.get('models/collection/MHCollection.js').MHCollection;
       },
       isImage: function(toCheck) {
-        return toCheck instanceof System.get('../models/image/MHImage.js').MHImage;
+        return toCheck instanceof System.get('models/image/MHImage.js').MHImage;
       },
       isTrait: function(toCheck) {
-        return toCheck instanceof System.get('../models/trait/MHTrait.js').MHTrait;
+        return toCheck instanceof System.get('models/trait/MHTrait.js').MHTrait;
       },
       isSource: function(toCheck) {
-        return toCheck instanceof System.get('../models/source/MHSource.js').MHSource;
+        return toCheck instanceof System.get('models/source/MHSource.js').MHSource;
       },
       isType: function(obj) {
         var type = '';
@@ -4914,6 +4916,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
       },
       fetchRootPagedEndpoint: function(path, params, view, size, force) {
         var next = arguments[5] !== (void 0) ? arguments[5] : null;
+        var $__8 = this;
         if (!force && !next) {
           var cached = this.cachedRootResponseForPath(path);
           if (cached) {
@@ -4936,7 +4939,6 @@ System.registerModule("models/base/MHObject.js", [], function() {
           });
         }
         var finalPromise = promise.then(function(response) {
-          var $__8 = this;
           var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
           var pagedResponse = new MHPagedResponse(response);
           pagedResponse.fetchNextOperation = (function(newNext) {
@@ -6233,6 +6235,7 @@ System.registerModule("models/container/MHPagedResponse.js", [], function() {
         return (this.pagingInfo.next !== undefined && this.pagingInfo.next !== null);
       },
       fetchNext: function() {
+        var $__5 = this;
         var cachedResponse = this.cachedNextResponse;
         if (cachedResponse) {
           return new Promise(function(resolve) {
@@ -6240,7 +6243,7 @@ System.registerModule("models/container/MHPagedResponse.js", [], function() {
           });
         }
         return this.fetchNextOperation(this.pagingInfo.next).then(function(response) {
-          this.cachedNextResponse = response;
+          $__5.cachedNextResponse = response;
           return response;
         });
       }

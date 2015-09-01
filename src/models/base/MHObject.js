@@ -256,35 +256,35 @@ export class MHObject {
   //    instanceof only works if the object being checked was created
   //    in the same global scope as the constructor function it is being checked against
   static isMedia(toCheck){
-    return toCheck instanceof System.get('../../src/models/media/MHMedia.js').MHMedia;
+    return toCheck instanceof System.get('models/media/MHMedia.js').MHMedia;
   }
 
   static isContributor(toCheck){
-    return toCheck instanceof System.get('../../src/models/contributor/MHContributor.js').MHContributor;
+    return toCheck instanceof System.get('models/contributor/MHContributor.js').MHContributor;
   }
 
   static isAction(toCheck){
-    return toCheck instanceof System.get('../../src/models/action/MHAction.js').MHAction;
+    return toCheck instanceof System.get('models/action/MHAction.js').MHAction;
   }
 
   static isUser(toCheck){
-    return toCheck instanceof System.get('../../src/models/user/MHUser.js').MHUser;
+    return toCheck instanceof System.get('models/user/MHUser.js').MHUser;
   }
 
   static isCollection(toCheck){
-    return toCheck instanceof System.get('../../src/models/collection/MHCollection.js').MHCollection;
+    return toCheck instanceof System.get('models/collection/MHCollection.js').MHCollection;
   }
 
   static isImage(toCheck){
-    return toCheck instanceof System.get('../../src/models/image/MHImage.js').MHImage;
+    return toCheck instanceof System.get('models/image/MHImage.js').MHImage;
   }
 
   static isTrait(toCheck){
-    return toCheck instanceof System.get('../../src/models/trait/MHTrait.js').MHTrait;
+    return toCheck instanceof System.get('models/trait/MHTrait.js').MHTrait;
   }
 
   static isSource(toCheck){
-    return toCheck instanceof System.get('../../src/models/source/MHSource.js').MHSource;
+    return toCheck instanceof System.get('models/source/MHSource.js').MHSource;
   }
 
 
@@ -659,7 +659,7 @@ export class MHObject {
       });
     }
 
-    var finalPromise = promise.then(function(response) {
+    var finalPromise = promise.then(response => {
       var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
       var pagedResponse = new MHPagedResponse(response);
 
@@ -703,7 +703,7 @@ export class MHObject {
       });
     }
 
-    var finalPromise = promise.then(function(response) {
+    var finalPromise = promise.then(response => {
       var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
       var pagedResponse = new MHPagedResponse(response);
 
