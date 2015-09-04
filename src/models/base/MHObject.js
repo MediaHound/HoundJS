@@ -618,17 +618,17 @@ export class MHObject {
     this.cachedResponses[cacheKey] = response;
   }
 
-  static rootResponseCacheKeyForPath(path) {
-    return "___root_cached_" + path;
+  static rootResponseCacheKeyForPath(path, params) {
+    return "___root_cached_" + path + "_" + JSON.stringify(params);
   }
 
-  static cachedRootResponseForPath(path) {
-    var cacheKey = this.rootResponseCacheKeyForPath(path);
+  static cachedRootResponseForPath(path, params) {
+    var cacheKey = this.rootResponseCacheKeyForPath(path, params);
     return __cachedRootResponses[cacheKey];
   }
 
-  static setCachedRootResponse(response, path) {
-    var cacheKey = this.rootResponseCacheKeyForPath(path);
+  static setCachedRootResponse(response, path, params) {
+    var cacheKey = this.rootResponseCacheKeyForPath(path, params);
     __cachedRootResponses[cacheKey] = response;
   }
 
@@ -679,7 +679,7 @@ export class MHObject {
 
   static fetchRootPagedEndpoint(path, params, view, size, force, next=null) {
     if (!force && !next) {
-      var cached = this.cachedRootResponseForPath(path);
+      var cached = this.cachedRootResponseForPath(path, params);
       if (cached) {
         return cached;
       }
@@ -715,7 +715,7 @@ export class MHObject {
     });
 
     if (!next) {
-      this.setCachedRootResponse(finalPromise, path);
+      this.setCachedRootResponse(finalPromise, path, params);
     }
 
     return finalPromise;

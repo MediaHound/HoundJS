@@ -4903,22 +4903,22 @@ System.registerModule("models/base/MHObject.js", [], function() {
         }
         return this.rootEndpoint + '/' + sub;
       },
-      rootResponseCacheKeyForPath: function(path) {
-        return "___root_cached_" + path;
+      rootResponseCacheKeyForPath: function(path, params) {
+        return "___root_cached_" + path + "_" + JSON.stringify(params);
       },
-      cachedRootResponseForPath: function(path) {
-        var cacheKey = this.rootResponseCacheKeyForPath(path);
+      cachedRootResponseForPath: function(path, params) {
+        var cacheKey = this.rootResponseCacheKeyForPath(path, params);
         return __cachedRootResponses[cacheKey];
       },
-      setCachedRootResponse: function(response, path) {
-        var cacheKey = this.rootResponseCacheKeyForPath(path);
+      setCachedRootResponse: function(response, path, params) {
+        var cacheKey = this.rootResponseCacheKeyForPath(path, params);
         __cachedRootResponses[cacheKey] = response;
       },
       fetchRootPagedEndpoint: function(path, params, view, size, force) {
         var next = arguments[5] !== (void 0) ? arguments[5] : null;
         var $__8 = this;
         if (!force && !next) {
-          var cached = this.cachedRootResponseForPath(path);
+          var cached = this.cachedRootResponseForPath(path, params);
           if (cached) {
             return cached;
           }
@@ -4947,7 +4947,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
           return pagedResponse;
         });
         if (!next) {
-          this.setCachedRootResponse(finalPromise, path);
+          this.setCachedRootResponse(finalPromise, path, params);
         }
         return finalPromise;
       }
@@ -6532,14 +6532,18 @@ System.registerModule("models/media/MHMedia.js", [], function() {
         return 'graph/media';
       },
       fetchRelatedTo: function(medias) {
-        var view = arguments[1] !== (void 0) ? arguments[1] : 'full';
-        var size = arguments[2] !== (void 0) ? arguments[2] : 12;
-        var force = arguments[3] !== (void 0) ? arguments[3] : false;
+        var filters = arguments[1] !== (void 0) ? arguments[1] : {};
+        var view = arguments[2] !== (void 0) ? arguments[2] : 'full';
+        var size = arguments[3] !== (void 0) ? arguments[3] : 12;
+        var force = arguments[4] !== (void 0) ? arguments[4] : false;
         var mhids = medias.map(function(m) {
           return m.metadata.mhid;
         });
         var path = this.rootSubendpoint('related');
-        var params = {ids: mhids};
+        var params = {
+          ids: mhids,
+          filters: JSON.stringify(filters)
+        };
         return this.fetchRootPagedEndpoint(path, params, view, size, force);
       }
     }, $__super);

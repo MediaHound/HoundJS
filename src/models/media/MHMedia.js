@@ -76,11 +76,12 @@ export class MHMedia extends MHObject {
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
-  static fetchRelatedTo(medias, view='full', size=12, force=false){
+  static fetchRelatedTo(medias, filters={}, view='full', size=12, force=false){
     var mhids = medias.map( m => m.metadata.mhid );
     var path = this.rootSubendpoint('related');
     var params = {
-      ids: mhids
+      ids: mhids,
+      filters: JSON.stringify(filters)
     };
     return this.fetchRootPagedEndpoint(path, params, view, size, force);
   }
