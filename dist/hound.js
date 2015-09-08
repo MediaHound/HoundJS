@@ -3884,17 +3884,19 @@ System.registerModule("models/internal/MHCache.js", [], function() {
         };
         log('putting: ', entry);
         this[keymapSym][key] = entry;
-        if (this.tail) {
-          this.tail.newer = entry;
-          entry.older = this.tail;
-        } else {
-          this.head = entry;
-        }
-        this.tail = entry;
-        if (this.size === this.limit) {
-          return this.shift();
-        } else {
-          this.size++;
+        if (key.substring(0, 5) !== 'mhsrc') {
+          if (this.tail) {
+            this.tail.newer = entry;
+            entry.older = this.tail;
+          } else {
+            this.head = entry;
+          }
+          this.tail = entry;
+          if (this.size === this.limit) {
+            return this.shift();
+          } else {
+            this.size++;
+          }
         }
       },
       putMHObj: function(mhObj) {
@@ -4849,6 +4851,15 @@ System.registerModule("models/base/MHObject.js", [], function() {
           type = null;
         }
         return type;
+      },
+      enterWithMappedSourceIds: function(msis) {
+        var endpoint = 'graph/enter/raw';
+        var params = {ids: msis};
+        return houndRequest({
+          method: 'GET',
+          endpoint: endpoint,
+          params: params
+        });
       },
       fetchByMhid: function(mhid) {
         var view = arguments[1] !== (void 0) ? arguments[1] : 'full';

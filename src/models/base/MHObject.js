@@ -322,6 +322,19 @@ export class MHObject {
     return type;
   }
 
+  static enterWithMappedSourceIds(msis) {
+    var endpoint = 'graph/enter/raw';
+    var params = {
+      ids: msis
+    };
+
+    return houndRequest({
+        method: 'GET',
+        endpoint: endpoint,
+        params: params
+      });
+  }
+
   get type(){
     return MHObject.isType(this);
   }

@@ -46,22 +46,27 @@ export class MHCache {
     log('putting: ', entry);
     // Note: No protection against replacing, and thus orphan entries. By design.
     this[keymapSym][key] = entry;
-    if (this.tail) {
-      // link previous tail to the new tail (entry)
-      this.tail.newer = entry;
-      entry.older = this.tail;
-    } else {
-      // we're first in -- yay
-      this.head = entry;
-    }
-    // add new entry to the end of the linked list -- it's now the freshest entry.
-    this.tail = entry;
-    if (this.size === this.limit) {
-      // we hit the limit -- remove the head
-      return this.shift();
-    } else {
-      // increase the size counter
-      this.size++;
+
+    // MHSRC nodes do not go in the linked list, so they won't be removed
+    // according to LRU rules.
+    if (key.substring(0,5) !== 'mhsrc') {
+      if (this.tail) {
+        // link previous tail to the new tail (entry)
+        this.tail.newer = entry;
+        entry.older = this.tail;
+      } else {
+        // we're first in -- yay
+        this.head = entry;
+      }
+      // add new entry to the end of the linked list -- it's now the freshest entry.
+      this.tail = entry;
+      if (this.size === this.limit) {
+        // we hit the limit -- remove the head
+        return this.shift();
+      } else {
+        // increase the size counter
+        this.size++;
+      }
     }
   }
 
