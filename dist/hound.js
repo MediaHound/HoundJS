@@ -3884,19 +3884,17 @@ System.registerModule("models/internal/MHCache.js", [], function() {
         };
         log('putting: ', entry);
         this[keymapSym][key] = entry;
-        if (key.substring(0, 5) !== 'mhsrc') {
-          if (this.tail) {
-            this.tail.newer = entry;
-            entry.older = this.tail;
-          } else {
-            this.head = entry;
-          }
-          this.tail = entry;
-          if (this.size === this.limit) {
-            return this.shift();
-          } else {
-            this.size++;
-          }
+        if (this.tail) {
+          this.tail.newer = entry;
+          entry.older = this.tail;
+        } else {
+          this.head = entry;
+        }
+        this.tail = entry;
+        if (this.size === this.limit) {
+          return this.shift();
+        } else {
+          this.size++;
         }
       },
       putMHObj: function(mhObj) {
