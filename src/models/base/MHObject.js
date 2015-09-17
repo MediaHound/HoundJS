@@ -632,7 +632,12 @@ export class MHObject {
   }
 
   static rootResponseCacheKeyForPath(path, params) {
-    return "___root_cached_" + path + "_" + JSON.stringify(params);
+    return "___root_cached_" + path + "_" + JSON.stringify(params, (k, v) => {
+      if (k === 'view' || k === 'pageSize' || k === 'access_token') {
+        return undefined;
+      }
+      return v;
+    });
   }
 
   static cachedRootResponseForPath(path, params) {
