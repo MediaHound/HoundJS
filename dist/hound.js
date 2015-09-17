@@ -4913,7 +4913,12 @@ System.registerModule("models/base/MHObject.js", [], function() {
         return this.rootEndpoint + '/' + sub;
       },
       rootResponseCacheKeyForPath: function(path, params) {
-        return "___root_cached_" + path + "_" + JSON.stringify(params);
+        return "___root_cached_" + path + "_" + JSON.stringify(params, function(k, v) {
+          if (k === 'view' || k === 'pageSize' || k === 'access_token') {
+            return undefined;
+          }
+          return v;
+        });
       },
       cachedRootResponseForPath: function(path, params) {
         var cacheKey = this.rootResponseCacheKeyForPath(path, params);
