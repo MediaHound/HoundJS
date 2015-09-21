@@ -3526,69 +3526,6 @@ System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/polyfills.js
 });
 System.get("traceur-runtime@0.0.91/src/runtime/polyfills/polyfills.js" + '');
 
-System.registerModule("models/internal/debug-helpers.js", [], function() {
-  "use strict";
-  var __moduleName = "models/internal/debug-helpers.js";
-  var debug = {
-    log: false,
-    warn: true,
-    error: true
-  };
-  var isDevAndDebug = function() {
-    if (typeof window !== 'undefined') {
-      return window.mhDebug && (window.location.host === 'local.mediahound.com:2014');
-    } else {
-      return false;
-    }
-  };
-  var log = function(override) {
-    for (var args = [],
-        $__1 = 1; $__1 < arguments.length; $__1++)
-      args[$__1 - 1] = arguments[$__1];
-    if (typeof override !== 'boolean') {
-      args.unshift(override);
-      override = false;
-    }
-    if (console && console.log && (override || debug.log || isDevAndDebug())) {
-      console.log.apply(console, arguments);
-    }
-  };
-  var warn = function(override) {
-    for (var args = [],
-        $__2 = 1; $__2 < arguments.length; $__2++)
-      args[$__2 - 1] = arguments[$__2];
-    if (typeof override !== 'boolean') {
-      args.unshift(override);
-      override = false;
-    }
-    if (console && console.warn && (override || debug.warn || isDevAndDebug())) {
-      console.warn.apply(console, args);
-    }
-  };
-  var error = function(override) {
-    for (var args = [],
-        $__3 = 1; $__3 < arguments.length; $__3++)
-      args[$__3 - 1] = arguments[$__3];
-    if (typeof override !== 'boolean') {
-      args.unshift(override);
-      override = false;
-    }
-    if (console && console.error && (override || debug.error || isDevAndDebug())) {
-      console.error.apply(console, args);
-    }
-  };
-  return {
-    get log() {
-      return log;
-    },
-    get warn() {
-      return warn;
-    },
-    get error() {
-      return error;
-    }
-  };
-});
 System.registerModule("models/sdk/MHSDK.js", [], function() {
   "use strict";
   var __moduleName = "models/sdk/MHSDK.js";
@@ -3775,11 +3712,9 @@ System.registerModule("request/promise-request.js", [], function() {
 System.registerModule("request/hound-request.js", [], function() {
   "use strict";
   var __moduleName = "request/hound-request.js";
-  var log = System.get("models/internal/debug-helpers.js").log;
   var promiseRequest = System.get("request/promise-request.js").promiseRequest;
   var MHSDK = System.get("models/sdk/MHSDK.js").MHSDK;
   var extraEncode = promiseRequest.extraEncode,
-      requestMap = {},
       defaults = {
         headers: {'Accept': 'application/json'},
         withCredentials: true
@@ -3830,21 +3765,6 @@ System.registerModule("request/hound-request.js", [], function() {
     if (args.withCredentials == null) {
       args.withCredentials = defaults.withCredentials;
     }
-    if (args.method == null || args.method === 'GET') {
-      if (requestMap.hasOwnProperty(args.url)) {
-        log('request is in map: ', args.url);
-        return requestMap[args.url];
-      }
-      requestMap[args.url] = promiseRequest(args).then(function(res) {
-        delete requestMap[args.url];
-        return res;
-      }, function(err) {
-        delete requestMap[args.url];
-        throw err;
-      }).then(responseThen);
-      return requestMap[args.url];
-    }
-    log('bypassing requestMap for POST: ', args.url);
     return promiseRequest(args).then(responseThen);
   };
   Object.defineProperty(houndRequest, 'extraEncode', {
@@ -3861,6 +3781,69 @@ System.registerModule("request/hound-request.js", [], function() {
     },
     get default() {
       return $__default;
+    }
+  };
+});
+System.registerModule("models/internal/debug-helpers.js", [], function() {
+  "use strict";
+  var __moduleName = "models/internal/debug-helpers.js";
+  var debug = {
+    log: false,
+    warn: true,
+    error: true
+  };
+  var isDevAndDebug = function() {
+    if (typeof window !== 'undefined') {
+      return window.mhDebug && (window.location.host === 'local.mediahound.com:2014');
+    } else {
+      return false;
+    }
+  };
+  var log = function(override) {
+    for (var args = [],
+        $__1 = 1; $__1 < arguments.length; $__1++)
+      args[$__1 - 1] = arguments[$__1];
+    if (typeof override !== 'boolean') {
+      args.unshift(override);
+      override = false;
+    }
+    if (console && console.log && (override || debug.log || isDevAndDebug())) {
+      console.log.apply(console, arguments);
+    }
+  };
+  var warn = function(override) {
+    for (var args = [],
+        $__2 = 1; $__2 < arguments.length; $__2++)
+      args[$__2 - 1] = arguments[$__2];
+    if (typeof override !== 'boolean') {
+      args.unshift(override);
+      override = false;
+    }
+    if (console && console.warn && (override || debug.warn || isDevAndDebug())) {
+      console.warn.apply(console, args);
+    }
+  };
+  var error = function(override) {
+    for (var args = [],
+        $__3 = 1; $__3 < arguments.length; $__3++)
+      args[$__3 - 1] = arguments[$__3];
+    if (typeof override !== 'boolean') {
+      args.unshift(override);
+      override = false;
+    }
+    if (console && console.error && (override || debug.error || isDevAndDebug())) {
+      console.error.apply(console, args);
+    }
+  };
+  return {
+    get log() {
+      return log;
+    },
+    get warn() {
+      return warn;
+    },
+    get error() {
+      return error;
     }
   };
 });
