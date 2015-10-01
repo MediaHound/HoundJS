@@ -4095,7 +4095,7 @@ System.registerModule("models/internal/jsonParse.js", [], function() {
       if (!optional && !convertedValue) {
         throw TypeError('non-optional field `' + name + '` found null value. Args:', args);
       }
-      if (convertedValue) {
+      if (convertedValue !== undefined) {
         if (merge) {
           obj[name] = convertedValue;
         } else {
