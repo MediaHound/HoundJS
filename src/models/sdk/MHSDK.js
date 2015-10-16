@@ -3,7 +3,7 @@ var _MHAccessToken = null;
 var _MHClientId = null;
 var _MHClientSecret = null;
 
-var _houndOrigin = 'https://api-v10.mediahound.com/';
+var _houndOrigin = 'https://api-v11.mediahound.com/';
 
 export class MHSDK {
 

@@ -1,13 +1,11 @@
 
-import { log } from '../models/internal/debug-helpers.js';
+// import { log } from '../models/internal/debug-helpers.js';
 
-// Start Module
 import { promiseRequest } from './promise-request.js';
 
 import { MHSDK } from '../models/sdk/MHSDK.js';
 
 var extraEncode = promiseRequest.extraEncode,
-    requestMap  = {},
     defaults    = {
       headers: {
         'Accept':'application/json'
@@ -15,9 +13,7 @@ var extraEncode = promiseRequest.extraEncode,
       withCredentials: true
     },
     responseThen = function(response){
-      //log('hound-request: ', response);
       if( !!response ){
-        // currently no XML support only JSON text else return status
         if( response.responseText != null && response.responseText !== ''){
           return JSON.parse(response.responseText);
         }
@@ -102,30 +98,8 @@ export var houndRequest = function(args){
 
   //log('args after defaults: ', JSON.stringify(args));
 
-  // on GET request save into requestMap, then if request is called again return Promise from requestMap
-  if( args.method == null || args.method === 'GET' ){
-
-    if( requestMap.hasOwnProperty(args.url) ){
-      log('request is in map: ', args.url);
-      return requestMap[args.url];
-    }
-
-    requestMap[args.url] = promiseRequest(args)
-      .then(
-        res => { delete requestMap[args.url]; return res; },
-        err => { delete requestMap[args.url]; throw err; }
-      )
-      .then(responseThen);
-      //.then(x => {log(x); return x;});
-
-    return requestMap[args.url];
-  }
-
-  log('bypassing requestMap for POST: ', args.url);
-  // else POST request
   return promiseRequest(args)
     .then(responseThen);
-    //.then(x => {log(x); return x;});
 };
 
 Object.defineProperty(houndRequest, 'extraEncode', {

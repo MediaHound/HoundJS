@@ -4,187 +4,46 @@ import { log } from '../internal/debug-helpers.js';
 import { MHObject } from '../base/MHObject.js';
 import { MHAction } from '../action/MHAction.js';
 import { MHLoginSession } from '../user/MHLoginSession.js';
-//import { MHRelationalPair } from '../base/MHRelationalPair.js';
+import { MHCollectionMetadata } from '../meta/MHMetadata.js';
 
 import { houndRequest } from '../../request/hound-request.js';
-import { pagedRequest } from '../../request/hound-paged-request.js';
 
 /**
  * @classdesc Mediahound Collection Object (MHCollection) inherits from MHObject
  */
 export class MHCollection extends MHObject {
-  /**
-   * MediaHound Object constructors take a single parameter {Object | JSON String}
-   * If the argument is an object properties will be read and placed properly
-   *  if a prop doesn't exist and is optional it will be replaced with a null value.
-   * If the argument is a string it will be passed through JSON.parse and then the constructor will continue as normal.
-   *
-   * @constructor
-   * @param {Object|JSON} args - Object map that describes a MediaHound Collection Object
-   * @param {MHID} args.mhid - A valid MediaHound Collection ID
-   * @param {string} [args.name=null] - The name of this collection
-   * @param {MHImage} [args.primaryImage=null] - the primary image url of this MHCollection object
-   * @param {Date} [args.createdDate=null] - The date this MHCollection was created
-   * @param {string} [args.description=null] - A description for this MHCollection
-   * @returns {MHCollection} The MHCollection described by args
-   *
-   * Inherited from MHObject
-   *    Require Param Props
-   *      mhid    - { MediaHound ID string }
-   *
-   *    Optional Param Props
-   *      name            - { String }
-   *      primaryImage    - { MHImage }
-   *      createdDate     - { String | Date }
-   *
-   * MHCollection
-   *    Optional Param Props
-   *      description     - { String }
-   *
-   */
-  constructor(args) {
-    args = MHObject.parseArgs(args);
-    super(args);
 
-    // mixlist = 'none', 'partial', 'full'
-
-    var mixlist = (typeof args.metadata.mixlist === 'string') ? args.metadata.mixlist.toLowerCase() : null,
-        firstContentImage = (args.firstContentImage != null) ? MHObject.create(args.firstContentImage) : null,
-        primaryOwner = (args.primaryOwner != null) ? MHObject.create(args.primaryOwner) : null,
-        description = args.metadata.description || null;
-
-    switch(mixlist){
-      case 'none':
-           mixlist = MHCollection.MIXLIST_TYPE_NONE;
-           break;
-      case 'partial':
-           mixlist = MHCollection.MIXLIST_TYPE_PARTIAL;
-           break;
-      case 'full':
-           mixlist = MHCollection.MIXLIST_TYPE_FULL;
-           break;
-      default:
-           mixlist = MHCollection.MIXLIST_TYPE_NONE;
-           break;
-    }
-
-    Object.defineProperties(this, {
-      'mixlist':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        mixlist
-      },
-      'firstContentImage':{
-        configurable: false,
-        enumerable:   true,
-        writable:     true,
-        value:        firstContentImage
-      },
-      'description':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        description
-      },
-      'primaryOwner':{
-        configurable: false,
-        enumerable:   true,
-        writable:     true,
-        value:        primaryOwner
-      },
-      // Promises
-      'ownersPromise': {
-        configurable: false,
-        enumerable:   true,
-        writable:     true,
-        value:        null
-      },
-      'content': {
-        configurable: false,
-        enumerable:   true,
-        writable:     true,
-        value:        null
-      },
-      'mixlistPromise': {
-        configurable: false,
-        enumerable:   true,
-        writable:     true,
-        value:        null
-      }
+  get jsonProperties() {
+    return Object.assign({}, super.jsonProperties, {
+      metadata: MHCollectionMetadata,
+      firstContentImage: { mapper: MHObject.create },
+      primaryOwner: { mapper: MHObject.create }
     });
   }
 
   // Static Mixlist enums
-  static get MIXLIST_TYPE_NONE()   { return 0; }
-  static get MIXLIST_TYPE_PARTIAL(){ return 1; }
-  static get MIXLIST_TYPE_FULL()   { return 2; }
+  static get MIXLIST_TYPE_NONE()   { return 'none'; }
+  static get MIXLIST_TYPE_PARTIAL(){ return 'partial'; }
+  static get MIXLIST_TYPE_FULL()   { return 'full'; }
 
-  get mixlistTypeString(){
-    switch(this.mixlist){
-      case MHCollection.MIXLIST_TYPE_NONE:
-        return 'none';
-      case MHCollection.MIXLIST_TYPE_PARTIAL:
-        return 'partial';
-      case MHCollection.MIXLIST_TYPE_FULL:
-        return 'full';
-      default:
-        return 'none';
-    }
-  }
 
-  /** @property {string} - the prefix for MHCollection mhids */
-  static get mhidPrefix() { return 'mhcol'; }
-
-  /**
-   * @property {string} - the api endpoint for the MHCollection class
-   * @static
-   */
-  static get rootEndpoint(){ return 'graph/collection'; }
-
-  // Could change as needed
-  /**
-   * @function toString
-   * @returns {string}
-   */
-  toString(){
-    return super.toString() + ' and description ' + this.description;
-  }
-
-  mergeWithData(parsedArgs) {
-    super.mergeWithData(parsedArgs);
-
-    if (!this.firstContentImage && parsedArgs.firstContentImage) {
-      var firstContentImage = MHObject.create(parsedArgs.firstContentImage);
-      if (firstContentImage) {
-        this.firstContentImage = firstContentImage;
-      }
-    }
-    if (!this.primaryOwner && parsedArgs.primaryOwner) {
-      var primaryOwner = MHObject.create(parsedArgs.primaryOwner);
-      if (primaryOwner) {
-        this.primaryOwner = primaryOwner;
-      }
-    }
-  }
+  static get mhidPrefix()   { return 'mhcol'; }
+  static get rootEndpoint() { return 'graph/collection'; }
 
   /**
    * @param {string} name - the name of the new collection for the currently logged in user.
    * @returns {Promise<MHCollection>} - a Promise that resolves to the newly created MHCollection
    * @static
    */
-  static createWithName(name,description){
-    var path = MHCollection.rootEndpoint + '/new',
-    data = {};
+  static createWithName(name, description){
+    var path = this.rootSubendpoint('new');
+    var data = {};
 
-    if(description){
-      data = {
-        "name":name,
-        "description":description
-      };
+    if (name){
+      data.name = name;
     }
-    else if(name){
-      data = { "name":name };
+    if (description){
+      data.description = description;
     }
 
     return houndRequest({
@@ -209,7 +68,7 @@ export class MHCollection extends MHObject {
   * @returns {Promise<MHCollection>} - a Promise that resolves to the newly created MHCollection
   * @static
   */
-  editMetaData(name,description){
+  editMetaData(name, description){
     var path = this.subendpoint('update'),
     data = {};
 
@@ -328,108 +187,28 @@ export class MHCollection extends MHObject {
 
   }
 
-
   /**
    * @param {boolean} force - whether to force a call to the server instead of using the cached ownersPromise
    * @returns {Promise} - a promise that resolves to a list of mhids for the owners of this MHCollection
    */
-  fetchOwners(force=false){
+  fetchOwners(view='full', size=12, force=false){
     var path = this.subendpoint('owners');
-
-    if( force || this.ownersPromise === null ){
-      this.ownersPromise = houndRequest({
-          method    : 'GET',
-          endpoint  : path
-        }).catch( (err => { this.ownersPromise = null; throw err; }).bind(this) );
-    }
-
-    return this.ownersPromise;
+    return this.fetchPagedEndpoint(path, view, size, force);
   }
 
-  /**
-   * @param view {string} view - the view paramater, 'full' or 'ids'
-   * @param {boolean} force - whether to force a call to the server instead of using the cached content
-   * @returns {Promise} - a promise that resolves to the list of content for this MHCollection
-
-   fetchContent(view='ids', force=false){
-     var path = this.subendpoint('content'),
-     self = this;
-
-     if( force || this.content === null ){
-       this.content = houndRequest({
-         method: 'GET',
-         endpoint: path,
-         params: { view }
-       })
-       .catch(err => { self.content = null; throw err; })
-       .then(function(parsed){
-         if( view === 'full' && Array.isArray(parsed) ){
-           parsed = MHRelationalPair.createFromArray(parsed).sort( (a,b) => a.position - b.position );
-         }
-         return parsed;
-       });
-     }
-
-     return this.content.then(res => {
-       // if asking for 'full' but cached is 'ids'
-       if( view === 'full' && Array.isArray(res) && typeof res[0] === 'string' ){
-         return self.fetchContent(view, true);
-       }
-       // if asking for 'ids' but cached is 'full'
-       if( view === 'ids' && Array.isArray(res) && res[0].object instanceof MHObject ){
-         return res.map(pair => pair.object.mhid);
-       }
-       return res;
-     });
-   }
-  */
-   fetchContent(view='full', size=12, force=true){
+  fetchContent(view='full', size=12, force=false){
     var path = this.subendpoint('content');
-    if( force || this.content === null ){
-      this.content = pagedRequest({
-        method: 'GET',
-        endpoint: path,
-        pageSize: size,
-        params: { view }
-      });
-    }
-    //console.log(this.feedPagedRequest);
-    return this.content;
+    return this.fetchPagedEndpoint(path, view, size, force);
   }
 
   /**
    * @param {boolean} force - whether to force a call to the server instead of using the cached mixlistPromise
    * @returns {Promise} - a promise that resolves to the list of mixlist content for this MHCollection
    */
-  fetchMixlist(view='full', size=20, force=true){
+  fetchMixlist(view='full', size=20, force=false){
     var path = this.subendpoint('mixlist');
-    if( force || this.mixlistPromise === null ){
-      this.mixlistPromise = pagedRequest({
-        method: 'GET',
-        endpoint: path,
-        pageSize: size,
-        params: { view }
-      });
-    }
-    //console.log(this.feedPagedRequest);
-    return this.mixlistPromise;
+    return this.fetchPagedEndpoint(path, view, size, force);
   }
-
-  /** TODO: Deprecate
-   * @static
-   * @returns {Promise} - a promise that resolves to the list of the featured collections
-   */
-  static fetchFeaturedCollections(){
-    var path = MHCollection.rootEndpoint + '/featured';
-    return houndRequest({
-        method    : 'GET',
-        endpoint  : path
-      })
-      .then( res => {
-        return Promise.all(MHObject.fetchByMhids(res));
-      });
-  }
-
 }
 
 (function(){

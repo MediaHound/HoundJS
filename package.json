@@ -1,15 +1,22 @@
 {
   "name": "houndjs",
-  "version": "0.2.1",
-  "description": "The MediaHound JavaScript library",
-  "keywords": ["MediaHound", "Media", "Entertainment"],
+  "version": "0.3.0-beta.10",
+  "description": "The MediaHound JavaScript Library",
+  "keywords": [
+    "MediaHound",
+    "Media",
+    "Entertainment",
+    "Movies",
+    "Music",
+    "TV"
+  ],
   "homepage": "http://www.mediahound.com",
-  "bugs": "https://bitbucket.org/mediahound/hound-js-api/issues",
-  "license": "http://www.mediahound.com/license",
+  "bugs": "https://github.com/mediahound/houndjs/issues",
+  "license": "Apache",
   "engines": {
     "node": ">=0.10"
   },
-  "main": "dist/hound-api.js",
+  "main": "dist/hound.js",
   "scripts": {
     "prepublish": "gulp"
   },
@@ -18,18 +25,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/mediahound/hound-js-api"
+    "url": "https://github.com/MediaHound/houndjs.git"
   },
   "dependencies": {
     "xmlhttprequest": "^1.7.0",
     "xmlhttprequest-cookie": "=0.9.2"
   },
   "devDependencies": {
-    "traceur": "=0.0.89",
-    "gulp": "=3.8.11",
-    "gulp-concat": "=2.4.1",
-    "gulp-jshint": "=1.8.5",
-    "gulp-replace": "=0.4.0",
-    "jshint-stylish": "=1.0.0"
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-jasmine": "^2.0.1",
+    "gulp-jshint": "^1.11.2",
+    "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.4",
+    "gulp-uglify": "^1.2.0",
+    "jshint-stylish": "^2.0.1",
+    "run-sequence": "^1.1.2",
+    "traceur": "=0.0.91"
   }
 }

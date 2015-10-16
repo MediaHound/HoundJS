@@ -1,15 +1,15 @@
 
 import { log, warn, error } from '../internal/debug-helpers.js';
+import { jsonCreateWithArgs, jsonMergeWithArgs } from '../internal/jsonParse.js';
 
-// Import Deps
 import { houndRequest } from '../../request/hound-request.js';
-import { pagedRequest } from '../../request/hound-paged-request.js';
 
 import { MHCache } from '../internal/MHCache.js';
-import { MHMetaData } from '../meta/MHMetaData.js';
+import { MHMetadata } from '../meta/MHMetadata.js';
 import { MHSocial } from '../social/MHSocial.js';
 
 var childrenConstructors = {};
+var __cachedRootResponses = {};
 
 // Create Cache
 export var mhidLRU = new MHCache(1000);
@@ -28,6 +28,7 @@ var lastSocialRequestIdSym = Symbol('lastSocialRequestId'),
 
 // Base MediaHound Object
 export class MHObject {
+
   /** MHObject Constructor
    *  @constructor
    * MediaHound Object constructors take a single parameter {Object | JSON String}
@@ -49,99 +50,18 @@ export class MHObject {
    *
    */
   constructor(args) {
-    args = MHObject.parseArgs(args);
+    jsonCreateWithArgs(args, this);
 
-    if( typeof args.metadata.mhid === 'undefined' || args.metadata.mhid === null ){
-      throw new TypeError('mhid is null or undefined', 'MHObject.js', 89);
-    }
+    this.cachedResponses = {};
+  }
 
-    var metadata        = new MHMetaData(args.metadata) || null,
-        mhid            = args.metadata.mhid || null,
-        altid           = args.metadata.altId || null,
-        name            = args.metadata.name || null,
-        // Optional (nullable) values
-        primaryImage    = (args.primaryImage != null)   ? MHObject.create(args.primaryImage)    : null,
-        primaryGroup    = (args.primaryGroup != null && args.primaryGroup !== undefined) ? MHObject.create(args.primaryGroup.object)    : null,
-        secondaryImage  = (args.secondaryImage != null) ? MHObject.create(args.secondaryImage)  : null;
-
-        if(args.social){
-          this.social = new MHSocial(args.social);
-        }
-
-    // Create imutable properties
-
-    if(name){
-      Object.defineProperty(this,'name',{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        name
-      });
-    }
-
-    if(altid){
-      Object.defineProperty(this,'altId',{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        altid
-      });
-    }
-
-    if(primaryGroup){
-      Object.defineProperty(this,'primaryGroup',{
-        configurable: false,
-        enumerable:   true,
-        writable:     true,
-        value:        primaryGroup
-      });
-    }
-
-    if(primaryImage){
-      Object.defineProperty(this,'primaryImage',{
-        configurable: false,
-        enumerable:   true,
-        writable:     true,
-        value:        primaryImage
-      });
-    }
-
-    if(secondaryImage){
-      Object.defineProperty(this,'secondaryImage',{
-        configurable: false,
-        enumerable:   true,
-        writable:     true,
-        value:        secondaryImage
-      });
-    }
-    //  mhid, name, primaryImage, createdDate, etc...
-    Object.defineProperties(this, {
-      'mhid':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        mhid
-      },
-      'metadata':{
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        metadata
-      },
-      // Promises
-      'feed':{
-        configurable: false,
-        enumerable:   false,
-        writable:     true,
-        value:        null
-      },
-      'images':{
-        configurable: false,
-        enumerable:   false,
-        writable:     true,
-        value:        null
-      }
-    });
+  get jsonProperties() {
+    return {
+      metadata: MHMetadata,
+      primaryImage: { mapper: MHObject.create },
+      secondaryImage: { mapper: MHObject.create },
+      social: MHSocial
+    };
   }
 
   /** @property {MHSocial} social */
@@ -156,54 +76,10 @@ export class MHObject {
   }
 
   /**
-   * TODO: PRIVATE?
-   * MHObject.parseArgs(args)
-   * Parses Constructor Arguments
-   *
-   * @param  { Object | JSON } - JSON or Argument Map for MediaHound Type object creation.
-   * @return { Object }        - Object map of arguments for MediaHound Type creation.
-   *
-   */
-  static parseArgs(args){
-    var type = typeof args;
-
-    // If object with mhid return
-    if( type === 'object' && !(args instanceof String) && args.metadata.mhid){
-      return args;
-    }
-
-    // if type string, parse
-    if( type === 'string' || args instanceof String ){
-      try{
-        args = JSON.parse(args);
-        return args;
-      } catch(e) {
-        error('JSON.parse failed at MHObject.parseArgs:170. Exception to follow.');
-        throw e;
-      }
-    }
-    // if undefined or null throw TypeError
-    if( type === 'undefined' || args === null ){
-      throw new TypeError('Args is undefined!', 'MHObject.js', 176);
-    }
-    // if type Array, throw TypeError
-    if ( args instanceof Array ){
-      throw new TypeError('MHObject arguments cannot be of type Array. Must be JSON String or Object of named parameters.', 'MHObject.js', 180);
-    }
-    // if type error, rethrow
-    if( args instanceof Error || args.Error || args.error ){
-      throw (args.error || args.Error || args);
-    }
-    // Shound never get here
-    //warn('how did you do that? args: ', args);
-    throw new TypeError('Args was object without mhid!', 'MHObject.js', 189);
-  }
-
-  /**
    * MHObject.create(args)
    *
    * @param   { Object | JSON<String> | Array{Objects | JSON<Strings>} } - Array or, single Object or JSON of MediaHound Object definition(s).
-   * @returns { <MHObject> } - Specific MediaHound Type. ex: MHMovie, MHAlbum, MHSong, MHContributor, etc.
+   * @returns { <MHObject> } - Specific MediaHound Type. ex: MHMovie, MHAlbum, MHTrack, MHContributor, etc.
    *
    * returns null if can't find associated class
    */
@@ -230,13 +106,12 @@ export class MHObject {
         };
       }
 
-      args = MHObject.parseArgs(args);
       //log(args.metadata.mhid)
       var mhid = args.metadata.mhid || args.mhid || undefined;
       var mhObj;
       //console.log('at start of creating... ',mhid,args);
 
-      if( mhid !== 'undefined' && mhid !== null && args instanceof Object && this.isEmpty(args) !== 0){
+      if( mhid !== 'undefined' && mhid !== null && args instanceof Object){
         args.mhid = mhid;
         // check cache
         //log('in create function trying to parseArgs: \n\n' , args);
@@ -275,6 +150,7 @@ export class MHObject {
     } catch (err) {
       //log(err);
       console.log(err);
+      console.log(err.stack);
       if( err instanceof TypeError ) {
         if( err.message === 'undefined is not a function' ) {
           warn('Unknown mhid prefix, see args object: ', args);
@@ -288,38 +164,6 @@ export class MHObject {
     }
     return null;
   }
-
-  /***
-  *
-  * Create MHObjects from Arrays of Objects. (formally found in MHEmbeddedObject)
-  *
-  * MHObject.createFromArray(array)
-  *
-  * @param { Array } - Array of args
-  * @return { Array } - Array of MHObjects
-  *
-  */
-
-  static createFromArray(arr){
-    if( Array.isArray(arr) ){
-      return arr.map( v => {
-        try{
-          return MHObject.create(v);
-        } catch (e) {
-          return v;
-        }
-      });
-    } else if( arr && arr.length > 0 ){
-      var i = 0, len = arr.length,
-      newArry = [];
-      for( ; i < len ; i++ ){
-        newArry.push( MHObject.create(arr[i]) );
-      }
-      return newArry;
-    }
-    return arr;
-  }
-
 
   /***
    * Register Child Constructors
@@ -350,11 +194,6 @@ export class MHObject {
       return true;
     }
     return false;
-  }
-
-
-  static isEmpty(obj) {
-    return Object.keys(obj).length;
   }
 
   /**
@@ -417,35 +256,35 @@ export class MHObject {
   //    instanceof only works if the object being checked was created
   //    in the same global scope as the constructor function it is being checked against
   static isMedia(toCheck){
-    return toCheck instanceof System.get('../../src/models/media/MHMedia.js').MHMedia;
+    return toCheck instanceof System.get('models/media/MHMedia.js').MHMedia;
   }
 
   static isContributor(toCheck){
-    return toCheck instanceof System.get('../../src/models/contributor/MHContributor.js').MHContributor;
+    return toCheck instanceof System.get('models/contributor/MHContributor.js').MHContributor;
   }
 
   static isAction(toCheck){
-    return toCheck instanceof System.get('../../src/models/action/MHAction.js').MHAction;
+    return toCheck instanceof System.get('models/action/MHAction.js').MHAction;
   }
 
   static isUser(toCheck){
-    return toCheck instanceof System.get('../../src/models/user/MHUser.js').MHUser;
+    return toCheck instanceof System.get('models/user/MHUser.js').MHUser;
   }
 
   static isCollection(toCheck){
-    return toCheck instanceof System.get('../../src/models/collection/MHCollection.js').MHCollection;
+    return toCheck instanceof System.get('models/collection/MHCollection.js').MHCollection;
   }
 
   static isImage(toCheck){
-    return toCheck instanceof System.get('../../src/models/image/MHImage.js').MHImage;
+    return toCheck instanceof System.get('models/image/MHImage.js').MHImage;
   }
 
   static isTrait(toCheck){
-    return toCheck instanceof System.get('../../src/models/trait/MHTrait.js').MHTrait;
+    return toCheck instanceof System.get('models/trait/MHTrait.js').MHTrait;
   }
 
   static isSource(toCheck){
-    return toCheck instanceof System.get('../../src/models/source/MHSource.js').MHSource;
+    return toCheck instanceof System.get('models/source/MHSource.js').MHSource;
   }
 
 
@@ -483,6 +322,19 @@ export class MHObject {
     return type;
   }
 
+  static enterWithMappedSourceIds(msis) {
+    var endpoint = 'graph/enter/raw';
+    var params = {
+      ids: msis
+    };
+
+    return houndRequest({
+        method: 'GET',
+        endpoint: endpoint,
+        params: params
+      });
+  }
+
   get type(){
     return MHObject.isType(this);
   }
@@ -503,8 +355,8 @@ export class MHObject {
    *
    */
   isEqualToMHObject(otherObj){
-    if( otherObj && otherObj.mhid ){
-      return this.metadata.mhid === otherObj.mhid;
+    if( otherObj && otherObj.metadata.mhid ){
+      return this.metadata.mhid === otherObj.metadata.mhid;
     }
     return false;
   }
@@ -526,30 +378,11 @@ export class MHObject {
 
   // TODO Could change as needed
   toString(){
-    return this.className + " with mhid " + this.mhid + " and name " + this.mhName;
+    return this.className + " with mhid " + this.metadata.mhid + " and name " + this.mhName;
   }
 
-  mergeWithData(parsedArgs) {
-    if (!this.primaryImage && parsedArgs.primaryImage) {
-      var primaryImage = MHObject.create(parsedArgs.primaryImage);
-      if (primaryImage) {
-        this.primaryImage = primaryImage;
-      }
-    }
-
-    if (!this.secondaryImage && parsedArgs.secondaryImage) {
-      var secondaryImage = MHObject.create(parsedArgs.secondaryImage);
-      if (secondaryImage) {
-        this.secondaryImage = secondaryImage;
-      }
-    }
-
-    if (!this.primaryGroup && parsedArgs.primaryGroup) {
-      var primaryGroup = MHObject.create(parsedArgs.primaryGroup);
-      if (primaryGroup) {
-        this.primaryGroup = primaryGroup;
-      }
-    }
+  mergeWithData(args) {
+    jsonMergeWithArgs(args, this);
   }
 
   /**
@@ -601,49 +434,16 @@ export class MHObject {
         }
       })
       .then(function(response){
-        //console.log(response);
         newObj = MHObject.create(response);
-        //newObj = response;
-        //console.log('fetched: ', newObj, 'with response: ', response);
-        // if( prefix === 'mhimg' ){
-        //   // bypass cache
-        // } else {
-        //   mhidLRU.putMHObj(newObj);
-        // }
         return newObj;
       });
   }
 
   /**
-   * MHObject.fetchByMhids(mhids)
-   *
-   * @param   { [String]  } mhids - array of MediaHound IDs
-   * @return  { [Promise] } - array of Promises that resolve to specific MHObject sub classes
-   *
-   */
-  // Should this return a single Promise?
-  //  Could be done through a second flag argument
-  static fetchByMhids(mhids,view="basic"){
-    if( mhids.map ){
-      return mhids.map(MHObject.fetchByMhid);
-    } else if( mhids.length > 0 ){
-      var i, mhObjs = [];
-      for( i = 0 ; i < mhids.length ; i++ ){
-        //log(mhids[i],view);
-        mhObjs.push(MHObject.fetchByMhid(mhids[i],view));
-      }
-      return mhObjs;
-    }
-    warn('Reached fallback return statement in MHObject.fetchByMhids', mhids);
-    return mhids || null;
-  }
-
-
-  /**
    * Children override
    *
    */
-  static get rootEndpoint(){ return null; }
+  static get rootEndpoint() { return null; }
 
   /**
    * MHObject.rootEndpointForMhid(mhid)
@@ -675,7 +475,7 @@ export class MHObject {
    *
    */
   get endpoint(){
-    return this.constructor.rootEndpoint + '/' + this.mhid;
+    return this.constructor.rootEndpoint + '/' + this.metadata.mhid;
   }
 
   /**
@@ -686,11 +486,17 @@ export class MHObject {
    *
    */
   subendpoint(sub){
-    //log(typeof sub);
     if( typeof sub !== 'string' && !(sub instanceof String) ){
       throw new TypeError('Sub not of type string or undefined in (MHObject).subendpoint.');
     }
     return this.endpoint + '/' + sub;
+  }
+
+  static rootSubendpoint(sub) {
+    if( typeof sub !== 'string' && !(sub instanceof String) ){
+      throw new TypeError('Sub not of type string or undefined in (MHObject).rootSubendpoint.');
+    }
+    return this.rootEndpoint + '/' + sub;
   }
 
   /**
@@ -729,30 +535,7 @@ export class MHObject {
    */
   fetchFeed(view='full', size=12, force=false){
     var path = this.subendpoint('feed');
-    if( force || this.feed === null || this.feed.numberOfElements !== size ){
-      this.feed = pagedRequest({
-        method: 'GET',
-        endpoint: path,
-        pageSize: size,
-        params: { view }
-      });
-    }
-    //console.log(this.feed);
-    return this.feed;
-  }
-
-  /** TODO: TEST
-   * TODO: set defaults to those on possible existing feedPagedRequest
-   * mhObj.fetchFeedPage(view, page, size)
-   *
-   * @param page { Number (0)  } - the zero indexed page number to return
-   * @param size { Number (12) } - the number of items to return per page
-   *
-   * @return { Promise }  - resolves to server response of feed info for this MediaHound object
-   *
-   */
-  fetchFeedPage(view='full', size=12, force=false){
-    return this.fetchFeed(view, size, force).currentPromise;
+    return this.fetchPagedEndpoint(path, view, size, force);
   }
 
   /* TODO: DocJS
@@ -765,16 +548,19 @@ export class MHObject {
 
   fetchImages(view='full', size=20, force=false){
     var path = this.subendpoint('images');
-    if( force || this.images === null ){
-      this.images = pagedRequest({
-        method: 'GET',
-        endpoint: path,
-        pageSize: size,
-        params: { view }
-      });
-    }
-    return this.images;
+    return this.fetchPagedEndpoint(path, view, size, force);
   }
+
+  /*
+   * mhContributor.fetchCollections(force)
+   *
+   * @return { Promise }  - resolves to server response of collections for this MediaHound object
+   *
+   */
+   fetchCollections(view='full', size=12, force=true){
+     var path = this.subendpoint('collections');
+     return this.fetchPagedEndpoint(path, view, size, force);
+   }
 
   /**
    *
@@ -829,5 +615,127 @@ export class MHObject {
         }
         throw err;
       });
+  }
+
+  responseCacheKeyForPath(path) {
+    return "__cached_" + path;
+  }
+
+  cachedResponseForPath(path) {
+    var cacheKey = this.responseCacheKeyForPath(path);
+    return this.cachedResponses[cacheKey];
+  }
+
+  setCachedResponse(response, path) {
+    var cacheKey = this.responseCacheKeyForPath(path);
+    this.cachedResponses[cacheKey] = response;
+  }
+
+  static rootResponseCacheKeyForPath(path, params) {
+    return "___root_cached_" + path + "_" + JSON.stringify(params, (k, v) => {
+      if (k === 'view' || k === 'pageSize' || k === 'access_token') {
+        return undefined;
+      }
+      return v;
+    });
+  }
+
+  static cachedRootResponseForPath(path, params) {
+    var cacheKey = this.rootResponseCacheKeyForPath(path, params);
+    return __cachedRootResponses[cacheKey];
+  }
+
+  static setCachedRootResponse(response, path, params) {
+    var cacheKey = this.rootResponseCacheKeyForPath(path, params);
+    __cachedRootResponses[cacheKey] = response;
+  }
+
+  fetchPagedEndpoint(path, view, size, force, next=null) {
+    if (!force && !next) {
+      var cached = this.cachedResponseForPath(path);
+      if (cached) {
+        return cached;
+      }
+    }
+
+    var promise;
+
+    if (next) {
+      promise = houndRequest({
+        method: 'GET',
+        url: next,
+      });
+    }
+    else {
+      promise = houndRequest({
+        method: 'GET',
+        endpoint: path,
+        params: {
+          pageSize: size,
+          view: view
+        }
+      });
+    }
+
+    var finalPromise = promise.then(response => {
+      var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
+      var pagedResponse = new MHPagedResponse(response);
+
+      pagedResponse.fetchNextOperation = (newNext => {
+        return this.fetchPagedEndpoint(path, view, size, force, newNext);
+      });
+
+      return pagedResponse;
+    });
+
+    if (!next) {
+      this.setCachedResponse(finalPromise, path);
+    }
+
+    return finalPromise;
+  }
+
+  static fetchRootPagedEndpoint(path, params, view, size, force, next=null) {
+    if (!force && !next) {
+      var cached = this.cachedRootResponseForPath(path, params);
+      if (cached) {
+        return cached;
+      }
+    }
+
+    var promise;
+    if (next) {
+      promise = houndRequest({
+        method: 'GET',
+        url: next,
+      });
+    }
+    else {
+      params.view = view;
+      params.pageSize = size;
+
+      promise = houndRequest({
+        method  : 'GET',
+        endpoint: path,
+        params: params
+      });
+    }
+
+    var finalPromise = promise.then(response => {
+      var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
+      var pagedResponse = new MHPagedResponse(response);
+
+      pagedResponse.fetchNextOperation = (newNext => {
+        return this.fetchRootPagedEndpoint(path, params, view, size, force, newNext);
+      });
+
+      return pagedResponse;
+    });
+
+    if (!next) {
+      this.setCachedRootResponse(finalPromise, path, params);
+    }
+
+    return finalPromise;
   }
 }

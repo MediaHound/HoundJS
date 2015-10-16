@@ -1,53 +1,10 @@
 
+import { jsonCreateWithArgs } from '../internal/jsonParse.js';
 
 // MediaHound Social Object
 export class MHSocial {
-  /* MHSocial Constructor
-   *
-   * MediaHound Object constructors take a single parameter {Object | JSON String}
-   * If the argument is an object properties will be read and placed properly
-   *  if a prop doesn't exist and is optional it will be replaced with a null value.
-   * If the argument is a string it will be passed through JSON.parse and then the constructor will continue as normal.
-   *
-   *  @param args - { Object | JSON String }
-   *
-   *  Optional Param Props (all type { Number }
-   *      followers
-   *      likers
-   *      collectors
-   *      mentioners
-   *
-   *      following
-   *      ownedCollections'
-   *
-   *      userLikes
-   *      userDislikes
-   *      userFollows
-   *
-   *      items
-   *
-   *  // TODO TYPE ENUMS
-   *  // TODO REMOVE DISLIKE?
-   *
-   */
   constructor(args) {
-    if( typeof args === 'string' || args instanceof String ){
-      try{
-        args = JSON.parse(args);
-      } catch(e) {
-        throw new TypeError('Args typeof string but not JSON in MHSocial', 'MHSocial.js', 28);
-      }
-    }
-
-    for( var prop of MHSocial.members ){
-      var curr = typeof args[prop] === 'undefined' ? null : args[prop];
-      Object.defineProperty(this, prop, {
-        configurable: false,
-        enumerable:   true,
-        writable:     false,
-        value:        curr
-      });
-    }
+    jsonCreateWithArgs(args, this);
   }
 
   /**
@@ -56,7 +13,7 @@ export class MHSocial {
    * @returns {boolean}
    */
   isEqualToMHSocial(otherObj){
-    for( var prop of MHSocial.members ){
+    for(var prop of Object.keys(this.jsonProperties)){
       if( typeof this[prop] === 'number' && typeof otherObj[prop] === 'number' && this[prop] === otherObj[prop] ){
         continue;
       } else if( !this[prop] && !otherObj[prop] ){
@@ -110,7 +67,7 @@ export class MHSocial {
         break;
     }
 
-    for( var prop of MHSocial.members ){
+    for(var prop of Object.keys(this.jsonProperties)){
       if( prop === toChange ) {
         newArgs[prop] = newValue;
       } else if( prop === alsoFlip ) {
@@ -151,25 +108,21 @@ export class MHSocial {
   static get COLLECT(){ return 'collect'; }
   static get COMMENT(){ return 'comment'; }
 
-  /**
-   * @private
-   * @returns {string[]}
-   */
-  // Would be cool if it was 'private' but traceur isn't that smart...yet
-  static get members(){
-    return [
-      'likers',           // int
-      'followers',        // int
-      'collectors',       // int
-      'mentioners',       // int
-      'following',        // int
-      'ownedCollections', // int
-      'items',            // int
-      'userLikes',        // boolean
-      'userDislikes',     // boolean
-      'userFollows'       // boolean
-    ];
+  get jsonProperties() {
+    return {
+      'likers': Number,
+      'followers': Number,
+      'collectors': Number,
+      'mentioners': Number,
+      'following': Number,
+      'ownedCollections': Number,
+      'items': Number,
+      'userLikes': Boolean,
+      'userDislikes': Boolean,
+      'userFollows': Boolean,
+      'isFeatured': Boolean,
+      'userConnected': Boolean,
+      'userPreference': Boolean,
+    };
   }
-
 }
-

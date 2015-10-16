@@ -1,94 +1,110 @@
+var gulp        = require('gulp');
+var jshint      = require('gulp-jshint');
+var concat      = require('gulp-concat');
+var replace     = require('gulp-replace');
+var uglify      = require('gulp-uglify');
+var rename      = require('gulp-rename');
+var jasmine     = require('gulp-jasmine');
+var runSequence = require('run-sequence');
+var execFile    = require('child_process').execFile;
 
-var gulp    = require('gulp'),
-    jshint  = require('gulp-jshint'),
-    concat  = require('gulp-concat'),
-    replace = require('gulp-replace'),
-    exec    = require('child_process').exec;
+var libName = 'hound';
 
 // Paths for tasks
 var paths = {
+  src: {
+    js: 'src/**/*.js',
+    mainEntryPoint: 'src/hound.js'
+  },
 
-  src:   './src',
-  build: './build',
-  dist:  './dist',
-  test: './test',
+  build: {
+    library: 'build/' + libName + '.build.js'
+  },
 
-  traceur: './node_modules/traceur/traceur'
+  traceur: {
+    binary: 'node_modules/traceur/traceur',
+    runtime: 'node_modules/traceur/bin/traceur-runtime.js'
+  },
 
-};
-// More paths, using above paths
-paths.srcGlob       = paths.src   + '/**/*.js';
-paths.houndApiJs    = paths.src   + '/hound-api.js';
-paths.buildCompiled = paths.build + '/compiled';
+  test: {
+    unit: 'test/unit/**/*.test.js'
+  },
 
-// Traceur command line commands
-var traceurOpts = '--symbols';
-var traceurCmds = {
-  single: {
-    register : paths.traceur + ' ' + paths.houndApiJs + ' --out ' + paths.buildCompiled + '/hound-api.register.js --modules=register' // <-- this is the important one that is used to build distribution right now
+  dist: {
+    dir: 'dist',
+    lib: {
+      full: libName + '.js',
+      min:  libName + '.min.js'
+    }
   }
 };
 
-// JSHint Task
-gulp.task('jshint', function(){
-
-  return gulp.src(paths.srcGlob)
-    .pipe(jshint('./.jshintrc'))
-    .pipe(jshint.reporter('jshint-stylish'));
-
-});
-
-// JSHint Watch
-gulp.task('jshint:watch', function(done){
-
-  gulp.watch(paths.srcGlob, ['jshint']);
-  done();
-
-});
-
-// Watch srcGlob do 'jshint', 'dist'
-gulp.task('watch', function(){
-
-  gulp.watch(paths.srcGlob, ['dist', 'jshint']);
-
-});
-
-// Helper for executing traceur compiles
-var execHelper = function(command, callback){
-  exec(command, function(error, stdout, stderr){
-    if( stdout ){
+// Helper for executing shell commands
+var execFileHelper = function(command, args, callback) {
+  execFile(command, args, function(error, stdout, stderr) {
+    if (stdout) {
       console.log('stdout: ' + stdout);
     }
-    if( stderr ){
+    if (stderr) {
       console.log('stderr: ' + stderr);
     }
-    if( error !== null ){
-      console.log(error);
+    if (error !== null) {
+      console.log('err: ' + error);
     }
     callback();
   });
 };
 
-// Distribution Tasks
-// Compile-Concat-Write helper
-var concatCompiled = function(){
-  return gulp.src([
-      './node_modules/traceur/bin/traceur-runtime.js',
-      './build/compiled/hound-api.register.js'
-    ])
-      .pipe(replace(/\.\.\/\.\.\/src\//g, ''))
-      .pipe(replace(
-        'System.get("hound-api.js" + \'\');',
-        'if (typeof module !== \'undefined\' && typeof module.exports !== \'undefined\') { module.exports = System.get("hound-api.js" + \'\').default; }'))
-      .pipe(concat('hound-api.js'))
-      .pipe(gulp.dest(paths.dist));
-};
+// Lints Javascript code for errors
+gulp.task('lint', function() {
+  return gulp.src(paths.src.js)
+    .pipe(jshint('.jshintrc'))
+    .pipe(jshint.reporter('jshint-stylish'));
+});
 
-// Calls traceur command once
-gulp.task('dist', function(done){
-  execHelper(traceurCmds.single.register, function(){
-    concatCompiled(done);
+// Build the library
+gulp.task('dist', function(done) {
+  var traceurArgs = [
+    paths.src.mainEntryPoint,
+    '--out', paths.build.library,
+    '--modules=bootstrap'
+  ];
+  execFileHelper(paths.traceur.binary, traceurArgs, function() {
+    return gulp.src([paths.traceur.runtime, paths.build.library])
+      .pipe(replace(/\.\.\/src\//g, ''))
+      .pipe(replace(
+        'System.get("hound.js" + \'\');',
+        'if (typeof module !== \'undefined\' && typeof module.exports !== \'undefined\') { module.exports = System.get("hound.js" + \'\').default; }'))
+      .pipe(concat(paths.dist.lib.full))
+      .pipe(gulp.dest(paths.dist.dir))
+      .pipe(uglify())
+      .pipe(rename(paths.dist.lib.min))
+      .pipe(gulp.dest(paths.dist.dir))
+      .on('end', done)
+      .on('error', done);
   });
 });
 
-gulp.task('default', ['dist', 'jshint']);
+// Runs unit tests (via Jasmine)
+gulp.task('test:unit', function() {
+  return gulp.src(paths.test.unit)
+    .pipe(jasmine());
+});
+
+// Runs all tests
+gulp.task('test', function(done) {
+  runSequence(
+    'dist',
+    'test:unit',
+    done
+  );
+});
+
+// Default task runs 'lint' and 'dist'
+gulp.task('default', function(done) {
+  runSequence(
+    'lint',
+    'dist',
+    done
+  )
+});
