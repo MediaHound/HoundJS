@@ -1,7 +1,7 @@
 {
-  "name": "houndjs",
+  "name": "HoundJS",
   "version": "0.3.0-beta.10",
-  "description": "The MediaHound JavaScript Library",
+  "description": "The MediaHound JavaScript SDK",
   "keywords": [
     "MediaHound",
     "Media",

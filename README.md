@@ -1,17 +1,26 @@
-# HoundJS
+![](https://github.com/MediaHound/houndjs/blob/master/Images/mh-entertainment-graph.png)
 
-The MediaHound Javascript SDK
+# HoundJS: Getting Started
 
-## Development
+## What is HoundJS?
+HoundJS is the Javascript SDK for accessing The Entertainment Graph through MediaHound's API. Search for media content across movies, books, games, TV, and more. Discover relationships across media via traits and contributors. HoundJS is a fast and easy SDK that lets you enhance your node and browser projects with access to an entire world of entertainment content. 
 
-1. Clone the repo into a local folder
-2. cd into project folder
-3. run `npm install`
-4. run `gulp`
+## Install HoundJS
 
-## Publishing
+```
+npm install --save houndjs
+```
 
-To publish an update to the houndjs library:
+## Links
 
-1. Update the `package.json` version follwing Semantic Versioning
-2. run `npm publish` (this will perform a `gulp` build before publishing)
+| Link | Description |
+| ---- | ----------- |
+[MediaHound.com](https://mediahound.com/) | Homepage for MediaHound.
+[@MediaHound](https://twitter.com/MediaHound) | Follow MediaHound on Twitter.
+[Blog](https://blog.mediahound.com) | The MediaHound blog.
+[The Entertainment Graph](https://developer.mediahound.com) | Developer Portal
+[Changelog](https://github.com/MediaHound/houndjs/blob/master/CHANGELOG.md) | View changes introduced in each HoundJS version.
+
+## License
+
+HoundJS is available under the Apache License 2.0. See the LICENSE file for more info.
