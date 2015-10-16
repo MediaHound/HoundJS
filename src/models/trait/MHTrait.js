@@ -10,4 +10,9 @@ export class MHTrait extends MHObject {
       metadata: MHTraitMetadata
     });
   }
+
+  fetchContent(view='full', size=12, force=false) {
+    var path = this.subendpoint('content');
+    return this.fetchPagedEndpoint(path, view, size, force);
+  }
 }

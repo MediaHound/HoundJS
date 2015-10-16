@@ -6533,12 +6533,16 @@ System.registerModule("models/media/MHMedia.js", [], function() {
         var view = arguments[2] !== (void 0) ? arguments[2] : 'full';
         var size = arguments[3] !== (void 0) ? arguments[3] : 12;
         var force = arguments[4] !== (void 0) ? arguments[4] : false;
-        var mhids = medias.map(function(m) {
-          return m.metadata.mhid;
+        var factors = medias.map(function(m) {
+          if ('metadata' in m) {
+            return m.metadata.mhid;
+          } else {
+            return m;
+          }
         });
         var path = this.rootSubendpoint('related');
         var params = {
-          ids: mhids,
+          factors: JSON.stringify(factors),
           filters: JSON.stringify(filters)
         };
         return this.fetchRootPagedEndpoint(path, params, view, size, force);
@@ -7102,9 +7106,18 @@ System.registerModule("models/trait/MHTrait.js", [], function() {
     function MHTrait() {
       $traceurRuntime.superConstructor(MHTrait).apply(this, arguments);
     }
-    return ($traceurRuntime.createClass)(MHTrait, {get jsonProperties() {
+    return ($traceurRuntime.createClass)(MHTrait, {
+      get jsonProperties() {
         return Object.assign({}, $traceurRuntime.superGet(this, MHTrait.prototype, "jsonProperties"), {metadata: MHTraitMetadata});
-      }}, {get rootEndpoint() {
+      },
+      fetchContent: function() {
+        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
+        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+        var path = this.subendpoint('content');
+        return this.fetchPagedEndpoint(path, view, size, force);
+      }
+    }, {get rootEndpoint() {
         return 'graph/trait';
       }}, $__super);
   }(MHObject);
