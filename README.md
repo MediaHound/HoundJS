@@ -8,7 +8,7 @@ HoundJS is the Javascript SDK for accessing The Entertainment Graph through Medi
 ## Install HoundJS
 
 ```
-npm install --save HoundJS
+npm install --save houndjs
 ```
 
 ## Links
