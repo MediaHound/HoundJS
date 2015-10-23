@@ -1,7 +1,8 @@
 {
   "name": "HoundJS",
-  "version": "0.3.0-beta.10",
+  "version": "0.3.0",
   "description": "The MediaHound JavaScript SDK",
+  "author": "MediaHound",
   "keywords": [
     "MediaHound",
     "Media",
@@ -11,7 +12,6 @@
     "TV"
   ],
   "homepage": "https://developer.mediahound.com",
-  "bugs": "https://github.com/mediahound/houndjs/issues",
   "license": "Apache",
   "engines": {
     "node": ">=0.10"
@@ -20,12 +20,9 @@
   "scripts": {
     "prepublish": "gulp"
   },
-  "publishConfig": {
-    "registry": "http://esb.mediahound.com:8081/nexus/content/repositories/npm-hound/"
-  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/MediaHound/houndjs.git"
+    "url": "https://github.com/MediaHound/HoundJS.git"
   },
   "dependencies": {
     "xmlhttprequest": "^1.7.0",
