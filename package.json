@@ -10,7 +10,7 @@
     "Music",
     "TV"
   ],
-  "homepage": "http://www.mediahound.com",
+  "homepage": "https://developer.mediahound.com",
   "bugs": "https://github.com/mediahound/houndjs/issues",
   "license": "Apache",
   "engines": {
