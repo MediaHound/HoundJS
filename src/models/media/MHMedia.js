@@ -59,6 +59,24 @@ export class MHMedia extends MHObject {
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
+  fetchIVATrailer() {
+    var path = this.subendpoint('ivaTrailer');
+
+    var cached = this.cachedResponseForPath(path);
+    if (cached) {
+      return cached;
+    }
+
+    var promise = houndRequest({
+      method: 'GET',
+      endpoint: path
+    });
+
+    this.setCachedResponse(promise, path);
+
+    return promise;
+  }
+
 
   /**
   * mhObj.fetchRelated(mhid,force)

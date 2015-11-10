@@ -6502,6 +6502,19 @@ System.registerModule("models/media/MHMedia.js", [], function() {
         var path = this.subendpoint('contributors');
         return this.fetchPagedEndpoint(path, view, size, force);
       },
+      fetchIVATrailer: function() {
+        var path = this.subendpoint('ivaTrailer');
+        var cached = this.cachedResponseForPath(path);
+        if (cached) {
+          return cached;
+        }
+        var promise = houndRequest({
+          method: 'GET',
+          endpoint: path
+        });
+        this.setCachedResponse(promise, path);
+        return promise;
+      },
       fetchRelated: function() {
         var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
         var size = arguments[1] !== (void 0) ? arguments[1] : 12;
