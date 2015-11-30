@@ -4609,6 +4609,13 @@ System.registerModule("models/base/MHObject.js", [], function() {
         var path = this.subendpoint('collections');
         return this.fetchPagedEndpoint(path, view, size, force);
       },
+      fetchBaseTraits: function() {
+        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
+        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
+        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+        var path = this.subendpoint('baseTraits');
+        return this.fetchPagedEndpoint(path, view, size, force);
+      },
       takeAction: function(action) {
         var $__8 = this;
         if (typeof action !== 'string' && !(action instanceof String)) {

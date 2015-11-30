@@ -562,6 +562,19 @@ export class MHObject {
      return this.fetchPagedEndpoint(path, view, size, force);
    }
 
+   /* TODO: DocJS
+  * mhMed.fetchBaseTraits()
+  *
+  * @param force { Boolean } - force refetch of content
+  * @return { Promise } - resolves to
+  *
+  */
+
+  fetchBaseTraits(view='full', size=20, force=false){
+    var path = this.subendpoint('baseTraits');
+    return this.fetchPagedEndpoint(path, view, size, force);
+  }
+
   /**
    *
    * mhObj.takeAction(action)
