@@ -2,6 +2,10 @@
 
 * No updates in master.
 
+## 0.3.3 (2015-12-1)
+
+* fetchRelatedTo() supports an array of mhids
+
 ## 0.3.2 (2015-11-30)
 
 * Base Traits for objects

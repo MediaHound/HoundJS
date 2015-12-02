@@ -96,7 +96,10 @@ export class MHMedia extends MHObject {
 
   static fetchRelatedTo(medias, filters={}, view='full', size=12, force=false){
     var factors = medias.map(m => {
-      if ('metadata' in m) {
+      if (typeof m === 'string' || m instanceof String) {
+        return m;
+      }
+      else if ('metadata' in m) {
         return m.metadata.mhid;
       }
       else {

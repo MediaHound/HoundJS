@@ -6554,7 +6554,9 @@ System.registerModule("models/media/MHMedia.js", [], function() {
         var size = arguments[3] !== (void 0) ? arguments[3] : 12;
         var force = arguments[4] !== (void 0) ? arguments[4] : false;
         var factors = medias.map(function(m) {
-          if ('metadata' in m) {
+          if (typeof m === 'string' || m instanceof String) {
+            return m;
+          } else if ('metadata' in m) {
             return m.metadata.mhid;
           } else {
             return m;
