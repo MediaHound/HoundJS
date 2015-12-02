@@ -8,6 +8,8 @@ import { MHCache } from '../internal/MHCache.js';
 import { MHMetadata } from '../meta/MHMetadata.js';
 import { MHSocial } from '../social/MHSocial.js';
 
+import { MHPagedResponse } from '../models/container/MHPagedResponse.js';
+
 var childrenConstructors = {};
 var __cachedRootResponses = {};
 
@@ -691,7 +693,6 @@ export class MHObject {
     }
 
     var finalPromise = promise.then(response => {
-      var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
       var pagedResponse = new MHPagedResponse(response);
 
       pagedResponse.fetchNextOperation = (newNext => {

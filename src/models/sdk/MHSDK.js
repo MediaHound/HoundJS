@@ -5,6 +5,8 @@ var _MHClientSecret = null;
 
 var _houndOrigin = 'https://api-v11.mediahound.com/';
 
+import houndRequest from '../../request/hound-request.js';
+
 export class MHSDK {
 
   /**
@@ -27,7 +29,6 @@ export class MHSDK {
   }
 
   static refreshOAuthToken() {
-    var houndRequest = System.get('request/hound-request.js').houndRequest;
     return houndRequest({
       endpoint: 'cas/oauth2.0/accessToken',
       params: {

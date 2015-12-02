@@ -1,3808 +1,111 @@
-(function(global) {
-  'use strict';
-  if (global.$traceurRuntime) {
-    return;
-  }
-  var $Object = Object;
-  var $TypeError = TypeError;
-  var $create = $Object.create;
-  var $defineProperties = $Object.defineProperties;
-  var $defineProperty = $Object.defineProperty;
-  var $freeze = $Object.freeze;
-  var $getOwnPropertyDescriptor = $Object.getOwnPropertyDescriptor;
-  var $getOwnPropertyNames = $Object.getOwnPropertyNames;
-  var $keys = $Object.keys;
-  var $hasOwnProperty = $Object.prototype.hasOwnProperty;
-  var $toString = $Object.prototype.toString;
-  var $preventExtensions = Object.preventExtensions;
-  var $seal = Object.seal;
-  var $isExtensible = Object.isExtensible;
-  var $apply = Function.prototype.call.bind(Function.prototype.apply);
-  function $bind(operand, thisArg, args) {
-    var argArray = [thisArg];
-    for (var i = 0; i < args.length; i++) {
-      argArray[i + 1] = args[i];
-    }
-    var func = $apply(Function.prototype.bind, operand, argArray);
-    return func;
-  }
-  function $construct(func, argArray) {
-    var object = new ($bind(func, null, argArray));
-    return object;
-  }
-  var counter = 0;
-  function newUniqueString() {
-    return '__$' + Math.floor(Math.random() * 1e9) + '$' + ++counter + '$__';
-  }
-  var privateNames = $create(null);
-  function isPrivateName(s) {
-    return privateNames[s];
-  }
-  function createPrivateName() {
-    var s = newUniqueString();
-    privateNames[s] = true;
-    return s;
-  }
-  var CONTINUATION_TYPE = Object.create(null);
-  function createContinuation(operand, thisArg, argsArray) {
-    return [CONTINUATION_TYPE, operand, thisArg, argsArray];
-  }
-  function isContinuation(object) {
-    return object && object[0] === CONTINUATION_TYPE;
-  }
-  var isTailRecursiveName = null;
-  function setupProperTailCalls() {
-    isTailRecursiveName = createPrivateName();
-    Function.prototype.call = initTailRecursiveFunction(function call(thisArg) {
-      var result = tailCall(function(thisArg) {
-        var argArray = [];
-        for (var i = 1; i < arguments.length; ++i) {
-          argArray[i - 1] = arguments[i];
-        }
-        var continuation = createContinuation(this, thisArg, argArray);
-        return continuation;
-      }, this, arguments);
-      return result;
-    });
-    Function.prototype.apply = initTailRecursiveFunction(function apply(thisArg, argArray) {
-      var result = tailCall(function(thisArg, argArray) {
-        var continuation = createContinuation(this, thisArg, argArray);
-        return continuation;
-      }, this, arguments);
-      return result;
-    });
-  }
-  function initTailRecursiveFunction(func) {
-    if (isTailRecursiveName === null) {
-      setupProperTailCalls();
-    }
-    func[isTailRecursiveName] = true;
-    return func;
-  }
-  function isTailRecursive(func) {
-    return !!func[isTailRecursiveName];
-  }
-  function tailCall(func, thisArg, argArray) {
-    var continuation = argArray[0];
-    if (isContinuation(continuation)) {
-      continuation = $apply(func, thisArg, continuation[3]);
-      return continuation;
-    }
-    continuation = createContinuation(func, thisArg, argArray);
-    while (true) {
-      if (isTailRecursive(func)) {
-        continuation = $apply(func, continuation[2], [continuation]);
-      } else {
-        continuation = $apply(func, continuation[2], continuation[3]);
-      }
-      if (!isContinuation(continuation)) {
-        return continuation;
-      }
-      func = continuation[1];
-    }
-  }
-  function construct() {
-    var object;
-    if (isTailRecursive(this)) {
-      object = $construct(this, [createContinuation(null, null, arguments)]);
-    } else {
-      object = $construct(this, arguments);
-    }
-    return object;
-  }
-  var $traceurRuntime = {
-    initTailRecursiveFunction: initTailRecursiveFunction,
-    call: tailCall,
-    continuation: createContinuation,
-    construct: construct
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('../models/container/MHPagedResponse.js')) :
+  typeof define === 'function' && define.amd ? define('HoundJS', ['../models/container/MHPagedResponse.js'], factory) :
+  global.HoundJS = factory(global.___models_container_MHPagedResponse_js);
+}(this, function (___models_container_MHPagedResponse_js) { 'use strict';
+
+  var babelHelpers = {};
+
+  babelHelpers.typeof = function (obj) {
+    return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj;
   };
-  (function() {
-    function nonEnum(value) {
-      return {
-        configurable: true,
-        enumerable: false,
-        value: value,
-        writable: true
-      };
+
+  babelHelpers.classCallCheck = function (instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
     }
-    var method = nonEnum;
-    var symbolInternalProperty = newUniqueString();
-    var symbolDescriptionProperty = newUniqueString();
-    var symbolDataProperty = newUniqueString();
-    var symbolValues = $create(null);
-    function isShimSymbol(symbol) {
-      return typeof symbol === 'object' && symbol instanceof SymbolValue;
-    }
-    function typeOf(v) {
-      if (isShimSymbol(v))
-        return 'symbol';
-      return typeof v;
-    }
-    function Symbol(description) {
-      var value = new SymbolValue(description);
-      if (!(this instanceof Symbol))
-        return value;
-      throw new TypeError('Symbol cannot be new\'ed');
-    }
-    $defineProperty(Symbol.prototype, 'constructor', nonEnum(Symbol));
-    $defineProperty(Symbol.prototype, 'toString', method(function() {
-      var symbolValue = this[symbolDataProperty];
-      return symbolValue[symbolInternalProperty];
-    }));
-    $defineProperty(Symbol.prototype, 'valueOf', method(function() {
-      var symbolValue = this[symbolDataProperty];
-      if (!symbolValue)
-        throw TypeError('Conversion from symbol to string');
-      if (!getOption('symbols'))
-        return symbolValue[symbolInternalProperty];
-      return symbolValue;
-    }));
-    function SymbolValue(description) {
-      var key = newUniqueString();
-      $defineProperty(this, symbolDataProperty, {value: this});
-      $defineProperty(this, symbolInternalProperty, {value: key});
-      $defineProperty(this, symbolDescriptionProperty, {value: description});
-      freeze(this);
-      symbolValues[key] = this;
-    }
-    $defineProperty(SymbolValue.prototype, 'constructor', nonEnum(Symbol));
-    $defineProperty(SymbolValue.prototype, 'toString', {
-      value: Symbol.prototype.toString,
-      enumerable: false
-    });
-    $defineProperty(SymbolValue.prototype, 'valueOf', {
-      value: Symbol.prototype.valueOf,
-      enumerable: false
-    });
-    var hashProperty = createPrivateName();
-    var hashPropertyDescriptor = {value: undefined};
-    var hashObjectProperties = {
-      hash: {value: undefined},
-      self: {value: undefined}
-    };
-    var hashCounter = 0;
-    function getOwnHashObject(object) {
-      var hashObject = object[hashProperty];
-      if (hashObject && hashObject.self === object)
-        return hashObject;
-      if ($isExtensible(object)) {
-        hashObjectProperties.hash.value = hashCounter++;
-        hashObjectProperties.self.value = object;
-        hashPropertyDescriptor.value = $create(null, hashObjectProperties);
-        $defineProperty(object, hashProperty, hashPropertyDescriptor);
-        return hashPropertyDescriptor.value;
-      }
-      return undefined;
-    }
-    function freeze(object) {
-      getOwnHashObject(object);
-      return $freeze.apply(this, arguments);
-    }
-    function preventExtensions(object) {
-      getOwnHashObject(object);
-      return $preventExtensions.apply(this, arguments);
-    }
-    function seal(object) {
-      getOwnHashObject(object);
-      return $seal.apply(this, arguments);
-    }
-    freeze(SymbolValue.prototype);
-    function isSymbolString(s) {
-      return symbolValues[s] || privateNames[s];
-    }
-    function toProperty(name) {
-      if (isShimSymbol(name))
-        return name[symbolInternalProperty];
-      return name;
-    }
-    function removeSymbolKeys(array) {
-      var rv = [];
-      for (var i = 0; i < array.length; i++) {
-        if (!isSymbolString(array[i])) {
-          rv.push(array[i]);
-        }
-      }
-      return rv;
-    }
-    function getOwnPropertyNames(object) {
-      return removeSymbolKeys($getOwnPropertyNames(object));
-    }
-    function keys(object) {
-      return removeSymbolKeys($keys(object));
-    }
-    function getOwnPropertySymbols(object) {
-      var rv = [];
-      var names = $getOwnPropertyNames(object);
-      for (var i = 0; i < names.length; i++) {
-        var symbol = symbolValues[names[i]];
-        if (symbol) {
-          rv.push(symbol);
-        }
-      }
-      return rv;
-    }
-    function getOwnPropertyDescriptor(object, name) {
-      return $getOwnPropertyDescriptor(object, toProperty(name));
-    }
-    function hasOwnProperty(name) {
-      return $hasOwnProperty.call(this, toProperty(name));
-    }
-    function getOption(name) {
-      return global.$traceurRuntime.options[name];
-    }
-    function defineProperty(object, name, descriptor) {
-      if (isShimSymbol(name)) {
-        name = name[symbolInternalProperty];
-      }
-      $defineProperty(object, name, descriptor);
-      return object;
-    }
-    function polyfillObject(Object) {
-      $defineProperty(Object, 'defineProperty', {value: defineProperty});
-      $defineProperty(Object, 'getOwnPropertyNames', {value: getOwnPropertyNames});
-      $defineProperty(Object, 'getOwnPropertyDescriptor', {value: getOwnPropertyDescriptor});
-      $defineProperty(Object.prototype, 'hasOwnProperty', {value: hasOwnProperty});
-      $defineProperty(Object, 'freeze', {value: freeze});
-      $defineProperty(Object, 'preventExtensions', {value: preventExtensions});
-      $defineProperty(Object, 'seal', {value: seal});
-      $defineProperty(Object, 'keys', {value: keys});
-    }
-    function exportStar(object) {
-      for (var i = 1; i < arguments.length; i++) {
-        var names = $getOwnPropertyNames(arguments[i]);
-        for (var j = 0; j < names.length; j++) {
-          var name = names[j];
-          if (name === '__esModule' || name === 'default' || isSymbolString(name))
-            continue;
-          (function(mod, name) {
-            $defineProperty(object, name, {
-              get: function() {
-                return mod[name];
-              },
-              enumerable: true
-            });
-          })(arguments[i], names[j]);
-        }
-      }
-      return object;
-    }
-    function isObject(x) {
-      return x != null && (typeof x === 'object' || typeof x === 'function');
-    }
-    function toObject(x) {
-      if (x == null)
-        throw $TypeError();
-      return $Object(x);
-    }
-    function checkObjectCoercible(argument) {
-      if (argument == null) {
-        throw new TypeError('Value cannot be converted to an Object');
-      }
-      return argument;
-    }
-    var hasNativeSymbol;
-    function polyfillSymbol(global, Symbol) {
-      if (!global.Symbol) {
-        global.Symbol = Symbol;
-        Object.getOwnPropertySymbols = getOwnPropertySymbols;
-        hasNativeSymbol = false;
-      } else {
-        hasNativeSymbol = true;
-      }
-      if (!global.Symbol.iterator) {
-        global.Symbol.iterator = Symbol('Symbol.iterator');
-      }
-      if (!global.Symbol.observer) {
-        global.Symbol.observer = Symbol('Symbol.observer');
+  };
+
+  babelHelpers.createClass = (function () {
+    function defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ("value" in descriptor) descriptor.writable = true;
+        Object.defineProperty(target, descriptor.key, descriptor);
       }
     }
-    function hasNativeSymbolFunc() {
-      return hasNativeSymbol;
-    }
-    function setupGlobals(global) {
-      polyfillSymbol(global, Symbol);
-      global.Reflect = global.Reflect || {};
-      global.Reflect.global = global.Reflect.global || global;
-      polyfillObject(global.Object);
-    }
-    setupGlobals(global);
-    global.$traceurRuntime = {
-      call: tailCall,
-      checkObjectCoercible: checkObjectCoercible,
-      construct: construct,
-      continuation: createContinuation,
-      createPrivateName: createPrivateName,
-      defineProperties: $defineProperties,
-      defineProperty: $defineProperty,
-      exportStar: exportStar,
-      getOwnHashObject: getOwnHashObject,
-      getOwnPropertyDescriptor: $getOwnPropertyDescriptor,
-      getOwnPropertyNames: $getOwnPropertyNames,
-      hasNativeSymbol: hasNativeSymbolFunc,
-      initTailRecursiveFunction: initTailRecursiveFunction,
-      isObject: isObject,
-      isPrivateName: isPrivateName,
-      isSymbolString: isSymbolString,
-      keys: $keys,
-      options: {},
-      setupGlobals: setupGlobals,
-      toObject: toObject,
-      toProperty: toProperty,
-      typeof: typeOf
+
+    return function (Constructor, protoProps, staticProps) {
+      if (protoProps) defineProperties(Constructor.prototype, protoProps);
+      if (staticProps) defineProperties(Constructor, staticProps);
+      return Constructor;
     };
   })();
-})(typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : this);
-(function() {
-  function buildFromEncodedParts(opt_scheme, opt_userInfo, opt_domain, opt_port, opt_path, opt_queryData, opt_fragment) {
-    var out = [];
-    if (opt_scheme) {
-      out.push(opt_scheme, ':');
-    }
-    if (opt_domain) {
-      out.push('//');
-      if (opt_userInfo) {
-        out.push(opt_userInfo, '@');
-      }
-      out.push(opt_domain);
-      if (opt_port) {
-        out.push(':', opt_port);
-      }
-    }
-    if (opt_path) {
-      out.push(opt_path);
-    }
-    if (opt_queryData) {
-      out.push('?', opt_queryData);
-    }
-    if (opt_fragment) {
-      out.push('#', opt_fragment);
-    }
-    return out.join('');
-  }
-  var splitRe = new RegExp('^' + '(?:' + '([^:/?#.]+)' + ':)?' + '(?://' + '(?:([^/?#]*)@)?' + '([\\w\\d\\-\\u0100-\\uffff.%]*)' + '(?::([0-9]+))?' + ')?' + '([^?#]+)?' + '(?:\\?([^#]*))?' + '(?:#(.*))?' + '$');
-  var ComponentIndex = {
-    SCHEME: 1,
-    USER_INFO: 2,
-    DOMAIN: 3,
-    PORT: 4,
-    PATH: 5,
-    QUERY_DATA: 6,
-    FRAGMENT: 7
-  };
-  function split(uri) {
-    return (uri.match(splitRe));
-  }
-  function removeDotSegments(path) {
-    if (path === '/')
-      return '/';
-    var leadingSlash = path[0] === '/' ? '/' : '';
-    var trailingSlash = path.slice(-1) === '/' ? '/' : '';
-    var segments = path.split('/');
-    var out = [];
-    var up = 0;
-    for (var pos = 0; pos < segments.length; pos++) {
-      var segment = segments[pos];
-      switch (segment) {
-        case '':
-        case '.':
-          break;
-        case '..':
-          if (out.length)
-            out.pop();
-          else
-            up++;
-          break;
-        default:
-          out.push(segment);
-      }
-    }
-    if (!leadingSlash) {
-      while (up-- > 0) {
-        out.unshift('..');
-      }
-      if (out.length === 0)
-        out.push('.');
-    }
-    return leadingSlash + out.join('/') + trailingSlash;
-  }
-  function joinAndCanonicalizePath(parts) {
-    var path = parts[ComponentIndex.PATH] || '';
-    path = removeDotSegments(path);
-    parts[ComponentIndex.PATH] = path;
-    return buildFromEncodedParts(parts[ComponentIndex.SCHEME], parts[ComponentIndex.USER_INFO], parts[ComponentIndex.DOMAIN], parts[ComponentIndex.PORT], parts[ComponentIndex.PATH], parts[ComponentIndex.QUERY_DATA], parts[ComponentIndex.FRAGMENT]);
-  }
-  function canonicalizeUrl(url) {
-    var parts = split(url);
-    return joinAndCanonicalizePath(parts);
-  }
-  function resolveUrl(base, url) {
-    var parts = split(url);
-    var baseParts = split(base);
-    if (parts[ComponentIndex.SCHEME]) {
-      return joinAndCanonicalizePath(parts);
-    } else {
-      parts[ComponentIndex.SCHEME] = baseParts[ComponentIndex.SCHEME];
-    }
-    for (var i = ComponentIndex.SCHEME; i <= ComponentIndex.PORT; i++) {
-      if (!parts[i]) {
-        parts[i] = baseParts[i];
-      }
-    }
-    if (parts[ComponentIndex.PATH][0] == '/') {
-      return joinAndCanonicalizePath(parts);
-    }
-    var path = baseParts[ComponentIndex.PATH];
-    var index = path.lastIndexOf('/');
-    path = path.slice(0, index + 1) + parts[ComponentIndex.PATH];
-    parts[ComponentIndex.PATH] = path;
-    return joinAndCanonicalizePath(parts);
-  }
-  function isAbsolute(name) {
-    if (!name)
-      return false;
-    if (name[0] === '/')
-      return true;
-    var parts = split(name);
-    if (parts[ComponentIndex.SCHEME])
-      return true;
-    return false;
-  }
-  $traceurRuntime.canonicalizeUrl = canonicalizeUrl;
-  $traceurRuntime.isAbsolute = isAbsolute;
-  $traceurRuntime.removeDotSegments = removeDotSegments;
-  $traceurRuntime.resolveUrl = resolveUrl;
-})();
-(function(global) {
-  'use strict';
-  var $__3 = $traceurRuntime,
-      canonicalizeUrl = $__3.canonicalizeUrl,
-      resolveUrl = $__3.resolveUrl,
-      isAbsolute = $__3.isAbsolute;
-  var moduleInstantiators = Object.create(null);
-  var baseURL;
-  if (global.location && global.location.href)
-    baseURL = resolveUrl(global.location.href, './');
-  else
-    baseURL = '';
-  function UncoatedModuleEntry(url, uncoatedModule) {
-    this.url = url;
-    this.value_ = uncoatedModule;
-  }
-  function ModuleEvaluationError(erroneousModuleName, cause) {
-    this.message = this.constructor.name + ': ' + this.stripCause(cause) + ' in ' + erroneousModuleName;
-    if (!(cause instanceof ModuleEvaluationError) && cause.stack)
-      this.stack = this.stripStack(cause.stack);
-    else
-      this.stack = '';
-  }
-  ModuleEvaluationError.prototype = Object.create(Error.prototype);
-  ModuleEvaluationError.prototype.constructor = ModuleEvaluationError;
-  ModuleEvaluationError.prototype.stripError = function(message) {
-    return message.replace(/.*Error:/, this.constructor.name + ':');
-  };
-  ModuleEvaluationError.prototype.stripCause = function(cause) {
-    if (!cause)
-      return '';
-    if (!cause.message)
-      return cause + '';
-    return this.stripError(cause.message);
-  };
-  ModuleEvaluationError.prototype.loadedBy = function(moduleName) {
-    this.stack += '\n loaded by ' + moduleName;
-  };
-  ModuleEvaluationError.prototype.stripStack = function(causeStack) {
-    var stack = [];
-    causeStack.split('\n').some(function(frame) {
-      if (/UncoatedModuleInstantiator/.test(frame))
-        return true;
-      stack.push(frame);
-    });
-    stack[0] = this.stripError(stack[0]);
-    return stack.join('\n');
-  };
-  function beforeLines(lines, number) {
-    var result = [];
-    var first = number - 3;
-    if (first < 0)
-      first = 0;
-    for (var i = first; i < number; i++) {
-      result.push(lines[i]);
-    }
-    return result;
-  }
-  function afterLines(lines, number) {
-    var last = number + 1;
-    if (last > lines.length - 1)
-      last = lines.length - 1;
-    var result = [];
-    for (var i = number; i <= last; i++) {
-      result.push(lines[i]);
-    }
-    return result;
-  }
-  function columnSpacing(columns) {
-    var result = '';
-    for (var i = 0; i < columns - 1; i++) {
-      result += '-';
-    }
-    return result;
-  }
-  function UncoatedModuleInstantiator(url, func) {
-    UncoatedModuleEntry.call(this, url, null);
-    this.func = func;
-  }
-  UncoatedModuleInstantiator.prototype = Object.create(UncoatedModuleEntry.prototype);
-  UncoatedModuleInstantiator.prototype.getUncoatedModule = function() {
-    var $__2 = this;
-    if (this.value_)
-      return this.value_;
-    try {
-      var relativeRequire;
-      if (typeof $traceurRuntime !== undefined && $traceurRuntime.require) {
-        relativeRequire = $traceurRuntime.require.bind(null, this.url);
-      }
-      return this.value_ = this.func.call(global, relativeRequire);
-    } catch (ex) {
-      if (ex instanceof ModuleEvaluationError) {
-        ex.loadedBy(this.url);
-        throw ex;
-      }
-      if (ex.stack) {
-        var lines = this.func.toString().split('\n');
-        var evaled = [];
-        ex.stack.split('\n').some(function(frame, index) {
-          if (frame.indexOf('UncoatedModuleInstantiator.getUncoatedModule') > 0)
-            return true;
-          var m = /(at\s[^\s]*\s).*>:(\d*):(\d*)\)/.exec(frame);
-          if (m) {
-            var line = parseInt(m[2], 10);
-            evaled = evaled.concat(beforeLines(lines, line));
-            if (index === 1) {
-              evaled.push(columnSpacing(m[3]) + '^ ' + $__2.url);
-            } else {
-              evaled.push(columnSpacing(m[3]) + '^');
-            }
-            evaled = evaled.concat(afterLines(lines, line));
-            evaled.push('= = = = = = = = =');
-          } else {
-            evaled.push(frame);
-          }
-        });
-        ex.stack = evaled.join('\n');
-      }
-      throw new ModuleEvaluationError(this.url, ex);
-    }
-  };
-  function getUncoatedModuleInstantiator(name) {
-    if (!name)
-      return;
-    var url = ModuleStore.normalize(name);
-    return moduleInstantiators[url];
-  }
-  ;
-  var moduleInstances = Object.create(null);
-  var liveModuleSentinel = {};
-  function Module(uncoatedModule) {
-    var isLive = arguments[1];
-    var coatedModule = Object.create(null);
-    Object.getOwnPropertyNames(uncoatedModule).forEach(function(name) {
-      var getter,
-          value;
-      if (isLive === liveModuleSentinel) {
-        var descr = Object.getOwnPropertyDescriptor(uncoatedModule, name);
-        if (descr.get)
-          getter = descr.get;
-      }
-      if (!getter) {
-        value = uncoatedModule[name];
-        getter = function() {
-          return value;
-        };
-      }
-      Object.defineProperty(coatedModule, name, {
-        get: getter,
-        enumerable: true
-      });
-    });
-    Object.preventExtensions(coatedModule);
-    return coatedModule;
-  }
-  var ModuleStore = {
-    normalize: function(name, refererName, refererAddress) {
-      if (typeof name !== 'string')
-        throw new TypeError('module name must be a string, not ' + typeof name);
-      if (isAbsolute(name))
-        return canonicalizeUrl(name);
-      if (/[^\.]\/\.\.\//.test(name)) {
-        throw new Error('module name embeds /../: ' + name);
-      }
-      if (name[0] === '.' && refererName)
-        return resolveUrl(refererName, name);
-      return canonicalizeUrl(name);
-    },
-    get: function(normalizedName) {
-      var m = getUncoatedModuleInstantiator(normalizedName);
-      if (!m)
-        return undefined;
-      var moduleInstance = moduleInstances[m.url];
-      if (moduleInstance)
-        return moduleInstance;
-      moduleInstance = Module(m.getUncoatedModule(), liveModuleSentinel);
-      return moduleInstances[m.url] = moduleInstance;
-    },
-    set: function(normalizedName, module) {
-      normalizedName = String(normalizedName);
-      moduleInstantiators[normalizedName] = new UncoatedModuleInstantiator(normalizedName, function() {
-        return module;
-      });
-      moduleInstances[normalizedName] = module;
-    },
-    get baseURL() {
-      return baseURL;
-    },
-    set baseURL(v) {
-      baseURL = String(v);
-    },
-    registerModule: function(name, deps, func) {
-      var normalizedName = ModuleStore.normalize(name);
-      if (moduleInstantiators[normalizedName])
-        throw new Error('duplicate module named ' + normalizedName);
-      moduleInstantiators[normalizedName] = new UncoatedModuleInstantiator(normalizedName, func);
-    },
-    bundleStore: Object.create(null),
-    register: function(name, deps, func) {
-      if (!deps || !deps.length && !func.length) {
-        this.registerModule(name, deps, func);
-      } else {
-        this.bundleStore[name] = {
-          deps: deps,
-          execute: function() {
-            var $__2 = arguments;
-            var depMap = {};
-            deps.forEach(function(dep, index) {
-              return depMap[dep] = $__2[index];
-            });
-            var registryEntry = func.call(this, depMap);
-            registryEntry.execute.call(this);
-            return registryEntry.exports;
-          }
-        };
-      }
-    },
-    getAnonymousModule: function(func) {
-      return new Module(func.call(global), liveModuleSentinel);
-    }
-  };
-  var moduleStoreModule = new Module({ModuleStore: ModuleStore});
-  ModuleStore.set('@traceur/src/runtime/ModuleStore.js', moduleStoreModule);
-  var setupGlobals = $traceurRuntime.setupGlobals;
-  $traceurRuntime.setupGlobals = function(global) {
-    setupGlobals(global);
-  };
-  $traceurRuntime.ModuleStore = ModuleStore;
-  global.System = {
-    register: ModuleStore.register.bind(ModuleStore),
-    registerModule: ModuleStore.registerModule.bind(ModuleStore),
-    get: ModuleStore.get,
-    set: ModuleStore.set,
-    normalize: ModuleStore.normalize
-  };
-})(typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : this);
-System.registerModule("traceur-runtime@0.0.91/src/runtime/async.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/async.js";
-  if (typeof $traceurRuntime !== 'object') {
-    throw new Error('traceur runtime not found.');
-  }
-  var $createPrivateName = $traceurRuntime.createPrivateName;
-  var $defineProperty = $traceurRuntime.defineProperty;
-  var $defineProperties = $traceurRuntime.defineProperties;
-  var $create = Object.create;
-  var thisName = $createPrivateName();
-  var argsName = $createPrivateName();
-  var observeName = $createPrivateName();
-  function AsyncGeneratorFunction() {}
-  function AsyncGeneratorFunctionPrototype() {}
-  AsyncGeneratorFunction.prototype = AsyncGeneratorFunctionPrototype;
-  AsyncGeneratorFunctionPrototype.constructor = AsyncGeneratorFunction;
-  $defineProperty(AsyncGeneratorFunctionPrototype, 'constructor', {enumerable: false});
-  var AsyncGeneratorContext = function() {
-    function AsyncGeneratorContext(observer) {
-      var $__2 = this;
-      this.decoratedObserver = $traceurRuntime.createDecoratedGenerator(observer, function() {
-        $__2.done = true;
-      });
-      this.done = false;
-      this.inReturn = false;
-    }
-    return ($traceurRuntime.createClass)(AsyncGeneratorContext, {
-      throw: function(error) {
-        if (!this.inReturn) {
-          throw error;
-        }
-      },
-      yield: function(value) {
-        if (this.done) {
-          this.inReturn = true;
-          throw undefined;
-        }
-        var result;
-        try {
-          result = this.decoratedObserver.next(value);
-        } catch (e) {
-          this.done = true;
-          throw e;
-        }
-        if (result === undefined) {
-          return;
-        }
-        if (result.done) {
-          this.done = true;
-          this.inReturn = true;
-          throw undefined;
-        }
-        return result.value;
-      },
-      yieldFor: function(observable) {
-        var ctx = this;
-        return $traceurRuntime.observeForEach(observable[$traceurRuntime.toProperty(Symbol.observer)].bind(observable), function(value) {
-          if (ctx.done) {
-            this.return();
-            return;
-          }
-          var result;
-          try {
-            result = ctx.decoratedObserver.next(value);
-          } catch (e) {
-            ctx.done = true;
-            throw e;
-          }
-          if (result === undefined) {
-            return;
-          }
-          if (result.done) {
-            ctx.done = true;
-          }
-          return result;
-        });
-      }
-    }, {});
-  }();
-  AsyncGeneratorFunctionPrototype.prototype[Symbol.observer] = function(observer) {
-    var observe = this[observeName];
-    var ctx = new AsyncGeneratorContext(observer);
-    $traceurRuntime.schedule(function() {
-      return observe(ctx);
-    }).then(function(value) {
-      if (!ctx.done) {
-        ctx.decoratedObserver.return(value);
-      }
-    }).catch(function(error) {
-      if (!ctx.done) {
-        ctx.decoratedObserver.throw(error);
-      }
-    });
-    return ctx.decoratedObserver;
-  };
-  $defineProperty(AsyncGeneratorFunctionPrototype.prototype, Symbol.observer, {enumerable: false});
-  function initAsyncGeneratorFunction(functionObject) {
-    functionObject.prototype = $create(AsyncGeneratorFunctionPrototype.prototype);
-    functionObject.__proto__ = AsyncGeneratorFunctionPrototype;
-    return functionObject;
-  }
-  function createAsyncGeneratorInstance(observe, functionObject) {
-    for (var args = [],
-        $__10 = 2; $__10 < arguments.length; $__10++)
-      args[$__10 - 2] = arguments[$__10];
-    var object = $create(functionObject.prototype);
-    object[thisName] = this;
-    object[argsName] = args;
-    object[observeName] = observe;
-    return object;
-  }
-  function observeForEach(observe, next) {
-    return new Promise(function(resolve, reject) {
-      var generator = observe({
-        next: function(value) {
-          return next.call(generator, value);
-        },
-        throw: function(error) {
-          reject(error);
-        },
-        return: function(value) {
-          resolve(value);
-        }
-      });
-    });
-  }
-  function schedule(asyncF) {
-    return Promise.resolve().then(asyncF);
-  }
-  var generator = Symbol();
-  var onDone = Symbol();
-  var DecoratedGenerator = function() {
-    function DecoratedGenerator(_generator, _onDone) {
-      this[generator] = _generator;
-      this[onDone] = _onDone;
-    }
-    return ($traceurRuntime.createClass)(DecoratedGenerator, {
-      next: function(value) {
-        var result = this[generator].next(value);
-        if (result !== undefined && result.done) {
-          this[onDone].call(this);
-        }
-        return result;
-      },
-      throw: function(error) {
-        this[onDone].call(this);
-        return this[generator].throw(error);
-      },
-      return: function(value) {
-        this[onDone].call(this);
-        return this[generator].return(value);
-      }
-    }, {});
-  }();
-  function createDecoratedGenerator(generator, onDone) {
-    return new DecoratedGenerator(generator, onDone);
-  }
-  Array.prototype[$traceurRuntime.toProperty(Symbol.observer)] = function(observer) {
-    var done = false;
-    var decoratedObserver = createDecoratedGenerator(observer, function() {
-      return done = true;
-    });
-    var $__6 = true;
-    var $__7 = false;
-    var $__8 = undefined;
-    try {
-      for (var $__4 = void 0,
-          $__3 = (this)[$traceurRuntime.toProperty(Symbol.iterator)](); !($__6 = ($__4 = $__3.next()).done); $__6 = true) {
-        var value = $__4.value;
-        {
-          decoratedObserver.next(value);
-          if (done) {
-            return;
-          }
-        }
-      }
-    } catch ($__9) {
-      $__7 = true;
-      $__8 = $__9;
-    } finally {
-      try {
-        if (!$__6 && $__3.return != null) {
-          $__3.return();
-        }
-      } finally {
-        if ($__7) {
-          throw $__8;
-        }
-      }
-    }
-    decoratedObserver.return();
-    return decoratedObserver;
-  };
-  $defineProperty(Array.prototype, $traceurRuntime.toProperty(Symbol.observer), {enumerable: false});
-  $traceurRuntime.initAsyncGeneratorFunction = initAsyncGeneratorFunction;
-  $traceurRuntime.createAsyncGeneratorInstance = createAsyncGeneratorInstance;
-  $traceurRuntime.observeForEach = observeForEach;
-  $traceurRuntime.schedule = schedule;
-  $traceurRuntime.createDecoratedGenerator = createDecoratedGenerator;
-  return {};
-});
-System.registerModule("traceur-runtime@0.0.91/src/runtime/classes.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/classes.js";
-  var $Object = Object;
-  var $TypeError = TypeError;
-  var $create = $Object.create;
-  var $defineProperties = $traceurRuntime.defineProperties;
-  var $defineProperty = $traceurRuntime.defineProperty;
-  var $getOwnPropertyDescriptor = $traceurRuntime.getOwnPropertyDescriptor;
-  var $getOwnPropertyNames = $traceurRuntime.getOwnPropertyNames;
-  var $getPrototypeOf = Object.getPrototypeOf;
-  var $__1 = Object,
-      getOwnPropertyNames = $__1.getOwnPropertyNames,
-      getOwnPropertySymbols = $__1.getOwnPropertySymbols;
-  function superDescriptor(homeObject, name) {
-    var proto = $getPrototypeOf(homeObject);
-    do {
-      var result = $getOwnPropertyDescriptor(proto, name);
-      if (result)
-        return result;
-      proto = $getPrototypeOf(proto);
-    } while (proto);
-    return undefined;
-  }
-  function superConstructor(ctor) {
-    return ctor.__proto__;
-  }
-  function superGet(self, homeObject, name) {
-    var descriptor = superDescriptor(homeObject, name);
-    if (descriptor) {
-      var value = descriptor.value;
-      if (value)
-        return value;
-      if (!descriptor.get)
-        return value;
-      return descriptor.get.call(self);
-    }
-    return undefined;
-  }
-  function superSet(self, homeObject, name, value) {
-    var descriptor = superDescriptor(homeObject, name);
-    if (descriptor && descriptor.set) {
-      descriptor.set.call(self, value);
-      return value;
-    }
-    throw $TypeError(("super has no setter '" + name + "'."));
-  }
-  function forEachPropertyKey(object, f) {
-    getOwnPropertyNames(object).forEach(f);
-    getOwnPropertySymbols(object).forEach(f);
-  }
-  function getDescriptors(object) {
-    var descriptors = {};
-    forEachPropertyKey(object, function(key) {
-      descriptors[key] = $getOwnPropertyDescriptor(object, key);
-      descriptors[key].enumerable = false;
-    });
-    return descriptors;
-  }
-  var nonEnum = {enumerable: false};
-  function makePropertiesNonEnumerable(object) {
-    forEachPropertyKey(object, function(key) {
-      $defineProperty(object, key, nonEnum);
-    });
-  }
-  function createClass(ctor, object, staticObject, superClass) {
-    $defineProperty(object, 'constructor', {
-      value: ctor,
-      configurable: true,
-      enumerable: false,
-      writable: true
-    });
-    if (arguments.length > 3) {
-      if (typeof superClass === 'function')
-        ctor.__proto__ = superClass;
-      ctor.prototype = $create(getProtoParent(superClass), getDescriptors(object));
-    } else {
-      makePropertiesNonEnumerable(object);
-      ctor.prototype = object;
-    }
-    $defineProperty(ctor, 'prototype', {
-      configurable: false,
-      writable: false
-    });
-    return $defineProperties(ctor, getDescriptors(staticObject));
-  }
-  function getProtoParent(superClass) {
-    if (typeof superClass === 'function') {
-      var prototype = superClass.prototype;
-      if ($Object(prototype) === prototype || prototype === null)
-        return superClass.prototype;
-      throw new $TypeError('super prototype must be an Object or null');
-    }
-    if (superClass === null)
-      return null;
-    throw new $TypeError(("Super expression must either be null or a function, not " + typeof superClass + "."));
-  }
-  $traceurRuntime.createClass = createClass;
-  $traceurRuntime.superConstructor = superConstructor;
-  $traceurRuntime.superGet = superGet;
-  $traceurRuntime.superSet = superSet;
-  return {};
-});
-System.registerModule("traceur-runtime@0.0.91/src/runtime/destructuring.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/destructuring.js";
-  function iteratorToArray(iter) {
-    var rv = [];
-    var i = 0;
-    var tmp;
-    while (!(tmp = iter.next()).done) {
-      rv[i++] = tmp.value;
-    }
-    return rv;
-  }
-  $traceurRuntime.iteratorToArray = iteratorToArray;
-  return {};
-});
-System.registerModule("traceur-runtime@0.0.91/src/runtime/generators.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/generators.js";
-  if (typeof $traceurRuntime !== 'object') {
-    throw new Error('traceur runtime not found.');
-  }
-  var createPrivateName = $traceurRuntime.createPrivateName;
-  var $defineProperties = $traceurRuntime.defineProperties;
-  var $defineProperty = $traceurRuntime.defineProperty;
-  var $create = Object.create;
-  var $TypeError = TypeError;
-  function nonEnum(value) {
-    return {
-      configurable: true,
-      enumerable: false,
-      value: value,
-      writable: true
-    };
-  }
-  var ST_NEWBORN = 0;
-  var ST_EXECUTING = 1;
-  var ST_SUSPENDED = 2;
-  var ST_CLOSED = 3;
-  var END_STATE = -2;
-  var RETHROW_STATE = -3;
-  function getInternalError(state) {
-    return new Error('Traceur compiler bug: invalid state in state machine: ' + state);
-  }
-  var RETURN_SENTINEL = {};
-  function GeneratorContext() {
-    this.state = 0;
-    this.GState = ST_NEWBORN;
-    this.storedException = undefined;
-    this.finallyFallThrough = undefined;
-    this.sent_ = undefined;
-    this.returnValue = undefined;
-    this.oldReturnValue = undefined;
-    this.tryStack_ = [];
-  }
-  GeneratorContext.prototype = {
-    pushTry: function(catchState, finallyState) {
-      if (finallyState !== null) {
-        var finallyFallThrough = null;
-        for (var i = this.tryStack_.length - 1; i >= 0; i--) {
-          if (this.tryStack_[i].catch !== undefined) {
-            finallyFallThrough = this.tryStack_[i].catch;
-            break;
-          }
-        }
-        if (finallyFallThrough === null)
-          finallyFallThrough = RETHROW_STATE;
-        this.tryStack_.push({
-          finally: finallyState,
-          finallyFallThrough: finallyFallThrough
-        });
-      }
-      if (catchState !== null) {
-        this.tryStack_.push({catch: catchState});
-      }
-    },
-    popTry: function() {
-      this.tryStack_.pop();
-    },
-    maybeUncatchable: function() {
-      if (this.storedException === RETURN_SENTINEL) {
-        throw RETURN_SENTINEL;
-      }
-    },
-    get sent() {
-      this.maybeThrow();
-      return this.sent_;
-    },
-    set sent(v) {
-      this.sent_ = v;
-    },
-    get sentIgnoreThrow() {
-      return this.sent_;
-    },
-    maybeThrow: function() {
-      if (this.action === 'throw') {
-        this.action = 'next';
-        throw this.sent_;
-      }
-    },
-    end: function() {
-      switch (this.state) {
-        case END_STATE:
-          return this;
-        case RETHROW_STATE:
-          throw this.storedException;
-        default:
-          throw getInternalError(this.state);
-      }
-    },
-    handleException: function(ex) {
-      this.GState = ST_CLOSED;
-      this.state = END_STATE;
-      throw ex;
-    },
-    wrapYieldStar: function(iterator) {
-      var ctx = this;
-      return {
-        next: function(v) {
-          return iterator.next(v);
-        },
-        throw: function(e) {
-          var result;
-          if (e === RETURN_SENTINEL) {
-            if (iterator.return) {
-              result = iterator.return(ctx.returnValue);
-              if (!result.done) {
-                ctx.returnValue = ctx.oldReturnValue;
-                return result;
-              }
-              ctx.returnValue = result.value;
-            }
-            throw e;
-          }
-          if (iterator.throw) {
-            return iterator.throw(e);
-          }
-          iterator.return && iterator.return();
-          throw $TypeError('Inner iterator does not have a throw method');
-        }
-      };
-    }
-  };
-  function nextOrThrow(ctx, moveNext, action, x) {
-    switch (ctx.GState) {
-      case ST_EXECUTING:
-        throw new Error(("\"" + action + "\" on executing generator"));
-      case ST_CLOSED:
-        if (action == 'next') {
-          return {
-            value: undefined,
-            done: true
-          };
-        }
-        if (x === RETURN_SENTINEL) {
-          return {
-            value: ctx.returnValue,
-            done: true
-          };
-        }
-        throw x;
-      case ST_NEWBORN:
-        if (action === 'throw') {
-          ctx.GState = ST_CLOSED;
-          if (x === RETURN_SENTINEL) {
-            return {
-              value: ctx.returnValue,
-              done: true
-            };
-          }
-          throw x;
-        }
-        if (x !== undefined)
-          throw $TypeError('Sent value to newborn generator');
-      case ST_SUSPENDED:
-        ctx.GState = ST_EXECUTING;
-        ctx.action = action;
-        ctx.sent = x;
-        var value;
-        try {
-          value = moveNext(ctx);
-        } catch (ex) {
-          if (ex === RETURN_SENTINEL) {
-            value = ctx;
-          } else {
-            throw ex;
-          }
-        }
-        var done = value === ctx;
-        if (done)
-          value = ctx.returnValue;
-        ctx.GState = done ? ST_CLOSED : ST_SUSPENDED;
-        return {
-          value: value,
-          done: done
-        };
-    }
-  }
-  var ctxName = createPrivateName();
-  var moveNextName = createPrivateName();
-  function GeneratorFunction() {}
-  function GeneratorFunctionPrototype() {}
-  GeneratorFunction.prototype = GeneratorFunctionPrototype;
-  $defineProperty(GeneratorFunctionPrototype, 'constructor', nonEnum(GeneratorFunction));
-  GeneratorFunctionPrototype.prototype = {
-    constructor: GeneratorFunctionPrototype,
-    next: function(v) {
-      return nextOrThrow(this[ctxName], this[moveNextName], 'next', v);
-    },
-    throw: function(v) {
-      return nextOrThrow(this[ctxName], this[moveNextName], 'throw', v);
-    },
-    return: function(v) {
-      this[ctxName].oldReturnValue = this[ctxName].returnValue;
-      this[ctxName].returnValue = v;
-      return nextOrThrow(this[ctxName], this[moveNextName], 'throw', RETURN_SENTINEL);
-    }
-  };
-  $defineProperties(GeneratorFunctionPrototype.prototype, {
-    constructor: {enumerable: false},
-    next: {enumerable: false},
-    throw: {enumerable: false},
-    return: {enumerable: false}
-  });
-  Object.defineProperty(GeneratorFunctionPrototype.prototype, Symbol.iterator, nonEnum(function() {
-    return this;
-  }));
-  function createGeneratorInstance(innerFunction, functionObject, self) {
-    var moveNext = getMoveNext(innerFunction, self);
-    var ctx = new GeneratorContext();
-    var object = $create(functionObject.prototype);
-    object[ctxName] = ctx;
-    object[moveNextName] = moveNext;
-    return object;
-  }
-  function initGeneratorFunction(functionObject) {
-    functionObject.prototype = $create(GeneratorFunctionPrototype.prototype);
-    functionObject.__proto__ = GeneratorFunctionPrototype;
-    return functionObject;
-  }
-  function AsyncFunctionContext() {
-    GeneratorContext.call(this);
-    this.err = undefined;
-    var ctx = this;
-    ctx.result = new Promise(function(resolve, reject) {
-      ctx.resolve = resolve;
-      ctx.reject = reject;
-    });
-  }
-  AsyncFunctionContext.prototype = $create(GeneratorContext.prototype);
-  AsyncFunctionContext.prototype.end = function() {
-    switch (this.state) {
-      case END_STATE:
-        this.resolve(this.returnValue);
-        break;
-      case RETHROW_STATE:
-        this.reject(this.storedException);
-        break;
-      default:
-        this.reject(getInternalError(this.state));
-    }
-  };
-  AsyncFunctionContext.prototype.handleException = function() {
-    this.state = RETHROW_STATE;
-  };
-  function asyncWrap(innerFunction, self) {
-    var moveNext = getMoveNext(innerFunction, self);
-    var ctx = new AsyncFunctionContext();
-    ctx.createCallback = function(newState) {
-      return function(value) {
-        ctx.state = newState;
-        ctx.value = value;
-        moveNext(ctx);
-      };
-    };
-    ctx.errback = function(err) {
-      handleCatch(ctx, err);
-      moveNext(ctx);
-    };
-    moveNext(ctx);
-    return ctx.result;
-  }
-  function getMoveNext(innerFunction, self) {
-    return function(ctx) {
-      while (true) {
-        try {
-          return innerFunction.call(self, ctx);
-        } catch (ex) {
-          handleCatch(ctx, ex);
-        }
-      }
-    };
-  }
-  function handleCatch(ctx, ex) {
-    ctx.storedException = ex;
-    var last = ctx.tryStack_[ctx.tryStack_.length - 1];
-    if (!last) {
-      ctx.handleException(ex);
-      return;
-    }
-    ctx.state = last.catch !== undefined ? last.catch : last.finally;
-    if (last.finallyFallThrough !== undefined)
-      ctx.finallyFallThrough = last.finallyFallThrough;
-  }
-  $traceurRuntime.asyncWrap = asyncWrap;
-  $traceurRuntime.initGeneratorFunction = initGeneratorFunction;
-  $traceurRuntime.createGeneratorInstance = createGeneratorInstance;
-  return {};
-});
-System.registerModule("traceur-runtime@0.0.91/src/runtime/relativeRequire.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/relativeRequire.js";
-  var path;
-  function relativeRequire(callerPath, requiredPath) {
-    path = path || typeof require !== 'undefined' && require('path');
-    function isDirectory(path) {
-      return path.slice(-1) === '/';
-    }
-    function isAbsolute(path) {
-      return path[0] === '/';
-    }
-    function isRelative(path) {
-      return path[0] === '.';
-    }
-    if (isDirectory(requiredPath) || isAbsolute(requiredPath))
-      return;
-    return isRelative(requiredPath) ? require(path.resolve(path.dirname(callerPath), requiredPath)) : require(requiredPath);
-  }
-  $traceurRuntime.require = relativeRequire;
-  return {};
-});
-System.registerModule("traceur-runtime@0.0.91/src/runtime/spread.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/spread.js";
-  function spread() {
-    var rv = [],
-        j = 0,
-        iterResult;
-    for (var i = 0; i < arguments.length; i++) {
-      var valueToSpread = $traceurRuntime.checkObjectCoercible(arguments[i]);
-      if (typeof valueToSpread[$traceurRuntime.toProperty(Symbol.iterator)] !== 'function') {
-        throw new TypeError('Cannot spread non-iterable object.');
-      }
-      var iter = valueToSpread[$traceurRuntime.toProperty(Symbol.iterator)]();
-      while (!(iterResult = iter.next()).done) {
-        rv[j++] = iterResult.value;
-      }
-    }
-    return rv;
-  }
-  $traceurRuntime.spread = spread;
-  return {};
-});
-System.registerModule("traceur-runtime@0.0.91/src/runtime/template.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/template.js";
-  var $__1 = Object,
-      defineProperty = $__1.defineProperty,
-      freeze = $__1.freeze;
-  var slice = Array.prototype.slice;
-  var map = Object.create(null);
-  function getTemplateObject(raw) {
-    var cooked = arguments[1];
-    var key = raw.join('${}');
-    var templateObject = map[key];
-    if (templateObject)
-      return templateObject;
-    if (!cooked) {
-      cooked = slice.call(raw);
-    }
-    return map[key] = freeze(defineProperty(cooked, 'raw', {value: freeze(raw)}));
-  }
-  $traceurRuntime.getTemplateObject = getTemplateObject;
-  return {};
-});
-System.registerModule("traceur-runtime@0.0.91/src/runtime/type-assertions.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/type-assertions.js";
-  var types = {
-    any: {name: 'any'},
-    boolean: {name: 'boolean'},
-    number: {name: 'number'},
-    string: {name: 'string'},
-    symbol: {name: 'symbol'},
-    void: {name: 'void'}
-  };
-  var GenericType = function() {
-    function GenericType(type, argumentTypes) {
-      this.type = type;
-      this.argumentTypes = argumentTypes;
-    }
-    return ($traceurRuntime.createClass)(GenericType, {}, {});
-  }();
-  var typeRegister = Object.create(null);
-  function genericType(type) {
-    for (var argumentTypes = [],
-        $__2 = 1; $__2 < arguments.length; $__2++)
-      argumentTypes[$__2 - 1] = arguments[$__2];
-    var typeMap = typeRegister;
-    var key = $traceurRuntime.getOwnHashObject(type).hash;
-    if (!typeMap[key]) {
-      typeMap[key] = Object.create(null);
-    }
-    typeMap = typeMap[key];
-    for (var i = 0; i < argumentTypes.length - 1; i++) {
-      key = $traceurRuntime.getOwnHashObject(argumentTypes[i]).hash;
-      if (!typeMap[key]) {
-        typeMap[key] = Object.create(null);
-      }
-      typeMap = typeMap[key];
-    }
-    var tail = argumentTypes[argumentTypes.length - 1];
-    key = $traceurRuntime.getOwnHashObject(tail).hash;
-    if (!typeMap[key]) {
-      typeMap[key] = new GenericType(type, argumentTypes);
-    }
-    return typeMap[key];
-  }
-  $traceurRuntime.GenericType = GenericType;
-  $traceurRuntime.genericType = genericType;
-  $traceurRuntime.type = types;
-  return {};
-});
-System.registerModule("traceur-runtime@0.0.91/src/runtime/runtime-modules.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/runtime-modules.js";
-  System.get("traceur-runtime@0.0.91/src/runtime/relativeRequire.js");
-  System.get("traceur-runtime@0.0.91/src/runtime/spread.js");
-  System.get("traceur-runtime@0.0.91/src/runtime/destructuring.js");
-  System.get("traceur-runtime@0.0.91/src/runtime/classes.js");
-  System.get("traceur-runtime@0.0.91/src/runtime/async.js");
-  System.get("traceur-runtime@0.0.91/src/runtime/generators.js");
-  System.get("traceur-runtime@0.0.91/src/runtime/template.js");
-  System.get("traceur-runtime@0.0.91/src/runtime/type-assertions.js");
-  return {};
-});
-System.get("traceur-runtime@0.0.91/src/runtime/runtime-modules.js" + '');
-System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/utils.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/polyfills/utils.js";
-  var $ceil = Math.ceil;
-  var $floor = Math.floor;
-  var $isFinite = isFinite;
-  var $isNaN = isNaN;
-  var $pow = Math.pow;
-  var $min = Math.min;
-  var toObject = $traceurRuntime.toObject;
-  function toUint32(x) {
-    return x >>> 0;
-  }
-  function isObject(x) {
-    return x && (typeof x === 'object' || typeof x === 'function');
-  }
-  function isCallable(x) {
-    return typeof x === 'function';
-  }
-  function isNumber(x) {
-    return typeof x === 'number';
-  }
-  function toInteger(x) {
-    x = +x;
-    if ($isNaN(x))
-      return 0;
-    if (x === 0 || !$isFinite(x))
-      return x;
-    return x > 0 ? $floor(x) : $ceil(x);
-  }
-  var MAX_SAFE_LENGTH = $pow(2, 53) - 1;
-  function toLength(x) {
-    var len = toInteger(x);
-    return len < 0 ? 0 : $min(len, MAX_SAFE_LENGTH);
-  }
-  function checkIterable(x) {
-    return !isObject(x) ? undefined : x[Symbol.iterator];
-  }
-  function isConstructor(x) {
-    return isCallable(x);
-  }
-  function createIteratorResultObject(value, done) {
-    return {
-      value: value,
-      done: done
-    };
-  }
-  function maybeDefine(object, name, descr) {
-    if (!(name in object)) {
-      Object.defineProperty(object, name, descr);
-    }
-  }
-  function maybeDefineMethod(object, name, value) {
-    maybeDefine(object, name, {
-      value: value,
-      configurable: true,
-      enumerable: false,
-      writable: true
-    });
-  }
-  function maybeDefineConst(object, name, value) {
-    maybeDefine(object, name, {
-      value: value,
-      configurable: false,
-      enumerable: false,
-      writable: false
-    });
-  }
-  function maybeAddFunctions(object, functions) {
-    for (var i = 0; i < functions.length; i += 2) {
-      var name = functions[i];
-      var value = functions[i + 1];
-      maybeDefineMethod(object, name, value);
-    }
-  }
-  function maybeAddConsts(object, consts) {
-    for (var i = 0; i < consts.length; i += 2) {
-      var name = consts[i];
-      var value = consts[i + 1];
-      maybeDefineConst(object, name, value);
-    }
-  }
-  function maybeAddIterator(object, func, Symbol) {
-    if (!Symbol || !Symbol.iterator || object[Symbol.iterator])
-      return;
-    if (object['@@iterator'])
-      func = object['@@iterator'];
-    Object.defineProperty(object, Symbol.iterator, {
-      value: func,
-      configurable: true,
-      enumerable: false,
-      writable: true
-    });
-  }
-  var polyfills = [];
-  function registerPolyfill(func) {
-    polyfills.push(func);
-  }
-  function polyfillAll(global) {
-    polyfills.forEach(function(f) {
-      return f(global);
-    });
-  }
-  return {
-    get toObject() {
-      return toObject;
-    },
-    get toUint32() {
-      return toUint32;
-    },
-    get isObject() {
-      return isObject;
-    },
-    get isCallable() {
-      return isCallable;
-    },
-    get isNumber() {
-      return isNumber;
-    },
-    get toInteger() {
-      return toInteger;
-    },
-    get toLength() {
-      return toLength;
-    },
-    get checkIterable() {
-      return checkIterable;
-    },
-    get isConstructor() {
-      return isConstructor;
-    },
-    get createIteratorResultObject() {
-      return createIteratorResultObject;
-    },
-    get maybeDefine() {
-      return maybeDefine;
-    },
-    get maybeDefineMethod() {
-      return maybeDefineMethod;
-    },
-    get maybeDefineConst() {
-      return maybeDefineConst;
-    },
-    get maybeAddFunctions() {
-      return maybeAddFunctions;
-    },
-    get maybeAddConsts() {
-      return maybeAddConsts;
-    },
-    get maybeAddIterator() {
-      return maybeAddIterator;
-    },
-    get registerPolyfill() {
-      return registerPolyfill;
-    },
-    get polyfillAll() {
-      return polyfillAll;
-    }
-  };
-});
-System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/Map.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/polyfills/Map.js";
-  var $__0 = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/utils.js"),
-      isObject = $__0.isObject,
-      registerPolyfill = $__0.registerPolyfill;
-  var $__10 = $traceurRuntime,
-      getOwnHashObject = $__10.getOwnHashObject,
-      hasNativeSymbol = $__10.hasNativeSymbol;
-  var $hasOwnProperty = Object.prototype.hasOwnProperty;
-  var deletedSentinel = {};
-  function lookupIndex(map, key) {
-    if (isObject(key)) {
-      var hashObject = getOwnHashObject(key);
-      return hashObject && map.objectIndex_[hashObject.hash];
-    }
-    if (typeof key === 'string')
-      return map.stringIndex_[key];
-    return map.primitiveIndex_[key];
-  }
-  function initMap(map) {
-    map.entries_ = [];
-    map.objectIndex_ = Object.create(null);
-    map.stringIndex_ = Object.create(null);
-    map.primitiveIndex_ = Object.create(null);
-    map.deletedCount_ = 0;
-  }
-  var Map = function() {
-    function Map() {
-      var $__12,
-          $__13;
-      var iterable = arguments[0];
-      if (!isObject(this))
-        throw new TypeError('Map called on incompatible type');
-      if ($hasOwnProperty.call(this, 'entries_')) {
-        throw new TypeError('Map can not be reentrantly initialised');
-      }
-      initMap(this);
-      if (iterable !== null && iterable !== undefined) {
-        var $__6 = true;
-        var $__7 = false;
-        var $__8 = undefined;
-        try {
-          for (var $__4 = void 0,
-              $__3 = (iterable)[$traceurRuntime.toProperty(Symbol.iterator)](); !($__6 = ($__4 = $__3.next()).done); $__6 = true) {
-            var $__11 = $__4.value,
-                key = ($__12 = $__11[$traceurRuntime.toProperty(Symbol.iterator)](), ($__13 = $__12.next()).done ? void 0 : $__13.value),
-                value = ($__13 = $__12.next()).done ? void 0 : $__13.value;
-            {
-              this.set(key, value);
-            }
-          }
-        } catch ($__9) {
-          $__7 = true;
-          $__8 = $__9;
-        } finally {
-          try {
-            if (!$__6 && $__3.return != null) {
-              $__3.return();
-            }
-          } finally {
-            if ($__7) {
-              throw $__8;
-            }
-          }
-        }
-      }
-    }
-    return ($traceurRuntime.createClass)(Map, {
-      get size() {
-        return this.entries_.length / 2 - this.deletedCount_;
-      },
-      get: function(key) {
-        var index = lookupIndex(this, key);
-        if (index !== undefined)
-          return this.entries_[index + 1];
-      },
-      set: function(key, value) {
-        var objectMode = isObject(key);
-        var stringMode = typeof key === 'string';
-        var index = lookupIndex(this, key);
-        if (index !== undefined) {
-          this.entries_[index + 1] = value;
-        } else {
-          index = this.entries_.length;
-          this.entries_[index] = key;
-          this.entries_[index + 1] = value;
-          if (objectMode) {
-            var hashObject = getOwnHashObject(key);
-            var hash = hashObject.hash;
-            this.objectIndex_[hash] = index;
-          } else if (stringMode) {
-            this.stringIndex_[key] = index;
-          } else {
-            this.primitiveIndex_[key] = index;
-          }
-        }
-        return this;
-      },
-      has: function(key) {
-        return lookupIndex(this, key) !== undefined;
-      },
-      delete: function(key) {
-        var objectMode = isObject(key);
-        var stringMode = typeof key === 'string';
-        var index;
-        var hash;
-        if (objectMode) {
-          var hashObject = getOwnHashObject(key);
-          if (hashObject) {
-            index = this.objectIndex_[hash = hashObject.hash];
-            delete this.objectIndex_[hash];
-          }
-        } else if (stringMode) {
-          index = this.stringIndex_[key];
-          delete this.stringIndex_[key];
-        } else {
-          index = this.primitiveIndex_[key];
-          delete this.primitiveIndex_[key];
-        }
-        if (index !== undefined) {
-          this.entries_[index] = deletedSentinel;
-          this.entries_[index + 1] = undefined;
-          this.deletedCount_++;
-          return true;
-        }
-        return false;
-      },
-      clear: function() {
-        initMap(this);
-      },
-      forEach: function(callbackFn) {
-        var thisArg = arguments[1];
-        for (var i = 0; i < this.entries_.length; i += 2) {
-          var key = this.entries_[i];
-          var value = this.entries_[i + 1];
-          if (key === deletedSentinel)
-            continue;
-          callbackFn.call(thisArg, value, key, this);
-        }
-      },
-      entries: $traceurRuntime.initGeneratorFunction(function $__14() {
-        var i,
-            key,
-            value;
-        return $traceurRuntime.createGeneratorInstance(function($ctx) {
-          while (true)
-            switch ($ctx.state) {
-              case 0:
-                i = 0;
-                $ctx.state = 12;
-                break;
-              case 12:
-                $ctx.state = (i < this.entries_.length) ? 8 : -2;
-                break;
-              case 4:
-                i += 2;
-                $ctx.state = 12;
-                break;
-              case 8:
-                key = this.entries_[i];
-                value = this.entries_[i + 1];
-                $ctx.state = 9;
-                break;
-              case 9:
-                $ctx.state = (key === deletedSentinel) ? 4 : 6;
-                break;
-              case 6:
-                $ctx.state = 2;
-                return [key, value];
-              case 2:
-                $ctx.maybeThrow();
-                $ctx.state = 4;
-                break;
-              default:
-                return $ctx.end();
-            }
-        }, $__14, this);
-      }),
-      keys: $traceurRuntime.initGeneratorFunction(function $__15() {
-        var i,
-            key,
-            value;
-        return $traceurRuntime.createGeneratorInstance(function($ctx) {
-          while (true)
-            switch ($ctx.state) {
-              case 0:
-                i = 0;
-                $ctx.state = 12;
-                break;
-              case 12:
-                $ctx.state = (i < this.entries_.length) ? 8 : -2;
-                break;
-              case 4:
-                i += 2;
-                $ctx.state = 12;
-                break;
-              case 8:
-                key = this.entries_[i];
-                value = this.entries_[i + 1];
-                $ctx.state = 9;
-                break;
-              case 9:
-                $ctx.state = (key === deletedSentinel) ? 4 : 6;
-                break;
-              case 6:
-                $ctx.state = 2;
-                return key;
-              case 2:
-                $ctx.maybeThrow();
-                $ctx.state = 4;
-                break;
-              default:
-                return $ctx.end();
-            }
-        }, $__15, this);
-      }),
-      values: $traceurRuntime.initGeneratorFunction(function $__16() {
-        var i,
-            key,
-            value;
-        return $traceurRuntime.createGeneratorInstance(function($ctx) {
-          while (true)
-            switch ($ctx.state) {
-              case 0:
-                i = 0;
-                $ctx.state = 12;
-                break;
-              case 12:
-                $ctx.state = (i < this.entries_.length) ? 8 : -2;
-                break;
-              case 4:
-                i += 2;
-                $ctx.state = 12;
-                break;
-              case 8:
-                key = this.entries_[i];
-                value = this.entries_[i + 1];
-                $ctx.state = 9;
-                break;
-              case 9:
-                $ctx.state = (key === deletedSentinel) ? 4 : 6;
-                break;
-              case 6:
-                $ctx.state = 2;
-                return value;
-              case 2:
-                $ctx.maybeThrow();
-                $ctx.state = 4;
-                break;
-              default:
-                return $ctx.end();
-            }
-        }, $__16, this);
-      })
-    }, {});
-  }();
-  Object.defineProperty(Map.prototype, Symbol.iterator, {
-    configurable: true,
-    writable: true,
-    value: Map.prototype.entries
-  });
-  function needsPolyfill(global) {
-    var $__11 = global,
-        Map = $__11.Map,
-        Symbol = $__11.Symbol;
-    if (!Map || !$traceurRuntime.hasNativeSymbol() || !Map.prototype[Symbol.iterator] || !Map.prototype.entries) {
-      return true;
-    }
-    try {
-      return new Map([[]]).size !== 1;
-    } catch (e) {
-      return false;
-    }
-  }
-  function polyfillMap(global) {
-    if (needsPolyfill(global)) {
-      global.Map = Map;
-    }
-  }
-  registerPolyfill(polyfillMap);
-  return {
-    get Map() {
-      return Map;
-    },
-    get polyfillMap() {
-      return polyfillMap;
-    }
-  };
-});
-System.get("traceur-runtime@0.0.91/src/runtime/polyfills/Map.js" + '');
-System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/Set.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/polyfills/Set.js";
-  var $__0 = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/utils.js"),
-      isObject = $__0.isObject,
-      registerPolyfill = $__0.registerPolyfill;
-  var Map = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/Map.js").Map;
-  var getOwnHashObject = $traceurRuntime.getOwnHashObject;
-  var $hasOwnProperty = Object.prototype.hasOwnProperty;
-  function initSet(set) {
-    set.map_ = new Map();
-  }
-  var Set = function() {
-    function Set() {
-      var iterable = arguments[0];
-      if (!isObject(this))
-        throw new TypeError('Set called on incompatible type');
-      if ($hasOwnProperty.call(this, 'map_')) {
-        throw new TypeError('Set can not be reentrantly initialised');
-      }
-      initSet(this);
-      if (iterable !== null && iterable !== undefined) {
-        var $__8 = true;
-        var $__9 = false;
-        var $__10 = undefined;
-        try {
-          for (var $__6 = void 0,
-              $__5 = (iterable)[$traceurRuntime.toProperty(Symbol.iterator)](); !($__8 = ($__6 = $__5.next()).done); $__8 = true) {
-            var item = $__6.value;
-            {
-              this.add(item);
-            }
-          }
-        } catch ($__11) {
-          $__9 = true;
-          $__10 = $__11;
-        } finally {
-          try {
-            if (!$__8 && $__5.return != null) {
-              $__5.return();
-            }
-          } finally {
-            if ($__9) {
-              throw $__10;
-            }
-          }
-        }
-      }
-    }
-    return ($traceurRuntime.createClass)(Set, {
-      get size() {
-        return this.map_.size;
-      },
-      has: function(key) {
-        return this.map_.has(key);
-      },
-      add: function(key) {
-        this.map_.set(key, key);
-        return this;
-      },
-      delete: function(key) {
-        return this.map_.delete(key);
-      },
-      clear: function() {
-        return this.map_.clear();
-      },
-      forEach: function(callbackFn) {
-        var thisArg = arguments[1];
-        var $__4 = this;
-        return this.map_.forEach(function(value, key) {
-          callbackFn.call(thisArg, key, key, $__4);
-        });
-      },
-      values: $traceurRuntime.initGeneratorFunction(function $__13() {
-        var $__14,
-            $__15;
-        return $traceurRuntime.createGeneratorInstance(function($ctx) {
-          while (true)
-            switch ($ctx.state) {
-              case 0:
-                $__14 = $ctx.wrapYieldStar(this.map_.keys()[Symbol.iterator]());
-                $ctx.sent = void 0;
-                $ctx.action = 'next';
-                $ctx.state = 12;
-                break;
-              case 12:
-                $__15 = $__14[$ctx.action]($ctx.sentIgnoreThrow);
-                $ctx.state = 9;
-                break;
-              case 9:
-                $ctx.state = ($__15.done) ? 3 : 2;
-                break;
-              case 3:
-                $ctx.sent = $__15.value;
-                $ctx.state = -2;
-                break;
-              case 2:
-                $ctx.state = 12;
-                return $__15.value;
-              default:
-                return $ctx.end();
-            }
-        }, $__13, this);
-      }),
-      entries: $traceurRuntime.initGeneratorFunction(function $__16() {
-        var $__17,
-            $__18;
-        return $traceurRuntime.createGeneratorInstance(function($ctx) {
-          while (true)
-            switch ($ctx.state) {
-              case 0:
-                $__17 = $ctx.wrapYieldStar(this.map_.entries()[Symbol.iterator]());
-                $ctx.sent = void 0;
-                $ctx.action = 'next';
-                $ctx.state = 12;
-                break;
-              case 12:
-                $__18 = $__17[$ctx.action]($ctx.sentIgnoreThrow);
-                $ctx.state = 9;
-                break;
-              case 9:
-                $ctx.state = ($__18.done) ? 3 : 2;
-                break;
-              case 3:
-                $ctx.sent = $__18.value;
-                $ctx.state = -2;
-                break;
-              case 2:
-                $ctx.state = 12;
-                return $__18.value;
-              default:
-                return $ctx.end();
-            }
-        }, $__16, this);
-      })
-    }, {});
-  }();
-  Object.defineProperty(Set.prototype, Symbol.iterator, {
-    configurable: true,
-    writable: true,
-    value: Set.prototype.values
-  });
-  Object.defineProperty(Set.prototype, 'keys', {
-    configurable: true,
-    writable: true,
-    value: Set.prototype.values
-  });
-  function needsPolyfill(global) {
-    var $__12 = global,
-        Set = $__12.Set,
-        Symbol = $__12.Symbol;
-    if (!Set || !$traceurRuntime.hasNativeSymbol() || !Set.prototype[Symbol.iterator] || !Set.prototype.values) {
-      return true;
-    }
-    try {
-      return new Set([1]).size !== 1;
-    } catch (e) {
-      return false;
-    }
-  }
-  function polyfillSet(global) {
-    if (needsPolyfill(global)) {
-      global.Set = Set;
-    }
-  }
-  registerPolyfill(polyfillSet);
-  return {
-    get Set() {
-      return Set;
-    },
-    get polyfillSet() {
-      return polyfillSet;
-    }
-  };
-});
-System.get("traceur-runtime@0.0.91/src/runtime/polyfills/Set.js" + '');
-System.registerModule("traceur-runtime@0.0.91/node_modules/rsvp/lib/rsvp/asap.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/node_modules/rsvp/lib/rsvp/asap.js";
-  var len = 0;
-  var toString = {}.toString;
-  var vertxNext;
-  function asap(callback, arg) {
-    queue[len] = callback;
-    queue[len + 1] = arg;
-    len += 2;
-    if (len === 2) {
-      scheduleFlush();
-    }
-  }
-  var $__default = asap;
-  var browserWindow = (typeof window !== 'undefined') ? window : undefined;
-  var browserGlobal = browserWindow || {};
-  var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
-  var isNode = typeof process !== 'undefined' && {}.toString.call(process) === '[object process]';
-  var isWorker = typeof Uint8ClampedArray !== 'undefined' && typeof importScripts !== 'undefined' && typeof MessageChannel !== 'undefined';
-  function useNextTick() {
-    var nextTick = process.nextTick;
-    var version = process.versions.node.match(/^(?:(\d+)\.)?(?:(\d+)\.)?(\*|\d+)$/);
-    if (Array.isArray(version) && version[1] === '0' && version[2] === '10') {
-      nextTick = setImmediate;
-    }
-    return function() {
-      nextTick(flush);
-    };
-  }
-  function useVertxTimer() {
-    return function() {
-      vertxNext(flush);
-    };
-  }
-  function useMutationObserver() {
-    var iterations = 0;
-    var observer = new BrowserMutationObserver(flush);
-    var node = document.createTextNode('');
-    observer.observe(node, {characterData: true});
-    return function() {
-      node.data = (iterations = ++iterations % 2);
-    };
-  }
-  function useMessageChannel() {
-    var channel = new MessageChannel();
-    channel.port1.onmessage = flush;
-    return function() {
-      channel.port2.postMessage(0);
-    };
-  }
-  function useSetTimeout() {
-    return function() {
-      setTimeout(flush, 1);
-    };
-  }
-  var queue = new Array(1000);
-  function flush() {
-    for (var i = 0; i < len; i += 2) {
-      var callback = queue[i];
-      var arg = queue[i + 1];
-      callback(arg);
-      queue[i] = undefined;
-      queue[i + 1] = undefined;
-    }
-    len = 0;
-  }
-  function attemptVertex() {
-    try {
-      var r = require;
-      var vertx = r('vertx');
-      vertxNext = vertx.runOnLoop || vertx.runOnContext;
-      return useVertxTimer();
-    } catch (e) {
-      return useSetTimeout();
-    }
-  }
-  var scheduleFlush;
-  if (isNode) {
-    scheduleFlush = useNextTick();
-  } else if (BrowserMutationObserver) {
-    scheduleFlush = useMutationObserver();
-  } else if (isWorker) {
-    scheduleFlush = useMessageChannel();
-  } else if (browserWindow === undefined && typeof require === 'function') {
-    scheduleFlush = attemptVertex();
-  } else {
-    scheduleFlush = useSetTimeout();
-  }
-  return {get default() {
-      return $__default;
-    }};
-});
-System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/Promise.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/polyfills/Promise.js";
-  var async = System.get("traceur-runtime@0.0.91/node_modules/rsvp/lib/rsvp/asap.js").default;
-  var registerPolyfill = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/utils.js").registerPolyfill;
-  var promiseRaw = {};
-  function isPromise(x) {
-    return x && typeof x === 'object' && x.status_ !== undefined;
-  }
-  function idResolveHandler(x) {
-    return x;
-  }
-  function idRejectHandler(x) {
-    throw x;
-  }
-  function chain(promise) {
-    var onResolve = arguments[1] !== (void 0) ? arguments[1] : idResolveHandler;
-    var onReject = arguments[2] !== (void 0) ? arguments[2] : idRejectHandler;
-    var deferred = getDeferred(promise.constructor);
-    switch (promise.status_) {
-      case undefined:
-        throw TypeError;
-      case 0:
-        promise.onResolve_.push(onResolve, deferred);
-        promise.onReject_.push(onReject, deferred);
-        break;
-      case +1:
-        promiseEnqueue(promise.value_, [onResolve, deferred]);
-        break;
-      case -1:
-        promiseEnqueue(promise.value_, [onReject, deferred]);
-        break;
-    }
-    return deferred.promise;
-  }
-  function getDeferred(C) {
-    if (this === $Promise) {
-      var promise = promiseInit(new $Promise(promiseRaw));
-      return {
-        promise: promise,
-        resolve: function(x) {
-          promiseResolve(promise, x);
-        },
-        reject: function(r) {
-          promiseReject(promise, r);
-        }
-      };
-    } else {
-      var result = {};
-      result.promise = new C(function(resolve, reject) {
-        result.resolve = resolve;
-        result.reject = reject;
-      });
-      return result;
-    }
-  }
-  function promiseSet(promise, status, value, onResolve, onReject) {
-    promise.status_ = status;
-    promise.value_ = value;
-    promise.onResolve_ = onResolve;
-    promise.onReject_ = onReject;
-    return promise;
-  }
-  function promiseInit(promise) {
-    return promiseSet(promise, 0, undefined, [], []);
-  }
-  var Promise = function() {
-    function Promise(resolver) {
-      if (resolver === promiseRaw)
-        return;
-      if (typeof resolver !== 'function')
-        throw new TypeError;
-      var promise = promiseInit(this);
-      try {
-        resolver(function(x) {
-          promiseResolve(promise, x);
-        }, function(r) {
-          promiseReject(promise, r);
-        });
-      } catch (e) {
-        promiseReject(promise, e);
-      }
-    }
-    return ($traceurRuntime.createClass)(Promise, {
-      catch: function(onReject) {
-        return this.then(undefined, onReject);
-      },
-      then: function(onResolve, onReject) {
-        if (typeof onResolve !== 'function')
-          onResolve = idResolveHandler;
-        if (typeof onReject !== 'function')
-          onReject = idRejectHandler;
-        var that = this;
-        var constructor = this.constructor;
-        return chain(this, function(x) {
-          x = promiseCoerce(constructor, x);
-          return x === that ? onReject(new TypeError) : isPromise(x) ? x.then(onResolve, onReject) : onResolve(x);
-        }, onReject);
-      }
-    }, {
-      resolve: function(x) {
-        if (this === $Promise) {
-          if (isPromise(x)) {
-            return x;
-          }
-          return promiseSet(new $Promise(promiseRaw), +1, x);
-        } else {
-          return new this(function(resolve, reject) {
-            resolve(x);
-          });
-        }
-      },
-      reject: function(r) {
-        if (this === $Promise) {
-          return promiseSet(new $Promise(promiseRaw), -1, r);
-        } else {
-          return new this(function(resolve, reject) {
-            reject(r);
-          });
-        }
-      },
-      all: function(values) {
-        var deferred = getDeferred(this);
-        var resolutions = [];
-        try {
-          var makeCountdownFunction = function(i) {
-            return function(x) {
-              resolutions[i] = x;
-              if (--count === 0)
-                deferred.resolve(resolutions);
-            };
-          };
-          var count = 0;
-          var i = 0;
-          var $__6 = true;
-          var $__7 = false;
-          var $__8 = undefined;
-          try {
-            for (var $__4 = void 0,
-                $__3 = (values)[$traceurRuntime.toProperty(Symbol.iterator)](); !($__6 = ($__4 = $__3.next()).done); $__6 = true) {
-              var value = $__4.value;
-              {
-                var countdownFunction = makeCountdownFunction(i);
-                this.resolve(value).then(countdownFunction, function(r) {
-                  deferred.reject(r);
-                });
-                ++i;
-                ++count;
-              }
-            }
-          } catch ($__9) {
-            $__7 = true;
-            $__8 = $__9;
-          } finally {
-            try {
-              if (!$__6 && $__3.return != null) {
-                $__3.return();
-              }
-            } finally {
-              if ($__7) {
-                throw $__8;
-              }
-            }
-          }
-          if (count === 0) {
-            deferred.resolve(resolutions);
-          }
-        } catch (e) {
-          deferred.reject(e);
-        }
-        return deferred.promise;
-      },
-      race: function(values) {
-        var deferred = getDeferred(this);
-        try {
-          for (var i = 0; i < values.length; i++) {
-            this.resolve(values[i]).then(function(x) {
-              deferred.resolve(x);
-            }, function(r) {
-              deferred.reject(r);
-            });
-          }
-        } catch (e) {
-          deferred.reject(e);
-        }
-        return deferred.promise;
-      }
-    });
-  }();
-  var $Promise = Promise;
-  var $PromiseReject = $Promise.reject;
-  function promiseResolve(promise, x) {
-    promiseDone(promise, +1, x, promise.onResolve_);
-  }
-  function promiseReject(promise, r) {
-    promiseDone(promise, -1, r, promise.onReject_);
-  }
-  function promiseDone(promise, status, value, reactions) {
-    if (promise.status_ !== 0)
-      return;
-    promiseEnqueue(value, reactions);
-    promiseSet(promise, status, value);
-  }
-  function promiseEnqueue(value, tasks) {
-    async(function() {
-      for (var i = 0; i < tasks.length; i += 2) {
-        promiseHandle(value, tasks[i], tasks[i + 1]);
-      }
-    });
-  }
-  function promiseHandle(value, handler, deferred) {
-    try {
-      var result = handler(value);
-      if (result === deferred.promise)
-        throw new TypeError;
-      else if (isPromise(result))
-        chain(result, deferred.resolve, deferred.reject);
-      else
-        deferred.resolve(result);
-    } catch (e) {
-      try {
-        deferred.reject(e);
-      } catch (e) {}
-    }
-  }
-  var thenableSymbol = '@@thenable';
-  function isObject(x) {
-    return x && (typeof x === 'object' || typeof x === 'function');
-  }
-  function promiseCoerce(constructor, x) {
-    if (!isPromise(x) && isObject(x)) {
-      var then;
-      try {
-        then = x.then;
-      } catch (r) {
-        var promise = $PromiseReject.call(constructor, r);
-        x[thenableSymbol] = promise;
-        return promise;
-      }
-      if (typeof then === 'function') {
-        var p = x[thenableSymbol];
-        if (p) {
-          return p;
-        } else {
-          var deferred = getDeferred(constructor);
-          x[thenableSymbol] = deferred.promise;
-          try {
-            then.call(x, deferred.resolve, deferred.reject);
-          } catch (r) {
-            deferred.reject(r);
-          }
-          return deferred.promise;
-        }
-      }
-    }
-    return x;
-  }
-  function polyfillPromise(global) {
-    if (!global.Promise)
-      global.Promise = Promise;
-  }
-  registerPolyfill(polyfillPromise);
-  return {
-    get Promise() {
-      return Promise;
-    },
-    get polyfillPromise() {
-      return polyfillPromise;
-    }
-  };
-});
-System.get("traceur-runtime@0.0.91/src/runtime/polyfills/Promise.js" + '');
-System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/StringIterator.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/polyfills/StringIterator.js";
-  var $__0 = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/utils.js"),
-      createIteratorResultObject = $__0.createIteratorResultObject,
-      isObject = $__0.isObject;
-  var toProperty = $traceurRuntime.toProperty;
-  var hasOwnProperty = Object.prototype.hasOwnProperty;
-  var iteratedString = Symbol('iteratedString');
-  var stringIteratorNextIndex = Symbol('stringIteratorNextIndex');
-  var StringIterator = function() {
-    var $__3;
-    function StringIterator() {}
-    return ($traceurRuntime.createClass)(StringIterator, ($__3 = {}, Object.defineProperty($__3, "next", {
-      value: function() {
-        var o = this;
-        if (!isObject(o) || !hasOwnProperty.call(o, iteratedString)) {
-          throw new TypeError('this must be a StringIterator object');
-        }
-        var s = o[toProperty(iteratedString)];
-        if (s === undefined) {
-          return createIteratorResultObject(undefined, true);
-        }
-        var position = o[toProperty(stringIteratorNextIndex)];
-        var len = s.length;
-        if (position >= len) {
-          o[toProperty(iteratedString)] = undefined;
-          return createIteratorResultObject(undefined, true);
-        }
-        var first = s.charCodeAt(position);
-        var resultString;
-        if (first < 0xD800 || first > 0xDBFF || position + 1 === len) {
-          resultString = String.fromCharCode(first);
-        } else {
-          var second = s.charCodeAt(position + 1);
-          if (second < 0xDC00 || second > 0xDFFF) {
-            resultString = String.fromCharCode(first);
-          } else {
-            resultString = String.fromCharCode(first) + String.fromCharCode(second);
-          }
-        }
-        o[toProperty(stringIteratorNextIndex)] = position + resultString.length;
-        return createIteratorResultObject(resultString, false);
-      },
-      configurable: true,
-      enumerable: true,
-      writable: true
-    }), Object.defineProperty($__3, Symbol.iterator, {
-      value: function() {
-        return this;
-      },
-      configurable: true,
-      enumerable: true,
-      writable: true
-    }), $__3), {});
-  }();
-  function createStringIterator(string) {
-    var s = String(string);
-    var iterator = Object.create(StringIterator.prototype);
-    iterator[toProperty(iteratedString)] = s;
-    iterator[toProperty(stringIteratorNextIndex)] = 0;
-    return iterator;
-  }
-  return {get createStringIterator() {
-      return createStringIterator;
-    }};
-});
-System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/String.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/polyfills/String.js";
-  var createStringIterator = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/StringIterator.js").createStringIterator;
-  var $__1 = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/utils.js"),
-      maybeAddFunctions = $__1.maybeAddFunctions,
-      maybeAddIterator = $__1.maybeAddIterator,
-      registerPolyfill = $__1.registerPolyfill;
-  var $toString = Object.prototype.toString;
-  var $indexOf = String.prototype.indexOf;
-  var $lastIndexOf = String.prototype.lastIndexOf;
-  function startsWith(search) {
-    var string = String(this);
-    if (this == null || $toString.call(search) == '[object RegExp]') {
-      throw TypeError();
-    }
-    var stringLength = string.length;
-    var searchString = String(search);
-    var searchLength = searchString.length;
-    var position = arguments.length > 1 ? arguments[1] : undefined;
-    var pos = position ? Number(position) : 0;
-    if (isNaN(pos)) {
-      pos = 0;
-    }
-    var start = Math.min(Math.max(pos, 0), stringLength);
-    return $indexOf.call(string, searchString, pos) == start;
-  }
-  function endsWith(search) {
-    var string = String(this);
-    if (this == null || $toString.call(search) == '[object RegExp]') {
-      throw TypeError();
-    }
-    var stringLength = string.length;
-    var searchString = String(search);
-    var searchLength = searchString.length;
-    var pos = stringLength;
-    if (arguments.length > 1) {
-      var position = arguments[1];
-      if (position !== undefined) {
-        pos = position ? Number(position) : 0;
-        if (isNaN(pos)) {
-          pos = 0;
-        }
-      }
-    }
-    var end = Math.min(Math.max(pos, 0), stringLength);
-    var start = end - searchLength;
-    if (start < 0) {
-      return false;
-    }
-    return $lastIndexOf.call(string, searchString, start) == start;
-  }
-  function includes(search) {
-    if (this == null) {
-      throw TypeError();
-    }
-    var string = String(this);
-    if (search && $toString.call(search) == '[object RegExp]') {
-      throw TypeError();
-    }
-    var stringLength = string.length;
-    var searchString = String(search);
-    var searchLength = searchString.length;
-    var position = arguments.length > 1 ? arguments[1] : undefined;
-    var pos = position ? Number(position) : 0;
-    if (pos != pos) {
-      pos = 0;
-    }
-    var start = Math.min(Math.max(pos, 0), stringLength);
-    if (searchLength + start > stringLength) {
-      return false;
-    }
-    return $indexOf.call(string, searchString, pos) != -1;
-  }
-  function repeat(count) {
-    if (this == null) {
-      throw TypeError();
-    }
-    var string = String(this);
-    var n = count ? Number(count) : 0;
-    if (isNaN(n)) {
-      n = 0;
-    }
-    if (n < 0 || n == Infinity) {
-      throw RangeError();
-    }
-    if (n == 0) {
-      return '';
-    }
-    var result = '';
-    while (n--) {
-      result += string;
-    }
-    return result;
-  }
-  function codePointAt(position) {
-    if (this == null) {
-      throw TypeError();
-    }
-    var string = String(this);
-    var size = string.length;
-    var index = position ? Number(position) : 0;
-    if (isNaN(index)) {
-      index = 0;
-    }
-    if (index < 0 || index >= size) {
-      return undefined;
-    }
-    var first = string.charCodeAt(index);
-    var second;
-    if (first >= 0xD800 && first <= 0xDBFF && size > index + 1) {
-      second = string.charCodeAt(index + 1);
-      if (second >= 0xDC00 && second <= 0xDFFF) {
-        return (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000;
-      }
-    }
-    return first;
-  }
-  function raw(callsite) {
-    var raw = callsite.raw;
-    var len = raw.length >>> 0;
-    if (len === 0)
-      return '';
-    var s = '';
-    var i = 0;
-    while (true) {
-      s += raw[i];
-      if (i + 1 === len)
-        return s;
-      s += arguments[++i];
-    }
-  }
-  function fromCodePoint(_) {
-    var codeUnits = [];
-    var floor = Math.floor;
-    var highSurrogate;
-    var lowSurrogate;
-    var index = -1;
-    var length = arguments.length;
-    if (!length) {
-      return '';
-    }
-    while (++index < length) {
-      var codePoint = Number(arguments[index]);
-      if (!isFinite(codePoint) || codePoint < 0 || codePoint > 0x10FFFF || floor(codePoint) != codePoint) {
-        throw RangeError('Invalid code point: ' + codePoint);
-      }
-      if (codePoint <= 0xFFFF) {
-        codeUnits.push(codePoint);
-      } else {
-        codePoint -= 0x10000;
-        highSurrogate = (codePoint >> 10) + 0xD800;
-        lowSurrogate = (codePoint % 0x400) + 0xDC00;
-        codeUnits.push(highSurrogate, lowSurrogate);
-      }
-    }
-    return String.fromCharCode.apply(null, codeUnits);
-  }
-  function stringPrototypeIterator() {
-    var o = $traceurRuntime.checkObjectCoercible(this);
-    var s = String(o);
-    return createStringIterator(s);
-  }
-  function polyfillString(global) {
-    var String = global.String;
-    maybeAddFunctions(String.prototype, ['codePointAt', codePointAt, 'endsWith', endsWith, 'includes', includes, 'repeat', repeat, 'startsWith', startsWith]);
-    maybeAddFunctions(String, ['fromCodePoint', fromCodePoint, 'raw', raw]);
-    maybeAddIterator(String.prototype, stringPrototypeIterator, Symbol);
-  }
-  registerPolyfill(polyfillString);
-  return {
-    get startsWith() {
-      return startsWith;
-    },
-    get endsWith() {
-      return endsWith;
-    },
-    get includes() {
-      return includes;
-    },
-    get repeat() {
-      return repeat;
-    },
-    get codePointAt() {
-      return codePointAt;
-    },
-    get raw() {
-      return raw;
-    },
-    get fromCodePoint() {
-      return fromCodePoint;
-    },
-    get stringPrototypeIterator() {
-      return stringPrototypeIterator;
-    },
-    get polyfillString() {
-      return polyfillString;
-    }
-  };
-});
-System.get("traceur-runtime@0.0.91/src/runtime/polyfills/String.js" + '');
-System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/ArrayIterator.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/polyfills/ArrayIterator.js";
-  var $__0 = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/utils.js"),
-      toObject = $__0.toObject,
-      toUint32 = $__0.toUint32,
-      createIteratorResultObject = $__0.createIteratorResultObject;
-  var ARRAY_ITERATOR_KIND_KEYS = 1;
-  var ARRAY_ITERATOR_KIND_VALUES = 2;
-  var ARRAY_ITERATOR_KIND_ENTRIES = 3;
-  var ArrayIterator = function() {
-    var $__3;
-    function ArrayIterator() {}
-    return ($traceurRuntime.createClass)(ArrayIterator, ($__3 = {}, Object.defineProperty($__3, "next", {
-      value: function() {
-        var iterator = toObject(this);
-        var array = iterator.iteratorObject_;
-        if (!array) {
-          throw new TypeError('Object is not an ArrayIterator');
-        }
-        var index = iterator.arrayIteratorNextIndex_;
-        var itemKind = iterator.arrayIterationKind_;
-        var length = toUint32(array.length);
-        if (index >= length) {
-          iterator.arrayIteratorNextIndex_ = Infinity;
-          return createIteratorResultObject(undefined, true);
-        }
-        iterator.arrayIteratorNextIndex_ = index + 1;
-        if (itemKind == ARRAY_ITERATOR_KIND_VALUES)
-          return createIteratorResultObject(array[index], false);
-        if (itemKind == ARRAY_ITERATOR_KIND_ENTRIES)
-          return createIteratorResultObject([index, array[index]], false);
-        return createIteratorResultObject(index, false);
-      },
-      configurable: true,
-      enumerable: true,
-      writable: true
-    }), Object.defineProperty($__3, Symbol.iterator, {
-      value: function() {
-        return this;
-      },
-      configurable: true,
-      enumerable: true,
-      writable: true
-    }), $__3), {});
-  }();
-  function createArrayIterator(array, kind) {
-    var object = toObject(array);
-    var iterator = new ArrayIterator;
-    iterator.iteratorObject_ = object;
-    iterator.arrayIteratorNextIndex_ = 0;
-    iterator.arrayIterationKind_ = kind;
-    return iterator;
-  }
-  function entries() {
-    return createArrayIterator(this, ARRAY_ITERATOR_KIND_ENTRIES);
-  }
-  function keys() {
-    return createArrayIterator(this, ARRAY_ITERATOR_KIND_KEYS);
-  }
-  function values() {
-    return createArrayIterator(this, ARRAY_ITERATOR_KIND_VALUES);
-  }
-  return {
-    get entries() {
-      return entries;
-    },
-    get keys() {
-      return keys;
-    },
-    get values() {
-      return values;
-    }
-  };
-});
-System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/Array.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/polyfills/Array.js";
-  var $__0 = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/ArrayIterator.js"),
-      entries = $__0.entries,
-      keys = $__0.keys,
-      jsValues = $__0.values;
-  var $__1 = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/utils.js"),
-      checkIterable = $__1.checkIterable,
-      isCallable = $__1.isCallable,
-      isConstructor = $__1.isConstructor,
-      maybeAddFunctions = $__1.maybeAddFunctions,
-      maybeAddIterator = $__1.maybeAddIterator,
-      registerPolyfill = $__1.registerPolyfill,
-      toInteger = $__1.toInteger,
-      toLength = $__1.toLength,
-      toObject = $__1.toObject;
-  function from(arrLike) {
-    var mapFn = arguments[1];
-    var thisArg = arguments[2];
-    var C = this;
-    var items = toObject(arrLike);
-    var mapping = mapFn !== undefined;
-    var k = 0;
-    var arr,
-        len;
-    if (mapping && !isCallable(mapFn)) {
-      throw TypeError();
-    }
-    if (checkIterable(items)) {
-      arr = isConstructor(C) ? new C() : [];
-      var $__6 = true;
-      var $__7 = false;
-      var $__8 = undefined;
-      try {
-        for (var $__4 = void 0,
-            $__3 = (items)[$traceurRuntime.toProperty(Symbol.iterator)](); !($__6 = ($__4 = $__3.next()).done); $__6 = true) {
-          var item = $__4.value;
-          {
-            if (mapping) {
-              arr[k] = mapFn.call(thisArg, item, k);
-            } else {
-              arr[k] = item;
-            }
-            k++;
-          }
-        }
-      } catch ($__9) {
-        $__7 = true;
-        $__8 = $__9;
-      } finally {
-        try {
-          if (!$__6 && $__3.return != null) {
-            $__3.return();
-          }
-        } finally {
-          if ($__7) {
-            throw $__8;
-          }
-        }
-      }
-      arr.length = k;
-      return arr;
-    }
-    len = toLength(items.length);
-    arr = isConstructor(C) ? new C(len) : new Array(len);
-    for (; k < len; k++) {
-      if (mapping) {
-        arr[k] = typeof thisArg === 'undefined' ? mapFn(items[k], k) : mapFn.call(thisArg, items[k], k);
-      } else {
-        arr[k] = items[k];
-      }
-    }
-    arr.length = len;
-    return arr;
-  }
-  function of() {
-    for (var items = [],
-        $__10 = 0; $__10 < arguments.length; $__10++)
-      items[$__10] = arguments[$__10];
-    var C = this;
-    var len = items.length;
-    var arr = isConstructor(C) ? new C(len) : new Array(len);
-    for (var k = 0; k < len; k++) {
-      arr[k] = items[k];
-    }
-    arr.length = len;
-    return arr;
-  }
-  function fill(value) {
-    var start = arguments[1] !== (void 0) ? arguments[1] : 0;
-    var end = arguments[2];
-    var object = toObject(this);
-    var len = toLength(object.length);
-    var fillStart = toInteger(start);
-    var fillEnd = end !== undefined ? toInteger(end) : len;
-    fillStart = fillStart < 0 ? Math.max(len + fillStart, 0) : Math.min(fillStart, len);
-    fillEnd = fillEnd < 0 ? Math.max(len + fillEnd, 0) : Math.min(fillEnd, len);
-    while (fillStart < fillEnd) {
-      object[fillStart] = value;
-      fillStart++;
-    }
-    return object;
-  }
-  function find(predicate) {
-    var thisArg = arguments[1];
-    return findHelper(this, predicate, thisArg);
-  }
-  function findIndex(predicate) {
-    var thisArg = arguments[1];
-    return findHelper(this, predicate, thisArg, true);
-  }
-  function findHelper(self, predicate) {
-    var thisArg = arguments[2];
-    var returnIndex = arguments[3] !== (void 0) ? arguments[3] : false;
-    var object = toObject(self);
-    var len = toLength(object.length);
-    if (!isCallable(predicate)) {
-      throw TypeError();
-    }
-    for (var i = 0; i < len; i++) {
-      var value = object[i];
-      if (predicate.call(thisArg, value, i, object)) {
-        return returnIndex ? i : value;
-      }
-    }
-    return returnIndex ? -1 : undefined;
-  }
-  function polyfillArray(global) {
-    var $__11 = global,
-        Array = $__11.Array,
-        Object = $__11.Object,
-        Symbol = $__11.Symbol;
-    var values = jsValues;
-    if (Symbol && Symbol.iterator && Array.prototype[Symbol.iterator]) {
-      values = Array.prototype[Symbol.iterator];
-    }
-    maybeAddFunctions(Array.prototype, ['entries', entries, 'keys', keys, 'values', values, 'fill', fill, 'find', find, 'findIndex', findIndex]);
-    maybeAddFunctions(Array, ['from', from, 'of', of]);
-    maybeAddIterator(Array.prototype, values, Symbol);
-    maybeAddIterator(Object.getPrototypeOf([].values()), function() {
-      return this;
-    }, Symbol);
-  }
-  registerPolyfill(polyfillArray);
-  return {
-    get from() {
-      return from;
-    },
-    get of() {
-      return of;
-    },
-    get fill() {
-      return fill;
-    },
-    get find() {
-      return find;
-    },
-    get findIndex() {
-      return findIndex;
-    },
-    get polyfillArray() {
-      return polyfillArray;
-    }
-  };
-});
-System.get("traceur-runtime@0.0.91/src/runtime/polyfills/Array.js" + '');
-System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/Object.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/polyfills/Object.js";
-  var $__0 = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/utils.js"),
-      maybeAddFunctions = $__0.maybeAddFunctions,
-      registerPolyfill = $__0.registerPolyfill;
-  var $__2 = $traceurRuntime,
-      defineProperty = $__2.defineProperty,
-      getOwnPropertyDescriptor = $__2.getOwnPropertyDescriptor,
-      getOwnPropertyNames = $__2.getOwnPropertyNames,
-      isPrivateName = $__2.isPrivateName,
-      keys = $__2.keys;
-  function is(left, right) {
-    if (left === right)
-      return left !== 0 || 1 / left === 1 / right;
-    return left !== left && right !== right;
-  }
-  function assign(target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-      var props = source == null ? [] : keys(source);
-      var p = void 0,
-          length = props.length;
-      for (p = 0; p < length; p++) {
-        var name = props[p];
-        if (isPrivateName(name))
-          continue;
-        target[name] = source[name];
-      }
-    }
-    return target;
-  }
-  function mixin(target, source) {
-    var props = getOwnPropertyNames(source);
-    var p,
-        descriptor,
-        length = props.length;
-    for (p = 0; p < length; p++) {
-      var name = props[p];
-      if (isPrivateName(name))
-        continue;
-      descriptor = getOwnPropertyDescriptor(source, props[p]);
-      defineProperty(target, props[p], descriptor);
-    }
-    return target;
-  }
-  function polyfillObject(global) {
-    var Object = global.Object;
-    maybeAddFunctions(Object, ['assign', assign, 'is', is, 'mixin', mixin]);
-  }
-  registerPolyfill(polyfillObject);
-  return {
-    get is() {
-      return is;
-    },
-    get assign() {
-      return assign;
-    },
-    get mixin() {
-      return mixin;
-    },
-    get polyfillObject() {
-      return polyfillObject;
-    }
-  };
-});
-System.get("traceur-runtime@0.0.91/src/runtime/polyfills/Object.js" + '');
-System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/Number.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/polyfills/Number.js";
-  var $__0 = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/utils.js"),
-      isNumber = $__0.isNumber,
-      maybeAddConsts = $__0.maybeAddConsts,
-      maybeAddFunctions = $__0.maybeAddFunctions,
-      registerPolyfill = $__0.registerPolyfill,
-      toInteger = $__0.toInteger;
-  var $abs = Math.abs;
-  var $isFinite = isFinite;
-  var $isNaN = isNaN;
-  var MAX_SAFE_INTEGER = Math.pow(2, 53) - 1;
-  var MIN_SAFE_INTEGER = -Math.pow(2, 53) + 1;
-  var EPSILON = Math.pow(2, -52);
-  function NumberIsFinite(number) {
-    return isNumber(number) && $isFinite(number);
-  }
-  function isInteger(number) {
-    return NumberIsFinite(number) && toInteger(number) === number;
-  }
-  function NumberIsNaN(number) {
-    return isNumber(number) && $isNaN(number);
-  }
-  function isSafeInteger(number) {
-    if (NumberIsFinite(number)) {
-      var integral = toInteger(number);
-      if (integral === number)
-        return $abs(integral) <= MAX_SAFE_INTEGER;
-    }
-    return false;
-  }
-  function polyfillNumber(global) {
-    var Number = global.Number;
-    maybeAddConsts(Number, ['MAX_SAFE_INTEGER', MAX_SAFE_INTEGER, 'MIN_SAFE_INTEGER', MIN_SAFE_INTEGER, 'EPSILON', EPSILON]);
-    maybeAddFunctions(Number, ['isFinite', NumberIsFinite, 'isInteger', isInteger, 'isNaN', NumberIsNaN, 'isSafeInteger', isSafeInteger]);
-  }
-  registerPolyfill(polyfillNumber);
-  return {
-    get MAX_SAFE_INTEGER() {
-      return MAX_SAFE_INTEGER;
-    },
-    get MIN_SAFE_INTEGER() {
-      return MIN_SAFE_INTEGER;
-    },
-    get EPSILON() {
-      return EPSILON;
-    },
-    get isFinite() {
-      return NumberIsFinite;
-    },
-    get isInteger() {
-      return isInteger;
-    },
-    get isNaN() {
-      return NumberIsNaN;
-    },
-    get isSafeInteger() {
-      return isSafeInteger;
-    },
-    get polyfillNumber() {
-      return polyfillNumber;
-    }
-  };
-});
-System.get("traceur-runtime@0.0.91/src/runtime/polyfills/Number.js" + '');
-System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/fround.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/polyfills/fround.js";
-  var $isFinite = isFinite;
-  var $isNaN = isNaN;
-  var $__1 = Math,
-      LN2 = $__1.LN2,
-      abs = $__1.abs,
-      floor = $__1.floor,
-      log = $__1.log,
-      min = $__1.min,
-      pow = $__1.pow;
-  function packIEEE754(v, ebits, fbits) {
-    var bias = (1 << (ebits - 1)) - 1,
-        s,
-        e,
-        f,
-        ln,
-        i,
-        bits,
-        str,
-        bytes;
-    function roundToEven(n) {
-      var w = floor(n),
-          f = n - w;
-      if (f < 0.5)
-        return w;
-      if (f > 0.5)
-        return w + 1;
-      return w % 2 ? w + 1 : w;
-    }
-    if (v !== v) {
-      e = (1 << ebits) - 1;
-      f = pow(2, fbits - 1);
-      s = 0;
-    } else if (v === Infinity || v === -Infinity) {
-      e = (1 << ebits) - 1;
-      f = 0;
-      s = (v < 0) ? 1 : 0;
-    } else if (v === 0) {
-      e = 0;
-      f = 0;
-      s = (1 / v === -Infinity) ? 1 : 0;
-    } else {
-      s = v < 0;
-      v = abs(v);
-      if (v >= pow(2, 1 - bias)) {
-        e = min(floor(log(v) / LN2), 1023);
-        f = roundToEven(v / pow(2, e) * pow(2, fbits));
-        if (f / pow(2, fbits) >= 2) {
-          e = e + 1;
-          f = 1;
-        }
-        if (e > bias) {
-          e = (1 << ebits) - 1;
-          f = 0;
-        } else {
-          e = e + bias;
-          f = f - pow(2, fbits);
-        }
-      } else {
-        e = 0;
-        f = roundToEven(v / pow(2, 1 - bias - fbits));
-      }
-    }
-    bits = [];
-    for (i = fbits; i; i -= 1) {
-      bits.push(f % 2 ? 1 : 0);
-      f = floor(f / 2);
-    }
-    for (i = ebits; i; i -= 1) {
-      bits.push(e % 2 ? 1 : 0);
-      e = floor(e / 2);
-    }
-    bits.push(s ? 1 : 0);
-    bits.reverse();
-    str = bits.join('');
-    bytes = [];
-    while (str.length) {
-      bytes.push(parseInt(str.substring(0, 8), 2));
-      str = str.substring(8);
-    }
-    return bytes;
-  }
-  function unpackIEEE754(bytes, ebits, fbits) {
-    var bits = [],
-        i,
-        j,
-        b,
-        str,
-        bias,
-        s,
-        e,
-        f;
-    for (i = bytes.length; i; i -= 1) {
-      b = bytes[i - 1];
-      for (j = 8; j; j -= 1) {
-        bits.push(b % 2 ? 1 : 0);
-        b = b >> 1;
-      }
-    }
-    bits.reverse();
-    str = bits.join('');
-    bias = (1 << (ebits - 1)) - 1;
-    s = parseInt(str.substring(0, 1), 2) ? -1 : 1;
-    e = parseInt(str.substring(1, 1 + ebits), 2);
-    f = parseInt(str.substring(1 + ebits), 2);
-    if (e === (1 << ebits) - 1) {
-      return f !== 0 ? NaN : s * Infinity;
-    } else if (e > 0) {
-      return s * pow(2, e - bias) * (1 + f / pow(2, fbits));
-    } else if (f !== 0) {
-      return s * pow(2, -(bias - 1)) * (f / pow(2, fbits));
-    } else {
-      return s < 0 ? -0 : 0;
-    }
-  }
-  function unpackF32(b) {
-    return unpackIEEE754(b, 8, 23);
-  }
-  function packF32(v) {
-    return packIEEE754(v, 8, 23);
-  }
-  function fround(x) {
-    if (x === 0 || !$isFinite(x) || $isNaN(x)) {
-      return x;
-    }
-    return unpackF32(packF32(Number(x)));
-  }
-  return {get fround() {
-      return fround;
-    }};
-});
-System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/Math.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/polyfills/Math.js";
-  var jsFround = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/fround.js").fround;
-  var $__1 = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/utils.js"),
-      maybeAddFunctions = $__1.maybeAddFunctions,
-      registerPolyfill = $__1.registerPolyfill,
-      toUint32 = $__1.toUint32;
-  var $isFinite = isFinite;
-  var $isNaN = isNaN;
-  var $__3 = Math,
-      abs = $__3.abs,
-      ceil = $__3.ceil,
-      exp = $__3.exp,
-      floor = $__3.floor,
-      log = $__3.log,
-      pow = $__3.pow,
-      sqrt = $__3.sqrt;
-  function clz32(x) {
-    x = toUint32(+x);
-    if (x == 0)
-      return 32;
-    var result = 0;
-    if ((x & 0xFFFF0000) === 0) {
-      x <<= 16;
-      result += 16;
-    }
-    ;
-    if ((x & 0xFF000000) === 0) {
-      x <<= 8;
-      result += 8;
-    }
-    ;
-    if ((x & 0xF0000000) === 0) {
-      x <<= 4;
-      result += 4;
-    }
-    ;
-    if ((x & 0xC0000000) === 0) {
-      x <<= 2;
-      result += 2;
-    }
-    ;
-    if ((x & 0x80000000) === 0) {
-      x <<= 1;
-      result += 1;
-    }
-    ;
-    return result;
-  }
-  function imul(x, y) {
-    x = toUint32(+x);
-    y = toUint32(+y);
-    var xh = (x >>> 16) & 0xffff;
-    var xl = x & 0xffff;
-    var yh = (y >>> 16) & 0xffff;
-    var yl = y & 0xffff;
-    return xl * yl + (((xh * yl + xl * yh) << 16) >>> 0) | 0;
-  }
-  function sign(x) {
-    x = +x;
-    if (x > 0)
-      return 1;
-    if (x < 0)
-      return -1;
-    return x;
-  }
-  function log10(x) {
-    return log(x) * 0.434294481903251828;
-  }
-  function log2(x) {
-    return log(x) * 1.442695040888963407;
-  }
-  function log1p(x) {
-    x = +x;
-    if (x < -1 || $isNaN(x)) {
-      return NaN;
-    }
-    if (x === 0 || x === Infinity) {
-      return x;
-    }
-    if (x === -1) {
-      return -Infinity;
-    }
-    var result = 0;
-    var n = 50;
-    if (x < 0 || x > 1) {
-      return log(1 + x);
-    }
-    for (var i = 1; i < n; i++) {
-      if ((i % 2) === 0) {
-        result -= pow(x, i) / i;
-      } else {
-        result += pow(x, i) / i;
-      }
-    }
-    return result;
-  }
-  function expm1(x) {
-    x = +x;
-    if (x === -Infinity) {
-      return -1;
-    }
-    if (!$isFinite(x) || x === 0) {
-      return x;
-    }
-    return exp(x) - 1;
-  }
-  function cosh(x) {
-    x = +x;
-    if (x === 0) {
-      return 1;
-    }
-    if ($isNaN(x)) {
-      return NaN;
-    }
-    if (!$isFinite(x)) {
-      return Infinity;
-    }
-    if (x < 0) {
-      x = -x;
-    }
-    if (x > 21) {
-      return exp(x) / 2;
-    }
-    return (exp(x) + exp(-x)) / 2;
-  }
-  function sinh(x) {
-    x = +x;
-    if (!$isFinite(x) || x === 0) {
-      return x;
-    }
-    return (exp(x) - exp(-x)) / 2;
-  }
-  function tanh(x) {
-    x = +x;
-    if (x === 0)
-      return x;
-    if (!$isFinite(x))
-      return sign(x);
-    var exp1 = exp(x);
-    var exp2 = exp(-x);
-    return (exp1 - exp2) / (exp1 + exp2);
-  }
-  function acosh(x) {
-    x = +x;
-    if (x < 1)
-      return NaN;
-    if (!$isFinite(x))
-      return x;
-    return log(x + sqrt(x + 1) * sqrt(x - 1));
-  }
-  function asinh(x) {
-    x = +x;
-    if (x === 0 || !$isFinite(x))
-      return x;
-    if (x > 0)
-      return log(x + sqrt(x * x + 1));
-    return -log(-x + sqrt(x * x + 1));
-  }
-  function atanh(x) {
-    x = +x;
-    if (x === -1) {
-      return -Infinity;
-    }
-    if (x === 1) {
-      return Infinity;
-    }
-    if (x === 0) {
-      return x;
-    }
-    if ($isNaN(x) || x < -1 || x > 1) {
-      return NaN;
-    }
-    return 0.5 * log((1 + x) / (1 - x));
-  }
-  function hypot(x, y) {
-    var length = arguments.length;
-    var args = new Array(length);
-    var max = 0;
-    for (var i = 0; i < length; i++) {
-      var n = arguments[i];
-      n = +n;
-      if (n === Infinity || n === -Infinity)
-        return Infinity;
-      n = abs(n);
-      if (n > max)
-        max = n;
-      args[i] = n;
-    }
-    if (max === 0)
-      max = 1;
-    var sum = 0;
-    var compensation = 0;
-    for (var i = 0; i < length; i++) {
-      var n = args[i] / max;
-      var summand = n * n - compensation;
-      var preliminary = sum + summand;
-      compensation = (preliminary - sum) - summand;
-      sum = preliminary;
-    }
-    return sqrt(sum) * max;
-  }
-  function trunc(x) {
-    x = +x;
-    if (x > 0)
-      return floor(x);
-    if (x < 0)
-      return ceil(x);
-    return x;
-  }
-  var fround,
-      f32;
-  if (typeof Float32Array === 'function') {
-    f32 = new Float32Array(1);
-    fround = function(x) {
-      f32[0] = Number(x);
-      return f32[0];
-    };
-  } else {
-    fround = jsFround;
-  }
-  function cbrt(x) {
-    x = +x;
-    if (x === 0)
-      return x;
-    var negate = x < 0;
-    if (negate)
-      x = -x;
-    var result = pow(x, 1 / 3);
-    return negate ? -result : result;
-  }
-  function polyfillMath(global) {
-    var Math = global.Math;
-    maybeAddFunctions(Math, ['acosh', acosh, 'asinh', asinh, 'atanh', atanh, 'cbrt', cbrt, 'clz32', clz32, 'cosh', cosh, 'expm1', expm1, 'fround', fround, 'hypot', hypot, 'imul', imul, 'log10', log10, 'log1p', log1p, 'log2', log2, 'sign', sign, 'sinh', sinh, 'tanh', tanh, 'trunc', trunc]);
-  }
-  registerPolyfill(polyfillMath);
-  return {
-    get clz32() {
-      return clz32;
-    },
-    get imul() {
-      return imul;
-    },
-    get sign() {
-      return sign;
-    },
-    get log10() {
-      return log10;
-    },
-    get log2() {
-      return log2;
-    },
-    get log1p() {
-      return log1p;
-    },
-    get expm1() {
-      return expm1;
-    },
-    get cosh() {
-      return cosh;
-    },
-    get sinh() {
-      return sinh;
-    },
-    get tanh() {
-      return tanh;
-    },
-    get acosh() {
-      return acosh;
-    },
-    get asinh() {
-      return asinh;
-    },
-    get atanh() {
-      return atanh;
-    },
-    get hypot() {
-      return hypot;
-    },
-    get trunc() {
-      return trunc;
-    },
-    get fround() {
-      return fround;
-    },
-    get cbrt() {
-      return cbrt;
-    },
-    get polyfillMath() {
-      return polyfillMath;
-    }
-  };
-});
-System.get("traceur-runtime@0.0.91/src/runtime/polyfills/Math.js" + '');
-System.registerModule("traceur-runtime@0.0.91/src/runtime/polyfills/polyfills.js", [], function() {
-  "use strict";
-  var __moduleName = "traceur-runtime@0.0.91/src/runtime/polyfills/polyfills.js";
-  var polyfillAll = System.get("traceur-runtime@0.0.91/src/runtime/polyfills/utils.js").polyfillAll;
-  polyfillAll(Reflect.global);
-  var setupGlobals = $traceurRuntime.setupGlobals;
-  $traceurRuntime.setupGlobals = function(global) {
-    setupGlobals(global);
-    polyfillAll(global);
-  };
-  return {};
-});
-System.get("traceur-runtime@0.0.91/src/runtime/polyfills/polyfills.js" + '');
 
-System.registerModule("models/sdk/MHSDK.js", [], function() {
-  "use strict";
-  var __moduleName = "models/sdk/MHSDK.js";
-  var _MHAccessToken = null;
-  var _MHClientId = null;
-  var _MHClientSecret = null;
-  var _houndOrigin = 'https://api-v11.mediahound.com/';
-  var MHSDK = function() {
-    function MHSDK() {}
-    return ($traceurRuntime.createClass)(MHSDK, {}, {
-      configure: function(clientId, clientSecret, origin) {
-        _MHClientId = clientId;
-        _MHClientSecret = clientSecret;
-        if (origin) {
-          _houndOrigin = origin;
-        }
-        return this.refreshOAuthToken();
-      },
-      refreshOAuthToken: function() {
-        var houndRequest = System.get('request/hound-request.js').houndRequest;
-        return houndRequest({
-          endpoint: 'cas/oauth2.0/accessToken',
-          params: {
-            client_id: _MHClientId,
-            client_secret: _MHClientSecret,
-            grant_type: 'client_credentials'
-          }
-        }).then(function(response) {
-          _MHAccessToken = response.accessToken;
-        });
-      },
-      get MHAccessToken() {
-        return _MHAccessToken;
-      },
-      get origin() {
-        return _houndOrigin;
+  babelHelpers.get = function get(object, property, receiver) {
+    if (object === null) object = Function.prototype;
+    var desc = Object.getOwnPropertyDescriptor(object, property);
+
+    if (desc === undefined) {
+      var parent = Object.getPrototypeOf(object);
+
+      if (parent === null) {
+        return undefined;
+      } else {
+        return get(parent, property, receiver);
+      }
+    } else if ("value" in desc) {
+      return desc.value;
+    } else {
+      var getter = desc.get;
+
+      if (getter === undefined) {
+        return undefined;
+      }
+
+      return getter.call(receiver);
+    }
+  };
+
+  babelHelpers.inherits = function (subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        enumerable: false,
+        writable: true,
+        configurable: true
       }
     });
-  }();
-  return {get MHSDK() {
-      return MHSDK;
-    }};
-});
-System.registerModule("request/promise-request.js", [], function() {
-  "use strict";
-  var __moduleName = "request/promise-request.js";
-  var xhrc;
-  if (typeof window !== 'undefined') {
-    if (!window.XMLHttpRequest || !("withCredentials" in new XMLHttpRequest())) {
-      throw new Error("No XMLHttpRequest 2 Object found, please update your browser.");
-    } else {
-      xhrc = window;
-    }
-  } else if (typeof window === 'undefined') {
-    xhrc = require("xmlhttprequest-cookie");
-  }
-  var extraEncode = function(str) {
-    return encodeURIComponent(str).replace(/\-/g, "%2D").replace(/\_/g, "%5F").replace(/\./g, "%2E").replace(/\!/g, "%21").replace(/\~/g, "%7E").replace(/\*/g, "%2A").replace(/\'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29");
-  },
-      promiseRequest = function(args) {
-        var prop,
-            method = args.method || 'GET',
-            url = args.url || null,
-            params = args.params || null,
-            data = args.data || null,
-            headers = args.headers || null,
-            withCreds = (args.withCredentials !== undefined) ? args.withCredentials : true,
-            onprogress = args.onprogress || null,
-            xhr = new xhrc.XMLHttpRequest();
-        if (url === null) {
-          throw new TypeError('url was null or undefined in arguments object', 'promiseRequest.js', 70);
-        }
-        if (params !== null) {
-          if (url.indexOf('?') === -1) {
-            url += '?';
-          }
-          for (prop in params) {
-            if (params.hasOwnProperty(prop)) {
-              if (url[url.length - 1] !== '?') {
-                url += '&';
-              }
-              if (typeof params[prop] === 'string' || params[prop] instanceof String) {
-                url += encodeURIComponent(prop) + '=' + extraEncode(params[prop]).replace('%20', '+');
-              } else if (Array.isArray(params[prop]) || params[prop] instanceof Array) {
-                var $__4 = true;
-                var $__5 = false;
-                var $__6 = undefined;
-                try {
-                  for (var $__2 = void 0,
-                      $__1 = (params[prop])[$traceurRuntime.toProperty(Symbol.iterator)](); !($__4 = ($__2 = $__1.next()).done); $__4 = true) {
-                    var p = $__2.value;
-                    {
-                      url += encodeURIComponent(prop) + '=' + extraEncode(p).replace('%20', '+');
-                      url += '&';
-                    }
-                  }
-                } catch ($__7) {
-                  $__5 = true;
-                  $__6 = $__7;
-                } finally {
-                  try {
-                    if (!$__4 && $__1.return != null) {
-                      $__1.return();
-                    }
-                  } finally {
-                    if ($__5) {
-                      throw $__6;
-                    }
-                  }
-                }
-                if (params[prop].length > 0) {
-                  url = url.slice(0, -1);
-                }
-              } else {
-                url += encodeURIComponent(prop) + '=' + extraEncode(JSON.stringify(params[prop])).replace('%20', '+');
-              }
-            }
-          }
-          prop = null;
-        }
-        if (data) {
-          if (typeof data === 'string' || data instanceof String || data instanceof ArrayBuffer) {} else if (typeof FormData !== 'undefined' && data instanceof FormData) {} else if (typeof Blob !== 'undefined' && data instanceof Blob) {} else {
-            data = JSON.stringify(data);
-            if (headers == null) {
-              headers = {'Content-Type': 'application/json'};
-            } else if (!headers['Content-Type'] && !headers['content-type'] && !headers['Content-type'] && !headers['content-Type']) {
-              headers['Content-Type'] = 'application/json';
-            }
-          }
-        }
-        xhr.open(method, url, true);
-        xhr.withCredentials = withCreds;
-        if (headers !== null) {
-          for (prop in headers) {
-            if (headers.hasOwnProperty(prop)) {
-              xhr.setRequestHeader(prop, headers[prop]);
-            }
-          }
-        }
-        return new Promise(function(resolve, reject) {
-          xhr.onreadystatechange = function() {
-            if (this.readyState === 4) {
-              if (this.status >= 200 && this.status < 300) {
-                resolve(this);
-              } else {
-                reject({
-                  error: new Error('Request failed with status: ' + this.status + ', ' + this.statusText),
-                  'xhr': this
-                });
-              }
-            } else if (this.readyState === 3) {
-              if (typeof onprogress === 'function') {
-                onprogress(this.responseText);
-              }
-            } else if (this.readyState === 2) {} else if (this.readyState === 1) {} else if (this.readyState === 0) {}
-          };
-          xhr.addEventListener('abort', function() {
-            console.log('Request to ' + url + ' aborted with status: ' + this.status + ', ' + this.statusText);
-          }, false);
-          if (data !== null) {
-            xhr.send(data);
-          } else {
-            xhr.send();
-          }
-        });
-      };
-  Object.defineProperty(promiseRequest, 'extraEncode', {
-    configurable: false,
-    enumerable: false,
-    get: function() {
-      return extraEncode;
-    }
-  });
-  var $__default = promiseRequest;
-  return {
-    get promiseRequest() {
-      return promiseRequest;
-    },
-    get default() {
-      return $__default;
-    }
+    if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
   };
-});
-System.registerModule("request/hound-request.js", [], function() {
-  "use strict";
-  var __moduleName = "request/hound-request.js";
-  var promiseRequest = System.get("request/promise-request.js").promiseRequest;
-  var MHSDK = System.get("models/sdk/MHSDK.js").MHSDK;
-  var extraEncode = promiseRequest.extraEncode,
-      defaults = {
-        headers: {'Accept': 'application/json'},
-        withCredentials: true
-      },
-      responseThen = function(response) {
-        if (!!response) {
-          if (response.responseText != null && response.responseText !== '') {
-            return JSON.parse(response.responseText);
-          }
-          if (response.response != null && typeof response.response === 'string' && response.response !== '') {
-            return JSON.parse(response.response);
-          }
-          return response.status;
-        }
-        return response;
-      };
-  var houndRequest = function(args) {
-    if (!args) {
-      throw new TypeError('Arguments not specified for houndRequest', 'houndRequest.js', 27);
+
+  babelHelpers.possibleConstructorReturn = function (self, call) {
+    if (!self) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
-    if (typeof args.method === 'string' && (/[a-z]/).test(args.method)) {
-      args.method = args.method.toUpperCase();
-    }
-    if (args.method && args.method === 'POST') {
-      defaults.withCredentials = true;
-    }
-    if (args.endpoint) {
-      args.url = MHSDK.origin + args.endpoint;
-      delete args.endpoint;
-    }
-    if (MHSDK.MHAccessToken) {
-      if (args.params) {
-        args.params.access_token = MHSDK.MHAccessToken;
-      } else {
-        args.params = {access_token: MHSDK.MHAccessToken};
-      }
-    }
-    if (!args.headers) {
-      args.headers = defaults.headers;
-    } else {
-      var prop;
-      for (prop in defaults.headers) {
-        if (defaults.headers.hasOwnProperty(prop) && !(prop in args.headers)) {
-          args.headers[prop] = defaults.headers[prop];
-        }
-      }
-    }
-    if (args.withCredentials == null) {
-      args.withCredentials = defaults.withCredentials;
-    }
-    return promiseRequest(args).then(responseThen);
+
+    return call && (typeof call === "object" || typeof call === "function") ? call : self;
   };
-  Object.defineProperty(houndRequest, 'extraEncode', {
-    configurable: false,
-    enumerable: false,
-    get: function() {
-      return extraEncode;
-    }
-  });
-  var $__default = houndRequest;
-  return {
-    get houndRequest() {
-      return houndRequest;
-    },
-    get default() {
-      return $__default;
-    }
-  };
-});
-System.registerModule("models/internal/debug-helpers.js", [], function() {
-  "use strict";
-  var __moduleName = "models/internal/debug-helpers.js";
+
+  babelHelpers;
+  // Logging Helper
   var debug = {
     log: false,
-    warn: true,
-    error: true
+    warn: true, //( (/(local\.mediahound\.com:2014)|(stag-www\.mediahound\.com)/).test(window.location.host) ),
+    error: true //( (/(local\.mediahound\.com:2014)|(stag-www\.mediahound\.com)/).test(window.location.host) )
   };
-  var isDevAndDebug = function() {
+
+  var isDevAndDebug = function isDevAndDebug() {
+
     if (typeof window !== 'undefined') {
-      return window.mhDebug && (window.location.host === 'local.mediahound.com:2014');
+      return window.mhDebug && window.location.host === 'local.mediahound.com:2014';
     } else {
       return false;
     }
   };
-  var log = function(override) {
-    for (var args = [],
-        $__1 = 1; $__1 < arguments.length; $__1++)
-      args[$__1 - 1] = arguments[$__1];
+
+  // TODO change so that log takes override and returns console function so that console shows correct line number
+  var log = function log(override) {
+    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      args[_key - 1] = arguments[_key];
+    }
+
     if (typeof override !== 'boolean') {
       args.unshift(override);
       override = false;
@@ -3811,10 +114,23 @@ System.registerModule("models/internal/debug-helpers.js", [], function() {
       console.log.apply(console, arguments);
     }
   };
-  var warn = function(override) {
-    for (var args = [],
-        $__2 = 1; $__2 < arguments.length; $__2++)
-      args[$__2 - 1] = arguments[$__2];
+
+  /*
+  export var log = function(...args){
+    if( typeof args[0] !== 'boolean' ){
+      return log(false);
+    }
+    if( console && console.log && ( args[0] || debug.log || isDevAndDebug() ) ){
+      return console.log.bind(console);
+    }
+  };
+   */
+
+  var warn = function warn(override) {
+    for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+      args[_key2 - 1] = arguments[_key2];
+    }
+
     if (typeof override !== 'boolean') {
       args.unshift(override);
       override = false;
@@ -3823,10 +139,12 @@ System.registerModule("models/internal/debug-helpers.js", [], function() {
       console.warn.apply(console, args);
     }
   };
-  var error = function(override) {
-    for (var args = [],
-        $__3 = 1; $__3 < arguments.length; $__3++)
-      args[$__3 - 1] = arguments[$__3];
+
+  var error = function error(override) {
+    for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+      args[_key3 - 1] = arguments[_key3];
+    }
+
     if (typeof override !== 'boolean') {
       args.unshift(override);
       override = false;
@@ -3835,60 +153,108 @@ System.registerModule("models/internal/debug-helpers.js", [], function() {
       console.error.apply(console, args);
     }
   };
-  return {
-    get log() {
-      return log;
-    },
-    get warn() {
-      return warn;
-    },
-    get error() {
-      return error;
-    }
-  };
-});
-System.registerModule("models/internal/MHCache.js", [], function() {
-  "use strict";
-  var __moduleName = "models/internal/MHCache.js";
-  var log = System.get("models/internal/debug-helpers.js").log;
+
+  /**
+   * A doubly linked list-based Least Recently Used (LRU) cache. Will keep most
+   * recently used items while discarding least recently used items when its limit
+   * is reached.
+   *
+   * Implementation inspired by:
+   *    Rasmus Andersson <http://hunch.se/>
+   *    https://github.com/rsms/js-lru
+   *
+   * Licensed under MIT. Copyright (c) 2014 MediaHound Inc. <http://mediahound.com/>
+   *
+   * Items are added to the end of the list, that means that the tail is the newest item
+   * and the head is the oldest item.
+   *
+   * head(oldest) --.newer--> entry --.newer--> tail(newest)
+   *    and
+   * head(oldest) <--older.-- entry <--older.-- tail(newest)
+   *
+   */
+
   var keymapSym = Symbol('keymap');
-  var MHCache = function() {
+
+  var MHCache = (function () {
     function MHCache(limit) {
+      babelHelpers.classCallCheck(this, MHCache);
+
+      // Current size of the cache.
       this.size = 0;
+
+      // Maximum number of items this cache can hold.
       this.limit = limit;
       this[keymapSym] = {};
     }
-    return ($traceurRuntime.createClass)(MHCache, {
-      put: function(key, value, altId) {
-        var entry = {
-          key: key,
-          value: value,
-          altId: altId
-        };
+
+    /**
+     * Put <value> into the cache associated with <key>. Returns the entry which was
+     * removed to make room for the new entry. Otherwise undefined is returned
+     * (i.e. if there was enough room already).
+     *
+     * TODO: Bug if put same value can get multiple instances of entry in list
+     */
+
+    babelHelpers.createClass(MHCache, [{
+      key: 'put',
+      value: function put(key, value, altId) {
+        var entry = { key: key, value: value, altId: altId };
         log('putting: ', entry);
+        // Note: No protection against replacing, and thus orphan entries. By design.
         this[keymapSym][key] = entry;
+
         if (this.tail) {
+          // link previous tail to the new tail (entry)
           this.tail.newer = entry;
           entry.older = this.tail;
         } else {
+          // we're first in -- yay
           this.head = entry;
         }
+        // add new entry to the end of the linked list -- it's now the freshest entry.
         this.tail = entry;
         if (this.size === this.limit) {
+          // we hit the limit -- remove the head
           return this.shift();
         } else {
+          // increase the size counter
           this.size++;
         }
-      },
-      putMHObj: function(mhObj) {
+      }
+
+      // convenience for putting an MHObject
+
+    }, {
+      key: 'putMHObj',
+      value: function putMHObj(mhObj) {
         if (mhObj && mhObj.metadata.mhid && mhObj.metadata.username) {
           return this.put(mhObj.metadata.mhid, mhObj, mhObj.metadata.username);
         }
         if (mhObj && mhObj.metadata.mhid) {
           return this.put(mhObj.metadata.mhid, mhObj, mhObj.metadata.altId);
         }
-      },
-      shift: function() {
+      }
+
+      /**
+       * Purge the least recently used (oldest) entry from the cache. Returns the
+       * removed entry or undefined if the cache was empty.
+       *
+       * If you need to perform any form of finalization of purged items, this is a
+       * good place to do it. Simply override/replace this function:
+       *
+       *   var c = new MHCache(123);
+       *   c.shift = function() {
+       *     var entry = MHCache.prototype.shift.call(this);
+       *     doSomethingWith(entry);
+       *     return entry;
+       *   }
+       */
+
+    }, {
+      key: 'shift',
+      value: function shift() {
+        // todo: handle special case when limit == 1
         var entry = this.head;
         if (entry) {
           if (this.head.newer) {
@@ -3897,39 +263,66 @@ System.registerModule("models/internal/MHCache.js", [], function() {
           } else {
             this.head = undefined;
           }
+          // Remove last strong reference to <entry> and remove links from the purged
+          // entry being returned:
           entry.newer = entry.older = undefined;
+          // delete is slow, but we need to do this to avoid uncontrollable growth:
           delete this[keymapSym][entry.key];
         }
         return entry;
-      },
-      get: function(key) {
+      }
+
+      /**
+       * Get and register recent use of <key>. Returns the value associated with <key>
+       * or undefined if not in cache.
+       */
+
+    }, {
+      key: 'get',
+      value: function get(key) {
+        // First, find our cache entry
         var entry = this[keymapSym][key];
         if (entry === undefined) {
           return;
-        }
+        } // Not cached. Sorry.
+        // As <key> was found in the cache, register it as being requested recently
         if (entry === this.tail) {
+          // Already the most recently used entry, so no need to update the list
           log('getting from cache (is tail): ', entry);
           return entry.value;
         }
+        // HEAD--------------TAIL
+        //   <.older   .newer>
+        //  <--- add direction --
+        //   A  B  C  <D>  E
         if (entry.newer) {
           if (entry === this.head) {
             this.head = entry.newer;
           }
-          entry.newer.older = entry.older;
+          entry.newer.older = entry.older; // C <-- E.
         }
         if (entry.older) {
-          entry.older.newer = entry.newer;
+          entry.older.newer = entry.newer; // C. --> E
         }
-        entry.newer = undefined;
-        entry.older = this.tail;
+        entry.newer = undefined; // D --x
+        entry.older = this.tail; // D. --> E
         if (this.tail) {
-          this.tail.newer = entry;
+          this.tail.newer = entry; // E. <-- D
         }
         this.tail = entry;
         log('getting from cache: ', entry);
         return entry.value;
-      },
-      getByAltId: function(altId) {
+      }
+
+      /**
+       *
+       * @param altId
+       * @returns {MHObject|undefined}
+       */
+
+    }, {
+      key: 'getByAltId',
+      value: function getByAltId(altId) {
         var entry = this.tail;
         while (entry) {
           if (entry.altId === altId) {
@@ -3938,14 +331,40 @@ System.registerModule("models/internal/MHCache.js", [], function() {
           }
           entry = entry.older;
         }
-      },
-      find: function(key) {
+      }
+
+      /**
+       * Check if <key> is in the cache without registering recent use. Feasible if
+       * you do not want to change the state of the cache, but only "peek" at it.
+       * Returns the entry associated with <key> if found, or undefined if not found.
+       */
+
+    }, {
+      key: 'find',
+      value: function find(key) {
         return this[keymapSym][key];
-      },
-      has: function(key) {
+      }
+
+      /**
+       * Check if <key> is in the cache without registering recent use.
+       * Returns true if key exists.
+       */
+
+    }, {
+      key: 'has',
+      value: function has(key) {
         return this[keymapSym][key] !== undefined;
-      },
-      hasAltId: function(altId) {
+      }
+
+      /**
+       *
+       * @param altId
+       * @returns {boolean}
+       */
+
+    }, {
+      key: 'hasAltId',
+      value: function hasAltId(altId) {
         var entry = this.tail;
         while (entry) {
           if (entry.altId === altId) {
@@ -3954,37 +373,67 @@ System.registerModule("models/internal/MHCache.js", [], function() {
           entry = entry.older;
         }
         return false;
-      },
-      remove: function(key) {
+      }
+
+      /**
+       * Remove entry <key> from cache and return its value. Returns undefined if not
+       * found.
+       */
+
+    }, {
+      key: 'remove',
+      value: function remove(key) {
         var entry = this[keymapSym][key];
         if (!entry) {
           return;
         }
         delete this[keymapSym][entry.key];
         if (entry.newer && entry.older) {
+          // link the older entry with the newer entry
           entry.older.newer = entry.newer;
           entry.newer.older = entry.older;
         } else if (entry.newer) {
+          // remove the link to us
           entry.newer.older = undefined;
+          // link the newer entry to head
           this.head = entry.newer;
         } else if (entry.older) {
+          // remove the link to us
           entry.older.newer = undefined;
+          // link the newer entry to head
           this.tail = entry.older;
         } else {
           this.head = this.tail = undefined;
         }
+
         this.size--;
         return entry.value;
-      },
-      removeAll: function() {
+      }
+
+      /** Removes all entries */
+
+    }, {
+      key: 'removeAll',
+      value: function removeAll() {
+        // This should be safe, as we never expose strong references to the outside
         this.head = this.tail = undefined;
         this.size = 0;
         this[keymapSym] = {};
-      },
-      keys: function() {
+      }
+
+      /**
+       * Get all keys stored in keymap
+       * Array returned is in an arbitrary order
+       */
+
+    }, {
+      key: 'keys',
+      value: function keys() {
         return Object.keys(this[keymapSym]);
-      },
-      forEach: function(callback) {
+      }
+    }, {
+      key: 'forEach',
+      value: function forEach(callback) {
         if (typeof callback === 'function') {
           var entry = this.head,
               index = 0;
@@ -3994,17 +443,30 @@ System.registerModule("models/internal/MHCache.js", [], function() {
             entry = entry.newer;
           }
         }
-      },
-      saveToLocalStorage: function() {
-        var storageKey = arguments[0] !== (void 0) ? arguments[0] : 'mhLocalCache';
+      }
+
+      /**
+       * Create an array of stored objects and
+       * @param {string='mhLocalCache'} storageKey - key to save to local storage to
+       *
+       * save to localStorage
+       * objects are JSON.stringiy-ed with promise properties removed
+       *
+       */
+
+    }, {
+      key: 'saveToLocalStorage',
+      value: function saveToLocalStorage() {
+        var storageKey = arguments.length <= 0 || arguments[0] === undefined ? 'mhLocalCache' : arguments[0];
+
         var arr = [],
             entry = this.head,
-            replacer = function(key, value) {
-              if ((/promise|request/gi).test(key)) {
-                return;
-              }
-              return value;
-            };
+            replacer = function replacer(key, value) {
+          if (/promise|request/gi.test(key)) {
+            return;
+          }
+          return value;
+        };
         log('saving to localStorage');
         while (entry) {
           log('adding to arry: ', JSON.stringify(entry.value, replacer));
@@ -4013,10 +475,21 @@ System.registerModule("models/internal/MHCache.js", [], function() {
         }
         log('adding to localStorage: ', JSON.stringify(arr));
         localStorage[storageKey] = JSON.stringify(arr);
-      },
-      restoreFromLocalStorage: function() {
-        var storageKey = arguments[0] !== (void 0) ? arguments[0] : 'mhLocalCache';
-        var MHObject = System.get('../models/base/MHObject.js').MHObject;
+      }
+
+      /**
+       * Fill cache localStorage.mhLocalCache
+       * @param {string='mhLocalCache'} storageKey
+       */
+
+    }, {
+      key: 'restoreFromLocalStorage',
+      value: function restoreFromLocalStorage() {
+        var storageKey = arguments.length <= 0 || arguments[0] === undefined ? 'mhLocalCache' : arguments[0];
+
+        var MHObject = System.get('../../src/models/base/MHObject.js').MHObject;
+        //console.log('circular dep: ', MHObject);
+
         if (!localStorage || typeof localStorage[storageKey] === 'undefined') {
           log('nothing stored');
           return;
@@ -4024,6 +497,7 @@ System.registerModule("models/internal/MHCache.js", [], function() {
         var i = 0,
             curr,
             stored = JSON.parse(localStorage[storageKey]);
+
         for (; i < stored.length; i++) {
           curr = MHObject.create(stored[i]);
           if (curr && !this.has(curr.metadata.mhid)) {
@@ -4032,23 +506,350 @@ System.registerModule("models/internal/MHCache.js", [], function() {
           }
         }
       }
-    }, {});
-  }();
-  return {get MHCache() {
-      return MHCache;
-    }};
-});
-System.registerModule("models/internal/jsonParse.js", [], function() {
-  "use strict";
-  var __moduleName = "models/internal/jsonParse.js";
-  var mapValueToType = function(rawValue, type) {
+    }]);
+    return MHCache;
+  })();
+
+  var xhrc;
+
+  // Use XMLHttpRequest from a browser or shim it in Ndoe with xmlhttprequest-cookie.
+  if (typeof window !== 'undefined') {
+    if (!window.XMLHttpRequest || !("withCredentials" in new XMLHttpRequest())) {
+      throw new Error("No XMLHttpRequest 2 Object found, please update your browser.");
+    } else {
+      xhrc = window;
+    }
+  } else if (typeof window === 'undefined') {
+    xhrc = require("xmlhttprequest-cookie");
+  }
+
+  var extraEncode$1 = function extraEncode(str) {
+    // encodeURIComponent then encode - _ . ! ~ * ' ( ) as well
+    return encodeURIComponent(str).replace(/\-/g, "%2D").replace(/\_/g, "%5F").replace(/\./g, "%2E").replace(/\!/g, "%21").replace(/\~/g, "%7E").replace(/\*/g, "%2A").replace(/\'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29");
+  };
+  var promiseRequest = function promiseRequest(args) {
+    var prop,
+        method = args.method || 'GET',
+        url = args.url || null,
+        params = args.params || null,
+        data = args.data || null,
+        headers = args.headers || null,
+        withCreds = args.withCredentials !== undefined ? args.withCredentials : true,
+        onprogress = args.onprogress || null,
+        xhr = new xhrc.XMLHttpRequest();
+
+    // Check for url
+    if (url === null) {
+      throw new TypeError('url was null or undefined in arguments object', 'promiseRequest.js', 70);
+    }
+
+    // Add params
+    if (params !== null) {
+      // If the URL already contains a ?, then we won't add one
+      if (url.indexOf('?') === -1) {
+        url += '?';
+      }
+      for (prop in params) {
+        if (params.hasOwnProperty(prop)) {
+          if (url[url.length - 1] !== '?') {
+            url += '&';
+          }
+          if (typeof params[prop] === 'string' || params[prop] instanceof String) {
+            url += encodeURIComponent(prop) + '=' + extraEncode$1(params[prop]).replace('%20', '+');
+          } else if (Array.isArray(params[prop]) || params[prop] instanceof Array) {
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+              for (var _iterator = params[prop][Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var p = _step.value;
+
+                url += encodeURIComponent(prop) + '=' + extraEncode$1(p).replace('%20', '+');
+                url += '&';
+              }
+            } catch (err) {
+              _didIteratorError = true;
+              _iteratorError = err;
+            } finally {
+              try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                  _iterator.return();
+                }
+              } finally {
+                if (_didIteratorError) {
+                  throw _iteratorError;
+                }
+              }
+            }
+
+            if (params[prop].length > 0) {
+              url = url.slice(0, -1); // Remove last & character
+            }
+          } else {
+              url += encodeURIComponent(prop) + '=' + extraEncode$1(JSON.stringify(params[prop])).replace('%20', '+');
+            }
+        }
+      }
+      prop = null;
+    }
+
+    // Stringify Data
+    if (data) {
+      if (typeof data === 'string' || data instanceof String || data instanceof ArrayBuffer) {
+        // do nothing
+      } else if (typeof FormData !== 'undefined' && data instanceof FormData) {
+          // do nothing
+        } else if (typeof Blob !== 'undefined' && data instanceof Blob) {
+            // do nothing
+          } else {
+              data = JSON.stringify(data);
+              if (headers == null) {
+                headers = {
+                  'Content-Type': 'application/json'
+                };
+              } else if (!headers['Content-Type'] && !headers['content-type'] && !headers['Content-type'] && !headers['content-Type']) {
+                headers['Content-Type'] = 'application/json';
+              }
+            }
+    }
+
+    // Open Request
+    xhr.open(method, url, true);
+
+    // Set Credentials, spec says can be done in UNSENT or OPENED states
+    xhr.withCredentials = withCreds;
+
+    // Set Headers
+    if (headers !== null) {
+      for (prop in headers) {
+        if (headers.hasOwnProperty(prop)) {
+          xhr.setRequestHeader(prop, headers[prop]);
+        }
+      }
+    }
+
+    // Create Promise
+    return new Promise(function (resolve, reject) {
+
+      xhr.onreadystatechange = function () {
+        if (this.readyState === 4) {
+          // Done
+          if (this.status >= 200 && this.status < 300) {
+            resolve(this);
+          } else {
+            //console.log(this);
+            reject({
+              error: new Error('Request failed with status: ' + this.status + ', ' + this.statusText),
+              'xhr': this
+            });
+          }
+        } else if (this.readyState === 3) {
+          // Loading
+          if (typeof onprogress === 'function') {
+            onprogress(this.responseText);
+          }
+        } else if (this.readyState === 2) {
+          // Headers Received
+        } else if (this.readyState === 1) {
+            // Request Open
+          } else if (this.readyState === 0) {
+              // Unset ie, not open
+            }
+      };
+
+      xhr.addEventListener('abort', function () {
+        console.log('Request to ' + url + ' aborted with status: ' + this.status + ', ' + this.statusText);
+      }, false);
+
+      // Send Request
+      if (data !== null) {
+        xhr.send(data);
+      } else {
+        xhr.send();
+      }
+    });
+  };
+  // Add extraEncode as an export
+  Object.defineProperty(promiseRequest, 'extraEncode', {
+    configurable: false,
+    enumerable: false,
+    get: function get() {
+      return extraEncode$1;
+    }
+  });
+
+  var extraEncode = promiseRequest.extraEncode;
+  var defaults = {
+    headers: {
+      'Accept': 'application/json'
+    },
+    withCredentials: true
+  };
+  var responseThen = function responseThen(response) {
+    if (!!response) {
+      if (response.responseText != null && response.responseText !== '') {
+        return JSON.parse(response.responseText);
+      }
+      if (response.response != null && typeof response.response === 'string' && response.response !== '') {
+        return JSON.parse(response.response);
+      }
+      return response.status;
+    }
+    return response;
+  };
+  var houndRequest = function houndRequest(args) {
+    // Passed through to promiseRequest
+    //  method
+    //  params
+    //  data
+    //  headers
+    //  withCredentials
+    //  onprogress or onProgress
+    //
+    // Unique
+    //  endpoint -- {String} api endpoint to pass as url to promiseRequest
+    //
+    // Overwrites
+    //  url
+
+    // If args doesn't exist throw TypeError
+    if (!args) {
+      throw new TypeError('Arguments not specified for houndRequest', 'houndRequest.js', 27);
+    }
+    //log('args before defaults: ', JSON.stringify(args));
+
+    // Enforce capitals for method
+    if (typeof args.method === 'string' && /[a-z]/.test(args.method)) {
+      args.method = args.method.toUpperCase();
+    }
+
+    // Set/Add defaults for POST requests
+    if (args.method && args.method === 'POST') {
+      defaults.withCredentials = true;
+    }
+
+    // Set args.url via args.endpoint
+    //  delete endpoint from args
+    if (args.endpoint) {
+      // houndOrigin defined in hound-origin.js before import, must be fully qualified domain name
+      args.url = MHSDK.origin + args.endpoint;
+      delete args.endpoint;
+    }
+
+    // Set the OAuth access token if the client has configured OAuth.
+    if (MHSDK.MHAccessToken) {
+      if (args.params) {
+        args.params.access_token = MHSDK.MHAccessToken;
+      } else {
+        args.params = {
+          access_token: MHSDK.MHAccessToken
+        };
+      }
+    }
+
+    // Set to defaults or merge
+    //  headers
+    if (!args.headers) {
+      args.headers = defaults.headers;
+    } else {
+      // Merge Defaults in
+      var prop;
+      for (prop in defaults.headers) {
+        if (defaults.headers.hasOwnProperty(prop) && !(prop in args.headers)) {
+          args.headers[prop] = defaults.headers[prop];
+        }
+      }
+    }
+
+    // withCredentials
+    if (args.withCredentials == null) {
+      args.withCredentials = defaults.withCredentials;
+    }
+
+    //log('args after defaults: ', JSON.stringify(args));
+
+    return promiseRequest(args).then(responseThen);
+  };
+
+  Object.defineProperty(houndRequest, 'extraEncode', {
+    configurable: false,
+    enumerable: false,
+    get: function get() {
+      return extraEncode;
+    }
+  });
+
+  var _MHAccessToken = null;
+  var _MHClientId = null;
+  var _MHClientSecret = null;
+
+  var _houndOrigin = 'https://api-v11.mediahound.com/';
+
+  var MHSDK = (function () {
+    function MHSDK() {
+      babelHelpers.classCallCheck(this, MHSDK);
+    }
+
+    babelHelpers.createClass(MHSDK, null, [{
+      key: 'configure',
+
+      /**
+       * MHSDK.create(clientId, clientSecret)
+       * Configures the MediaHound SDK with an OAuth clientId and clientSecret.
+       *
+       * @param   clientId <String> - OAuth Client Identifier
+       * @param   clientSecret <String> - OAuth Client Secret
+       * @param   origin <String> - (Optional) MediaHound network origin.
+       * @returns <Promise> - A promise that resolves when the configuration is complete.
+       */
+      value: function configure(clientId, clientSecret, origin) {
+        _MHClientId = clientId;
+        _MHClientSecret = clientSecret;
+        if (origin) {
+          _houndOrigin = origin;
+        }
+
+        return this.refreshOAuthToken();
+      }
+    }, {
+      key: 'refreshOAuthToken',
+      value: function refreshOAuthToken() {
+        return houndRequest({
+          endpoint: 'cas/oauth2.0/accessToken',
+          params: {
+            client_id: _MHClientId,
+            client_secret: _MHClientSecret,
+            grant_type: 'client_credentials'
+          }
+        }).then(function (response) {
+          _MHAccessToken = response.accessToken;
+        });
+      }
+    }, {
+      key: 'MHAccessToken',
+      get: function get() {
+        return _MHAccessToken;
+      }
+    }, {
+      key: 'origin',
+      get: function get() {
+        return _houndOrigin;
+      }
+    }]);
+    return MHSDK;
+  })();
+
+  var mapValueToType = function mapValueToType(rawValue, type) {
     var initialValue = null;
-    if (typeof type === 'object') {
+
+    if ((typeof type === 'undefined' ? 'undefined' : babelHelpers.typeof(type)) === 'object') {
       if (type) {
         if (type instanceof Array) {
           var innerType = type[0];
+
           if (rawValue !== null && rawValue !== undefined) {
-            initialValue = rawValue.map(function(v) {
+            initialValue = rawValue.map(function (v) {
               try {
                 return mapValueToType(v, innerType);
               } catch (e) {
@@ -4059,23 +860,25 @@ System.registerModule("models/internal/jsonParse.js", [], function() {
           }
         } else {
           if (type.mapper && typeof type.mapper === 'function') {
-            initialValue = (rawValue !== null && rawValue !== undefined) ? type.mapper(rawValue) : null;
+            initialValue = rawValue !== null && rawValue !== undefined ? type.mapper(rawValue) : null;
           }
         }
       }
     } else if (type === String) {
-      initialValue = (rawValue !== null && rawValue !== undefined) ? String(rawValue) : null;
+      initialValue = rawValue !== null && rawValue !== undefined ? String(rawValue) : null;
     } else if (type === Number) {
-      initialValue = (rawValue !== null && rawValue !== undefined) ? Number(rawValue) : null;
+      initialValue = rawValue !== null && rawValue !== undefined ? Number(rawValue) : null;
+
       if (Number.isNaN(initialValue)) {
         initialValue = null;
       }
     } else if (type === Boolean) {
-      initialValue = (rawValue !== null && rawValue !== undefined) ? Boolean(rawValue) : null;
+      initialValue = rawValue !== null && rawValue !== undefined ? Boolean(rawValue) : null;
     } else if (type === Object) {
       initialValue = rawValue || null;
     } else if (type === Date) {
       initialValue = new Date(rawValue * 1000);
+
       if (isNaN(initialValue)) {
         initialValue = null;
       } else if (initialValue === 'Invalid Date') {
@@ -4084,17 +887,21 @@ System.registerModule("models/internal/jsonParse.js", [], function() {
         initialValue = new Date(initialValue.valueOf() + initialValue.getTimezoneOffset() * 60000);
       }
     } else if (typeof type === 'function') {
-      initialValue = (rawValue !== null && rawValue !== undefined) ? new type(rawValue) : null;
+      initialValue = rawValue !== null && rawValue !== undefined ? new type(rawValue) : null;
     }
+
     return initialValue;
   };
-  var setPropertyFromArgs = function(args, obj, name, type, optional, merge) {
+
+  var setPropertyFromArgs = function setPropertyFromArgs(args, obj, name, type, optional, merge) {
     if (!obj[name]) {
       var rawValue = args[name];
       var convertedValue = mapValueToType(rawValue, type);
+
       if (!optional && !convertedValue) {
         throw TypeError('non-optional field `' + name + '` found null value. Args:', args);
       }
+
       if (convertedValue !== undefined) {
         if (merge) {
           obj[name] = convertedValue;
@@ -4109,14 +916,16 @@ System.registerModule("models/internal/jsonParse.js", [], function() {
       }
     }
   };
-  var jsonParseArgs = function(args, obj, merge) {
+
+  var jsonParseArgs = function jsonParseArgs(args, obj, merge) {
     var properties = obj.jsonProperties;
     for (var name in properties) {
       if (properties.hasOwnProperty(name)) {
         var value = properties[name];
+
         var optional = true;
-        var type = void 0;
-        if (typeof value === 'object') {
+        var type;
+        if ((typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object') {
           if (value.type !== undefined) {
             type = value.type;
           } else if (value.mapper !== undefined) {
@@ -4124,255 +933,92 @@ System.registerModule("models/internal/jsonParse.js", [], function() {
           } else if (value instanceof Array) {
             type = value;
           }
+
           if (value.optional !== undefined) {
             optional = value.optional;
           }
         } else {
           type = value;
         }
+
         setPropertyFromArgs(args, obj, name, type, optional, merge);
       }
     }
   };
-  var jsonCreateWithArgs = function(args, obj) {
+
+  var jsonCreateWithArgs = function jsonCreateWithArgs(args, obj) {
     jsonParseArgs(args, obj, false);
   };
-  var jsonMergeWithArgs = function(args, obj) {
+
+  var jsonMergeWithArgs = function jsonMergeWithArgs(args, obj) {
     jsonParseArgs(args, obj, true);
   };
-  var jsonCreateFromArrayData = function(arr, type) {
-    return mapValueToType(arr, type);
-  };
-  return {
-    get jsonCreateWithArgs() {
-      return jsonCreateWithArgs;
-    },
-    get jsonMergeWithArgs() {
-      return jsonMergeWithArgs;
-    },
-    get jsonCreateFromArrayData() {
-      return jsonCreateFromArrayData;
-    }
-  };
-});
-System.registerModule("models/image/MHImageData.js", [], function() {
-  "use strict";
-  var __moduleName = "models/image/MHImageData.js";
-  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
-  var MHImageData = function() {
-    function MHImageData(args) {
-      jsonCreateWithArgs(args, this);
-    }
-    return ($traceurRuntime.createClass)(MHImageData, {get jsonProperties() {
-        return {
-          url: String,
-          width: Number,
-          height: Number
-        };
-      }}, {});
-  }();
-  return {get MHImageData() {
-      return MHImageData;
-    }};
-});
-System.registerModule("models/meta/MHMetadata.js", [], function() {
-  "use strict";
-  var __moduleName = "models/meta/MHMetadata.js";
-  var MHImageData = System.get("models/image/MHImageData.js").MHImageData;
-  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
-  var MHMetadata = function() {
-    function MHMetadata(args) {
-      jsonCreateWithArgs(args, this);
-    }
-    return ($traceurRuntime.createClass)(MHMetadata, {get jsonProperties() {
-        return {
-          mhid: {
-            type: String,
-            optional: false
-          },
-          altId: String,
-          name: String,
-          description: String,
-          createdDate: Date
-        };
-      }}, {});
-  }();
-  var MHMediaMetadata = function($__super) {
-    function MHMediaMetadata() {
-      $traceurRuntime.superConstructor(MHMediaMetadata).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHMediaMetadata, {get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHMediaMetadata.prototype, "jsonProperties"), {releaseDate: Date});
-      }}, {}, $__super);
-  }(MHMetadata);
-  var MHUserMetadata = function($__super) {
-    function MHUserMetadata() {
-      $traceurRuntime.superConstructor(MHUserMetadata).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHUserMetadata, {get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHUserMetadata.prototype, "jsonProperties"), {
-          username: {
-            type: String,
-            optional: false
-          },
-          email: String
-        });
-      }}, {}, $__super);
-  }(MHMetadata);
-  var MHCollectionMetadata = function($__super) {
-    function MHCollectionMetadata() {
-      $traceurRuntime.superConstructor(MHCollectionMetadata).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHCollectionMetadata, {get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHCollectionMetadata.prototype, "jsonProperties"), {mixlist: String});
-      }}, {}, $__super);
-  }(MHMetadata);
-  var MHActionMetadata = function($__super) {
-    function MHActionMetadata() {
-      $traceurRuntime.superConstructor(MHActionMetadata).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHActionMetadata, {get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHActionMetadata.prototype, "jsonProperties"), {message: String});
-      }}, {}, $__super);
-  }(MHMetadata);
-  var MHImageMetadata = function($__super) {
-    function MHImageMetadata() {
-      $traceurRuntime.superConstructor(MHImageMetadata).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHImageMetadata, {get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHImageMetadata.prototype, "jsonProperties"), {
-          isDefault: Boolean,
-          averageColor: String,
-          thumbnail: MHImageData,
-          small: MHImageData,
-          medium: MHImageData,
-          large: MHImageData,
-          original: MHImageData
-        });
-      }}, {}, $__super);
-  }(MHMetadata);
-  var MHSubscriptionMetadata = function($__super) {
-    function MHSubscriptionMetadata() {
-      $traceurRuntime.superConstructor(MHSubscriptionMetadata).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHSubscriptionMetadata, {get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHSubscriptionMetadata.prototype, "jsonProperties"), {
-          timePeriod: String,
-          price: String,
-          currency: String,
-          mediums: String
-        });
-      }}, {}, $__super);
-  }(MHMetadata);
-  var MHSourceMetadata = function($__super) {
-    function MHSourceMetadata() {
-      $traceurRuntime.superConstructor(MHSourceMetadata).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHSourceMetadata, {get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHSourceMetadata.prototype, "jsonProperties"), {connectable: Boolean});
-      }}, {}, $__super);
-  }(MHMetadata);
-  var MHContributorMetadata = function($__super) {
-    function MHContributorMetadata() {
-      $traceurRuntime.superConstructor(MHContributorMetadata).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHContributorMetadata, {}, {}, $__super);
-  }(MHMetadata);
-  var MHHashtagMetadata = function($__super) {
-    function MHHashtagMetadata() {
-      $traceurRuntime.superConstructor(MHHashtagMetadata).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHHashtagMetadata, {}, {}, $__super);
-  }(MHMetadata);
-  var MHTraitMetadata = function($__super) {
-    function MHTraitMetadata() {
-      $traceurRuntime.superConstructor(MHTraitMetadata).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHTraitMetadata, {}, {}, $__super);
-  }(MHMetadata);
-  return {
-    get MHMetadata() {
-      return MHMetadata;
-    },
-    get MHMediaMetadata() {
-      return MHMediaMetadata;
-    },
-    get MHUserMetadata() {
-      return MHUserMetadata;
-    },
-    get MHCollectionMetadata() {
-      return MHCollectionMetadata;
-    },
-    get MHActionMetadata() {
-      return MHActionMetadata;
-    },
-    get MHImageMetadata() {
-      return MHImageMetadata;
-    },
-    get MHSubscriptionMetadata() {
-      return MHSubscriptionMetadata;
-    },
-    get MHSourceMetadata() {
-      return MHSourceMetadata;
-    },
-    get MHContributorMetadata() {
-      return MHContributorMetadata;
-    },
-    get MHHashtagMetadata() {
-      return MHHashtagMetadata;
-    },
-    get MHTraitMetadata() {
-      return MHTraitMetadata;
-    }
-  };
-});
-System.registerModule("models/social/MHSocial.js", [], function() {
-  "use strict";
-  var __moduleName = "models/social/MHSocial.js";
-  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
-  var MHSocial = function() {
+
+  // MediaHound Social Object
+  var MHSocial = (function () {
     function MHSocial(args) {
+      babelHelpers.classCallCheck(this, MHSocial);
+
       jsonCreateWithArgs(args, this);
     }
-    return ($traceurRuntime.createClass)(MHSocial, {
-      isEqualToMHSocial: function(otherObj) {
-        var $__6 = true;
-        var $__7 = false;
-        var $__8 = undefined;
+
+    /**
+     * TODO maybe just do a this[prop] === other[prop] check
+     * @param {MHSocial} otherObj - another MHSocial object to check against
+     * @returns {boolean}
+     */
+
+    babelHelpers.createClass(MHSocial, [{
+      key: 'isEqualToMHSocial',
+      value: function isEqualToMHSocial(otherObj) {
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
         try {
-          for (var $__4 = void 0,
-              $__3 = (Object.keys(this.jsonProperties))[$traceurRuntime.toProperty(Symbol.iterator)](); !($__6 = ($__4 = $__3.next()).done); $__6 = true) {
-            var prop = $__4.value;
-            {
-              if (typeof this[prop] === 'number' && typeof otherObj[prop] === 'number' && this[prop] === otherObj[prop]) {
-                continue;
-              } else if (!this[prop] && !otherObj[prop]) {
-                continue;
-              }
-              return false;
+          for (var _iterator = Object.keys(this.jsonProperties)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var prop = _step.value;
+
+            if (typeof this[prop] === 'number' && typeof otherObj[prop] === 'number' && this[prop] === otherObj[prop]) {
+              continue;
+            } else if (!this[prop] && !otherObj[prop]) {
+              continue;
             }
+            return false;
           }
-        } catch ($__9) {
-          $__7 = true;
-          $__8 = $__9;
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
         } finally {
           try {
-            if (!$__6 && $__3.return != null) {
-              $__3.return();
+            if (!_iteratorNormalCompletion && _iterator.return) {
+              _iterator.return();
             }
           } finally {
-            if ($__7) {
-              throw $__8;
+            if (_didIteratorError) {
+              throw _iteratorError;
             }
           }
         }
+
         return true;
-      },
-      newWithAction: function(action) {
+      }
+
+      /**
+       * Returns a new social object with the expected change of a given action
+       * @private
+       * @param action - MHSocial.ACTION to take on this social object
+       * @returns {MHSocial} - A new MHSocial object that represents the expected outcome
+       */
+
+    }, {
+      key: 'newWithAction',
+      value: function newWithAction(action) {
         var newValue,
             toChange,
             alsoFlip,
             newArgs = {};
+
         switch (action) {
           case MHSocial.LIKE:
             toChange = 'likers';
@@ -4405,40 +1051,49 @@ System.registerModule("models/social/MHSocial.js", [], function() {
           default:
             break;
         }
-        var $__6 = true;
-        var $__7 = false;
-        var $__8 = undefined;
+
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
+
         try {
-          for (var $__4 = void 0,
-              $__3 = (Object.keys(this.jsonProperties))[$traceurRuntime.toProperty(Symbol.iterator)](); !($__6 = ($__4 = $__3.next()).done); $__6 = true) {
-            var prop = $__4.value;
-            {
-              if (prop === toChange) {
-                newArgs[prop] = newValue;
-              } else if (prop === alsoFlip) {
-                newArgs[prop] = !this[prop];
-              } else {
-                newArgs[prop] = this[prop];
-              }
+          for (var _iterator2 = Object.keys(this.jsonProperties)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var prop = _step2.value;
+
+            if (prop === toChange) {
+              newArgs[prop] = newValue;
+            } else if (prop === alsoFlip) {
+              newArgs[prop] = !this[prop];
+            } else {
+              newArgs[prop] = this[prop];
             }
           }
-        } catch ($__9) {
-          $__7 = true;
-          $__8 = $__9;
+        } catch (err) {
+          _didIteratorError2 = true;
+          _iteratorError2 = err;
         } finally {
           try {
-            if (!$__6 && $__3.return != null) {
-              $__3.return();
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+              _iterator2.return();
             }
           } finally {
-            if ($__7) {
-              throw $__8;
+            if (_didIteratorError2) {
+              throw _iteratorError2;
             }
           }
         }
+
         return new MHSocial(newArgs);
-      },
-      get jsonProperties() {
+      }
+
+      /**
+       * Social Action Types
+       *
+       */
+
+    }, {
+      key: 'jsonProperties',
+      get: function get() {
         return {
           'likers': Number,
           'followers': Number,
@@ -4455,223 +1110,602 @@ System.registerModule("models/social/MHSocial.js", [], function() {
           'userPreference': Boolean
         };
       }
-    }, {
-      get LIKE() {
+    }], [{
+      key: 'LIKE',
+      get: function get() {
         return 'like';
-      },
-      get UNLIKE() {
+      }
+    }, {
+      key: 'UNLIKE',
+      get: function get() {
         return 'unlike';
-      },
-      get DISLIKE() {
+      }
+    }, {
+      key: 'DISLIKE',
+      get: function get() {
         return 'dislike';
-      },
-      get UNDISLIKE() {
+      }
+    }, {
+      key: 'UNDISLIKE',
+      get: function get() {
         return 'undislike';
-      },
-      get FOLLOW() {
+      }
+    }, {
+      key: 'FOLLOW',
+      get: function get() {
         return 'follow';
-      },
-      get UNFOLLOW() {
+      }
+    }, {
+      key: 'UNFOLLOW',
+      get: function get() {
         return 'unfollow';
-      },
-      get SOCIAL_ACTIONS() {
+      }
+    }, {
+      key: 'SOCIAL_ACTIONS',
+      get: function get() {
         return [MHSocial.LIKE, MHSocial.UNLIKE, MHSocial.DISLIKE, MHSocial.UNDISLIKE, MHSocial.FOLLOW, MHSocial.UNFOLLOW];
-      },
-      get POST() {
+      }
+    }, {
+      key: 'POST',
+      get: function get() {
         return 'post';
-      },
-      get COLLECT() {
+      }
+    }, {
+      key: 'COLLECT',
+      get: function get() {
         return 'collect';
-      },
-      get COMMENT() {
+      }
+    }, {
+      key: 'COMMENT',
+      get: function get() {
         return 'comment';
       }
-    });
-  }();
-  return {get MHSocial() {
-      return MHSocial;
-    }};
-});
-System.registerModule("models/base/MHObject.js", [], function() {
-  "use strict";
-  var __moduleName = "models/base/MHObject.js";
-  var $__0 = System.get("models/internal/debug-helpers.js"),
-      log = $__0.log,
-      warn = $__0.warn,
-      error = $__0.error;
-  var $__1 = System.get("models/internal/jsonParse.js"),
-      jsonCreateWithArgs = $__1.jsonCreateWithArgs,
-      jsonMergeWithArgs = $__1.jsonMergeWithArgs;
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var MHCache = System.get("models/internal/MHCache.js").MHCache;
-  var MHMetadata = System.get("models/meta/MHMetadata.js").MHMetadata;
-  var MHSocial = System.get("models/social/MHSocial.js").MHSocial;
+    }]);
+    return MHSocial;
+  })();
+
+  var MHImageData = (function () {
+    function MHImageData(args) {
+      babelHelpers.classCallCheck(this, MHImageData);
+
+      jsonCreateWithArgs(args, this);
+    }
+
+    babelHelpers.createClass(MHImageData, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return {
+          url: String,
+          width: Number,
+          height: Number
+        };
+      }
+    }]);
+    return MHImageData;
+  })();
+
+  var MHMetadata = (function () {
+    function MHMetadata(args) {
+      babelHelpers.classCallCheck(this, MHMetadata);
+
+      jsonCreateWithArgs(args, this);
+    }
+
+    babelHelpers.createClass(MHMetadata, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return {
+          mhid: { type: String, optional: false },
+          altId: String,
+          name: String,
+          description: String,
+          createdDate: Date
+        };
+      }
+    }]);
+    return MHMetadata;
+  })();
+
+  var MHMediaMetadata = (function (_MHMetadata) {
+    babelHelpers.inherits(MHMediaMetadata, _MHMetadata);
+
+    function MHMediaMetadata() {
+      babelHelpers.classCallCheck(this, MHMediaMetadata);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHMediaMetadata).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHMediaMetadata, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHMediaMetadata.prototype), 'jsonProperties', this), {
+          releaseDate: Date
+        });
+      }
+    }]);
+    return MHMediaMetadata;
+  })(MHMetadata);
+
+  var MHUserMetadata = (function (_MHMetadata2) {
+    babelHelpers.inherits(MHUserMetadata, _MHMetadata2);
+
+    function MHUserMetadata() {
+      babelHelpers.classCallCheck(this, MHUserMetadata);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHUserMetadata).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHUserMetadata, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHUserMetadata.prototype), 'jsonProperties', this), {
+          username: { type: String, optional: false },
+          email: String
+        });
+      }
+    }]);
+    return MHUserMetadata;
+  })(MHMetadata);
+
+  var MHCollectionMetadata = (function (_MHMetadata3) {
+    babelHelpers.inherits(MHCollectionMetadata, _MHMetadata3);
+
+    function MHCollectionMetadata() {
+      babelHelpers.classCallCheck(this, MHCollectionMetadata);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHCollectionMetadata).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHCollectionMetadata, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHCollectionMetadata.prototype), 'jsonProperties', this), {
+          mixlist: String
+        });
+      }
+    }]);
+    return MHCollectionMetadata;
+  })(MHMetadata);
+
+  var MHActionMetadata = (function (_MHMetadata4) {
+    babelHelpers.inherits(MHActionMetadata, _MHMetadata4);
+
+    function MHActionMetadata() {
+      babelHelpers.classCallCheck(this, MHActionMetadata);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHActionMetadata).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHActionMetadata, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHActionMetadata.prototype), 'jsonProperties', this), {
+          message: String
+        });
+      }
+    }]);
+    return MHActionMetadata;
+  })(MHMetadata);
+
+  var MHImageMetadata = (function (_MHMetadata5) {
+    babelHelpers.inherits(MHImageMetadata, _MHMetadata5);
+
+    function MHImageMetadata() {
+      babelHelpers.classCallCheck(this, MHImageMetadata);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHImageMetadata).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHImageMetadata, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHImageMetadata.prototype), 'jsonProperties', this), {
+          isDefault: Boolean,
+          averageColor: String,
+          thumbnail: MHImageData,
+          small: MHImageData,
+          medium: MHImageData,
+          large: MHImageData,
+          original: MHImageData
+        });
+      }
+    }]);
+    return MHImageMetadata;
+  })(MHMetadata);
+
+  var MHSubscriptionMetadata = (function (_MHMetadata6) {
+    babelHelpers.inherits(MHSubscriptionMetadata, _MHMetadata6);
+
+    function MHSubscriptionMetadata() {
+      babelHelpers.classCallCheck(this, MHSubscriptionMetadata);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHSubscriptionMetadata).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHSubscriptionMetadata, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHSubscriptionMetadata.prototype), 'jsonProperties', this), {
+          timePeriod: String,
+          price: String,
+          currency: String,
+          mediums: String
+        });
+      }
+    }]);
+    return MHSubscriptionMetadata;
+  })(MHMetadata);
+
+  var MHSourceMetadata = (function (_MHMetadata7) {
+    babelHelpers.inherits(MHSourceMetadata, _MHMetadata7);
+
+    function MHSourceMetadata() {
+      babelHelpers.classCallCheck(this, MHSourceMetadata);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHSourceMetadata).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHSourceMetadata, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHSourceMetadata.prototype), 'jsonProperties', this), {
+          connectable: Boolean
+        });
+      }
+    }]);
+    return MHSourceMetadata;
+  })(MHMetadata);
+
+  var MHContributorMetadata = (function (_MHMetadata8) {
+    babelHelpers.inherits(MHContributorMetadata, _MHMetadata8);
+
+    function MHContributorMetadata() {
+      babelHelpers.classCallCheck(this, MHContributorMetadata);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHContributorMetadata).apply(this, arguments));
+    }
+
+    return MHContributorMetadata;
+  })(MHMetadata);
+
+  var MHHashtagMetadata = (function (_MHMetadata9) {
+    babelHelpers.inherits(MHHashtagMetadata, _MHMetadata9);
+
+    function MHHashtagMetadata() {
+      babelHelpers.classCallCheck(this, MHHashtagMetadata);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHHashtagMetadata).apply(this, arguments));
+    }
+
+    return MHHashtagMetadata;
+  })(MHMetadata);
+
+  var MHTraitMetadata = (function (_MHMetadata10) {
+    babelHelpers.inherits(MHTraitMetadata, _MHMetadata10);
+
+    function MHTraitMetadata() {
+      babelHelpers.classCallCheck(this, MHTraitMetadata);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHTraitMetadata).apply(this, arguments));
+    }
+
+    return MHTraitMetadata;
+  })(MHMetadata);
+
   var childrenConstructors = {};
   var __cachedRootResponses = {};
+
+  // Create Cache
   var mhidLRU = new MHCache(1000);
+
   if (typeof window !== 'undefined') {
     if (window.location.host === 'local.mediahound.com:2014') {
       window.mhidLRU = mhidLRU;
     }
   }
-  var lastSocialRequestIdSym = Symbol('lastSocialRequestId'),
-      socialSym = Symbol('social');
-  var MHObject = function() {
+
+  // Symbols for Element hiding
+  var lastSocialRequestIdSym = Symbol('lastSocialRequestId');
+  var socialSym = Symbol('social');
+  // TODO: editable primary and secondary image properties using Symbols
+
+  // Base MediaHound Object
+  var MHObject = (function () {
+
+    /** MHObject Constructor
+     *  @constructor
+     * MediaHound Object constructors take a single parameter {Object | JSON String}
+     * If the argument is an object properties will be read and placed properly
+     *  if a prop doesn't exist and is optional it will be replaced with a null value.
+     * If the argument is a string it will be passed through JSON.parse and then the constructor will continue as normal.
+     *
+     *  @param args - { Object | JSON String }
+     *
+     *    Require Param Props
+     *      mhid    - { MediaHound ID string }
+     *
+     *  Optional Param Props
+     *      name            - { String }
+     *      altId           - { String }
+     *      primaryImage    - { MHImage }
+     *      secondaryImage  - { MHImage }
+     *      createdDate     - { Date }
+     *
+     */
+
     function MHObject(args) {
+      babelHelpers.classCallCheck(this, MHObject);
+
       jsonCreateWithArgs(args, this);
+
       this.cachedResponses = {};
     }
-    return ($traceurRuntime.createClass)(MHObject, {
-      get jsonProperties() {
-        return {
-          metadata: MHMetadata,
-          primaryImage: {mapper: MHObject.create},
-          secondaryImage: {mapper: MHObject.create},
-          social: MHSocial
-        };
-      },
-      get social() {
-        return this[socialSym] || null;
-      },
-      set social(newSocial) {
-        if (newSocial instanceof MHSocial) {
-          this[socialSym] = newSocial;
-        }
-        return this.social;
-      },
-      get type() {
-        return MHObject.isType(this);
-      },
-      get className() {
-        return this.constructor.mhName;
-      },
-      isEqualToMHObject: function(otherObj) {
+
+    babelHelpers.createClass(MHObject, [{
+      key: 'isEqualToMHObject',
+
+      /**
+       * mhObj.isEqualToMHObject(otherObj)
+       *
+       * @param { <MHObject> }  - MediaHound Type to check against
+       * @return { Boolean }    - True or False if mhids match
+       *
+       */
+      value: function isEqualToMHObject(otherObj) {
         if (otherObj && otherObj.metadata.mhid) {
           return this.metadata.mhid === otherObj.metadata.mhid;
         }
         return false;
-      },
-      hasMhid: function(mhid) {
+      }
+      // TODO Add deep equality check?
+      // might be useful for checking for changes in cache'd objects
+
+      /**
+       * mhObj.hasMhid(mhid)
+       *
+       * @param {string} mhid - a string mhid to check against this object
+       * @returns {boolean}
+       */
+
+    }, {
+      key: 'hasMhid',
+      value: function hasMhid(mhid) {
         if (typeof mhid === 'string' || mhid instanceof String) {
           return this.metadata.mhid === mhid;
         }
         return false;
-      },
-      toString: function() {
+      }
+
+      // TODO Could change as needed
+
+    }, {
+      key: 'toString',
+      value: function toString() {
         return this.className + " with mhid " + this.metadata.mhid + " and name " + this.mhName;
-      },
-      mergeWithData: function(args) {
+      }
+    }, {
+      key: 'mergeWithData',
+      value: function mergeWithData(args) {
         jsonMergeWithArgs(args, this);
-      },
-      get endpoint() {
-        return this.constructor.rootEndpoint + '/' + this.metadata.mhid;
-      },
-      subendpoint: function(sub) {
+      }
+
+      /**
+       * MHObject.fetchByMhid(mhid)
+       *
+       * @param   { String        } mhid  - valid MediaHound ID
+       * @param   { String        } view  - set to basic, basic_social, extended, extended_social, full, defaults to basic.
+       * @param   { boolean=false } force - set to true to re-request for the given mhid
+       * @return  { Promise       } - resloves to specific MHObject sub class
+       *
+       */
+
+    }, {
+      key: 'subendpoint',
+
+      /**
+       * mhObj.subendpoint(sub)
+       *
+       * @param   { String } - subendpoint to be added onto this.endpoint
+       * @returns { String } - example with ('like'): 'graph/media/mhmov1000009260/like'
+       *
+       */
+      value: function subendpoint(sub) {
         if (typeof sub !== 'string' && !(sub instanceof String)) {
           throw new TypeError('Sub not of type string or undefined in (MHObject).subendpoint.');
         }
         return this.endpoint + '/' + sub;
-      },
-      fetchSocial: function() {
-        var force = arguments[0] !== (void 0) ? arguments[0] : false;
-        var $__8 = this;
+      }
+    }, {
+      key: 'fetchSocial',
+
+      /**
+       * mhObj.fetchSocial()
+       * Calls server for new social stats
+       * @param {boolean} force - Forces an http request if set to true
+       * @return  { Promise }  - Resolves to Social stats as returned by the server
+       *
+       */
+      value: function fetchSocial() {
+        var _this = this;
+
+        var force = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
         var path = this.subendpoint('social');
+
         if (!force && this.social instanceof MHSocial) {
           return Promise.resolve(this.social);
         }
         return houndRequest({
           method: 'GET',
           endpoint: path
-        }).then((function(parsed) {
-          return $__8.social = new MHSocial(parsed);
-        }).bind(this)).catch(function(err) {
+        }).then((function (parsed) {
+          return _this.social = new MHSocial(parsed);
+        }).bind(this)).catch(function (err) {
           console.warn('fetchSocial:', err);
         });
-      },
-      fetchFeed: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      }
+
+      /** TODO: Move to Objects that actually use it, i.e. not MHAction
+       * mhObj.fetchFeed(view, page, size)
+       *
+       * @param { string=full   } view - the view param
+       * @param { number=0      } page - the zero indexed page number to return
+       * @param { number=12     } size  - the number of items to return per page
+       * @param { Boolean=false } force
+       *
+       * @return { houndPagedRequest }  - MediaHound paged request object for this feed
+       *
+       */
+
+    }, {
+      key: 'fetchFeed',
+      value: function fetchFeed() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         var path = this.subendpoint('feed');
         return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchImages: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      }
+
+      /* TODO: DocJS
+      * mhMed.fetchImages()
+      *
+      * @param force { Boolean } - force refetch of content
+      * @return { Promise } - resolves to
+      *
+      */
+
+    }, {
+      key: 'fetchImages',
+      value: function fetchImages() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 20 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         var path = this.subendpoint('images');
         return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchCollections: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : true;
+      }
+
+      /*
+       * mhContributor.fetchCollections(force)
+       *
+       * @return { Promise }  - resolves to server response of collections for this MediaHound object
+       *
+       */
+
+    }, {
+      key: 'fetchCollections',
+      value: function fetchCollections() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
         var path = this.subendpoint('collections');
         return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchBaseTraits: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      }
+
+      /* TODO: DocJS
+      * mhMed.fetchBaseTraits()
+      *
+      * @param force { Boolean } - force refetch of content
+      * @return { Promise } - resolves to
+      *
+      */
+
+    }, {
+      key: 'fetchBaseTraits',
+      value: function fetchBaseTraits() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 20 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         var path = this.subendpoint('baseTraits');
         return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      takeAction: function(action) {
-        var $__8 = this;
+      }
+
+      /**
+       *
+       * mhObj.takeAction(action)
+       *
+       * @param   { string } action - The action to take, should be accessed from MHSocial.LIKE, MHSocial.FOLLOW, etc.
+       *
+       * @return  { Promise } - resolves to server response of action call
+       *
+       */
+
+    }, {
+      key: 'takeAction',
+      value: function takeAction(action) {
+        var _this2 = this;
+
         if (typeof action !== 'string' && !(action instanceof String)) {
           throw new TypeError('Action not of type String or undefined');
         }
-        if (!MHSocial.SOCIAL_ACTIONS.some(function(a) {
+        if (!MHSocial.SOCIAL_ACTIONS.some(function (a) {
           return action === a;
         })) {
           throw new TypeError('Action is not of an accepted type in mhObj.takeAction');
         }
-        log(("in takeAction, action: " + action + ", obj: " + this.toString()));
+
+        log('in takeAction, action: ' + action + ', obj: ' + this.toString());
+
         var path = this.subendpoint(action),
             requestId = Math.random(),
             original = this.social,
             self = this;
+
+        // Expected outcome
         if (this.social instanceof MHSocial) {
           this.social = this.social.newWithAction(action);
         }
+
+        // Save request id to check against later
         this[lastSocialRequestIdSym] = requestId;
+
+        // Return promise to new Social as returned from the server
         return houndRequest({
           method: 'PUT',
           endpoint: path
-        }).then(function(socialRes) {
+        }).then(function (socialRes) {
           var newSocial = new MHSocial(socialRes.social);
-          if ($__8[lastSocialRequestIdSym] === requestId) {
+
+          // only update if this is the last request returning
+          if (_this2[lastSocialRequestIdSym] === requestId) {
             self.social = newSocial;
           }
+          //log('in take action response, newSocial: ', newSocial);
           return newSocial;
-        }).catch(function(err) {
-          if ($__8[lastSocialRequestIdSym] === requestId) {
+        }).catch(function (err) {
+          if (_this2[lastSocialRequestIdSym] === requestId) {
             self.social = original;
           }
           throw err;
         });
-      },
-      responseCacheKeyForPath: function(path) {
+      }
+    }, {
+      key: 'responseCacheKeyForPath',
+      value: function responseCacheKeyForPath(path) {
         return "__cached_" + path;
-      },
-      cachedResponseForPath: function(path) {
+      }
+    }, {
+      key: 'cachedResponseForPath',
+      value: function cachedResponseForPath(path) {
         var cacheKey = this.responseCacheKeyForPath(path);
         return this.cachedResponses[cacheKey];
-      },
-      setCachedResponse: function(response, path) {
+      }
+    }, {
+      key: 'setCachedResponse',
+      value: function setCachedResponse(response, path) {
         var cacheKey = this.responseCacheKeyForPath(path);
         this.cachedResponses[cacheKey] = response;
-      },
-      fetchPagedEndpoint: function(path, view, size, force) {
-        var next = arguments[4] !== (void 0) ? arguments[4] : null;
-        var $__8 = this;
+      }
+    }, {
+      key: 'fetchPagedEndpoint',
+      value: function fetchPagedEndpoint(path, view, size, force) {
+        var _this3 = this;
+
+        var next = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
+
         if (!force && !next) {
           var cached = this.cachedResponseForPath(path);
           if (cached) {
             return cached;
           }
         }
+
         var promise;
+
         if (next) {
           promise = houndRequest({
             method: 'GET',
@@ -4687,25 +1721,94 @@ System.registerModule("models/base/MHObject.js", [], function() {
             }
           });
         }
-        var finalPromise = promise.then(function(response) {
-          var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
-          var pagedResponse = new MHPagedResponse(response);
-          pagedResponse.fetchNextOperation = (function(newNext) {
-            return $__8.fetchPagedEndpoint(path, view, size, force, newNext);
-          });
+
+        var finalPromise = promise.then(function (response) {
+          var pagedResponse = new ___models_container_MHPagedResponse_js.MHPagedResponse(response);
+
+          pagedResponse.fetchNextOperation = function (newNext) {
+            return _this3.fetchPagedEndpoint(path, view, size, force, newNext);
+          };
+
           return pagedResponse;
         });
+
         if (!next) {
           this.setCachedResponse(finalPromise, path);
         }
+
         return finalPromise;
       }
     }, {
-      create: function(args) {
-        var saveToLRU = arguments[1] !== (void 0) ? arguments[1] : true;
+      key: 'jsonProperties',
+      get: function get() {
+        return {
+          metadata: MHMetadata,
+          primaryImage: { mapper: MHObject.create },
+          secondaryImage: { mapper: MHObject.create },
+          social: MHSocial
+        };
+      }
+
+      /** @property {MHSocial} social */
+
+    }, {
+      key: 'social',
+      get: function get() {
+        return this[socialSym] || null;
+      },
+      set: function set(newSocial) {
+        if (newSocial instanceof MHSocial) {
+          this[socialSym] = newSocial;
+        }
+        return this.social;
+      }
+
+      /**
+       * MHObject.create(args)
+       *
+       * @param   { Object | JSON<String> | Array{Objects | JSON<Strings>} } - Array or, single Object or JSON of MediaHound Object definition(s).
+       * @returns { <MHObject> } - Specific MediaHound Type. ex: MHMovie, MHAlbum, MHTrack, MHContributor, etc.
+       *
+       * returns null if can't find associated class
+       */
+
+    }, {
+      key: 'type',
+      get: function get() {
+        return MHObject.isType(this);
+      }
+
+      /**
+       * This uses the function.name feature which is shimmed if it doesn't exist during the child constructor registration process.
+       * @property {string} className - the string class name for this object, ie: MHUser, MHMovie, MHPost, etc.
+       */
+
+    }, {
+      key: 'className',
+      get: function get() {
+        return this.constructor.mhName;
+      }
+    }, {
+      key: 'endpoint',
+
+      /**
+       * mhObj.endpoint
+       *
+       * @return { String } - ex: 'graph/media/mhmov1000009260'
+       *
+       */
+      get: function get() {
+        return this.constructor.rootEndpoint + '/' + this.metadata.mhid;
+      }
+    }], [{
+      key: 'create',
+      value: function create(args) {
+        var saveToLRU = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
         if (args instanceof Array) {
           log('trying to create MHObject that is new: ' + args);
-          return args.map(function(value) {
+          //return args.map(MHObject.create); // <-- should probably be this once all MHObjs are done
+          return args.map(function (value) {
             try {
               return MHObject.create(value);
             } catch (e) {
@@ -4715,6 +1818,7 @@ System.registerModule("models/base/MHObject.js", [], function() {
           });
         }
         try {
+
           if (args.mhid && args.metadata === undefined) {
             args.metadata = {
               "mhid": args.mhid,
@@ -4722,10 +1826,17 @@ System.registerModule("models/base/MHObject.js", [], function() {
               "name": args.name
             };
           }
+
+          //log(args.metadata.mhid)
           var mhid = args.metadata.mhid || args.mhid || undefined;
           var mhObj;
+          //console.log('at start of creating... ',mhid,args);
+
           if (mhid !== 'undefined' && mhid !== null && args instanceof Object) {
             args.mhid = mhid;
+            // check cache
+            //log('in create function trying to parseArgs: \n\n' , args);
+
             if (mhidLRU.has(args.metadata.mhid) || mhidLRU.has(args.mhid)) {
               log('getting from cache in create: ' + args.metadata.mhid);
               var foundObject = mhidLRU.get(args.metadata.mhid);
@@ -4734,32 +1845,66 @@ System.registerModule("models/base/MHObject.js", [], function() {
               }
               return foundObject;
             }
+
             var prefix = MHObject.getPrefixFromMhid(mhid);
             log(prefix, new childrenConstructors[prefix](args));
             mhObj = new childrenConstructors[prefix](args);
+
+            // if( prefix === 'mhimg' ){
+            //   // bypass cache
+            // } else {
+            //   log('putting from create');
+            //   mhidLRU.putMHObj(mhObj);
+            // }
+            //console.log('creating... ',prefix,': ', mhObj);
             if (saveToLRU) {
               mhidLRU.putMHObj(mhObj);
             }
             return mhObj;
           } else {
             mhObj = args;
+            //log('creating without a prefix...', mhObj);
             return mhObj;
           }
         } catch (err) {
+          //log(err);
           console.log(err);
           console.log(err.stack);
           if (err instanceof TypeError) {
             if (err.message === 'undefined is not a function') {
               warn('Unknown mhid prefix, see args object: ', args);
             }
-            if (err.message === 'Args was object without mhid!') {}
+            if (err.message === 'Args was object without mhid!') {
+              //warn('Incomplete Object passed to create function: ', args);
+            }
           }
+          //error(err.stack); // turning off this error because it is really annoying!
           return null;
         }
         return null;
-      },
-      registerConstructor: function(mhClass, mhName) {
+      }
+
+      /***
+       * Register Child Constructors
+       *
+       * MHObject.registerConstructor(mhClass)
+       *
+       * @param  { Function } mhClass - MediaHound Object constructor to be used within MHObject.create and other methods
+       * @return { Boolean }                - Success(true) or Fail(false)
+       *
+       */
+
+    }, {
+      key: 'registerConstructor',
+      value: function registerConstructor(mhClass, mhName) {
+        // Add class name if function.name is not native
+        // if( mhClass.name === undefined ){
+        //   mhClass.name = mhClass.toString().match(/function (MH[A-Za-z]*)\(args\)/)[1];
+        //   log('shimmed mhClass.name to: ' + mhClass.name);
+        // }
         mhClass.mhName = mhName;
+        //log('registering constructor: ' + mhClass.name);
+
         var prefix = mhClass.mhidPrefix;
         if (typeof prefix !== 'undefined' && prefix !== null && !(prefix in childrenConstructors)) {
           Object.defineProperty(childrenConstructors, prefix, {
@@ -4771,54 +1916,113 @@ System.registerModule("models/base/MHObject.js", [], function() {
           return true;
         }
         return false;
-      },
-      get prefixes() {
-        return Object.keys(childrenConstructors);
-      },
-      getPrefixFromMhid: function(mhid) {
+      }
+
+      /**
+       * MHObject.prefixes
+       *
+       * @return { Array } - A list of MediaHound ID prefixes
+       *
+       * Note: This list contains only prefixes of types known to the MHObject.create method
+       */
+      // List of prefixes known to MHObject through registerConstructor
+
+    }, {
+      key: 'getPrefixFromMhid',
+
+      /**
+       * MHObject.getPrefixFromMhid(mhid)
+       *
+       * @param  { String } mhid - a valid MediaHound ID
+       * @return { String } - a valid MediaHound ID prefix
+       *
+       */
+      value: function getPrefixFromMhid(mhid) {
         for (var pfx in childrenConstructors) {
-          if (childrenConstructors.hasOwnProperty(pfx) && (new RegExp('^' + pfx)).test(mhid)) {
+          if (childrenConstructors.hasOwnProperty(pfx) && new RegExp('^' + pfx).test(mhid)) {
             return pfx;
           }
         }
         return null;
-      },
-      getClassNameFromMhid: function(mhid) {
+      }
+
+      /**
+       * MHObject.getClassNameFromMhid(mhid)
+       *
+       * @param  { String } mhid - a valid MediaHound ID
+       * @return { String } - the class name associated with the prefix
+       *
+       */
+
+    }, {
+      key: 'getClassNameFromMhid',
+      value: function getClassNameFromMhid(mhid) {
         var pfx = MHObject.getPrefixFromMhid(mhid);
         if (childrenConstructors[pfx]) {
           return childrenConstructors[pfx].mhName;
         }
         return null;
-      },
-      get mhidPrefix() {
-        return null;
-      },
-      isMedia: function(toCheck) {
+      }
+
+      /**
+       * mhObj.mhidPrefix
+       *
+       * @return { String } - the MediaHound ID prefix associated with this MHObject.
+       *
+       * Note: Override at child level
+       */
+
+    }, {
+      key: 'isMedia',
+
+      // Type Checking
+      // TODO: Update these checks for cross site scripting cases
+      // case:
+      //    instanceof only works if the object being checked was created
+      //    in the same global scope as the constructor function it is being checked against
+      value: function isMedia(toCheck) {
         return toCheck instanceof System.get('models/media/MHMedia.js').MHMedia;
-      },
-      isContributor: function(toCheck) {
+      }
+    }, {
+      key: 'isContributor',
+      value: function isContributor(toCheck) {
         return toCheck instanceof System.get('models/contributor/MHContributor.js').MHContributor;
-      },
-      isAction: function(toCheck) {
+      }
+    }, {
+      key: 'isAction',
+      value: function isAction(toCheck) {
         return toCheck instanceof System.get('models/action/MHAction.js').MHAction;
-      },
-      isUser: function(toCheck) {
+      }
+    }, {
+      key: 'isUser',
+      value: function isUser(toCheck) {
         return toCheck instanceof System.get('models/user/MHUser.js').MHUser;
-      },
-      isCollection: function(toCheck) {
+      }
+    }, {
+      key: 'isCollection',
+      value: function isCollection(toCheck) {
         return toCheck instanceof System.get('models/collection/MHCollection.js').MHCollection;
-      },
-      isImage: function(toCheck) {
+      }
+    }, {
+      key: 'isImage',
+      value: function isImage(toCheck) {
         return toCheck instanceof System.get('models/image/MHImage.js').MHImage;
-      },
-      isTrait: function(toCheck) {
+      }
+    }, {
+      key: 'isTrait',
+      value: function isTrait(toCheck) {
         return toCheck instanceof System.get('models/trait/MHTrait.js').MHTrait;
-      },
-      isSource: function(toCheck) {
+      }
+    }, {
+      key: 'isSource',
+      value: function isSource(toCheck) {
         return toCheck instanceof System.get('models/source/MHSource.js').MHSource;
-      },
-      isType: function(obj) {
+      }
+    }, {
+      key: 'isType',
+      value: function isType(obj) {
         var type = '';
+
         if (MHObject.isAction(obj)) {
           type = 'MHAction';
         } else if (MHObject.isMedia(obj)) {
@@ -4838,95 +2042,145 @@ System.registerModule("models/base/MHObject.js", [], function() {
         } else {
           type = null;
         }
+
         return type;
-      },
-      enterWithMappedSourceIds: function(msis) {
+      }
+    }, {
+      key: 'enterWithMappedSourceIds',
+      value: function enterWithMappedSourceIds(msis) {
         var endpoint = 'graph/enter/raw';
-        var params = {ids: msis};
+        var params = {
+          ids: msis
+        };
+
         return houndRequest({
           method: 'GET',
           endpoint: endpoint,
           params: params
         });
-      },
-      fetchByMhid: function(mhid) {
-        var view = arguments[1] !== (void 0) ? arguments[1] : 'full';
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      }
+    }, {
+      key: 'fetchByMhid',
+      value: function fetchByMhid(mhid) {
+        var view = arguments.length <= 1 || arguments[1] === undefined ? 'full' : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         if (typeof mhid !== 'string' && !(mhid instanceof String)) {
           throw TypeError('MHObject.fetchByMhid argument must be type string.');
         }
+
         if (view === null || view === undefined) {
           view = 'full';
         }
+
         log('in fetchByMhid, looking for: ', mhid, 'with view = ', view);
+
+        // Check LRU for mhid
         if (!force && mhidLRU.has(mhid)) {
           return Promise.resolve(mhidLRU.get(mhid));
         }
+        // Check LRU for altId
         if (!force && mhidLRU.hasAltId(mhid)) {
           return Promise.resolve(mhidLRU.getByAltId(mhid));
         }
+
         var prefix = MHObject.getPrefixFromMhid(mhid),
             mhClass = childrenConstructors[prefix],
             newObj;
+
         if (prefix === null || typeof mhClass === 'undefined') {
           warn('Error in MHObject.fetchByMhid', mhid, prefix, mhClass);
           throw Error('Could not find correct class, unknown mhid: ' + mhid);
         }
+
+        //console.log('fetching:', mhClass.rootEndpoint + '/' + mhid);
+
         return houndRequest({
           method: 'GET',
           endpoint: mhClass.rootEndpoint + '/' + mhid,
-          params: {view: view}
-        }).then(function(response) {
+          params: {
+            view: view
+          }
+        }).then(function (response) {
           newObj = MHObject.create(response);
           return newObj;
         });
-      },
-      get rootEndpoint() {
-        return null;
-      },
-      rootEndpointForMhid: function(mhid) {
+      }
+
+      /**
+       * Children override
+       *
+       */
+
+    }, {
+      key: 'rootEndpointForMhid',
+
+      /**
+       * MHObject.rootEndpointForMhid(mhid)
+       *
+       * @param   { String } mhid - a valid MediaHound ID
+       * @return  { String } - the endpoint for MediaHound Type of mhid
+       *
+       */
+      value: function rootEndpointForMhid(mhid) {
         if (typeof mhid !== 'string' && !(mhid instanceof String)) {
           throw new TypeError('Mhid not of type string or undefined in rootEndpointForMhid');
         }
+
         var prefix = MHObject.getPrefixFromMhid(mhid),
             mhClass = childrenConstructors[prefix];
+
         if (prefix === null || typeof mhClass === 'undefined') {
           warn('Error in MHObject.rootEndpointForMhid', mhid, prefix, mhClass);
           throw new Error('Could not find correct class, unknown mhid: ' + mhid);
         }
+
         return mhClass.rootEndpoint;
-      },
-      rootSubendpoint: function(sub) {
+      }
+    }, {
+      key: 'rootSubendpoint',
+      value: function rootSubendpoint(sub) {
         if (typeof sub !== 'string' && !(sub instanceof String)) {
           throw new TypeError('Sub not of type string or undefined in (MHObject).rootSubendpoint.');
         }
         return this.rootEndpoint + '/' + sub;
-      },
-      rootResponseCacheKeyForPath: function(path, params) {
-        return "___root_cached_" + path + "_" + JSON.stringify(params, function(k, v) {
+      }
+    }, {
+      key: 'rootResponseCacheKeyForPath',
+      value: function rootResponseCacheKeyForPath(path, params) {
+        return "___root_cached_" + path + "_" + JSON.stringify(params, function (k, v) {
           if (k === 'view' || k === 'pageSize' || k === 'access_token') {
             return undefined;
           }
           return v;
         });
-      },
-      cachedRootResponseForPath: function(path, params) {
+      }
+    }, {
+      key: 'cachedRootResponseForPath',
+      value: function cachedRootResponseForPath(path, params) {
         var cacheKey = this.rootResponseCacheKeyForPath(path, params);
         return __cachedRootResponses[cacheKey];
-      },
-      setCachedRootResponse: function(response, path, params) {
+      }
+    }, {
+      key: 'setCachedRootResponse',
+      value: function setCachedRootResponse(response, path, params) {
         var cacheKey = this.rootResponseCacheKeyForPath(path, params);
         __cachedRootResponses[cacheKey] = response;
-      },
-      fetchRootPagedEndpoint: function(path, params, view, size, force) {
-        var next = arguments[5] !== (void 0) ? arguments[5] : null;
-        var $__8 = this;
+      }
+    }, {
+      key: 'fetchRootPagedEndpoint',
+      value: function fetchRootPagedEndpoint(path, params, view, size, force) {
+        var _this4 = this;
+
+        var next = arguments.length <= 5 || arguments[5] === undefined ? null : arguments[5];
+
         if (!force && !next) {
           var cached = this.cachedRootResponseForPath(path, params);
           if (cached) {
             return cached;
           }
         }
+
         var promise;
         if (next) {
           promise = houndRequest({
@@ -4936,183 +2190,217 @@ System.registerModule("models/base/MHObject.js", [], function() {
         } else {
           params.view = view;
           params.pageSize = size;
+
           promise = houndRequest({
             method: 'GET',
             endpoint: path,
             params: params
           });
         }
-        var finalPromise = promise.then(function(response) {
+
+        var finalPromise = promise.then(function (response) {
           var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
           var pagedResponse = new MHPagedResponse(response);
-          pagedResponse.fetchNextOperation = (function(newNext) {
-            return $__8.fetchRootPagedEndpoint(path, params, view, size, force, newNext);
-          });
+
+          pagedResponse.fetchNextOperation = function (newNext) {
+            return _this4.fetchRootPagedEndpoint(path, params, view, size, force, newNext);
+          };
+
           return pagedResponse;
         });
+
         if (!next) {
           this.setCachedRootResponse(finalPromise, path, params);
         }
+
         return finalPromise;
       }
-    });
-  }();
-  return {
-    get mhidLRU() {
-      return mhidLRU;
-    },
-    get MHObject() {
-      return MHObject;
-    }
-  };
-});
-System.registerModule("models/action/MHAction.js", [], function() {
-  "use strict";
-  var __moduleName = "models/action/MHAction.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHActionMetadata = System.get("models/meta/MHMetadata.js").MHActionMetadata;
-  var MHAction = function($__super) {
+    }, {
+      key: 'prefixes',
+      get: function get() {
+        return Object.keys(childrenConstructors);
+      }
+    }, {
+      key: 'mhidPrefix',
+      get: function get() {
+        return null;
+      }
+    }, {
+      key: 'rootEndpoint',
+      get: function get() {
+        return null;
+      }
+    }]);
+    return MHObject;
+  })();
+
+  // MediaHound Action Object
+  var MHAction = (function (_MHObject) {
+    babelHelpers.inherits(MHAction, _MHObject);
+
     function MHAction() {
-      $traceurRuntime.superConstructor(MHAction).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHAction);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHAction).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHAction, {get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHAction.prototype, "jsonProperties"), {
+
+    babelHelpers.createClass(MHAction, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHAction.prototype), 'jsonProperties', this), {
           metadata: MHActionMetadata,
-          primaryOwner: {mapper: MHObject.create},
-          primaryMention: {mapper: MHObject.create}
+          primaryOwner: { mapper: MHObject.create },
+          primaryMention: { mapper: MHObject.create }
         });
-      }}, {get rootEndpoint() {
+      }
+    }], [{
+      key: 'rootEndpoint',
+      get: function get() {
         return 'graph/action';
-      }}, $__super);
-  }(MHObject);
-  return {get MHAction() {
-      return MHAction;
-    }};
-});
-System.registerModule("models/action/MHAdd.js", [], function() {
-  "use strict";
-  var __moduleName = "models/action/MHAdd.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHAction = System.get("models/action/MHAction.js").MHAction;
-  var MHAdd = function($__super) {
+      }
+    }]);
+    return MHAction;
+  })(MHObject);
+
+  // MediaHound Add Object
+  var MHAdd = (function (_MHAction) {
+    babelHelpers.inherits(MHAdd, _MHAction);
+
     function MHAdd() {
-      $traceurRuntime.superConstructor(MHAdd).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHAdd);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHAdd).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHAdd, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHAdd, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhadd';
-      }}, $__super);
-  }(MHAction);
-  (function() {
+      }
+    }]);
+    return MHAdd;
+  })(MHAction);
+
+  (function () {
     MHObject.registerConstructor(MHAdd, 'MHAdd');
   })();
-  return {get MHAdd() {
-      return MHAdd;
-    }};
-});
-System.registerModule("models/action/MHComment.js", [], function() {
-  "use strict";
-  var __moduleName = "models/action/MHComment.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHAction = System.get("models/action/MHAction.js").MHAction;
-  var MHComment = function($__super) {
+
+  // MediaHound Comment Object
+  var MHComment = (function (_MHAction) {
+    babelHelpers.inherits(MHComment, _MHAction);
+
     function MHComment() {
-      $traceurRuntime.superConstructor(MHComment).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHComment);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHComment).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHComment, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHComment, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhcmt';
-      }}, $__super);
-  }(MHAction);
-  (function() {
+      }
+    }]);
+    return MHComment;
+  })(MHAction);
+
+  (function () {
     MHObject.registerConstructor(MHComment, 'MHComment');
   })();
-  return {get MHComment() {
-      return MHComment;
-    }};
-});
-System.registerModule("models/action/MHCreate.js", [], function() {
-  "use strict";
-  var __moduleName = "models/action/MHCreate.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHAction = System.get("models/action/MHAction.js").MHAction;
-  var MHCreate = function($__super) {
+
+  // MediaHound Create Object
+  var MHCreate = (function (_MHAction) {
+    babelHelpers.inherits(MHCreate, _MHAction);
+
     function MHCreate() {
-      $traceurRuntime.superConstructor(MHCreate).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHCreate);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHCreate).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHCreate, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHCreate, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhcrt';
-      }}, $__super);
-  }(MHAction);
-  (function() {
+      }
+    }]);
+    return MHCreate;
+  })(MHAction);
+
+  (function () {
     MHObject.registerConstructor(MHCreate, 'MHCreate');
   })();
-  return {get MHCreate() {
-      return MHCreate;
-    }};
-});
-System.registerModule("models/action/MHFollow.js", [], function() {
-  "use strict";
-  var __moduleName = "models/action/MHFollow.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHAction = System.get("models/action/MHAction.js").MHAction;
-  var MHFollow = function($__super) {
-    function MHFollow() {
-      $traceurRuntime.superConstructor(MHFollow).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHFollow, {}, {get mhidPrefix() {
-        return 'mhflw';
-      }}, $__super);
-  }(MHAction);
-  (function() {
-    MHObject.registerConstructor(MHFollow, 'MHFollow');
-  })();
-  return {get MHFollow() {
-      return MHFollow;
-    }};
-});
-System.registerModule("models/action/MHLike.js", [], function() {
-  "use strict";
-  var __moduleName = "models/action/MHLike.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHAction = System.get("models/action/MHAction.js").MHAction;
-  var MHLike = function($__super) {
+
+  // MediaHound Like Object
+  var MHLike = (function (_MHAction) {
+    babelHelpers.inherits(MHLike, _MHAction);
+
     function MHLike() {
-      $traceurRuntime.superConstructor(MHLike).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHLike);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHLike).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHLike, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHLike, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhlke';
-      }}, $__super);
-  }(MHAction);
-  (function() {
+      }
+    }]);
+    return MHLike;
+  })(MHAction);
+
+  (function () {
     MHObject.registerConstructor(MHLike, 'MHLike');
   })();
-  return {get MHLike() {
-      return MHLike;
-    }};
-});
-System.registerModule("models/action/MHPost.js", [], function() {
-  "use strict";
-  var __moduleName = "models/action/MHPost.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHAction = System.get("models/action/MHAction.js").MHAction;
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var MHPost = function($__super) {
-    function MHPost() {
-      $traceurRuntime.superConstructor(MHPost).apply(this, arguments);
+
+  // MediaHound Follow Object
+  var MHFollow = (function (_MHAction) {
+    babelHelpers.inherits(MHFollow, _MHAction);
+
+    function MHFollow() {
+      babelHelpers.classCallCheck(this, MHFollow);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHFollow).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHPost, {}, {
-      get mhidPrefix() {
-        return 'mhpst';
-      },
-      createWithMessage: function(message, mentions, primaryMention) {
-        if (!message || !mentions || !primaryMention || typeof message !== 'string' || !Array.isArray(mentions) || !mentions.every(function(x) {
+
+    babelHelpers.createClass(MHFollow, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhflw';
+      }
+    }]);
+    return MHFollow;
+  })(MHAction);
+
+  (function () {
+    MHObject.registerConstructor(MHFollow, 'MHFollow');
+  })();
+
+  // MediaHound Post Object
+  var MHPost = (function (_MHAction) {
+    babelHelpers.inherits(MHPost, _MHAction);
+
+    function MHPost() {
+      babelHelpers.classCallCheck(this, MHPost);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHPost).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHPost, null, [{
+      key: 'createWithMessage',
+
+      /**
+       *
+       * MHPost.createWithMessage(message{String}, mentions{Array<MHObject>}, primaryMention{MHObject})
+       *
+       * @param {string} message - the message for this new post
+       */
+      value: function createWithMessage(message, mentions, primaryMention) {
+        if (!message || !mentions || !primaryMention || typeof message !== 'string' || !Array.isArray(mentions) || !mentions.every(function (x) {
           return x instanceof MHObject;
         }) || !(primaryMention instanceof MHObject)) {
           throw new TypeError("Can't create post without message string, mentions array, and primary mention object.");
         }
+
         var path = this.rootSubendpoint('new'),
-            mentionedMhids = mentions.map(function(m) {
-              return m.metadata.mhid;
-            });
+            mentionedMhids = mentions.map(function (m) {
+          return m.metadata.mhid;
+        });
+
         return houndRequest({
           method: 'POST',
           endpoint: path,
@@ -5121,32 +2409,104 @@ System.registerModule("models/action/MHPost.js", [], function() {
             'mentions': mentionedMhids,
             'primaryMention': primaryMention.metadata.mhid
           }
-        }).then(function(res) {
-          mentions.forEach(function(m) {
+        }).then(function (res) {
+          // update social counts of mentioned objects
+          mentions.forEach(function (m) {
             return m.fetchSocial(true);
           });
           return res;
         });
       }
-    }, $__super);
-  }(MHAction);
-  (function() {
+    }, {
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhpst';
+      }
+    }]);
+    return MHPost;
+  })(MHAction);
+
+  (function () {
     MHObject.registerConstructor(MHPost, 'MHPost');
   })();
-  return {get MHPost() {
-      return MHPost;
-    }};
-});
-System.registerModule("models/source/MHSourceFormat.js", [], function() {
-  "use strict";
-  var __moduleName = "models/source/MHSourceFormat.js";
-  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
-  var MHSourceFormat = function() {
+
+  var MHHashtag = (function (_MHObject) {
+    babelHelpers.inherits(MHHashtag, _MHObject);
+
+    function MHHashtag() {
+      babelHelpers.classCallCheck(this, MHHashtag);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHHashtag).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHHashtag, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHHashtag.prototype), 'jsonProperties', this), {
+          metadata: MHHashtagMetadata
+        });
+      }
+
+      /**
+      * MHHashtag.fetchByName(name,view,force)
+      *
+      * @param { String } username - Username to fetch info for
+      * @param { boolean} force - force fetch to server
+      *
+      * @return { Promise } - resolves to the MHUser object
+      *
+      */
+
+    }], [{
+      key: 'fetchByName',
+      value: function fetchByName(name) /*, force=false*/{
+        var view = arguments.length <= 1 || arguments[1] === undefined ? 'full' : arguments[1];
+
+        if (!name || typeof name !== 'string' && !(name instanceof String)) {
+          throw new TypeError('Hashtag not of type String in fetchByTag');
+        }
+
+        var path = this.rootSubendpoint('/lookup/' + name);
+
+        return houndRequest({
+          method: 'GET',
+          endpoint: path,
+          params: {
+            view: view
+          }
+        }).then(function (response) {
+          var newObj = MHObject.create(response);
+          return newObj;
+        });
+      }
+    }, {
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhhtg';
+      }
+    }, {
+      key: 'rootEndpoint',
+      get: function get() {
+        return 'graph/hashtag';
+      }
+    }]);
+    return MHHashtag;
+  })(MHObject);
+
+  (function () {
+    MHObject.registerConstructor(MHHashtag, 'MHHashtag');
+  })();
+
+  // MediaHound SourceFormat Object
+  var MHSourceFormat = (function () {
     function MHSourceFormat(args) {
+      babelHelpers.classCallCheck(this, MHSourceFormat);
+
       jsonCreateWithArgs(args, this);
     }
-    return ($traceurRuntime.createClass)(MHSourceFormat, {
-      get jsonProperties() {
+
+    babelHelpers.createClass(MHSourceFormat, [{
+      key: 'jsonProperties',
+      get: function get() {
         return {
           type: String,
           price: String,
@@ -5155,214 +2515,223 @@ System.registerModule("models/source/MHSourceFormat.js", [], function() {
           launchInfo: Object,
           contentCount: Number
         };
-      },
-      get displayPrice() {
+      }
+    }, {
+      key: 'displayPrice',
+      get: function get() {
         return '$' + this.price;
       }
-    }, {});
-  }();
-  return {get MHSourceFormat() {
-      return MHSourceFormat;
-    }};
-});
-System.registerModule("models/source/MHSourceMethod.js", [], function() {
-  "use strict";
-  var __moduleName = "models/source/MHSourceMethod.js";
-  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
-  var MHSourceFormat = System.get("models/source/MHSourceFormat.js").MHSourceFormat;
-  var MHSourceMethod = function() {
+    }]);
+    return MHSourceFormat;
+  })();
+
+  // MediaHound SourceMethod Object
+  var MHSourceMethod = (function () {
     function MHSourceMethod(args) {
+      babelHelpers.classCallCheck(this, MHSourceMethod);
+
       jsonCreateWithArgs(args, this);
     }
-    return ($traceurRuntime.createClass)(MHSourceMethod, {
-      get jsonProperties() {
-        return {
-          type: String,
-          formats: [MHSourceFormat]
-        };
-      },
-      formatForType: function(type) {
-        return this.formats.filter(function(format) {
+
+    babelHelpers.createClass(MHSourceMethod, [{
+      key: 'formatForType',
+      value: function formatForType(type) {
+        return this.formats.filter(function (format) {
           return format.type === type;
         })[0];
       }
     }, {
-      get TYPE_PURCHASE() {
-        return 'purchase';
-      },
-      get TYPE_RENTAL() {
-        return 'rental';
-      },
-      get TYPE_SUBSCRIPTION() {
-        return 'subscription';
-      },
-      get TYPE_ADSUPPORTED() {
-        return 'adSupported';
-      }
-    });
-  }();
-  return {get MHSourceMethod() {
-      return MHSourceMethod;
-    }};
-});
-System.registerModule("models/source/MHSourceMedium.js", [], function() {
-  "use strict";
-  var __moduleName = "models/source/MHSourceMedium.js";
-  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
-  var MHSourceMethod = System.get("models/source/MHSourceMethod.js").MHSourceMethod;
-  var MHSourceMedium = function() {
-    function MHSourceMedium(args) {
-      jsonCreateWithArgs(args, this);
-    }
-    return ($traceurRuntime.createClass)(MHSourceMedium, {
-      get jsonProperties() {
+      key: 'jsonProperties',
+      get: function get() {
         return {
           type: String,
-          methods: [MHSourceMethod]
+          formats: [MHSourceFormat]
         };
-      },
-      methodForType: function(type) {
-        return this.methods.filter(function(method) {
+      }
+    }], [{
+      key: 'TYPE_PURCHASE',
+      get: function get() {
+        return 'purchase';
+      }
+    }, {
+      key: 'TYPE_RENTAL',
+      get: function get() {
+        return 'rental';
+      }
+    }, {
+      key: 'TYPE_SUBSCRIPTION',
+      get: function get() {
+        return 'subscription';
+      }
+    }, {
+      key: 'TYPE_ADSUPPORTED',
+      get: function get() {
+        return 'adSupported';
+      }
+    }]);
+    return MHSourceMethod;
+  })();
+
+  // MediaHound SourceMedium Object
+  var MHSourceMedium = (function () {
+    function MHSourceMedium(args) {
+      babelHelpers.classCallCheck(this, MHSourceMedium);
+
+      jsonCreateWithArgs(args, this);
+    }
+
+    babelHelpers.createClass(MHSourceMedium, [{
+      key: 'methodForType',
+      value: function methodForType(type) {
+        return this.methods.filter(function (method) {
           return method.type === type;
         })[0];
       }
     }, {
-      get TYPE_STREAM() {
+      key: 'jsonProperties',
+      get: function get() {
+        return {
+          type: String,
+          methods: [MHSourceMethod]
+        };
+      }
+    }], [{
+      key: 'TYPE_STREAM',
+      get: function get() {
         return 'stream';
-      },
-      get TYPE_DOWNLOAD() {
+      }
+    }, {
+      key: 'TYPE_DOWNLOAD',
+      get: function get() {
         return 'download';
-      },
-      get TYPE_DELIVER() {
+      }
+    }, {
+      key: 'TYPE_DELIVER',
+      get: function get() {
         return 'deliver';
-      },
-      get TYPE_PICKUP() {
+      }
+    }, {
+      key: 'TYPE_PICKUP',
+      get: function get() {
         return 'pickup';
-      },
-      get TYPE_ATTEND() {
+      }
+    }, {
+      key: 'TYPE_ATTEND',
+      get: function get() {
         return 'attend';
       }
-    });
-  }();
-  return {get MHSourceMedium() {
-      return MHSourceMedium;
-    }};
-});
-System.registerModule("models/container/MHRelationship.js", [], function() {
-  "use strict";
-  var __moduleName = "models/container/MHRelationship.js";
-  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHRelationship = function() {
+    }]);
+    return MHSourceMedium;
+  })();
+
+  var MHRelationship = (function () {
     function MHRelationship(args) {
+      babelHelpers.classCallCheck(this, MHRelationship);
+
       jsonCreateWithArgs(args, this);
     }
-    return ($traceurRuntime.createClass)(MHRelationship, {get jsonProperties() {
+
+    babelHelpers.createClass(MHRelationship, [{
+      key: 'jsonProperties',
+      get: function get() {
         return {
           contribution: String,
           role: String,
-          object: {mapper: MHObject.create}
+          object: { mapper: MHObject.create }
         };
-      }}, {});
-  }();
-  return {get MHRelationship() {
-      return MHRelationship;
-    }};
-});
-System.registerModule("models/container/MHSorting.js", [], function() {
-  "use strict";
-  var __moduleName = "models/container/MHSorting.js";
-  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
-  var MHSorting = function() {
+      }
+    }]);
+    return MHRelationship;
+  })();
+
+  var MHSorting = (function () {
     function MHSorting(args) {
+      babelHelpers.classCallCheck(this, MHSorting);
+
       jsonCreateWithArgs(args, this);
     }
-    return ($traceurRuntime.createClass)(MHSorting, {get jsonProperties() {
+
+    babelHelpers.createClass(MHSorting, [{
+      key: 'jsonProperties',
+      get: function get() {
         return {
           importance: Number,
           position: Number
         };
-      }}, {});
-  }();
-  return {get MHSorting() {
-      return MHSorting;
-    }};
-});
-System.registerModule("models/container/MHContext.js", [], function() {
-  "use strict";
-  var __moduleName = "models/container/MHContext.js";
-  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
-  var MHRelationship = System.get("models/container/MHRelationship.js").MHRelationship;
-  var MHSorting = System.get("models/container/MHSorting.js").MHSorting;
-  var MHSourceMedium = System.get("models/source/MHSourceMedium.js").MHSourceMedium;
-  var MHContext = function() {
+      }
+    }]);
+    return MHSorting;
+  })();
+
+  var MHContext = (function () {
     function MHContext(args) {
+      babelHelpers.classCallCheck(this, MHContext);
+
       jsonCreateWithArgs(args, this);
     }
-    return ($traceurRuntime.createClass)(MHContext, {get jsonProperties() {
+
+    babelHelpers.createClass(MHContext, [{
+      key: 'jsonProperties',
+      get: function get() {
         return {
           consumable: Boolean,
           sorting: MHSorting,
           relationships: [MHRelationship],
           mediums: [MHSourceMedium]
         };
-      }}, {});
-  }();
-  return {get MHContext() {
-      return MHContext;
-    }};
-});
-System.registerModule("models/container/MHRelationalPair.js", [], function() {
-  "use strict";
-  var __moduleName = "models/container/MHRelationalPair.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHContext = System.get("models/container/MHContext.js").MHContext;
-  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
-  var MHRelationalPair = function() {
+      }
+    }]);
+    return MHContext;
+  })();
+
+  // MediaHound Relational Pair Object
+  var MHRelationalPair = (function () {
     function MHRelationalPair(args) {
+      babelHelpers.classCallCheck(this, MHRelationalPair);
+
       jsonCreateWithArgs(args, this);
     }
-    return ($traceurRuntime.createClass)(MHRelationalPair, {get jsonProperties() {
+
+    babelHelpers.createClass(MHRelationalPair, [{
+      key: 'jsonProperties',
+      get: function get() {
         return {
           context: MHContext,
-          object: {mapper: MHObject.create}
+          object: { mapper: MHObject.create }
         };
-      }}, {});
-  }();
-  return {get MHRelationalPair() {
-      return MHRelationalPair;
-    }};
-});
-System.registerModule("models/user/MHUser.js", [], function() {
-  "use strict";
-  var __moduleName = "models/user/MHUser.js";
-  var log = System.get("models/internal/debug-helpers.js").log;
-  var $__1 = System.get("models/base/MHObject.js"),
-      MHObject = $__1.MHObject,
-      mhidLRU = $__1.mhidLRU;
-  var MHRelationalPair = System.get("models/container/MHRelationalPair.js").MHRelationalPair;
-  var MHUserMetadata = System.get("models/meta/MHMetadata.js").MHUserMetadata;
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var MHUser = function($__super) {
+      }
+    }]);
+    return MHRelationalPair;
+  })();
+
+  // MediaHound User Object
+  var MHUser = (function (_MHObject) {
+    babelHelpers.inherits(MHUser, _MHObject);
+
     function MHUser() {
-      $traceurRuntime.superConstructor(MHUser).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHUser);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHUser).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHUser, {
-      get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHUser.prototype, "jsonProperties"), {metadata: MHUserMetadata});
-      },
-      get isCurrentUser() {
-        var currentUser = System.get('../models/user/MHLoginSession.js').MHLoginSession.currentUser;
-        return this.isEqualToMHObject(currentUser);
-      },
-      setPassword: function(password, newPassword) {
-        if (!password || (typeof password !== 'string' && !(password instanceof String))) {
+
+    babelHelpers.createClass(MHUser, [{
+      key: 'setPassword',
+
+      /* TODO: change endpoint to CamelCase and to use mhid?
+      * mhUser.setPassword()
+      *
+      * @return { Promise }
+      *
+      */
+      value: function setPassword(password, newPassword) {
+
+        if (!password || typeof password !== 'string' && !(password instanceof String)) {
           throw new TypeError('password must be type string in MHUser.newPassword');
         }
-        if (!newPassword || (typeof newPassword !== 'string' && !(newPassword instanceof String))) {
+        if (!newPassword || typeof newPassword !== 'string' && !(newPassword instanceof String)) {
           throw new TypeError('newPassword must be type string in MHUser.newPassword');
         }
         var path = this.subendpoint('updatePassword');
+
         return houndRequest({
           method: 'POST',
           endpoint: path,
@@ -5371,10 +2740,10 @@ System.registerModule("models/user/MHUser.js", [], function() {
             oldPassword: password,
             newPassword: newPassword
           }
-        }).then(function(response) {
+        }).then(function (response) {
           console.log('valid password: ', response);
           return response;
-        }).catch(function(error) {
+        }).catch(function (error) {
           if (error.xhr.status === 400) {
             console.error('The password ' + password + ' is an invalid password.');
           } else if (error.xhr.status === 404) {
@@ -5385,18 +2754,30 @@ System.registerModule("models/user/MHUser.js", [], function() {
           }
           return false;
         });
-      },
-      setProfileImage: function(image) {
+      }
+      /* TODO: docJS
+      *
+      * mhUser.setProfileImage(image);
+      *
+      */
+
+    }, {
+      key: 'setProfileImage',
+      value: function setProfileImage(image) {
         log('in setProfileImage with image: ', image);
         if (!image) {
           throw new TypeError('No Image passed to setProfileImage');
+          //return Promise.resolve(null);
         }
         if (!(image instanceof Blob || image instanceof File)) {
           throw new TypeError('Image was not of type Blob or File.');
         }
+
+        // If not current user throw error
         if (!this.isCurrentUser) {
-          throw (function() {
-            var NoMHSessionError = function(message) {
+          //throw new NoMHSessionError('No valid user session. Please log in to change profile picture');
+          throw (function () {
+            var NoMHSessionError = function NoMHSessionError(message) {
               this.name = 'NoMHSessionError';
               this.message = message || '';
             };
@@ -5405,172 +2786,391 @@ System.registerModule("models/user/MHUser.js", [], function() {
             return new NoMHSessionError('No valid user session. Please log in to change profile picture');
           })();
         }
+
         var path = this.subendpoint('uploadImage'),
             form = new FormData();
+
         form.append('data', image);
+
         log('path: ', path, 'image: ', image, 'form: ', form);
+
+        // send form or file?
         return houndRequest({
           method: 'POST',
           endpoint: path,
           withCredentials: true,
           data: form
-        }).then(function(primaryImage) {
+        }).then(function (primaryImage) {
+
+          // var MHLoginSession = System.get('../../src/models/user/MHLoginSession.js').MHLoginSession;
+          // //console.warn('circular dep: ', MHLoginSession);
+          //var img = new MHImage(primaryImage);
+          //MHLoginSession.updatedProfileImage(img);
+          //return img;
+
+          // TODO: wire back up the Event in MHLoginSession
           return primaryImage;
         });
-      },
-      fetchInterestFeed: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      }
+
+      /**
+      * MHUser.fetchByUsername(username)
+      *
+      * @param { String } username - Username to fetch info for
+      * @param { boolean} force - force fetch to server
+      *
+      * @return { Promise } - resolves to the MHUser object
+      *
+      */
+
+    }, {
+      key: 'fetchInterestFeed',
+
+      /* TODO: add local cache
+      * mhUsr.fetchInterestFeed(view, page, size)
+      *
+      * @param view { String } - the view type query parameter
+      * @param page { Number } - the page number query parameter
+      * @param size { Number } - the number of items per page
+      *
+      * @return { pagedRequest } - resolves to paged response from server, res.content contains array of data
+      *
+      */
+      value: function fetchInterestFeed() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         var path = this.subendpoint('interestFeed');
         return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchOwnedCollections: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : true;
+      }
+
+      /* TODO: remove console.log debug stuffs
+      * mhUsr.fetchOwnedCollections()
+      *
+      * @return { Promise }
+      *
+      */
+
+    }, {
+      key: 'fetchOwnedCollections',
+      value: function fetchOwnedCollections() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
         var path = this.subendpoint('ownedCollections');
         return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchSuggested: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      }
+
+      /**
+      * mhObj.fetchSuggested(mhid,force)
+      *
+      * @param { string='full' } view - the view needed to depict each MHObject that is returned
+      * @param { number=12     } size  - the number of items to return per page
+      * @param { Boolean=false } force
+      *
+      * @return { houndPagedRequest }  - MediaHound paged request object for this feed
+      *
+      */
+
+    }, {
+      key: 'fetchSuggested',
+      value: function fetchSuggested() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         var path = this.subendpoint('suggested');
         return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchFollowing: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      }
+
+      /**
+      * mhUser.fetchFollowing()
+      * @param force {boolean=false}
+      * @returns {Promise}
+      */
+
+    }, {
+      key: 'fetchFollowing',
+      value: function fetchFollowing() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         var path = this.subendpoint('following');
         return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchFollowers: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      }
+    }, {
+      key: 'fetchFollowers',
+      value: function fetchFollowers() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         var path = this.subendpoint('followers');
         return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchServiceSettings: function(serv) {
+      }
+
+      /*
+      * mhUser.linkService()
+      *
+      * @return { Promise }
+      *
+      */
+
+    }, {
+      key: 'fetchServiceSettings',
+
+      /*
+      * mhUser.fetchServiceSettings()
+      *
+      * @return { Promise }
+      *
+      */
+      value: function fetchServiceSettings(serv) {
+
         var service = serv || null;
         var path = this.subendpoint('settings');
+
         if (service === null) {
           console.warn("No service provided, aborting. First argument must include service name i.e. 'facebook' or 'twitter'.");
           return false;
         }
+
         return houndRequest({
           method: 'GET',
           endpoint: path + '/' + service,
           withCredentials: true,
+          //data   : { 'successRedirectUrl' : 'http://www.mediahound.com',  'failureRedirectUrl' : 'http://www.mediahound.com'},
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           }
-        }).catch(function(response) {
+        }).catch(function (response) {
           console.error(response);
-        }).then(function(response) {
+        }).then(function (response) {
           if (response === undefined) {
             return 500;
           } else {
             return response;
           }
         });
-      },
-      fetchTwitterFollowers: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      }
+
+      /*
+      * mhUser.fetchTwitterFollowers()
+      *
+      * @return { PagedRequest }
+      *
+      */
+
+    }, {
+      key: 'fetchTwitterFollowers',
+      value: function fetchTwitterFollowers() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         var path = this.subendpoint('settings') + '/twitter/friends';
         return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchFacebookFriends: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      }
+
+      /*
+      * mhUser.fetchFacebookFriends()
+      *
+      * @return { PagedRequest }
+      *
+      */
+
+    }, {
+      key: 'fetchFacebookFriends',
+      value: function fetchFacebookFriends() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         var path = this.subendpoint('settings') + '/facebook/friends';
         return this.fetchPagedEndpoint(path, view, size, force);
       }
     }, {
-      get mhidPrefix() {
-        return 'mhusr';
-      },
-      get rootEndpoint() {
-        return 'graph/user';
-      },
-      registerNewUser: function(username, password, email, firstName, lastName, optional) {
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHUser.prototype), 'jsonProperties', this), {
+          metadata: MHUserMetadata
+        });
+      }
+    }, {
+      key: 'isCurrentUser',
+      get: function get() {
+        var currentUser = System.get('../../src/models/user/MHLoginSession.js').MHLoginSession.currentUser;
+        //console.warn('circular dep: (currentUser) ', currentUser);
+        return this.isEqualToMHObject(currentUser);
+      }
+
+      /*
+      * Register New User on MediaHound
+      *  Required Params
+      *    username          { String }
+      *    password          { String }
+      *    email             { String }
+      *    firstName         { String }
+      *    lastName          { String }
+      *
+      *  Optional Params
+      *    role              { Integer }
+      *    phoneNumber       { String }
+      *    description       { String }
+      *    onboarded         { boolean}
+      *    facebookToken     { String }
+      *    spotifyToken      { String }
+      *    spotifyUsername   { String }
+      *    rdioToken         { String }
+      *    rdioAccessToken   { String }
+      *
+      * Returns Promise that resolves to a MHUser object.
+      *
+      */
+
+    }], [{
+      key: 'registerNewUser',
+      value: function registerNewUser(username, password, email, firstName, lastName, optional) {
         var path = MHUser.rootEndpoint + '/new',
-            data = (optional && typeof optional === 'object' && !(optional instanceof Array || optional instanceof String)) ? optional : {},
-            notString = function(obj) {
-              return (typeof obj !== 'string' && !(obj instanceof String));
-            };
+            data = optional && (typeof optional === 'undefined' ? 'undefined' : babelHelpers.typeof(optional)) === 'object' && !(optional instanceof Array || optional instanceof String) ? optional : {},
+            notString = function notString(obj) {
+          return typeof obj !== 'string' && !(obj instanceof String);
+        };
+
+        // Check for required params
         if (notString(username)) {
           throw new TypeError('Username not of type string in MHUser.registerNewUser');
         }
+
         if (notString(password)) {
           throw new TypeError('Password not of type string in MHUser.registerNewUser');
         }
+
         if (notString(email)) {
           throw new TypeError('Email not of type string in MHUser.registerNewUser');
         }
+
         if (notString(firstName)) {
           throw new TypeError('First name not of type string in MHUser.registerNewUser');
         }
+
         if (notString(lastName)) {
           throw new TypeError('Last name not of type string in MHUser.registerNewUser');
         }
+
         data.username = username;
         data.password = password;
         data.email = email;
         data.firstName = firstName;
         data.lastName = lastName;
+
+        // TODO: call validate username and email before register?
         return houndRequest({
           method: 'POST',
           endpoint: path,
           'data': data,
           withCredentials: true,
-          headers: {}
-        }).then(function(parsed) {
+          headers: {
+            //'Accept':'application/json',
+            //'Content-Type':'application/json'
+          }
+        }).then(function (parsed) {
           return parsed.metadata;
         });
-      },
-      fetchSettings: function(mhid) {
-        if (!mhid || (typeof mhid !== 'string' && !(mhid instanceof String))) {
+        /*
+        .catch(function(error){
+        console.error('Error on MHUser.registerNewUser: ', error);
+        throw new Error('Problem registring new User');
+        });
+        */
+      }
+
+      /**
+      * fetchSettings(mhid)
+      * @param mhid
+      * Fetches the settings for the current logged in user.
+      */
+
+    }, {
+      key: 'fetchSettings',
+      value: function fetchSettings(mhid) {
+        if (!mhid || typeof mhid !== 'string' && !(mhid instanceof String)) {
           throw new TypeError('mhid must be type string in MHUser.fetchSettings');
         }
         var path = MHUser.rootEndpoint + '/' + mhid + '/settings/internal';
+
         return houndRequest({
           method: 'GET',
           endpoint: path
-        }).then(function(response) {
+        }).then(function (response) {
           log('valid settings response: ', response);
           return response.internalSettings;
-        }).catch(function(error) {
+        }).catch(function (error) {
           console.log('error in fetchSettings: ', error.error.message);
           console.error(error.error.stack);
           return false;
         });
-      },
-      fetchSourceSettings: function(mhid) {
-        if (!mhid || (typeof mhid !== 'string' && !(mhid instanceof String))) {
+      }
+
+      /**
+      * fetchSourceSettings(mhid)
+      * @param mhid
+      * Fetches the settings for the current logged in user.
+      */
+
+    }, {
+      key: 'fetchSourceSettings',
+      value: function fetchSourceSettings(mhid) {
+        if (!mhid || typeof mhid !== 'string' && !(mhid instanceof String)) {
           throw new TypeError('mhid must be type string in MHUser.fetchSourceSettings');
         }
         var path = MHUser.rootEndpoint + '/' + mhid + '/settings/sources';
+
         return houndRequest({
           method: 'GET',
           endpoint: path
-        }).then(function(response) {
+        }).then(function (response) {
           response = MHRelationalPair.createFromArray(response.content);
           console.log('valid settings response: ', response);
           return response;
-        }).catch(function(error) {
+        }).catch(function (error) {
           console.log('error in fetchSourceSettings: ', error.error.message);
           console.error(error.error.stack);
           return false;
         });
-      },
-      updateSettings: function(mhid, updates) {
+      }
+
+      /**
+      * updateSettings(mhid,updates)
+      *
+      * @param updates
+      * updates must be passed into updateSettings as an object with three required params.
+      * An example of updating the boolean value of onboarded.
+      * {
+      *   "operation":"replace",
+      *   "property":"onboarded",
+      *   "value":Boolean
+      * }
+      * operation refers to the actions "replace", "add", or "remove"
+      * property is the property you want to change, i.e. "onboarded", "access", or "tooltips"
+      * value is either a boolean or string based on context of the request
+      *
+      * Another exmaple for updating tooltips:
+      * {
+      *   "operation":"add",
+      *   "property":"tooltips",
+      *   "value":["webapptooltip1", "webapptooltip2", "webapptooltip3"]
+      * }
+      * @returns {Promise}
+      */
+
+    }, {
+      key: 'updateSettings',
+      value: function updateSettings(mhid, updates) {
         if (updates == null || typeof updates === 'string' || Array.isArray(updates)) {
           throw new TypeError('Update data parameter must be of type object');
         }
@@ -5584,22 +3184,32 @@ System.registerModule("models/user/MHUser.js", [], function() {
           endpoint: path,
           withCredentials: true,
           data: updates
-        }).catch(function(err) {
+        }).catch(function (err) {
           console.log('error on profile update: ', err);
           throw err;
         });
-      },
-      validateUsername: function(username) {
-        if (!username || (typeof username !== 'string' && !(username instanceof String))) {
+      }
+
+      /** TODO: refactor after new auth system
+      *
+      */
+
+    }, {
+      key: 'validateUsername',
+      value: function validateUsername(username) {
+        if (!username || typeof username !== 'string' && !(username instanceof String)) {
           throw new TypeError('Username must be type string in MHUser.validateUsername');
         }
         var path = MHUser.rootEndpoint + '/validate/username/' + encodeURIComponent(username);
+
+        // returns 200 for acceptable user name
+        // returns 406 for taken user name
         return houndRequest({
           method: 'GET',
           endpoint: path
-        }).then(function(response) {
+        }).then(function (response) {
           return response;
-        }).catch(function(error) {
+        }).catch(function (error) {
           if (error.xhr.status === 406) {
             console.error('The username ' + username + ' is already taken.');
           } else {
@@ -5608,18 +3218,29 @@ System.registerModule("models/user/MHUser.js", [], function() {
           }
           return false;
         });
-      },
-      validateEmail: function(email) {
-        if (!email || (typeof email !== 'string' && !(email instanceof String))) {
+      }
+
+      /** TODO: refactor after new auth system
+      *
+      */
+
+    }, {
+      key: 'validateEmail',
+      value: function validateEmail(email) {
+        if (!email || typeof email !== 'string' && !(email instanceof String)) {
           throw new TypeError('Email must be type string in MHUser.validateEmail');
         }
         var path = MHUser.rootEndpoint + '/validate/email/' + encodeURIComponent(email);
+
+        // returns 200 for acceptable user name
+        // returns 406 for taken user name
         return houndRequest({
           method: 'GET',
           endpoint: path
-        }).then(function(response) {
+        }).then(function (response) {
+          //console.log('valid email response: ', response);
           return response;
-        }).catch(function(error) {
+        }).catch(function (error) {
           if (error.xhr.status === 406) {
             console.error('The email ' + email + ' is already registered.');
           } else {
@@ -5628,22 +3249,36 @@ System.registerModule("models/user/MHUser.js", [], function() {
           }
           return false;
         });
-      },
-      forgotUsernameWithEmail: function(email) {
-        if (!email || (typeof email !== 'string' && !(email instanceof String))) {
+      }
+      /* TODO: change endpoint to CamelCase and to use mhid?
+      * mhUser.forgotUsernameWithEmail()
+      *
+      * @return { Promise }
+      *
+      */
+
+    }, {
+      key: 'forgotUsernameWithEmail',
+      value: function forgotUsernameWithEmail(email) {
+        if (!email || typeof email !== 'string' && !(email instanceof String)) {
           throw new TypeError('Email must be type string in MHUser.forgotUsernameWithEmail');
         }
         var path = MHUser.rootEndpoint + '/forgotusername',
             data = {};
+
         data.email = email;
+
+        // returns 200 for acceptable user name
+        // returns 406 for taken user name
         return houndRequest({
           method: 'POST',
           endpoint: path,
           withCredentials: false,
           data: data
-        }).then(function(response) {
+        }).then(function (response) {
+          //  console.log('valid forgotUsernameWithEmail: ', response);
           return response;
-        }).catch(function(error) {
+        }).catch(function (error) {
           if (error.xhr.status === 400) {
             console.error('The email ' + email + ' is missing or an invalid argument.');
           } else if (error.xhr.status === 404) {
@@ -5654,23 +3289,34 @@ System.registerModule("models/user/MHUser.js", [], function() {
           }
           return false;
         });
-      },
-      forgotPasswordWithEmail: function(email) {
-        if (!email || (typeof email !== 'string' && !(email instanceof String))) {
+      }
+      /* TODO: change endpoint to CamelCase and to use mhid?
+      * mhUser.forgotPasswordWithEmail()
+      *
+      * @return { Promise }
+      *
+      */
+
+    }, {
+      key: 'forgotPasswordWithEmail',
+      value: function forgotPasswordWithEmail(email) {
+        if (!email || typeof email !== 'string' && !(email instanceof String)) {
           throw new TypeError('Email must be type string in MHUser.forgotPasswordWithEmail');
         }
         var path = MHUser.rootEndpoint + '/forgotpassword',
             data = {};
+
         data.email = email;
+
         return houndRequest({
           method: 'POST',
           endpoint: path,
           withCredentials: false,
           data: data
-        }).then(function(response) {
+        }).then(function (response) {
           console.log('valid forgotPasswordWithEmail: ', response);
           return response;
-        }).catch(function(error) {
+        }).catch(function (error) {
           if (error.xhr.status === 400) {
             console.error('The email ' + email + ' is missing or an invalid argument.');
           } else if (error.xhr.status === 404) {
@@ -5681,23 +3327,34 @@ System.registerModule("models/user/MHUser.js", [], function() {
           }
           return false;
         });
-      },
-      forgotPasswordWithUsername: function(username) {
-        if (!username || (typeof username !== 'string' && !(username instanceof String))) {
+      }
+      /* TODO: change endpoint to CamelCase and to use mhid?
+      * mhUser.forgotPasswordWithEmail()
+      *
+      * @return { Promise }
+      *
+      */
+
+    }, {
+      key: 'forgotPasswordWithUsername',
+      value: function forgotPasswordWithUsername(username) {
+        if (!username || typeof username !== 'string' && !(username instanceof String)) {
           throw new TypeError('username must be type string in MHUser.forgotPasswordWithUsername');
         }
         var path = MHUser.rootEndpoint + '/forgotpassword',
             data = {};
+
         data.username = username;
+
         return houndRequest({
           method: 'POST',
           endpoint: path,
           withCredentials: false,
           data: data
-        }).then(function(response) {
+        }).then(function (response) {
           console.log('valid forgotPasswordWithUsername: ', response);
           return response;
-        }).catch(function(error) {
+        }).catch(function (error) {
           if (error.xhr.status === 400) {
             console.error('The username ' + username + ' is missing or an invalid argument.');
           } else if (error.xhr.status === 404) {
@@ -5708,27 +3365,39 @@ System.registerModule("models/user/MHUser.js", [], function() {
           }
           return false;
         });
-      },
-      newPassword: function(password, ticket) {
-        if (!password || (typeof password !== 'string' && !(password instanceof String))) {
+      }
+      /* TODO: change endpoint to CamelCase and to use mhid?
+      * mhUser.newPassword()
+      *
+      * @return { Promise }
+      *
+      */
+
+    }, {
+      key: 'newPassword',
+      value: function newPassword(password, ticket) {
+
+        if (!password || typeof password !== 'string' && !(password instanceof String)) {
           throw new TypeError('password must be type string in MHUser.newPassword');
         }
-        if (!ticket || (typeof ticket !== 'string' && !(ticket instanceof String))) {
+        if (!ticket || typeof ticket !== 'string' && !(ticket instanceof String)) {
           throw new TypeError('ticket must be type string in MHUser.newPassword');
         }
         var path = MHUser.rootEndpoint + '/forgotpassword/finish',
             data = {};
+
         data.newPassword = password;
         data.ticket = ticket;
+
         return houndRequest({
           method: 'POST',
           endpoint: path,
           withCredentials: false,
           data: data
-        }).then(function(response) {
+        }).then(function (response) {
           console.log('valid newPassword: ', response);
           return response;
-        }).catch(function(error) {
+        }).catch(function (error) {
           if (error.xhr.status === 400) {
             console.error('The password ' + password + ' is an invalid password.');
           } else if (error.xhr.status === 404) {
@@ -5739,11 +3408,14 @@ System.registerModule("models/user/MHUser.js", [], function() {
           }
           return false;
         });
-      },
-      fetchByUsername: function(username) {
-        var view = arguments[1] !== (void 0) ? arguments[1] : 'full';
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        if (!username || (typeof username !== 'string' && !(username instanceof String))) {
+      }
+    }, {
+      key: 'fetchByUsername',
+      value: function fetchByUsername(username) {
+        var view = arguments.length <= 1 || arguments[1] === undefined ? 'full' : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+        if (!username || typeof username !== 'string' && !(username instanceof String)) {
           throw new TypeError('Username not of type String in fetchByUsername');
         }
         if (MHObject.getPrefixFromMhid(username) != null) {
@@ -5752,59 +3424,93 @@ System.registerModule("models/user/MHUser.js", [], function() {
         if (view === null || view === undefined) {
           view = 'full';
         }
+
         log('in fetchByUsername, looking for: ' + username);
+
+        // Check LRU for altId === username
         if (!force && mhidLRU.hasAltId(username)) {
           return Promise.resolve(mhidLRU.getByAltId(username));
         }
+
         var path = MHUser.rootEndpoint + '/lookup/' + username,
             newObj;
+
         return houndRequest({
           method: 'GET',
           endpoint: path,
           withCredentials: true,
-          params: {view: view}
-        }).then(function(response) {
+          params: {
+            view: view
+          }
+        }).then(function (response) {
           newObj = MHObject.create(response);
           mhidLRU.putMHObj(newObj);
           return newObj;
         });
-      },
-      fetchFeaturedUsers: function() {
+      }
+
+      /* TODO: Refactor to api 1.0 specs
+      * MHUser.fetchFeaturedUsers()
+      *
+      * @return { Promise } - resloves to an array of featured users of type MHUser
+      *
+      */
+
+    }, {
+      key: 'fetchFeaturedUsers',
+      value: function fetchFeaturedUsers() {
         var path = this.rootSubendpoint('featured');
         return houndRequest({
           method: 'GET',
           endpoint: path
-        }).then(function(response) {
+        }).then(function (response) {
           return Promise.all(MHObject.fetchByMhids(response));
         });
-      },
-      linkService: function(serv, succ, fail) {
+      }
+    }, {
+      key: 'linkService',
+      value: function linkService(serv, succ, fail) {
+
         var service = serv || null,
             success = succ || 'https://www.mediahound.com/',
             failure = fail || 'https://www.mediahound.com/';
+
         if (service === null) {
           console.warn("No service provided, aborting. First argument must include service name i.e. 'facebook' or 'twitter'.");
           return false;
         }
+
         return houndRequest({
           method: 'GET',
           endpoint: MHUser.rootEndpoint + '/account/' + service + '/link?successRedirectUrl=' + success + '&failureRedirectUrl=' + failure,
           withCredentials: true,
+          //data   : { 'successRedirectUrl' : 'http://www.mediahound.com',  'failureRedirectUrl' : 'http://www.mediahound.com'},
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           }
-        }).then(function(response) {
+        }).then(function (response) {
           console.log(response);
           return response;
         });
-      },
-      unlinkService: function(serv) {
+      }
+      /*
+      * mhUser.unlinkService()
+      *
+      * @return { Promise }
+      *
+      */
+
+    }, {
+      key: 'unlinkService',
+      value: function unlinkService(serv) {
         var service = serv || null;
+
         if (service === null) {
           console.warn("No service provided, aborting. First argument must include service name i.e. 'facebook' or 'twitter'.");
           return false;
         }
+
         return houndRequest({
           method: 'GET',
           endpoint: MHUser.rootEndpoint + '/account/' + service + '/unlink',
@@ -5813,201 +3519,335 @@ System.registerModule("models/user/MHUser.js", [], function() {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           }
-        }).then(function(response) {
+        }).then(function (response) {
           console.log(response);
           return response;
         });
       }
-    }, $__super);
-  }(MHObject);
-  (function() {
+    }, {
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhusr';
+      }
+    }, {
+      key: 'rootEndpoint',
+      get: function get() {
+        return 'graph/user';
+      }
+    }]);
+    return MHUser;
+  })(MHObject);
+
+  (function () {
     MHObject.registerConstructor(MHUser, 'MHUser');
   })();
-  return {get MHUser() {
-      return MHUser;
-    }};
-});
-System.registerModule("models/user/MHLoginSession.js", [], function() {
-  "use strict";
-  var __moduleName = "models/user/MHLoginSession.js";
-  var $__0 = System.get("models/internal/debug-helpers.js"),
-      log = $__0.log,
-      warn = $__0.warn,
-      error = $__0.error;
-  var $__1 = System.get("models/base/MHObject.js"),
-      MHObject = $__1.MHObject,
-      mhidLRU = $__1.mhidLRU;
-  var MHUser = System.get("models/user/MHUser.js").MHUser;
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var makeEvent = function(name, options) {
+
+  /* taken from iOS
+   *
+   *  NSString* const MHLoginSessionUserProfileImageDidChange = @"LoginSessionUserProfileImageDidChange";
+   *
+   */
+
+  var makeEvent = function makeEvent(name, options) {
     var evt;
     options.bubbles = options.bubbles || false;
     options.cancelable = options.cancelable || false;
-    options.detail = options.detail || (void 0);
+    options.detail = options.detail || void 0;
+
     try {
+
       evt = new CustomEvent(name, options);
     } catch (err) {
+
       evt = document.createEvent('CustomEvent');
       evt.initCustomEvent(name, options.bubbles, options.cancelable, options.detail);
     }
     return evt;
   };
-  var MHUserLoginEvent = function() {
-    function MHUserLoginEvent() {}
-    return ($traceurRuntime.createClass)(MHUserLoginEvent, {}, {create: function(mhUserObj) {
+
+  /**
+   *
+   * Class Events
+   *  mhUserLogin
+   *  mhUserLogout
+   *  mhSessionUserProfileImageChange
+   *
+   *  currently can't extend built in classes or else this would be:
+   *    'MHUserLoginEvent extends CustomEvent'
+   *
+   */
+
+  var MHUserLoginEvent = (function () {
+    function MHUserLoginEvent() {
+      babelHelpers.classCallCheck(this, MHUserLoginEvent);
+    }
+
+    babelHelpers.createClass(MHUserLoginEvent, null, [{
+      key: 'create',
+      value: function create(mhUserObj) {
         return makeEvent('mhUserLogin', {
           bubbles: false,
           cancelable: false,
-          detail: {mhUser: mhUserObj}
+          detail: {
+            mhUser: mhUserObj
+          }
         });
-      }});
-  }();
-  var MHUserLogoutEvent = function() {
-    function MHUserLogoutEvent() {}
-    return ($traceurRuntime.createClass)(MHUserLogoutEvent, {}, {create: function(mhUserObj) {
+      }
+    }]);
+    return MHUserLoginEvent;
+  })();
+
+  var MHUserLogoutEvent = (function () {
+    function MHUserLogoutEvent() {
+      babelHelpers.classCallCheck(this, MHUserLogoutEvent);
+    }
+
+    babelHelpers.createClass(MHUserLogoutEvent, null, [{
+      key: 'create',
+      value: function create(mhUserObj) {
         return makeEvent('mhUserLogout', {
           bubbles: false,
           cancelable: false,
-          detail: {mhUser: mhUserObj}
+          detail: {
+            mhUser: mhUserObj
+          }
         });
-      }});
-  }();
-  var loggedInUser = null,
-      onboarded = false,
-      access = false,
-      count = null;
-  var restoreFromSessionStorage = function() {
+      }
+    }]);
+    return MHUserLogoutEvent;
+  })();
+
+  // class MHSessionUserProfileImageChange {
+  //   static create(mhUserObj){
+  //     return makeEvent('mhSessionUserProfileImageChange', {
+  //       bubbles:    false,
+  //       cancelable: false,
+  //       detail: {
+  //         mhUser: mhUserObj
+  //       }
+  //     });
+  //   }
+  // }
+
+  // Singleton Containers
+
+  var loggedInUser = null;
+  var onboarded = false;
+  var access = false;
+  var count = null;
+  // Hidden Restore from Storage function
+  var restoreFromSessionStorage = function restoreFromSessionStorage() {
     var inStorage = window.sessionStorage.currentUser;
+
     if (inStorage) {
+      //loggedInUser = MHObject.create(inStorage);
       return true;
     }
     return false;
   };
-  var MHLoginSession = function() {
-    function MHLoginSession() {}
-    return ($traceurRuntime.createClass)(MHLoginSession, {}, {
-      get currentUser() {
-        return loggedInUser;
-      },
-      get openSession() {
-        return loggedInUser instanceof MHUser;
-      },
-      get onboarded() {
-        return onboarded;
-      },
-      get access() {
-        return access;
-      },
-      get count() {
-        return count;
-      },
-      updateCount: function() {
+
+  // MediaHound Login Session Singleton
+  /** @class MHLoginSession */
+  var MHLoginSession = (function () {
+    function MHLoginSession() {
+      babelHelpers.classCallCheck(this, MHLoginSession);
+    }
+
+    babelHelpers.createClass(MHLoginSession, null, [{
+      key: 'updateCount',
+      value: function updateCount() {
         return houndRequest({
           method: 'GET',
           endpoint: MHUser.rootEndpoint + '/count'
-        }).then(function(res) {
+        }).then(function (res) {
           count = res.count;
           return res;
-        }).catch(function(err) {
+        }).catch(function (err) {
           warn('Error fetching user count');
           error(err.error.stack);
           return count;
         });
-      },
-      login: function(username, password) {
+      }
+
+      /** DEPRECATED: updatedProfileImage doesn't need to be called, just fetch the current logged in user.
+       * When A user updates their profile picture this will fire the event
+       * and update the currentUser property.
+       * @param  {MHUser} updatedUser
+       * @returns {Boolean}
+       */
+      // static updatedProfileImage(updatedImage){
+      //   console.log('updatedUploadImage: ', updatedUser, updatedUser instanceof MHUser, updatedUser.hasMhid(loggedInUser.mhid));
+      //   if( !(updatedUser instanceof MHUser) || !updatedUser.hasMhid(loggedInUser.mhid) ){
+      //     throw new TypeError("Updated Profile Image must be passed a new MHUser Object that equals the currently logged in user");
+      //   }
+      //
+      //   loggedInUser = updatedUser;
+      //   loggedInUser.fetchSocial();
+      //   loggedInUser.fetchOwnedCollections();
+      //
+      //   // dispatch profile image changed event: 'mhUserProfileImageChanged'
+      //   window.dispatchEvent(MHSessionUserProfileImageChange.create(loggedInUser));
+      //
+      //   return true;
+      // }
+
+      // DEPRECATED: Use MHUser.updateSettings() instead.
+      // static completedOnboarding(){
+      //   var path = MHUser.rootEndpoint + '/onboard';
+      //   return houndRequest({
+      //       method            : 'POST',
+      //       endpoint          : path,
+      //       'withCredentials' : true
+      //     })
+      //     .then(loginMap => {
+      //       access    = loginMap.access;
+      //       onboarded = loginMap.onboarded;
+      //       console.log(loginMap);
+      //       return loginMap;
+      //     });
+      // }
+
+      /**
+       *  MHLoginSession.login(username, password)
+       *
+       *  @param {string} username - the username for the user logging in
+       *  @param {string} password - the password for the user logging in
+       *
+       *  @return {Promise<MHUser>} - resolves to MHUser object of logged in user
+       */
+
+    }, {
+      key: 'login',
+      value: function login(username, password) {
         if (typeof username !== 'string' && !(username instanceof String)) {
           throw new TypeError('Username not of type string in MHUser.login');
         }
+
         if (typeof password !== 'string' && !(password instanceof String)) {
           throw new TypeError('Password not of type string in MHUser.login');
         }
+
         var path = MHUser.rootEndpoint + '/login',
             data = {
-              'username': username,
-              'password': password
-            };
+          'username': username,
+          'password': password
+        };
+
         return houndRequest({
           method: 'POST',
           endpoint: path,
           'data': data,
           withCredentials: true,
           headers: {}
-        }).then(function(loginMap) {
+        }).then(function (loginMap) {
           if (!loginMap.Error) {
-            return MHObject.fetchByMhid(loginMap.mhid).then(function(mhUser) {
+            return MHObject.fetchByMhid(loginMap.mhid).then(function (mhUser) {
               return [loginMap, mhUser];
             });
           } else {
             throw new Error(loginMap.Error);
           }
-        }).then(function(mhUserMap) {
+        }).then(function (mhUserMap) {
           if (mhUserMap[0].access === false) {
+
             mhUserMap[1].settings = {
               onboarded: mhUserMap[0].onboarded,
               access: mhUserMap[0].access
             };
             return mhUserMap[1];
           } else {
-            return MHUser.fetchSettings(mhUserMap[1].mhid).then(function(settings) {
+            return MHUser.fetchSettings(mhUserMap[1].mhid).then(function (settings) {
               mhUserMap[1].settings = settings;
               return mhUserMap[1];
             });
           }
-        }).then(function(user) {
+        }).then(function (user) {
           access = user.access = user.settings.access;
           onboarded = user.onboarded = user.settings.onboarded;
           loggedInUser = user;
+
           if (typeof window !== 'undefined') {
             window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
           }
           if (typeof sessionStorage !== 'undefined') {
             sessionStorage.currentUser = JSON.stringify(loggedInUser);
           }
+
           log('logging in:', loggedInUser);
           return loggedInUser;
-        }).catch(function(error) {
+        }).catch(function (error) {
+          //console.error('Error on MHLoginSession.login', error.error, 'xhr: ', error.xhr);
           throw new Error(error);
         });
-      },
-      logout: function() {
-        var currentCookies = document.cookie.split('; ').map(function(c) {
+      }
+
+      /**
+       * MHLoginSession.logout()
+       *
+       * @returns {Promise} - resolves to user that just logged out.
+       */
+
+    }, {
+      key: 'logout',
+      value: function logout() {
+        var currentCookies = document.cookie.split('; ').map(function (c) {
           var keyVal = c.split('=');
           return {
             'key': keyVal[0],
             'value': keyVal[1]
           };
         });
+
         window.sessionStorage.currentUser = null;
-        currentCookies.forEach(function(cookie) {
+
+        currentCookies.forEach(function (cookie) {
           if (cookie.key === 'JSESSIONID') {
-            var expires = (new Date(0)).toGMTString();
-            document.cookie = (cookie.key + "=" + cookie.value + "; expires=" + expires + "; domain=.mediahound.com");
+            var expires = new Date(0).toGMTString();
+            document.cookie = cookie.key + '=' + cookie.value + '; expires=' + expires + '; domain=.mediahound.com';
           }
         });
-        if (typeof window !== undefined) {
+
+        // Dispatch logout event
+        if ((typeof window === 'undefined' ? 'undefined' : babelHelpers.typeof(window)) !== undefined) {
           window.dispatchEvent(MHUserLogoutEvent.create(loggedInUser));
         }
+
         mhidLRU.removeAll();
-        return Promise.resolve(loggedInUser).then(function(mhUser) {
+
+        return Promise.resolve(loggedInUser).then(function (mhUser) {
           loggedInUser = null;
           access = false;
           onboarded = false;
           return mhUser;
         });
-      },
-      validateOpenSession: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : "full";
+      }
+
+      /**
+       * @returns {Promise} - resolves to the user that has an open session.
+       */
+
+    }, {
+      key: 'validateOpenSession',
+      value: function validateOpenSession() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? "full" : arguments[0];
+
         var path = MHUser.rootEndpoint + '/validateSession';
+
         return houndRequest({
           method: 'GET',
           endpoint: path,
-          params: {view: view},
+          params: {
+            view: view
+          },
           withCredentials: true,
           headers: {}
-        }).then(function(loginMap) {
+        }).then(function (loginMap) {
+
           if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined' && restoreFromSessionStorage()) {
+
             var cachedUser = JSON.parse(window.sessionStorage.currentUser);
             if (cachedUser.mhid === loginMap.users[0].metadata.mhid || cachedUser.mhid === loginMap.users[0].mhid) {
+
               access = cachedUser.settings.access;
               onboarded = cachedUser.settings.onboarded;
               return MHObject.create(loginMap.users[0]);
@@ -6015,529 +3855,218 @@ System.registerModule("models/user/MHLoginSession.js", [], function() {
           } else {
             return MHObject.create(loginMap.users[0]);
           }
-        }).then(function(user) {
+        }).then(function (user) {
+          // loggedInUser.access = access;
+          // loggedInUser.onboarded = onboarded;
           loggedInUser = user;
+          //console.log(loggedInUser);
           window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
           return loggedInUser;
-        }).catch(function(error) {
+        }).catch(function (error) {
           if (error.xhr.status === 401) {
             console.log('No open MediaHound session');
           }
           return error;
         });
       }
-    });
-  }();
-  return {get MHLoginSession() {
-      return MHLoginSession;
-    }};
-});
-System.registerModule("models/collection/MHCollection.js", [], function() {
-  "use strict";
-  var __moduleName = "models/collection/MHCollection.js";
-  var log = System.get("models/internal/debug-helpers.js").log;
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHAction = System.get("models/action/MHAction.js").MHAction;
-  var MHLoginSession = System.get("models/user/MHLoginSession.js").MHLoginSession;
-  var MHCollectionMetadata = System.get("models/meta/MHMetadata.js").MHCollectionMetadata;
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var MHCollection = function($__super) {
-    function MHCollection() {
-      $traceurRuntime.superConstructor(MHCollection).apply(this, arguments);
+    }, {
+      key: 'currentUser',
+
+      /**
+       * The Currently logged in MHUser object
+       * @property {MHUser}
+       * @static
+       */
+      get: function get() {
+        return loggedInUser;
+      }
+
+      /**
+       * True or False, is there an open session?
+       * @property {Boolean}
+       * @static
+       */
+
+    }, {
+      key: 'openSession',
+      get: function get() {
+        return loggedInUser instanceof MHUser;
+      }
+
+      /**
+       * If the currently logged in user has gone through the onboarding process.
+       * @property {Boolean|null} onboarded
+       */
+
+    }, {
+      key: 'onboarded',
+      get: function get() {
+        return onboarded;
+      }
+
+      /**
+       * If the currently logged in user has access to the application.
+       * @property {Boolean|null} access
+       */
+
+    }, {
+      key: 'access',
+      get: function get() {
+        return access;
+      }
+
+      /**
+       * The count of users in the system
+       * @returns {number}
+       */
+
+    }, {
+      key: 'count',
+      get: function get() {
+        return count;
+      }
+    }]);
+    return MHLoginSession;
+  })();
+
+  // MediaHound Media Object
+  var MHMedia = (function (_MHObject) {
+    babelHelpers.inherits(MHMedia, _MHObject);
+
+    function MHMedia() {
+      babelHelpers.classCallCheck(this, MHMedia);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHMedia).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHCollection, {
-      get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHCollection.prototype, "jsonProperties"), {
-          metadata: MHCollectionMetadata,
-          firstContentImage: {mapper: MHObject.create},
-          primaryOwner: {mapper: MHObject.create}
-        });
-      },
-      editMetaData: function(name, description) {
-        var path = this.subendpoint('update'),
-            data = {};
-        if (description) {
-          data = {
-            "name": name,
-            "description": description
-          };
-        } else if (name) {
-          data = {"name": name};
-        }
-        return houndRequest({
-          method: 'PUT',
-          endpoint: path,
-          data: data
-        }).then(function(response) {
-          return MHObject.fetchByMhid(response.metadata.mhid);
-        }).then(function(newCollection) {
-          if (MHLoginSession.openSession) {
-            MHLoginSession.currentUser.fetchOwnedCollections("full", 12, true);
-          }
-          return newCollection;
-        });
-      },
-      addContent: function(content) {
-        return this.addContents([content]);
-      },
-      addContents: function(contents) {
-        return this.changeContents(contents, 'add');
-      },
-      removeContent: function(content) {
-        return this.removeContents([content]);
-      },
-      removeContents: function(contents) {
-        return this.changeContents(contents, 'remove');
-      },
-      changeContents: function(contents, sub) {
-        var $__9 = this;
-        if (!Array.isArray(contents)) {
-          throw new TypeError('Contents must be an array in changeContents');
-        }
-        if (typeof sub !== 'string' || (sub !== 'add' && sub !== 'remove')) {
-          throw new TypeError('Subendpoint must be add or remove');
-        }
-        var path = this.subendpoint(sub),
-            mhids = contents.map(function(v) {
-              if (v instanceof MHObject) {
-                if (!(v instanceof MHAction)) {
-                  return v.mhid;
-                } else {
-                  console.error('MHActions including like, favorite, create, and post cannot be collected. Please resubmit with actual content.');
-                }
-              } else if (typeof v === 'string' && MHObject.prefixes.indexOf(MHObject.getPrefixFromMhid(v)) > -1) {
-                return v;
-              }
-              return null;
-            }).filter(function(v) {
-              return v !== null;
-            });
-        this.mixlistPromise = null;
-        if (mhids.length > -1) {
-          log('content array to be submitted: ', mhids);
-          return (this.content = houndRequest({
-            method: 'PUT',
-            endpoint: path,
-            data: {'content': mhids}
-          }).catch((function(err) {
-            $__9.content = null;
-            throw err;
-          }).bind(this)).then(function(response) {
-            contents.forEach(function(v) {
-              return typeof v.fetchSocial === 'function' && v.fetchSocial(true);
-            });
-            return response;
-          }));
-        } else {
-          console.error('To add or remove content from a Collection the content array must include at least one MHObject');
-        }
-      },
-      fetchOwners: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        var path = this.subendpoint('owners');
-        return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchContent: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+
+    babelHelpers.createClass(MHMedia, [{
+      key: 'fetchContent',
+
+      /* TODO: DocJS
+      * mhMed.fetchContent()
+      *
+      * @param force { Boolean } - force refetch of content
+      * @return { Promise } - resolves to
+      *
+      */
+
+      value: function fetchContent() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 20 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         var path = this.subendpoint('content');
         return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchMixlist: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        var path = this.subendpoint('mixlist');
+      }
+
+      /* TODO: DocJS
+       * mhMed.fetchSources()
+       *
+       * @param force { Boolean } - force refetch of content
+       * @return { Promise } - resolves to
+       *
+       */
+
+    }, {
+      key: 'fetchSources',
+      value: function fetchSources() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 20 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+        var path = this.subendpoint('sources');
+        return this.fetchPagedEndpoint(path, view, size, force);
+      }
+
+      /**
+      * mhObj.fetchContributors(mhid,force)
+      *
+      * @param { string='full' } view - the view needed to depict each MHObject that is returned
+      * @param { number=12     } size  - the number of items to return per page
+      * @param { Boolean=false } force
+      *
+      * @return { houndPagedRequest }  - MediaHound paged request object for this feed
+      *
+      */
+
+    }, {
+      key: 'fetchContributors',
+      value: function fetchContributors() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+        var path = this.subendpoint('contributors');
         return this.fetchPagedEndpoint(path, view, size, force);
       }
     }, {
-      get MIXLIST_TYPE_NONE() {
-        return 'none';
-      },
-      get MIXLIST_TYPE_PARTIAL() {
-        return 'partial';
-      },
-      get MIXLIST_TYPE_FULL() {
-        return 'full';
-      },
-      get mhidPrefix() {
-        return 'mhcol';
-      },
-      get rootEndpoint() {
-        return 'graph/collection';
-      },
-      createWithName: function(name, description) {
-        var path = this.rootSubendpoint('new');
-        var data = {};
-        if (name) {
-          data.name = name;
-        }
-        if (description) {
-          data.description = description;
-        }
-        return houndRequest({
-          method: 'POST',
-          endpoint: path,
-          data: data
-        }).then(function(response) {
-          return MHObject.fetchByMhid(response.metadata.mhid);
-        }).then(function(newCollection) {
-          if (MHLoginSession.openSession) {
-            MHLoginSession.currentUser.fetchOwnedCollections("full", 12, true);
-          }
-          return newCollection;
-        });
-      }
-    }, $__super);
-  }(MHObject);
-  (function() {
-    MHObject.registerConstructor(MHCollection, 'MHCollection');
-  })();
-  return {get MHCollection() {
-      return MHCollection;
-    }};
-});
-System.registerModule("models/container/MHPagingInfo.js", [], function() {
-  "use strict";
-  var __moduleName = "models/container/MHPagingInfo.js";
-  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
-  var MHPagingInfo = function() {
-    function MHPagingInfo(args) {
-      jsonCreateWithArgs(args, this);
-    }
-    return ($traceurRuntime.createClass)(MHPagingInfo, {get jsonProperties() {
-        return {next: String};
-      }}, {});
-  }();
-  return {get MHPagingInfo() {
-      return MHPagingInfo;
-    }};
-});
-System.registerModule("models/container/MHPagedResponse.js", [], function() {
-  "use strict";
-  var __moduleName = "models/container/MHPagedResponse.js";
-  var jsonCreateWithArgs = System.get("models/internal/jsonParse.js").jsonCreateWithArgs;
-  var MHPagingInfo = System.get("models/container/MHPagingInfo.js").MHPagingInfo;
-  var MHRelationalPair = System.get("models/container/MHRelationalPair.js").MHRelationalPair;
-  var MHPagedResponse = function() {
-    function MHPagedResponse(args) {
-      this.cachedNextResponse = null;
-      this.fetchNextOperation = null;
-      jsonCreateWithArgs(args, this);
-    }
-    return ($traceurRuntime.createClass)(MHPagedResponse, {
-      get jsonProperties() {
-        return {
-          content: [MHRelationalPair],
-          pagingInfo: MHPagingInfo
-        };
-      },
-      get hasMorePages() {
-        return (this.pagingInfo.next !== undefined && this.pagingInfo.next !== null);
-      },
-      fetchNext: function() {
-        var $__5 = this;
-        var cachedResponse = this.cachedNextResponse;
-        if (cachedResponse) {
-          return new Promise(function(resolve) {
-            resolve(cachedResponse);
-          });
-        }
-        return this.fetchNextOperation(this.pagingInfo.next).then(function(response) {
-          $__5.cachedNextResponse = response;
-          return response;
-        });
-      }
-    }, {});
-  }();
-  return {get MHPagedResponse() {
-      return MHPagedResponse;
-    }};
-});
-System.registerModule("models/contributor/MHContributor.js", [], function() {
-  "use strict";
-  var __moduleName = "models/contributor/MHContributor.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHContributorMetadata = System.get("models/meta/MHMetadata.js").MHContributorMetadata;
-  var MHContributor = function($__super) {
-    function MHContributor() {
-      $traceurRuntime.superConstructor(MHContributor).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHContributor, {
-      get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHContributor.prototype, "jsonProperties"), {metadata: MHContributorMetadata});
-      },
-      get isGroup() {
-        return !this.isIndividual;
-      },
-      get isFictional() {
-        return !this.isReal;
-      },
-      fetchMedia: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        var path = this.subendpoint('media');
-        return this.fetchPagedEndpoint(path, view, size, force);
-      }
-    }, {get rootEndpoint() {
-        return 'graph/contributor';
-      }}, $__super);
-  }(MHObject);
-  return {get MHContributor() {
-      return MHContributor;
-    }};
-});
-System.registerModule("models/contributor/MHFictionalGroupContributor.js", [], function() {
-  "use strict";
-  var __moduleName = "models/contributor/MHFictionalGroupContributor.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHContributor = System.get("models/contributor/MHContributor.js").MHContributor;
-  var MHFictionalGroupContributor = function($__super) {
-    function MHFictionalGroupContributor() {
-      $traceurRuntime.superConstructor(MHFictionalGroupContributor).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHFictionalGroupContributor, {
-      get isIndividual() {
-        return false;
-      },
-      get isReal() {
-        return false;
-      }
-    }, {get mhidPrefix() {
-        return 'mhfgc';
-      }}, $__super);
-  }(MHContributor);
-  (function() {
-    MHObject.registerConstructor(MHFictionalGroupContributor, 'MHFictionalGroupContributor');
-  }());
-  return {get MHFictionalGroupContributor() {
-      return MHFictionalGroupContributor;
-    }};
-});
-System.registerModule("models/contributor/MHFictionalIndividualContributor.js", [], function() {
-  "use strict";
-  var __moduleName = "models/contributor/MHFictionalIndividualContributor.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHContributor = System.get("models/contributor/MHContributor.js").MHContributor;
-  var MHFictionalIndividualContributor = function($__super) {
-    function MHFictionalIndividualContributor() {
-      $traceurRuntime.superConstructor(MHFictionalIndividualContributor).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHFictionalIndividualContributor, {
-      get isIndividual() {
-        return true;
-      },
-      get isReal() {
-        return false;
-      }
-    }, {get mhidPrefix() {
-        return 'mhfic';
-      }}, $__super);
-  }(MHContributor);
-  (function() {
-    MHObject.registerConstructor(MHFictionalIndividualContributor, 'MHFictionalIndividualContributor');
-  }());
-  return {get MHFictionalIndividualContributor() {
-      return MHFictionalIndividualContributor;
-    }};
-});
-System.registerModule("models/contributor/MHRealGroupContributor.js", [], function() {
-  "use strict";
-  var __moduleName = "models/contributor/MHRealGroupContributor.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHContributor = System.get("models/contributor/MHContributor.js").MHContributor;
-  var MHRealGroupContributor = function($__super) {
-    function MHRealGroupContributor() {
-      $traceurRuntime.superConstructor(MHRealGroupContributor).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHRealGroupContributor, {
-      get isIndividual() {
-        return false;
-      },
-      get isReal() {
-        return true;
-      }
-    }, {get mhidPrefix() {
-        return 'mhrgc';
-      }}, $__super);
-  }(MHContributor);
-  (function() {
-    MHObject.registerConstructor(MHRealGroupContributor, 'MHRealGroupContributor');
-  }());
-  return {get MHRealGroupContributor() {
-      return MHRealGroupContributor;
-    }};
-});
-System.registerModule("models/contributor/MHRealIndividualContributor.js", [], function() {
-  "use strict";
-  var __moduleName = "models/contributor/MHRealIndividualContributor.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHContributor = System.get("models/contributor/MHContributor.js").MHContributor;
-  var MHRealIndividualContributor = function($__super) {
-    function MHRealIndividualContributor() {
-      $traceurRuntime.superConstructor(MHRealIndividualContributor).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHRealIndividualContributor, {
-      get isIndividual() {
-        return true;
-      },
-      get isReal() {
-        return true;
-      }
-    }, {get mhidPrefix() {
-        return 'mhric';
-      }}, $__super);
-  }(MHContributor);
-  (function() {
-    MHObject.registerConstructor(MHRealIndividualContributor, 'MHRealIndividualContributor');
-  }());
-  return {get MHRealIndividualContributor() {
-      return MHRealIndividualContributor;
-    }};
-});
-System.registerModule("models/hashtag/MHHashtag.js", [], function() {
-  "use strict";
-  var __moduleName = "models/hashtag/MHHashtag.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var MHHashtagMetadata = System.get("models/meta/MHMetadata.js").MHHashtagMetadata;
-  var MHHashtag = function($__super) {
-    function MHHashtag() {
-      $traceurRuntime.superConstructor(MHHashtag).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHHashtag, {get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHHashtag.prototype, "jsonProperties"), {metadata: MHHashtagMetadata});
-      }}, {
-      get mhidPrefix() {
-        return 'mhhtg';
-      },
-      get rootEndpoint() {
-        return 'graph/hashtag';
-      },
-      fetchByName: function(name) {
-        var view = arguments[1] !== (void 0) ? arguments[1] : 'full';
-        if (!name || (typeof name !== 'string' && !(name instanceof String))) {
-          throw new TypeError('Hashtag not of type String in fetchByTag');
-        }
-        var path = this.rootSubendpoint('/lookup/' + name);
-        return houndRequest({
-          method: 'GET',
-          endpoint: path,
-          params: {view: view}
-        }).then(function(response) {
-          var newObj = MHObject.create(response);
-          return newObj;
-        });
-      }
-    }, $__super);
-  }(MHObject);
-  (function() {
-    MHObject.registerConstructor(MHHashtag, 'MHHashtag');
-  })();
-  return {get MHHashtag() {
-      return MHHashtag;
-    }};
-});
-System.registerModule("models/image/MHImage.js", [], function() {
-  "use strict";
-  var __moduleName = "models/image/MHImage.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHImageMetadata = System.get("models/meta/MHMetadata.js").MHImageMetadata;
-  var MHImage = function($__super) {
-    function MHImage() {
-      $traceurRuntime.superConstructor(MHImage).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHImage, {get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHImage.prototype, "jsonProperties"), {metadata: MHImageMetadata});
-      }}, {
-      get mhidPrefix() {
-        return 'mhimg';
-      },
-      get rootEndpoint() {
-        return 'graph/image';
-      }
-    }, $__super);
-  }(MHObject);
-  (function() {
-    MHObject.registerConstructor(MHImage, 'MHImage');
-  }());
-  return {get MHImage() {
-      return MHImage;
-    }};
-});
-System.registerModule("models/media/MHMedia.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHMedia.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHRelationalPair = System.get("models/container/MHRelationalPair.js").MHRelationalPair;
-  var MHMediaMetadata = System.get("models/meta/MHMetadata.js").MHMediaMetadata;
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var MHMedia = function($__super) {
-    function MHMedia() {
-      $traceurRuntime.superConstructor(MHMedia).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHMedia, {
-      get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHMedia.prototype, "jsonProperties"), {
-          metadata: MHMediaMetadata,
-          keyContributors: [MHRelationalPair],
-          primaryGroup: MHRelationalPair
-        });
-      },
-      fetchContent: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        var path = this.subendpoint('content');
-        return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchSources: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 20;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        var path = this.subendpoint('sources');
-        return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchContributors: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        var path = this.subendpoint('contributors');
-        return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchIVATrailer: function() {
+      key: 'fetchIVATrailer',
+      value: function fetchIVATrailer() {
         var path = this.subendpoint('ivaTrailer');
+
         var cached = this.cachedResponseForPath(path);
         if (cached) {
           return cached;
         }
+
         var promise = houndRequest({
           method: 'GET',
           endpoint: path
         });
+
         this.setCachedResponse(promise, path);
+
         return promise;
-      },
-      fetchRelated: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+      }
+
+      /**
+      * mhObj.fetchRelated(mhid,force)
+      *
+      * @param { string='full' } view - the view needed to depict each MHObject that is returned
+      * @param { number=0      } page - the zero indexed page number to return
+      * @param { number=12     } size  - the number of items to return per page
+      * @param { Boolean=false } force
+      *
+      * @return { houndPagedRequest }  - MediaHound paged request object for this feed
+      *
+      */
+
+    }, {
+      key: 'fetchRelated',
+      value: function fetchRelated() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         var path = this.subendpoint('related');
         return this.fetchPagedEndpoint(path, view, size, force);
-      },
-      fetchShortestDistance: function(otherMhid) {
+      }
+    }, {
+      key: 'fetchShortestDistance',
+
+      /**
+      * mhObj.fetchShortestDistance(otherMhid)
+      *
+      * @param { otherMhid } otherMhid - the MHID for the object to calculate shortest path.
+      *
+      * @return { Number }  - Returns the shortest distance between the two objects.
+      *                       If there is no path between the two objects, returns `null`.
+      *
+      */
+      value: function fetchShortestDistance(otherMhid) {
         var path = this.subendpoint('shortestPath/' + otherMhid);
         return houndRequest({
           method: 'GET',
           endpoint: path
-        }).then(function(response) {
+        }).then(function (response) {
+          // This method returns an array of shortest paths.
+          // Since we only care about the length, we can look at the first
+          // shortest path and calculate its length.
+          // The path includes both the start and mhid.
+          // We do not count the start as a 'step', so we subtract one.
           return response.paths[0].path.length - 1;
-        }).catch(function(err) {
+        }).catch(function (err) {
           if (err.xhr.status === 404) {
+            // A 404 indicates there is no path between the two nodes.
             return null;
           } else {
             throw err;
@@ -6545,15 +4074,23 @@ System.registerModule("models/media/MHMedia.js", [], function() {
         });
       }
     }, {
-      get rootEndpoint() {
-        return 'graph/media';
-      },
-      fetchRelatedTo: function(medias) {
-        var filters = arguments[1] !== (void 0) ? arguments[1] : {};
-        var view = arguments[2] !== (void 0) ? arguments[2] : 'full';
-        var size = arguments[3] !== (void 0) ? arguments[3] : 12;
-        var force = arguments[4] !== (void 0) ? arguments[4] : false;
-        var factors = medias.map(function(m) {
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHMedia.prototype), 'jsonProperties', this), {
+          metadata: MHMediaMetadata,
+          keyContributors: [MHRelationalPair],
+          primaryGroup: MHRelationalPair
+        });
+      }
+    }], [{
+      key: 'fetchRelatedTo',
+      value: function fetchRelatedTo(medias) {
+        var filters = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+        var view = arguments.length <= 2 || arguments[2] === undefined ? 'full' : arguments[2];
+        var size = arguments.length <= 3 || arguments[3] === undefined ? 12 : arguments[3];
+        var force = arguments.length <= 4 || arguments[4] === undefined ? false : arguments[4];
+
+        var factors = medias.map(function (m) {
           if ('metadata' in m) {
             return m.metadata.mhid;
           } else {
@@ -6565,858 +4102,1510 @@ System.registerModule("models/media/MHMedia.js", [], function() {
           factors: JSON.stringify(factors),
           filters: JSON.stringify(filters)
         };
+
         return this.fetchRootPagedEndpoint(path, params, view, size, force);
       }
-    }, $__super);
-  }(MHObject);
-  return {get MHMedia() {
-      return MHMedia;
-    }};
-});
-System.registerModule("models/media/MHAlbum.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHAlbum.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHAlbum = function($__super) {
+    }, {
+      key: 'rootEndpoint',
+      get: function get() {
+        return 'graph/media';
+      }
+    }]);
+    return MHMedia;
+  })(MHObject);
+
+  // MediaHound Album Object
+  var MHAlbum = (function (_MHMedia) {
+    babelHelpers.inherits(MHAlbum, _MHMedia);
+
     function MHAlbum() {
-      $traceurRuntime.superConstructor(MHAlbum).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHAlbum);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHAlbum).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHAlbum, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHAlbum, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhalb';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHAlbum;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHAlbum, 'MHAlbum');
   })();
-  return {get MHAlbum() {
-      return MHAlbum;
-    }};
-});
-System.registerModule("models/media/MHAlbumSeries.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHAlbumSeries.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHAlbumSeries = function($__super) {
+
+  // MediaHound Album Object
+  var MHAlbumSeries = (function (_MHMedia) {
+    babelHelpers.inherits(MHAlbumSeries, _MHMedia);
+
     function MHAlbumSeries() {
-      $traceurRuntime.superConstructor(MHAlbumSeries).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHAlbumSeries);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHAlbumSeries).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHAlbumSeries, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHAlbumSeries, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhals';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHAlbumSeries;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHAlbumSeries, 'MHAlbumSeries');
   })();
-  return {get MHAlbumSeries() {
-      return MHAlbumSeries;
-    }};
-});
-System.registerModule("models/media/MHAnthology.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHAnthology.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHAnthology = function($__super) {
+
+  // MediaHound Anthology Object
+  var MHAnthology = (function (_MHMedia) {
+    babelHelpers.inherits(MHAnthology, _MHMedia);
+
     function MHAnthology() {
-      $traceurRuntime.superConstructor(MHAnthology).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHAnthology);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHAnthology).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHAnthology, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHAnthology, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhath';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHAnthology;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHAnthology, 'MHAnthology');
   })();
-  return {get MHAnthology() {
-      return MHAnthology;
-    }};
-});
-System.registerModule("models/media/MHBook.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHBook.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHBook = function($__super) {
+
+  // MediaHound Book (Track) Object
+  var MHBook = (function (_MHMedia) {
+    babelHelpers.inherits(MHBook, _MHMedia);
+
     function MHBook() {
-      $traceurRuntime.superConstructor(MHBook).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHBook);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHBook).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHBook, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHBook, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhbok';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHBook;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHBook, 'MHBook');
   })();
-  return {get MHBook() {
-      return MHBook;
-    }};
-});
-System.registerModule("models/media/MHBookSeries.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHBookSeries.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHBookSeries = function($__super) {
+
+  // MediaHound Book Series Object
+  var MHBookSeries = (function (_MHMedia) {
+    babelHelpers.inherits(MHBookSeries, _MHMedia);
+
     function MHBookSeries() {
-      $traceurRuntime.superConstructor(MHBookSeries).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHBookSeries);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHBookSeries).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHBookSeries, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHBookSeries, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhbks';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHBookSeries;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHBookSeries, 'MHBookSeries');
   })();
-  return {get MHBookSeries() {
-      return MHBookSeries;
-    }};
-});
-System.registerModule("models/media/MHComicBook.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHComicBook.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHComicBook = function($__super) {
+
+  // MediaHound Comic Book Object
+  var MHComicBook = (function (_MHMedia) {
+    babelHelpers.inherits(MHComicBook, _MHMedia);
+
     function MHComicBook() {
-      $traceurRuntime.superConstructor(MHComicBook).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHComicBook);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHComicBook).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHComicBook, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHComicBook, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhcbk';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHComicBook;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHComicBook, 'MHComicBook');
   })();
-  return {get MHComicBook() {
-      return MHComicBook;
-    }};
-});
-System.registerModule("models/media/MHComicBookSeries.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHComicBookSeries.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHComicBookSeries = function($__super) {
+
+  // MediaHound Comic Book Series Object
+  var MHComicBookSeries = (function (_MHMedia) {
+    babelHelpers.inherits(MHComicBookSeries, _MHMedia);
+
     function MHComicBookSeries() {
-      $traceurRuntime.superConstructor(MHComicBookSeries).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHComicBookSeries);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHComicBookSeries).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHComicBookSeries, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHComicBookSeries, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhcbs';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHComicBookSeries;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHComicBookSeries, 'MHComicBookSeries');
   })();
-  return {get MHComicBookSeries() {
-      return MHComicBookSeries;
-    }};
-});
-System.registerModule("models/media/MHGame.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHGame.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHGame = function($__super) {
+
+  // MediaHound Game (Track) Object
+  var MHGame = (function (_MHMedia) {
+    babelHelpers.inherits(MHGame, _MHMedia);
+
     function MHGame() {
-      $traceurRuntime.superConstructor(MHGame).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHGame);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHGame).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHGame, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHGame, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhgam';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHGame;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHGame, 'MHGame');
   })();
-  return {get MHGame() {
-      return MHGame;
-    }};
-});
-System.registerModule("models/media/MHGameSeries.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHGameSeries.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHGameSeries = function($__super) {
+
+  // MediaHound Game Series Object
+  var MHGameSeries = (function (_MHMedia) {
+    babelHelpers.inherits(MHGameSeries, _MHMedia);
+
     function MHGameSeries() {
-      $traceurRuntime.superConstructor(MHGameSeries).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHGameSeries);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHGameSeries).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHGameSeries, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHGameSeries, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhgms';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHGameSeries;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHGameSeries, 'MHGameSeries');
   })();
-  return {get MHGameSeries() {
-      return MHGameSeries;
-    }};
-});
-System.registerModule("models/media/MHGraphicNovel.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHGraphicNovel.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHGraphicNovel = function($__super) {
+
+  // MediaHound Graphic Novel Object
+  var MHGraphicNovel = (function (_MHMedia) {
+    babelHelpers.inherits(MHGraphicNovel, _MHMedia);
+
     function MHGraphicNovel() {
-      $traceurRuntime.superConstructor(MHGraphicNovel).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHGraphicNovel);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHGraphicNovel).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHGraphicNovel, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHGraphicNovel, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhgnl';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHGraphicNovel;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHGraphicNovel, 'MHGraphicNovel');
   })();
-  return {get MHGraphicNovel() {
-      return MHGraphicNovel;
-    }};
-});
-System.registerModule("models/media/MHGraphicNovelSeries.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHGraphicNovelSeries.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHGraphicNovelSeries = function($__super) {
+
+  // MediaHound Graphic Novel Series Object
+  var MHGraphicNovelSeries = (function (_MHMedia) {
+    babelHelpers.inherits(MHGraphicNovelSeries, _MHMedia);
+
     function MHGraphicNovelSeries() {
-      $traceurRuntime.superConstructor(MHGraphicNovelSeries).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHGraphicNovelSeries);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHGraphicNovelSeries).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHGraphicNovelSeries, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHGraphicNovelSeries, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhgns';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHGraphicNovelSeries;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHGraphicNovelSeries, 'MHGraphicNovelSeries');
   })();
-  return {get MHGraphicNovelSeries() {
-      return MHGraphicNovelSeries;
-    }};
-});
-System.registerModule("models/media/MHMovie.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHMovie.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHMovie = function($__super) {
+
+  // MediaHound Movie Object
+  var MHMovie = (function (_MHMedia) {
+    babelHelpers.inherits(MHMovie, _MHMedia);
+
     function MHMovie() {
-      $traceurRuntime.superConstructor(MHMovie).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHMovie);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHMovie).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHMovie, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHMovie, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhmov';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHMovie;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHMovie, 'MHMovie');
   })();
-  return {get MHMovie() {
-      return MHMovie;
-    }};
-});
-System.registerModule("models/media/MHMovieSeries.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHMovieSeries.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHMovieSeries = function($__super) {
+
+  // MediaHound Movie Series Object
+  var MHMovieSeries = (function (_MHMedia) {
+    babelHelpers.inherits(MHMovieSeries, _MHMedia);
+
     function MHMovieSeries() {
-      $traceurRuntime.superConstructor(MHMovieSeries).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHMovieSeries);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHMovieSeries).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHMovieSeries, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHMovieSeries, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhmvs';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHMovieSeries;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHMovieSeries, 'MHMovieSeries');
   })();
-  return {get MHMovieSeries() {
-      return MHMovieSeries;
-    }};
-});
-System.registerModule("models/media/MHMusicVideo.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHMusicVideo.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHMusicVideo = function($__super) {
+
+  // MediaHound Music Video Object
+  var MHMusicVideo = (function (_MHMedia) {
+    babelHelpers.inherits(MHMusicVideo, _MHMedia);
+
     function MHMusicVideo() {
-      $traceurRuntime.superConstructor(MHMusicVideo).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHMusicVideo);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHMusicVideo).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHMusicVideo, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHMusicVideo, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhmsv';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHMusicVideo;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHMusicVideo, 'MHMusicVideo');
   })();
-  return {get MHMusicVideo() {
-      return MHMusicVideo;
-    }};
-});
-System.registerModule("models/media/MHNovella.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHNovella.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHNovella = function($__super) {
+
+  // MediaHound Novella Object
+  var MHNovella = (function (_MHMedia) {
+    babelHelpers.inherits(MHNovella, _MHMedia);
+
     function MHNovella() {
-      $traceurRuntime.superConstructor(MHNovella).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHNovella);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHNovella).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHNovella, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHNovella, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhnov';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHNovella;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHNovella, 'MHNovella');
   })();
-  return {get MHNovella() {
-      return MHNovella;
-    }};
-});
-System.registerModule("models/media/MHPeriodical.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHPeriodical.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHPeriodical = function($__super) {
+
+  // MediaHound Periodical Object
+  var MHPeriodical = (function (_MHMedia) {
+    babelHelpers.inherits(MHPeriodical, _MHMedia);
+
     function MHPeriodical() {
-      $traceurRuntime.superConstructor(MHPeriodical).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHPeriodical);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHPeriodical).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHPeriodical, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHPeriodical, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhpdc';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHPeriodical;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHPeriodical, 'MHPeriodical');
   })();
-  return {get MHPeriodical() {
-      return MHPeriodical;
-    }};
-});
-System.registerModule("models/media/MHPeriodicalSeries.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHPeriodicalSeries.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHPeriodicalSeries = function($__super) {
+
+  // MediaHound Periodical Series Object
+  var MHPeriodicalSeries = (function (_MHMedia) {
+    babelHelpers.inherits(MHPeriodicalSeries, _MHMedia);
+
     function MHPeriodicalSeries() {
-      $traceurRuntime.superConstructor(MHPeriodicalSeries).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHPeriodicalSeries);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHPeriodicalSeries).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHPeriodicalSeries, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHPeriodicalSeries, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhpds';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHPeriodicalSeries;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHPeriodicalSeries, 'MHPeriodicalSeries');
   })();
-  return {get MHPeriodicalSeries() {
-      return MHPeriodicalSeries;
-    }};
-});
-System.registerModule("models/media/MHShowEpisode.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHShowEpisode.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHShowEpisode = function($__super) {
+
+  // MediaHound ShowEpisode Object
+  var MHShowEpisode = (function (_MHMedia) {
+    babelHelpers.inherits(MHShowEpisode, _MHMedia);
+
     function MHShowEpisode() {
-      $traceurRuntime.superConstructor(MHShowEpisode).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHShowEpisode);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHShowEpisode).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHShowEpisode, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHShowEpisode, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhsep';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHShowEpisode;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHShowEpisode, 'MHShowEpisode');
   })();
-  return {get MHShowEpisode() {
-      return MHShowEpisode;
-    }};
-});
-System.registerModule("models/media/MHShowSeason.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHShowSeason.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHShowSeason = function($__super) {
+
+  // MediaHound ShowSeason (Track) Object
+  var MHShowSeason = (function (_MHMedia) {
+    babelHelpers.inherits(MHShowSeason, _MHMedia);
+
     function MHShowSeason() {
-      $traceurRuntime.superConstructor(MHShowSeason).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHShowSeason);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHShowSeason).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHShowSeason, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHShowSeason, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhssn';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHShowSeason;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHShowSeason, 'MHShowSeason');
   })();
-  return {get MHShowSeason() {
-      return MHShowSeason;
-    }};
-});
-System.registerModule("models/media/MHShowSeries.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHShowSeries.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHShowSeries = function($__super) {
+
+  // MediaHound ShowSeries (Track) Object
+  var MHShowSeries = (function (_MHMedia) {
+    babelHelpers.inherits(MHShowSeries, _MHMedia);
+
     function MHShowSeries() {
-      $traceurRuntime.superConstructor(MHShowSeries).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHShowSeries);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHShowSeries).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHShowSeries, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHShowSeries, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhsss';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHShowSeries;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHShowSeries, 'MHShowSeries');
   })();
-  return {get MHShowSeries() {
-      return MHShowSeries;
-    }};
-});
-System.registerModule("models/media/MHSpecial.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHSpecial.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHSpecial = function($__super) {
-    function MHSpecial() {
-      $traceurRuntime.superConstructor(MHSpecial).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHSpecial, {}, {get mhidPrefix() {
-        return 'mhspc';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
-    MHObject.registerConstructor(MHSpecial, 'MHSpecial');
-  })();
-  return {get MHSpecial() {
-      return MHSpecial;
-    }};
-});
-System.registerModule("models/media/MHSpecialSeries.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHSpecialSeries.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHSpecialSeries = function($__super) {
-    function MHSpecialSeries() {
-      $traceurRuntime.superConstructor(MHSpecialSeries).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHSpecialSeries, {}, {get mhidPrefix() {
-        return 'mhsps';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
-    MHObject.registerConstructor(MHSpecialSeries, 'MHSpecialSeries');
-  })();
-  return {get MHSpecialSeries() {
-      return MHSpecialSeries;
-    }};
-});
-System.registerModule("models/media/MHTrack.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHTrack.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHTrack = function($__super) {
+
+  // MediaHound Track Object
+  var MHTrack = (function (_MHMedia) {
+    babelHelpers.inherits(MHTrack, _MHMedia);
+
     function MHTrack() {
-      $traceurRuntime.superConstructor(MHTrack).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHTrack);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHTrack).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHTrack, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHTrack, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhsng';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHTrack;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHTrack, 'MHTrack');
   })();
-  return {get MHTrack() {
-      return MHTrack;
-    }};
-});
-System.registerModule("models/media/MHTrailer.js", [], function() {
-  "use strict";
-  var __moduleName = "models/media/MHTrailer.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHTrailer = function($__super) {
-    function MHTrailer() {
-      $traceurRuntime.superConstructor(MHTrailer).apply(this, arguments);
+
+  // MediaHound Special Media Object
+  // TV Special is the most common use case
+  var MHSpecial = (function (_MHMedia) {
+    babelHelpers.inherits(MHSpecial, _MHMedia);
+
+    function MHSpecial() {
+      babelHelpers.classCallCheck(this, MHSpecial);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHSpecial).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHTrailer, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHSpecial, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhspc';
+      }
+    }]);
+    return MHSpecial;
+  })(MHMedia);
+
+  (function () {
+    MHObject.registerConstructor(MHSpecial, 'MHSpecial');
+  })();
+
+  // MediaHound Special Series Object
+  var MHSpecialSeries = (function (_MHMedia) {
+    babelHelpers.inherits(MHSpecialSeries, _MHMedia);
+
+    function MHSpecialSeries() {
+      babelHelpers.classCallCheck(this, MHSpecialSeries);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHSpecialSeries).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHSpecialSeries, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhsps';
+      }
+    }]);
+    return MHSpecialSeries;
+  })(MHMedia);
+
+  (function () {
+    MHObject.registerConstructor(MHSpecialSeries, 'MHSpecialSeries');
+  })();
+
+  // MediaHound Trailer Object
+  var MHTrailer = (function (_MHMedia) {
+    babelHelpers.inherits(MHTrailer, _MHMedia);
+
+    function MHTrailer() {
+      babelHelpers.classCallCheck(this, MHTrailer);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHTrailer).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHTrailer, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhtrl';
-      }}, $__super);
-  }(MHMedia);
-  (function() {
+      }
+    }]);
+    return MHTrailer;
+  })(MHMedia);
+
+  (function () {
     MHObject.registerConstructor(MHTrailer, 'MHTrailer');
   })();
-  return {get MHTrailer() {
-      return MHTrailer;
-    }};
-});
-System.registerModule("models/source/MHSource.js", [], function() {
-  "use strict";
-  var __moduleName = "models/source/MHSource.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHSourceMetadata = System.get("models/meta/MHMetadata.js").MHSourceMetadata;
-  var MHSource = function($__super) {
-    function MHSource() {
-      $traceurRuntime.superConstructor(MHSource).apply(this, arguments);
+
+  /**
+   * @classdesc Mediahound Collection Object (MHCollection) inherits from MHObject
+   */
+  var MHCollection = (function (_MHObject) {
+    babelHelpers.inherits(MHCollection, _MHObject);
+
+    function MHCollection() {
+      babelHelpers.classCallCheck(this, MHCollection);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHCollection).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHSource, {get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHSource.prototype, "jsonProperties"), {
-          metadata: MHSourceMetadata,
-          subscriptions: [{mapper: MHObject.create}]
+
+    babelHelpers.createClass(MHCollection, [{
+      key: 'editMetaData',
+
+      /**
+      * @param {string} name - the name of the new collection for the currently logged in user.
+      * @returns {Promise<MHCollection>} - a Promise that resolves to the newly created MHCollection
+      * @static
+      */
+      value: function editMetaData(name, description) {
+        var path = this.subendpoint('update'),
+            data = {};
+
+        if (description) {
+          data = {
+            "name": name,
+            "description": description
+          };
+        } else if (name) {
+          data = { "name": name };
+        }
+
+        return houndRequest({
+          method: 'PUT',
+          endpoint: path,
+          data: data
+        }).then(function (response) {
+          return MHObject.fetchByMhid(response.metadata.mhid);
+        }).then(function (newCollection) {
+          if (MHLoginSession.openSession) {
+            MHLoginSession.currentUser.fetchOwnedCollections("full", 12, true);
+          }
+          return newCollection;
         });
-      }}, {
-      get rootEndpoint() {
-        return 'graph/source';
-      },
-      get mhidPrefix() {
-        return 'mhsrc';
-      },
-      fetchAllSources: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : "full";
-        var size = arguments[1] !== (void 0) ? arguments[1] : 100;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
-        var path = this.rootSubendpoint('all');
-        return this.fetchRootPagedEndpoint(path, {}, view, size, force);
       }
-    }, $__super);
-  }(MHObject);
-  (function() {
-    MHObject.registerConstructor(MHSource, 'MHSource');
-  })();
-  return {get MHSource() {
-      return MHSource;
-    }};
-});
-System.registerModule("models/source/MHSubscription.js", [], function() {
-  "use strict";
-  var __moduleName = "models/source/MHSubscription.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHSubscriptionMetadata = System.get("models/meta/MHMetadata.js").MHSubscriptionMetadata;
-  var MHSubscription = function($__super) {
-    function MHSubscription() {
-      $traceurRuntime.superConstructor(MHSubscription).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHSubscription, {get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHSubscription.prototype, "jsonProperties"), {metadata: MHSubscriptionMetadata});
-      }}, {
-      get mhidPrefix() {
-        return 'mhsub';
-      },
-      get rootEndpoint() {
-        return 'graph/subscription';
+      /**
+       * @param {MHMedia} - a MHMedia object to add to this collection
+       * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
+       */
+
+    }, {
+      key: 'addContent',
+      value: function addContent(content) {
+        return this.addContents([content]);
       }
-    }, $__super);
-  }(MHObject);
-  (function() {
-    MHObject.registerConstructor(MHSubscription, 'MHSubscription');
-  })();
-  return {get MHSubscription() {
-      return MHSubscription;
-    }};
-});
-System.registerModule("models/trait/MHTrait.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHTrait.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTraitMetadata = System.get("models/meta/MHMetadata.js").MHTraitMetadata;
-  var MHTrait = function($__super) {
-    function MHTrait() {
-      $traceurRuntime.superConstructor(MHTrait).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHTrait, {
-      get jsonProperties() {
-        return Object.assign({}, $traceurRuntime.superGet(this, MHTrait.prototype, "jsonProperties"), {metadata: MHTraitMetadata});
-      },
-      fetchContent: function() {
-        var view = arguments[0] !== (void 0) ? arguments[0] : 'full';
-        var size = arguments[1] !== (void 0) ? arguments[1] : 12;
-        var force = arguments[2] !== (void 0) ? arguments[2] : false;
+
+      /**
+       * @param {Array<MHMedia>} - an Array of MHMedia objects to add to this collection
+       * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
+       */
+
+    }, {
+      key: 'addContents',
+      value: function addContents(contents) {
+        return this.changeContents(contents, 'add');
+      }
+
+      /**
+       * @param {MHMedia} - a MHMedia object to remove from this collection
+       * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
+       */
+
+    }, {
+      key: 'removeContent',
+      value: function removeContent(content) {
+        return this.removeContents([content]);
+      }
+
+      /**
+       * @param {Array<MHMedia>} - an Array of MHMedia objects to remove from this collection
+       * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
+       */
+
+    }, {
+      key: 'removeContents',
+      value: function removeContents(contents) {
+        return this.changeContents(contents, 'remove');
+      }
+
+      /**
+       * @private
+       * @param {Array<MHMedia>} - an Array of MHMedia objects to add or remove from this collection
+       * @param {string} sub - the subendpoint string, 'add' or 'remove'
+       * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
+       */
+
+    }, {
+      key: 'changeContents',
+      value: function changeContents(contents, sub) {
+        var _this2 = this;
+
+        if (!Array.isArray(contents)) {
+          throw new TypeError('Contents must be an array in changeContents');
+        }
+        if (typeof sub !== 'string' || sub !== 'add' && sub !== 'remove') {
+          throw new TypeError('Subendpoint must be add or remove');
+        }
+
+        var path = this.subendpoint(sub),
+            mhids = contents.map(function (v) {
+          if (v instanceof MHObject) {
+            if (!(v instanceof MHAction)) {
+              return v.mhid;
+            } else {
+              console.error('MHActions including like, favorite, create, and post cannot be collected. Please resubmit with actual content.');
+            }
+          } else if (typeof v === 'string' && MHObject.prefixes.indexOf(MHObject.getPrefixFromMhid(v)) > -1) {
+            // TODO double check this if statement
+            return v;
+          }
+          return null;
+        }).filter(function (v) {
+          return v !== null;
+        });
+
+        // invalidate mixlistPromise
+        this.mixlistPromise = null;
+        if (mhids.length > -1) {
+
+          log('content array to be submitted: ', mhids);
+
+          return this.content = houndRequest({
+            method: 'PUT',
+            endpoint: path,
+            data: {
+              'content': mhids
+            }
+          }).catch((function (err) {
+            _this2.content = null;throw err;
+          }).bind(this)).then(function (response) {
+            // fetch social for original passed in mhobjs
+            contents.forEach(function (v) {
+              return typeof v.fetchSocial === 'function' && v.fetchSocial(true);
+            });
+            return response;
+          });
+        } else {
+          console.error('To add or remove content from a Collection the content array must include at least one MHObject');
+        }
+      }
+
+      /**
+       * @param {boolean} force - whether to force a call to the server instead of using the cached ownersPromise
+       * @returns {Promise} - a promise that resolves to a list of mhids for the owners of this MHCollection
+       */
+
+    }, {
+      key: 'fetchOwners',
+      value: function fetchOwners() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+        var path = this.subendpoint('owners');
+        return this.fetchPagedEndpoint(path, view, size, force);
+      }
+    }, {
+      key: 'fetchContent',
+      value: function fetchContent() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         var path = this.subendpoint('content');
         return this.fetchPagedEndpoint(path, view, size, force);
       }
-    }, {get rootEndpoint() {
+
+      /**
+       * @param {boolean} force - whether to force a call to the server instead of using the cached mixlistPromise
+       * @returns {Promise} - a promise that resolves to the list of mixlist content for this MHCollection
+       */
+
+    }, {
+      key: 'fetchMixlist',
+      value: function fetchMixlist() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 20 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+        var path = this.subendpoint('mixlist');
+        return this.fetchPagedEndpoint(path, view, size, force);
+      }
+    }, {
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHCollection.prototype), 'jsonProperties', this), {
+          metadata: MHCollectionMetadata,
+          firstContentImage: { mapper: MHObject.create },
+          primaryOwner: { mapper: MHObject.create }
+        });
+      }
+
+      // Static Mixlist enums
+
+    }], [{
+      key: 'createWithName',
+
+      /**
+       * @param {string} name - the name of the new collection for the currently logged in user.
+       * @returns {Promise<MHCollection>} - a Promise that resolves to the newly created MHCollection
+       * @static
+       */
+      value: function createWithName(name, description) {
+        var path = this.rootSubendpoint('new');
+        var data = {};
+
+        if (name) {
+          data.name = name;
+        }
+        if (description) {
+          data.description = description;
+        }
+
+        return houndRequest({
+          method: 'POST',
+          endpoint: path,
+          data: data
+        }).then(function (response) {
+          return MHObject.fetchByMhid(response.metadata.mhid);
+        }).then(function (newCollection) {
+          if (MHLoginSession.openSession) {
+            MHLoginSession.currentUser.fetchOwnedCollections("full", 12, true);
+          }
+          return newCollection;
+        });
+      }
+    }, {
+      key: 'MIXLIST_TYPE_NONE',
+      get: function get() {
+        return 'none';
+      }
+    }, {
+      key: 'MIXLIST_TYPE_PARTIAL',
+      get: function get() {
+        return 'partial';
+      }
+    }, {
+      key: 'MIXLIST_TYPE_FULL',
+      get: function get() {
+        return 'full';
+      }
+    }, {
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhcol';
+      }
+    }, {
+      key: 'rootEndpoint',
+      get: function get() {
+        return 'graph/collection';
+      }
+    }]);
+    return MHCollection;
+  })(MHObject);
+
+  (function () {
+    MHObject.registerConstructor(MHCollection, 'MHCollection');
+  })();
+
+  var MHImage = (function (_MHObject) {
+    babelHelpers.inherits(MHImage, _MHObject);
+
+    function MHImage() {
+      babelHelpers.classCallCheck(this, MHImage);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHImage).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHImage, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHImage.prototype), 'jsonProperties', this), {
+          metadata: MHImageMetadata
+        });
+      }
+    }], [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhimg';
+      }
+    }, {
+      key: 'rootEndpoint',
+      get: function get() {
+        return 'graph/image';
+      }
+    }]);
+    return MHImage;
+  })(MHObject);
+
+  (function () {
+    MHObject.registerConstructor(MHImage, 'MHImage');
+  })();
+
+  var MHPagingInfo = (function () {
+    function MHPagingInfo(args) {
+      babelHelpers.classCallCheck(this, MHPagingInfo);
+
+      jsonCreateWithArgs(args, this);
+    }
+
+    babelHelpers.createClass(MHPagingInfo, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return {
+          next: String
+        };
+      }
+    }]);
+    return MHPagingInfo;
+  })();
+
+  var MHPagedResponse = (function () {
+    function MHPagedResponse(args) {
+      babelHelpers.classCallCheck(this, MHPagedResponse);
+
+      this.cachedNextResponse = null;
+      this.fetchNextOperation = null;
+
+      jsonCreateWithArgs(args, this);
+    }
+
+    babelHelpers.createClass(MHPagedResponse, [{
+      key: 'fetchNext',
+      value: function fetchNext() {
+        var _this = this;
+
+        var cachedResponse = this.cachedNextResponse;
+        if (cachedResponse) {
+          return new Promise(function (resolve) {
+            resolve(cachedResponse);
+          });
+        }
+
+        return this.fetchNextOperation(this.pagingInfo.next).then(function (response) {
+          _this.cachedNextResponse = response;
+          return response;
+        });
+      }
+    }, {
+      key: 'jsonProperties',
+      get: function get() {
+        return {
+          content: [MHRelationalPair],
+          pagingInfo: MHPagingInfo
+        };
+      }
+    }, {
+      key: 'hasMorePages',
+      get: function get() {
+        return this.pagingInfo.next !== undefined && this.pagingInfo.next !== null;
+      }
+    }]);
+    return MHPagedResponse;
+  })();
+
+  var MHTrait = (function (_MHObject) {
+    babelHelpers.inherits(MHTrait, _MHObject);
+
+    function MHTrait() {
+      babelHelpers.classCallCheck(this, MHTrait);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHTrait).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHTrait, [{
+      key: 'fetchContent',
+      value: function fetchContent() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+        var path = this.subendpoint('content');
+        return this.fetchPagedEndpoint(path, view, size, force);
+      }
+    }, {
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHTrait.prototype), 'jsonProperties', this), {
+          metadata: MHTraitMetadata
+        });
+      }
+    }], [{
+      key: 'rootEndpoint',
+      get: function get() {
         return 'graph/trait';
-      }}, $__super);
-  }(MHObject);
-  return {get MHTrait() {
-      return MHTrait;
-    }};
-});
-System.registerModule("models/trait/MHAchievement.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHAchievement.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHAchievement = function($__super) {
-    function MHAchievement() {
-      $traceurRuntime.superConstructor(MHAchievement).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHAchievement, {}, {get mhidPrefix() {
-        return 'mhach';
-      }}, $__super);
-  }(MHTrait);
-  (function() {
-    MHObject.registerConstructor(MHAchievement, 'MHAchievement');
-  })();
-  return {get MHAchievement() {
-      return MHAchievement;
-    }};
-});
-System.registerModule("models/trait/MHAudience.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHAudience.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHAudience = function($__super) {
-    function MHAudience() {
-      $traceurRuntime.superConstructor(MHAudience).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHAudience, {}, {get mhidPrefix() {
-        return 'mhaud';
-      }}, $__super);
-  }(MHTrait);
-  (function() {
-    MHObject.registerConstructor(MHAudience, 'MHAudience');
-  })();
-  return {get MHAudience() {
-      return MHAudience;
-    }};
-});
-System.registerModule("models/trait/MHEra.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHEra.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHEra = function($__super) {
-    function MHEra() {
-      $traceurRuntime.superConstructor(MHEra).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHEra, {}, {get mhidPrefix() {
-        return 'mhera';
-      }}, $__super);
-  }(MHTrait);
-  (function() {
-    MHObject.registerConstructor(MHEra, 'MHEra');
-  })();
-  return {get MHEra() {
-      return MHEra;
-    }};
-});
-System.registerModule("models/trait/MHFlag.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHFlag.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHFlag = function($__super) {
-    function MHFlag() {
-      $traceurRuntime.superConstructor(MHFlag).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHFlag, {}, {get mhidPrefix() {
-        return 'mhflg';
-      }}, $__super);
-  }(MHTrait);
-  (function() {
-    MHObject.registerConstructor(MHFlag, 'MHFlag');
-  })();
-  return {get MHFlag() {
-      return MHFlag;
-    }};
-});
-System.registerModule("models/trait/MHGenre.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHGenre.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHGenre = function($__super) {
+      }
+    }]);
+    return MHTrait;
+  })(MHObject);
+
+  // MediaHound Trait Object
+  var MHGenre = (function (_MHTrait) {
+    babelHelpers.inherits(MHGenre, _MHTrait);
+
     function MHGenre() {
-      $traceurRuntime.superConstructor(MHGenre).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHGenre);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHGenre).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHGenre, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHGenre, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhgnr';
-      }}, $__super);
-  }(MHTrait);
-  (function() {
+      }
+    }]);
+    return MHGenre;
+  })(MHTrait);
+
+  (function () {
     MHObject.registerConstructor(MHGenre, 'MHGenre');
   })();
-  return {get MHGenre() {
-      return MHGenre;
-    }};
-});
-System.registerModule("models/trait/MHGraphGenre.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHGraphGenre.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHGraphGenre = function($__super) {
-    function MHGraphGenre() {
-      $traceurRuntime.superConstructor(MHGraphGenre).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHGraphGenre, {}, {get mhidPrefix() {
-        return 'mhgrg';
-      }}, $__super);
-  }(MHTrait);
-  (function() {
-    MHObject.registerConstructor(MHGraphGenre, 'MHGraphGenre');
-  })();
-  return {get MHGraphGenre() {
-      return MHGraphGenre;
-    }};
-});
-System.registerModule("models/trait/MHMaterialSource.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHMaterialSource.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHMaterialSource = function($__super) {
-    function MHMaterialSource() {
-      $traceurRuntime.superConstructor(MHMaterialSource).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHMaterialSource, {}, {get mhidPrefix() {
-        return 'mhmts';
-      }}, $__super);
-  }(MHTrait);
-  (function() {
-    MHObject.registerConstructor(MHMaterialSource, 'MHMaterialSource');
-  })();
-  return {get MHMaterialSource() {
-      return MHMaterialSource;
-    }};
-});
-System.registerModule("models/trait/MHMood.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHMood.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHMood = function($__super) {
-    function MHMood() {
-      $traceurRuntime.superConstructor(MHMood).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHMood, {}, {get mhidPrefix() {
-        return 'mhmod';
-      }}, $__super);
-  }(MHTrait);
-  (function() {
-    MHObject.registerConstructor(MHMood, 'MHMood');
-  })();
-  return {get MHMood() {
-      return MHMood;
-    }};
-});
-System.registerModule("models/trait/MHQuality.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHQuality.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHQuality = function($__super) {
-    function MHQuality() {
-      $traceurRuntime.superConstructor(MHQuality).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHQuality, {}, {get mhidPrefix() {
-        return 'mhqlt';
-      }}, $__super);
-  }(MHTrait);
-  (function() {
-    MHObject.registerConstructor(MHQuality, 'MHQuality');
-  })();
-  return {get MHQuality() {
-      return MHQuality;
-    }};
-});
-System.registerModule("models/trait/MHStoryElement.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHStoryElement.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHStoryElement = function($__super) {
-    function MHStoryElement() {
-      $traceurRuntime.superConstructor(MHStoryElement).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHStoryElement, {}, {get mhidPrefix() {
-        return 'mhstr';
-      }}, $__super);
-  }(MHTrait);
-  (function() {
-    MHObject.registerConstructor(MHStoryElement, 'MHStoryElement');
-  })();
-  return {get MHStoryElement() {
-      return MHStoryElement;
-    }};
-});
-System.registerModule("models/trait/MHStyleElement.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHStyleElement.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHStyleElement = function($__super) {
-    function MHStyleElement() {
-      $traceurRuntime.superConstructor(MHStyleElement).apply(this, arguments);
-    }
-    return ($traceurRuntime.createClass)(MHStyleElement, {}, {get mhidPrefix() {
-        return 'mhsty';
-      }}, $__super);
-  }(MHTrait);
-  (function() {
-    MHObject.registerConstructor(MHStyleElement, 'MHStyleElement');
-  })();
-  return {get MHStyleElement() {
-      return MHStyleElement;
-    }};
-});
-System.registerModule("models/trait/MHSubGenre.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHSubGenre.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHSubGenre = function($__super) {
+
+  // MediaHound Trait Object
+  var MHSubGenre = (function (_MHTrait) {
+    babelHelpers.inherits(MHSubGenre, _MHTrait);
+
     function MHSubGenre() {
-      $traceurRuntime.superConstructor(MHSubGenre).apply(this, arguments);
+      babelHelpers.classCallCheck(this, MHSubGenre);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHSubGenre).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHSubGenre, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHSubGenre, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhsgn';
-      }}, $__super);
-  }(MHTrait);
-  (function() {
+      }
+    }]);
+    return MHSubGenre;
+  })(MHTrait);
+
+  (function () {
     MHObject.registerConstructor(MHSubGenre, 'MHSubGenre');
   })();
-  return {get MHSubGenre() {
-      return MHSubGenre;
-    }};
-});
-System.registerModule("models/trait/MHTheme.js", [], function() {
-  "use strict";
-  var __moduleName = "models/trait/MHTheme.js";
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHTheme = function($__super) {
-    function MHTheme() {
-      $traceurRuntime.superConstructor(MHTheme).apply(this, arguments);
+
+  // MediaHound Trait Object
+  var MHMood = (function (_MHTrait) {
+    babelHelpers.inherits(MHMood, _MHTrait);
+
+    function MHMood() {
+      babelHelpers.classCallCheck(this, MHMood);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHMood).apply(this, arguments));
     }
-    return ($traceurRuntime.createClass)(MHTheme, {}, {get mhidPrefix() {
+
+    babelHelpers.createClass(MHMood, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhmod';
+      }
+    }]);
+    return MHMood;
+  })(MHTrait);
+
+  (function () {
+    MHObject.registerConstructor(MHMood, 'MHMood');
+  })();
+
+  // MediaHound Trait Object
+  var MHQuality = (function (_MHTrait) {
+    babelHelpers.inherits(MHQuality, _MHTrait);
+
+    function MHQuality() {
+      babelHelpers.classCallCheck(this, MHQuality);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHQuality).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHQuality, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhqlt';
+      }
+    }]);
+    return MHQuality;
+  })(MHTrait);
+
+  (function () {
+    MHObject.registerConstructor(MHQuality, 'MHQuality');
+  })();
+
+  // MediaHound Trait Object
+  var MHStyleElement = (function (_MHTrait) {
+    babelHelpers.inherits(MHStyleElement, _MHTrait);
+
+    function MHStyleElement() {
+      babelHelpers.classCallCheck(this, MHStyleElement);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHStyleElement).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHStyleElement, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhsty';
+      }
+    }]);
+    return MHStyleElement;
+  })(MHTrait);
+
+  (function () {
+    MHObject.registerConstructor(MHStyleElement, 'MHStyleElement');
+  })();
+
+  // MediaHound Trait Object
+  var MHStoryElement = (function (_MHTrait) {
+    babelHelpers.inherits(MHStoryElement, _MHTrait);
+
+    function MHStoryElement() {
+      babelHelpers.classCallCheck(this, MHStoryElement);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHStoryElement).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHStoryElement, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhstr';
+      }
+    }]);
+    return MHStoryElement;
+  })(MHTrait);
+
+  (function () {
+    MHObject.registerConstructor(MHStoryElement, 'MHStoryElement');
+  })();
+
+  // MediaHound Trait Object
+  var MHMaterialSource = (function (_MHTrait) {
+    babelHelpers.inherits(MHMaterialSource, _MHTrait);
+
+    function MHMaterialSource() {
+      babelHelpers.classCallCheck(this, MHMaterialSource);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHMaterialSource).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHMaterialSource, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhmts';
+      }
+    }]);
+    return MHMaterialSource;
+  })(MHTrait);
+
+  (function () {
+    MHObject.registerConstructor(MHMaterialSource, 'MHMaterialSource');
+  })();
+
+  // MediaHound Trait Object
+  var MHTheme = (function (_MHTrait) {
+    babelHelpers.inherits(MHTheme, _MHTrait);
+
+    function MHTheme() {
+      babelHelpers.classCallCheck(this, MHTheme);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHTheme).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHTheme, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
         return 'mhthm';
-      }}, $__super);
-  }(MHTrait);
-  (function() {
+      }
+    }]);
+    return MHTheme;
+  })(MHTrait);
+
+  (function () {
     MHObject.registerConstructor(MHTheme, 'MHTheme');
   })();
-  return {get MHTheme() {
-      return MHTheme;
-    }};
-});
-System.registerModule("search/MHSearch.js", [], function() {
-  "use strict";
-  var __moduleName = "search/MHSearch.js";
-  var houndRequest = System.get("request/hound-request.js").houndRequest;
-  var MHPagedResponse = System.get("models/container/MHPagedResponse.js").MHPagedResponse;
-  var MHSearch = function() {
-    function MHSearch() {}
-    return ($traceurRuntime.createClass)(MHSearch, {}, {
-      fetchResultsForSearchTerm: function(searchTerm, scopes) {
-        var size = arguments[2] !== (void 0) ? arguments[2] : 12;
-        var next = arguments[3] !== (void 0) ? arguments[3] : null;
+
+  // MediaHound Trait Object
+  var MHAchievement = (function (_MHTrait) {
+    babelHelpers.inherits(MHAchievement, _MHTrait);
+
+    function MHAchievement() {
+      babelHelpers.classCallCheck(this, MHAchievement);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHAchievement).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHAchievement, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhach';
+      }
+    }]);
+    return MHAchievement;
+  })(MHTrait);
+
+  (function () {
+    MHObject.registerConstructor(MHAchievement, 'MHAchievement');
+  })();
+
+  // MediaHound Trait Object
+  var MHEra = (function (_MHTrait) {
+    babelHelpers.inherits(MHEra, _MHTrait);
+
+    function MHEra() {
+      babelHelpers.classCallCheck(this, MHEra);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHEra).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHEra, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhera';
+      }
+    }]);
+    return MHEra;
+  })(MHTrait);
+
+  (function () {
+    MHObject.registerConstructor(MHEra, 'MHEra');
+  })();
+
+  // MediaHound Trait Object
+  var MHAudience = (function (_MHTrait) {
+    babelHelpers.inherits(MHAudience, _MHTrait);
+
+    function MHAudience() {
+      babelHelpers.classCallCheck(this, MHAudience);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHAudience).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHAudience, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhaud';
+      }
+    }]);
+    return MHAudience;
+  })(MHTrait);
+
+  (function () {
+    MHObject.registerConstructor(MHAudience, 'MHAudience');
+  })();
+
+  // MediaHound Trait Object
+  var MHFlag = (function (_MHTrait) {
+    babelHelpers.inherits(MHFlag, _MHTrait);
+
+    function MHFlag() {
+      babelHelpers.classCallCheck(this, MHFlag);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHFlag).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHFlag, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhflg';
+      }
+    }]);
+    return MHFlag;
+  })(MHTrait);
+
+  (function () {
+    MHObject.registerConstructor(MHFlag, 'MHFlag');
+  })();
+
+  // MediaHound Trait Object
+  var MHGraphGenre = (function (_MHTrait) {
+    babelHelpers.inherits(MHGraphGenre, _MHTrait);
+
+    function MHGraphGenre() {
+      babelHelpers.classCallCheck(this, MHGraphGenre);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHGraphGenre).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHGraphGenre, null, [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhgrg';
+      }
+    }]);
+    return MHGraphGenre;
+  })(MHTrait);
+
+  (function () {
+    MHObject.registerConstructor(MHGraphGenre, 'MHGraphGenre');
+  })();
+
+  // MediaHound Contributor Object
+  var MHContributor = (function (_MHObject) {
+    babelHelpers.inherits(MHContributor, _MHObject);
+
+    function MHContributor() {
+      babelHelpers.classCallCheck(this, MHContributor);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHContributor).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHContributor, [{
+      key: 'fetchMedia',
+
+      /*
+       * TODO DocJS
+       */
+      value: function fetchMedia() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? 'full' : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 12 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+        var path = this.subendpoint('media');
+        return this.fetchPagedEndpoint(path, view, size, force);
+      }
+    }, {
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHContributor.prototype), 'jsonProperties', this), {
+          metadata: MHContributorMetadata
+        });
+      }
+
+      /*
+       * TODO DocJS
+       */
+
+    }, {
+      key: 'isGroup',
+      get: function get() {
+        return !this.isIndividual;
+      }
+
+      /*
+       * TODO DocJS
+       */
+
+    }, {
+      key: 'isFictional',
+      get: function get() {
+        return !this.isReal;
+      }
+    }], [{
+      key: 'rootEndpoint',
+      get: function get() {
+        return 'graph/contributor';
+      }
+    }]);
+    return MHContributor;
+  })(MHObject);
+
+  // MediaHound Contributor Object
+  var MHRealIndividualContributor = (function (_MHContributor) {
+    babelHelpers.inherits(MHRealIndividualContributor, _MHContributor);
+
+    function MHRealIndividualContributor() {
+      babelHelpers.classCallCheck(this, MHRealIndividualContributor);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHRealIndividualContributor).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHRealIndividualContributor, [{
+      key: 'isIndividual',
+      get: function get() {
+        return true;
+      }
+    }, {
+      key: 'isReal',
+      get: function get() {
+        return true;
+      }
+    }], [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhric';
+      }
+    }]);
+    return MHRealIndividualContributor;
+  })(MHContributor);
+
+  (function () {
+    MHObject.registerConstructor(MHRealIndividualContributor, 'MHRealIndividualContributor');
+  })();
+
+  // MediaHound Contributor Object
+  var MHRealGroupContributor = (function (_MHContributor) {
+    babelHelpers.inherits(MHRealGroupContributor, _MHContributor);
+
+    function MHRealGroupContributor() {
+      babelHelpers.classCallCheck(this, MHRealGroupContributor);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHRealGroupContributor).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHRealGroupContributor, [{
+      key: 'isIndividual',
+      get: function get() {
+        return false;
+      }
+    }, {
+      key: 'isReal',
+      get: function get() {
+        return true;
+      }
+    }], [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhrgc';
+      }
+    }]);
+    return MHRealGroupContributor;
+  })(MHContributor);
+
+  (function () {
+    MHObject.registerConstructor(MHRealGroupContributor, 'MHRealGroupContributor');
+  })();
+
+  // MediaHound Contributor Object
+  var MHFictionalIndividualContributor = (function (_MHContributor) {
+    babelHelpers.inherits(MHFictionalIndividualContributor, _MHContributor);
+
+    function MHFictionalIndividualContributor() {
+      babelHelpers.classCallCheck(this, MHFictionalIndividualContributor);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHFictionalIndividualContributor).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHFictionalIndividualContributor, [{
+      key: 'isIndividual',
+      get: function get() {
+        return true;
+      }
+    }, {
+      key: 'isReal',
+      get: function get() {
+        return false;
+      }
+    }], [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhfic';
+      }
+    }]);
+    return MHFictionalIndividualContributor;
+  })(MHContributor);
+
+  (function () {
+    MHObject.registerConstructor(MHFictionalIndividualContributor, 'MHFictionalIndividualContributor');
+  })();
+
+  // MediaHound Contributor Object
+  var MHFictionalGroupContributor = (function (_MHContributor) {
+    babelHelpers.inherits(MHFictionalGroupContributor, _MHContributor);
+
+    function MHFictionalGroupContributor() {
+      babelHelpers.classCallCheck(this, MHFictionalGroupContributor);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHFictionalGroupContributor).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHFictionalGroupContributor, [{
+      key: 'isIndividual',
+      get: function get() {
+        return false;
+      }
+    }, {
+      key: 'isReal',
+      get: function get() {
+        return false;
+      }
+    }], [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhfgc';
+      }
+    }]);
+    return MHFictionalGroupContributor;
+  })(MHContributor);
+
+  (function () {
+    MHObject.registerConstructor(MHFictionalGroupContributor, 'MHFictionalGroupContributor');
+  })();
+
+  // MediaHound Source Master Object
+  var MHSource = (function (_MHObject) {
+    babelHelpers.inherits(MHSource, _MHObject);
+
+    function MHSource() {
+      babelHelpers.classCallCheck(this, MHSource);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHSource).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHSource, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHSource.prototype), 'jsonProperties', this), {
+          metadata: MHSourceMetadata,
+          subscriptions: [{ mapper: MHObject.create }] // TODO: It would be nicer to be able to just say [MHSubscription]
+        });
+      }
+    }], [{
+      key: 'fetchAllSources',
+      value: function fetchAllSources() {
+        var view = arguments.length <= 0 || arguments[0] === undefined ? "full" : arguments[0];
+        var size = arguments.length <= 1 || arguments[1] === undefined ? 100 : arguments[1];
+        var force = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+        var path = this.rootSubendpoint('all');
+        return this.fetchRootPagedEndpoint(path, {}, view, size, force);
+      }
+    }, {
+      key: 'rootEndpoint',
+      get: function get() {
+        return 'graph/source';
+      }
+    }, {
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhsrc';
+      }
+    }]);
+    return MHSource;
+  })(MHObject);
+
+  (function () {
+    MHObject.registerConstructor(MHSource, 'MHSource');
+  })();
+
+  // MediaHound Subscription Object
+  var MHSubscription = (function (_MHObject) {
+    babelHelpers.inherits(MHSubscription, _MHObject);
+
+    function MHSubscription() {
+      babelHelpers.classCallCheck(this, MHSubscription);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(MHSubscription).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(MHSubscription, [{
+      key: 'jsonProperties',
+      get: function get() {
+        return Object.assign({}, babelHelpers.get(Object.getPrototypeOf(MHSubscription.prototype), 'jsonProperties', this), {
+          metadata: MHSubscriptionMetadata
+        });
+      }
+    }], [{
+      key: 'mhidPrefix',
+      get: function get() {
+        return 'mhsub';
+      }
+    }, {
+      key: 'rootEndpoint',
+      get: function get() {
+        return 'graph/subscription';
+      }
+    }]);
+    return MHSubscription;
+  })(MHObject);
+
+  (function () {
+    MHObject.registerConstructor(MHSubscription, 'MHSubscription');
+  })();
+
+  var MHSearch = (function () {
+    function MHSearch() {
+      babelHelpers.classCallCheck(this, MHSearch);
+    }
+
+    babelHelpers.createClass(MHSearch, null, [{
+      key: 'fetchResultsForSearchTerm',
+      value: function fetchResultsForSearchTerm(searchTerm, scopes) {
+        var size = arguments.length <= 2 || arguments[2] === undefined ? 12 : arguments[2];
+        var next = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
         var path = 'search/all/' + houndRequest.extraEncode(searchTerm);
+
         var promise;
         if (next) {
           promise = houndRequest({
@@ -7424,150 +5613,112 @@ System.registerModule("search/MHSearch.js", [], function() {
             url: next
           });
         } else {
-          var params = {pageSize: size};
+          var params = {
+            pageSize: size
+          };
+
           if (Array.isArray(scopes) && scopes.indexOf(MHSearch.SCOPE_ALL) === -1) {
             params.types = scopes;
           }
+
           promise = houndRequest({
             method: 'GET',
             endpoint: path,
             params: params
           });
         }
-        return promise.then(function(response) {
-          var $__4 = this;
+
+        return promise.then(function (response) {
+          var _this = this;
+
           var pagedResponse = new MHPagedResponse(response);
-          pagedResponse.fetchNextOperation = (function(newNext) {
-            return $__4.fetchResultsForSearchTerm(searchTerm, scopes, size, newNext);
-          });
+
+          pagedResponse.fetchNextOperation = function (newNext) {
+            return _this.fetchResultsForSearchTerm(searchTerm, scopes, size, newNext);
+          };
+
           return pagedResponse;
         });
-      },
-      get SCOPE_ALL() {
+      }
+
+      // Static Search Scopes enums
+
+    }, {
+      key: 'SCOPE_ALL',
+      get: function get() {
         return 'all';
-      },
-      get SCOPE_MOVIE() {
+      }
+    }, {
+      key: 'SCOPE_MOVIE',
+      get: function get() {
         return 'movie';
-      },
-      get SCOPE_TRACK() {
+      }
+    }, {
+      key: 'SCOPE_TRACK',
+      get: function get() {
         return 'track';
-      },
-      get SCOPE_ALBUM() {
+      }
+    }, {
+      key: 'SCOPE_ALBUM',
+      get: function get() {
         return 'album';
-      },
-      get SCOPE_SHOWSERIES() {
+      }
+    }, {
+      key: 'SCOPE_SHOWSERIES',
+      get: function get() {
         return 'showseries';
-      },
-      get SCOPE_SHOWSEASON() {
+      }
+    }, {
+      key: 'SCOPE_SHOWSEASON',
+      get: function get() {
         return 'showseason';
-      },
-      get SCOPE_SHOWEPISODE() {
+      }
+    }, {
+      key: 'SCOPE_SHOWEPISODE',
+      get: function get() {
         return 'showepisode';
-      },
-      get SCOPE_BOOK() {
+      }
+    }, {
+      key: 'SCOPE_BOOK',
+      get: function get() {
         return 'book';
-      },
-      get SCOPE_GAME() {
+      }
+    }, {
+      key: 'SCOPE_GAME',
+      get: function get() {
         return 'game';
-      },
-      get SCOPE_COLLECTION() {
+      }
+    }, {
+      key: 'SCOPE_COLLECTION',
+      get: function get() {
         return 'collection';
-      },
-      get SCOPE_USER() {
+      }
+    }, {
+      key: 'SCOPE_USER',
+      get: function get() {
         return 'user';
-      },
-      get SCOPE_CONTRIBUTOR() {
+      }
+    }, {
+      key: 'SCOPE_CONTRIBUTOR',
+      get: function get() {
         return 'contributor';
       }
-    });
-  }();
-  return {get MHSearch() {
-      return MHSearch;
-    }};
-});
-System.registerModule("hound.js", [], function() {
-  "use strict";
-  var __moduleName = "hound.js";
-  var MHSDK = System.get("models/sdk/MHSDK.js").MHSDK;
-  var MHObject = System.get("models/base/MHObject.js").MHObject;
-  var MHAction = System.get("models/action/MHAction.js").MHAction;
-  var MHAdd = System.get("models/action/MHAdd.js").MHAdd;
-  var MHComment = System.get("models/action/MHComment.js").MHComment;
-  var MHCreate = System.get("models/action/MHCreate.js").MHCreate;
-  var MHLike = System.get("models/action/MHLike.js").MHLike;
-  var MHFollow = System.get("models/action/MHFollow.js").MHFollow;
-  var MHPost = System.get("models/action/MHPost.js").MHPost;
-  var MHHashtag = System.get("models/hashtag/MHHashtag.js").MHHashtag;
-  var MHUser = System.get("models/user/MHUser.js").MHUser;
-  var MHLoginSession = System.get("models/user/MHLoginSession.js").MHLoginSession;
-  var MHSocial = System.get("models/social/MHSocial.js").MHSocial;
-  var MHMedia = System.get("models/media/MHMedia.js").MHMedia;
-  var MHAlbum = System.get("models/media/MHAlbum.js").MHAlbum;
-  var MHAlbumSeries = System.get("models/media/MHAlbumSeries.js").MHAlbumSeries;
-  var MHAnthology = System.get("models/media/MHAnthology.js").MHAnthology;
-  var MHBook = System.get("models/media/MHBook.js").MHBook;
-  var MHBookSeries = System.get("models/media/MHBookSeries.js").MHBookSeries;
-  var MHComicBook = System.get("models/media/MHComicBook.js").MHComicBook;
-  var MHComicBookSeries = System.get("models/media/MHComicBookSeries.js").MHComicBookSeries;
-  var MHGame = System.get("models/media/MHGame.js").MHGame;
-  var MHGameSeries = System.get("models/media/MHGameSeries.js").MHGameSeries;
-  var MHGraphicNovel = System.get("models/media/MHGraphicNovel.js").MHGraphicNovel;
-  var MHGraphicNovelSeries = System.get("models/media/MHGraphicNovelSeries.js").MHGraphicNovelSeries;
-  var MHMovie = System.get("models/media/MHMovie.js").MHMovie;
-  var MHMovieSeries = System.get("models/media/MHMovieSeries.js").MHMovieSeries;
-  var MHMusicVideo = System.get("models/media/MHMusicVideo.js").MHMusicVideo;
-  var MHNovella = System.get("models/media/MHNovella.js").MHNovella;
-  var MHPeriodical = System.get("models/media/MHPeriodical.js").MHPeriodical;
-  var MHPeriodicalSeries = System.get("models/media/MHPeriodicalSeries.js").MHPeriodicalSeries;
-  var MHShowEpisode = System.get("models/media/MHShowEpisode.js").MHShowEpisode;
-  var MHShowSeason = System.get("models/media/MHShowSeason.js").MHShowSeason;
-  var MHShowSeries = System.get("models/media/MHShowSeries.js").MHShowSeries;
-  var MHTrack = System.get("models/media/MHTrack.js").MHTrack;
-  var MHSpecial = System.get("models/media/MHSpecial.js").MHSpecial;
-  var MHSpecialSeries = System.get("models/media/MHSpecialSeries.js").MHSpecialSeries;
-  var MHTrailer = System.get("models/media/MHTrailer.js").MHTrailer;
-  var MHCollection = System.get("models/collection/MHCollection.js").MHCollection;
-  var MHMetadata = System.get("models/meta/MHMetadata.js").MHMetadata;
-  var MHImage = System.get("models/image/MHImage.js").MHImage;
-  var MHContext = System.get("models/container/MHContext.js").MHContext;
-  var MHPagedResponse = System.get("models/container/MHPagedResponse.js").MHPagedResponse;
-  var MHRelationalPair = System.get("models/container/MHRelationalPair.js").MHRelationalPair;
-  var MHTrait = System.get("models/trait/MHTrait.js").MHTrait;
-  var MHGenre = System.get("models/trait/MHGenre.js").MHGenre;
-  var MHSubGenre = System.get("models/trait/MHSubGenre.js").MHSubGenre;
-  var MHMood = System.get("models/trait/MHMood.js").MHMood;
-  var MHQuality = System.get("models/trait/MHQuality.js").MHQuality;
-  var MHStyleElement = System.get("models/trait/MHStyleElement.js").MHStyleElement;
-  var MHStoryElement = System.get("models/trait/MHStoryElement.js").MHStoryElement;
-  var MHMaterialSource = System.get("models/trait/MHMaterialSource.js").MHMaterialSource;
-  var MHTheme = System.get("models/trait/MHTheme.js").MHTheme;
-  var MHAchievement = System.get("models/trait/MHAchievement.js").MHAchievement;
-  var MHEra = System.get("models/trait/MHEra.js").MHEra;
-  var MHAudience = System.get("models/trait/MHAudience.js").MHAudience;
-  var MHFlag = System.get("models/trait/MHFlag.js").MHFlag;
-  var MHGraphGenre = System.get("models/trait/MHGraphGenre.js").MHGraphGenre;
-  var MHContributor = System.get("models/contributor/MHContributor.js").MHContributor;
-  var MHRealIndividualContributor = System.get("models/contributor/MHRealIndividualContributor.js").MHRealIndividualContributor;
-  var MHRealGroupContributor = System.get("models/contributor/MHRealGroupContributor.js").MHRealGroupContributor;
-  var MHFictionalIndividualContributor = System.get("models/contributor/MHFictionalIndividualContributor.js").MHFictionalIndividualContributor;
-  var MHFictionalGroupContributor = System.get("models/contributor/MHFictionalGroupContributor.js").MHFictionalGroupContributor;
-  var MHSource = System.get("models/source/MHSource.js").MHSource;
-  var MHSubscription = System.get("models/source/MHSubscription.js").MHSubscription;
-  var MHSourceFormat = System.get("models/source/MHSourceFormat.js").MHSourceFormat;
-  var MHSourceMethod = System.get("models/source/MHSourceMethod.js").MHSourceMethod;
-  var MHSourceMedium = System.get("models/source/MHSourceMedium.js").MHSourceMedium;
-  var MHSearch = System.get("search/MHSearch.js").MHSearch;
-  delete MHObject.registerConstructor;
-  var $__default = {
+    }]);
+    return MHSearch;
+  })();
+
+  var hound = {
     get MHSDK() {
       return MHSDK;
     },
+
     get MHObject() {
       return MHObject;
     },
     get MHRelationalPair() {
       return MHRelationalPair;
     },
+
     get MHAction() {
       return MHAction;
     },
@@ -7592,15 +5743,18 @@ System.registerModule("hound.js", [], function() {
     get MHHashtag() {
       return MHHashtag;
     },
+
     get MHUser() {
       return MHUser;
     },
     get MHLoginSession() {
       return MHLoginSession;
     },
+
     get MHSocial() {
       return MHSocial;
     },
+
     get MHMedia() {
       return MHMedia;
     },
@@ -7676,18 +5830,22 @@ System.registerModule("hound.js", [], function() {
     get MHTrailer() {
       return MHTrailer;
     },
+
     get MHCollection() {
       return MHCollection;
     },
+
     get MHImage() {
       return MHImage;
     },
+
     get MHContext() {
       return MHContext;
     },
     get MHMetadata() {
       return MHMetadata;
     },
+
     get MHTrait() {
       return MHTrait;
     },
@@ -7730,6 +5888,7 @@ System.registerModule("hound.js", [], function() {
     get MHGraphGenre() {
       return MHGraphGenre;
     },
+
     get MHContributor() {
       return MHContributor;
     },
@@ -7745,6 +5904,7 @@ System.registerModule("hound.js", [], function() {
     get MHFictionalGroupContributor() {
       return MHFictionalGroupContributor;
     },
+
     get MHSource() {
       return MHSource;
     },
@@ -7760,12 +5920,12 @@ System.registerModule("hound.js", [], function() {
     get MHSourceMedium() {
       return MHSourceMedium;
     },
+
     get MHSearch() {
       return MHSearch;
     }
   };
-  return {get default() {
-      return $__default;
-    }};
-});
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') { module.exports = System.get("hound.js" + '').default; }
+
+  return hound;
+
+}));
