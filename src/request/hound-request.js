@@ -15,10 +15,20 @@ var extraEncode = promiseRequest.extraEncode,
     responseThen = function(response){
       if( !!response ){
         if( response.responseText != null && response.responseText !== ''){
-          return JSON.parse(response.responseText);
+          try {
+            return JSON.parse(response.responseText);
+          }
+          catch (e) {
+            return response.responseText;
+          }
         }
         if( response.response != null && typeof response.response === 'string' && response.response !== '' ){
-          return JSON.parse(response.response);
+          try {
+            return JSON.parse(response.response);
+          }
+          catch (e) {
+            return response.response;
+          }
         }
         return response.status;
       }
@@ -60,14 +70,16 @@ export var houndRequest = function(args){
   //  delete endpoint from args
   if( args.endpoint ){
     // houndOrigin defined in hound-origin.js before import, must be fully qualified domain name
-    args.url = MHSDK.origin + args.endpoint;
+    args.url = MHSDK.origin + MHSDK.apiVersion + '/' + args.endpoint;
     delete args.endpoint;
   }
 
   // Set the OAuth access token if the client has configured OAuth.
   if (MHSDK.MHAccessToken) {
     if (args.params) {
-      args.params.access_token = MHSDK.MHAccessToken;
+      if (!args.params.access_token) {
+        args.params.access_token = MHSDK.MHAccessToken;
+      }
     }
     else {
       args.params = {

@@ -25,6 +25,7 @@
     "url": "https://github.com/MediaHound/HoundJS.git"
   },
   "dependencies": {
+    "base-64": "^0.1.0",
     "xmlhttprequest": "^1.7.0",
     "xmlhttprequest-cookie": "=0.9.2"
   },

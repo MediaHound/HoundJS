@@ -3,6 +3,7 @@ import { log, warn, error } from '../internal/debug-helpers.js';
 
 import { MHObject, mhidLRU } from '../base/MHObject.js';
 import { MHUser } from './MHUser.js';
+import { MHSDK } from '../sdk/MHSDK.js';
 
 import { houndRequest } from '../../request/hound-request.js';
 
@@ -98,6 +99,36 @@ var restoreFromSessionStorage = function(){
 // MediaHound Login Session Singleton
 /** @class MHLoginSession */
 export class MHLoginSession {
+
+  static loginDialogURLWithRedirectURL(redirectUrl) {
+    return MHSDK.origin + MHSDK.apiVersion + `/security/oauth/authorize?client_id=${MHSDK.clientId}&client_secret=${MHSDK.clientSecret}&scope=public_profile&response_type=token&redirect_uri=${redirectUrl}`;
+  }
+
+  static loginWithAccessToken(accessToken) {
+    var path = MHUser.rootEndpoint + '/validateSession';
+
+    return houndRequest({
+        method: 'GET',
+        endpoint: path,
+        params: {
+          access_token: accessToken
+        },
+        withCredentials : true
+      })
+      .then(response => {
+        MHSDK._setUserAccessToken(accessToken);
+
+        const matches = response.match(/mhid=(.*?),/);
+        const mhid = matches[1];
+        return MHObject.fetchByMhid(mhid);
+      })
+      .then(user => {
+        loggedInUser = user;
+        // TODO: Event
+        // window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
+        return loggedInUser;
+      });
+  }
 
   /**
    * The Currently logged in MHUser object

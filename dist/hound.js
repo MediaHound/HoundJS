@@ -3530,9 +3530,16 @@ System.registerModule("models/sdk/MHSDK.js", [], function() {
   "use strict";
   var __moduleName = "models/sdk/MHSDK.js";
   var _MHAccessToken = null;
+  var _MHUserAccessToken = null;
   var _MHClientId = null;
   var _MHClientSecret = null;
-  var _houndOrigin = 'https://api-v11.mediahound.com/';
+  var _houndOrigin = 'https://api.mediahound.com/';
+  var _btoa;
+  if (typeof window !== 'undefined') {
+    _btoa = window.btoa;
+  } else if (typeof window === 'undefined') {
+    _btoa = require("base-64").encode;
+  }
   var MHSDK = function() {
     function MHSDK() {}
     return ($traceurRuntime.createClass)(MHSDK, {}, {
@@ -3546,22 +3553,41 @@ System.registerModule("models/sdk/MHSDK.js", [], function() {
       },
       refreshOAuthToken: function() {
         var houndRequest = System.get('request/hound-request.js').houndRequest;
+        var auth = _btoa(_MHClientId + ":" + _MHClientSecret);
         return houndRequest({
-          endpoint: 'cas/oauth2.0/accessToken',
-          params: {
+          method: 'POST',
+          useForms: true,
+          endpoint: 'security/oauth/token',
+          data: {
             client_id: _MHClientId,
             client_secret: _MHClientSecret,
             grant_type: 'client_credentials'
-          }
+          },
+          headers: {Authorization: ("Basic " + auth)}
         }).then(function(response) {
-          _MHAccessToken = response.accessToken;
+          _MHAccessToken = response.access_token;
         });
       },
       get MHAccessToken() {
+        if (_MHUserAccessToken) {
+          return _MHUserAccessToken;
+        }
         return _MHAccessToken;
+      },
+      get clientId() {
+        return _MHClientId;
+      },
+      get clientSecret() {
+        return _MHClientSecret;
       },
       get origin() {
         return _houndOrigin;
+      },
+      get apiVersion() {
+        return '1.2';
+      },
+      _setUserAccessToken: function(accessToken) {
+        _MHUserAccessToken = accessToken;
       }
     });
   }();
@@ -3648,11 +3674,63 @@ System.registerModule("request/promise-request.js", [], function() {
         }
         if (data) {
           if (typeof data === 'string' || data instanceof String || data instanceof ArrayBuffer) {} else if (typeof FormData !== 'undefined' && data instanceof FormData) {} else if (typeof Blob !== 'undefined' && data instanceof Blob) {} else {
-            data = JSON.stringify(data);
-            if (headers == null) {
-              headers = {'Content-Type': 'application/json'};
-            } else if (!headers['Content-Type'] && !headers['content-type'] && !headers['Content-type'] && !headers['content-Type']) {
-              headers['Content-Type'] = 'application/json';
+            if (args.useForms) {
+              var dataUrl = "";
+              for (prop in data) {
+                if (data.hasOwnProperty(prop)) {
+                  if (dataUrl.length !== 0) {
+                    dataUrl += '&';
+                  }
+                  if (typeof data[prop] === 'string' || data[prop] instanceof String) {
+                    dataUrl += prop + '=' + data[prop];
+                  } else if (Array.isArray(data[prop]) || data[prop] instanceof Array) {
+                    var $__11 = true;
+                    var $__12 = false;
+                    var $__13 = undefined;
+                    try {
+                      for (var $__9 = void 0,
+                          $__8 = (data[prop])[$traceurRuntime.toProperty(Symbol.iterator)](); !($__11 = ($__9 = $__8.next()).done); $__11 = true) {
+                        var p2 = $__9.value;
+                        {
+                          dataUrl += prop + '=' + p2;
+                          dataUrl += '&';
+                        }
+                      }
+                    } catch ($__14) {
+                      $__12 = true;
+                      $__13 = $__14;
+                    } finally {
+                      try {
+                        if (!$__11 && $__8.return != null) {
+                          $__8.return();
+                        }
+                      } finally {
+                        if ($__12) {
+                          throw $__13;
+                        }
+                      }
+                    }
+                    if (data[prop].length > 0) {
+                      dataUrl = dataUrl.slice(0, -1);
+                    }
+                  } else {
+                    dataUrl += prop + '=' + JSON.stringify(data[prop]);
+                  }
+                }
+              }
+              data = dataUrl;
+              if (headers == null) {
+                headers = {'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'};
+              } else if (!headers['Content-Type'] && !headers['content-type'] && !headers['Content-type'] && !headers['content-Type']) {
+                headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=utf-8';
+              }
+            } else {
+              data = JSON.stringify(data);
+              if (headers == null) {
+                headers = {'Content-Type': 'application/json'};
+              } else if (!headers['Content-Type'] && !headers['content-type'] && !headers['Content-type'] && !headers['content-Type']) {
+                headers['Content-Type'] = 'application/json';
+              }
             }
           }
         }
@@ -3722,10 +3800,18 @@ System.registerModule("request/hound-request.js", [], function() {
       responseThen = function(response) {
         if (!!response) {
           if (response.responseText != null && response.responseText !== '') {
-            return JSON.parse(response.responseText);
+            try {
+              return JSON.parse(response.responseText);
+            } catch (e) {
+              return response.responseText;
+            }
           }
           if (response.response != null && typeof response.response === 'string' && response.response !== '') {
-            return JSON.parse(response.response);
+            try {
+              return JSON.parse(response.response);
+            } catch (e) {
+              return response.response;
+            }
           }
           return response.status;
         }
@@ -3742,12 +3828,14 @@ System.registerModule("request/hound-request.js", [], function() {
       defaults.withCredentials = true;
     }
     if (args.endpoint) {
-      args.url = MHSDK.origin + args.endpoint;
+      args.url = MHSDK.origin + MHSDK.apiVersion + '/' + args.endpoint;
       delete args.endpoint;
     }
     if (MHSDK.MHAccessToken) {
       if (args.params) {
-        args.params.access_token = MHSDK.MHAccessToken;
+        if (!args.params.access_token) {
+          args.params.access_token = MHSDK.MHAccessToken;
+        }
       } else {
         args.params = {access_token: MHSDK.MHAccessToken};
       }
@@ -5838,6 +5926,7 @@ System.registerModule("models/user/MHLoginSession.js", [], function() {
       MHObject = $__1.MHObject,
       mhidLRU = $__1.mhidLRU;
   var MHUser = System.get("models/user/MHUser.js").MHUser;
+  var MHSDK = System.get("models/sdk/MHSDK.js").MHSDK;
   var houndRequest = System.get("request/hound-request.js").houndRequest;
   var makeEvent = function(name, options) {
     var evt;
@@ -5886,6 +5975,26 @@ System.registerModule("models/user/MHLoginSession.js", [], function() {
   var MHLoginSession = function() {
     function MHLoginSession() {}
     return ($traceurRuntime.createClass)(MHLoginSession, {}, {
+      loginDialogURLWithRedirectURL: function(redirectUrl) {
+        return MHSDK.origin + MHSDK.apiVersion + ("/security/oauth/authorize?client_id=" + MHSDK.clientId + "&client_secret=" + MHSDK.clientSecret + "&scope=public_profile&response_type=token&redirect_uri=" + redirectUrl);
+      },
+      loginWithAccessToken: function(accessToken) {
+        var path = MHUser.rootEndpoint + '/validateSession';
+        return houndRequest({
+          method: 'GET',
+          endpoint: path,
+          params: {access_token: accessToken},
+          withCredentials: true
+        }).then(function(response) {
+          MHSDK._setUserAccessToken(accessToken);
+          var matches = response.match(/mhid=(.*?),/);
+          var mhid = matches[1];
+          return MHObject.fetchByMhid(mhid);
+        }).then(function(user) {
+          loggedInUser = user;
+          return loggedInUser;
+        });
+      },
       get currentUser() {
         return loggedInUser;
       },
