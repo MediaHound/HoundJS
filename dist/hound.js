@@ -3551,9 +3551,12 @@ System.registerModule("models/sdk/MHSDK.js", [], function() {
         }
         return this.refreshOAuthToken();
       },
+      authHeaders: function() {
+        return _btoa(_MHClientId + ":" + _MHClientSecret);
+      },
       refreshOAuthToken: function() {
         var houndRequest = System.get('request/hound-request.js').houndRequest;
-        var auth = _btoa(_MHClientId + ":" + _MHClientSecret);
+        var auth = this.authHeaders();
         return houndRequest({
           method: 'POST',
           useForms: true,
@@ -5979,17 +5982,16 @@ System.registerModule("models/user/MHLoginSession.js", [], function() {
         return MHSDK.origin + MHSDK.apiVersion + ("/security/oauth/authorize?client_id=" + MHSDK.clientId + "&client_secret=" + MHSDK.clientSecret + "&scope=public_profile&response_type=token&redirect_uri=" + redirectUrl);
       },
       loginWithAccessToken: function(accessToken) {
-        var path = MHUser.rootEndpoint + '/validateSession';
         return houndRequest({
-          method: 'GET',
-          endpoint: path,
-          params: {access_token: accessToken},
-          withCredentials: true
+          method: 'POST',
+          useForms: true,
+          endpoint: 'security/oauth/check_token',
+          data: {token: accessToken},
+          withCredentials: true,
+          headers: {Authorization: ("Basic " + MHSDK.authHeaders())}
         }).then(function(response) {
           MHSDK._setUserAccessToken(accessToken);
-          var matches = response.match(/mhid=(.*?),/);
-          var mhid = matches[1];
-          return MHObject.fetchByMhid(mhid);
+          return MHUser.fetchByUsername(response.user_name);
         }).then(function(user) {
           loggedInUser = user;
           return loggedInUser;

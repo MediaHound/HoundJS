@@ -105,22 +105,22 @@ export class MHLoginSession {
   }
 
   static loginWithAccessToken(accessToken) {
-    var path = MHUser.rootEndpoint + '/validateSession';
-
     return houndRequest({
-        method: 'GET',
-        endpoint: path,
-        params: {
-          access_token: accessToken
+        method: 'POST',
+        useForms: true,
+        endpoint: 'security/oauth/check_token',
+        data: {
+          token: accessToken
         },
-        withCredentials : true
+        withCredentials : true,
+        headers: {
+          Authorization: `Basic ${MHSDK.authHeaders()}`
+        }
       })
       .then(response => {
         MHSDK._setUserAccessToken(accessToken);
 
-        const matches = response.match(/mhid=(.*?),/);
-        const mhid = matches[1];
-        return MHObject.fetchByMhid(mhid);
+        return MHUser.fetchByUsername(response.user_name);
       })
       .then(user => {
         loggedInUser = user;

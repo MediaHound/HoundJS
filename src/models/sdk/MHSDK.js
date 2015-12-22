@@ -36,10 +36,14 @@ export class MHSDK {
     return this.refreshOAuthToken();
   }
 
+  static authHeaders() {
+    return _btoa(_MHClientId + ":" + _MHClientSecret);
+  }
+
   static refreshOAuthToken() {
     var houndRequest = System.get('request/hound-request.js').houndRequest;
 
-    const auth = _btoa(_MHClientId + ":" + _MHClientSecret);
+    const auth = this.authHeaders();
 
     return houndRequest({
       method: 'POST',
