@@ -3564,7 +3564,8 @@ System.registerModule("models/sdk/MHSDK.js", [], function() {
           data: {
             client_id: _MHClientId,
             client_secret: _MHClientSecret,
-            grant_type: 'client_credentials'
+            grant_type: 'client_credentials',
+            scope: 'public_profile'
           },
           headers: {Authorization: ("Basic " + auth)}
         }).then(function(response) {
