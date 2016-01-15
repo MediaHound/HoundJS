@@ -52,30 +52,30 @@ export default class MHUser extends MHObject {
   *
   */
   static registerNewUser(username, password, email, firstName, lastName, optional) {
-    var path = MHUser.rootEndpoint + '/new',
-    data = (optional && typeof optional === 'object' && !(optional instanceof Array || optional instanceof String)) ? optional : {},
-    notString = function(obj) {
+    const path = MHUser.rootEndpoint + '/new';
+    const data = (optional && typeof optional === 'object' && !(optional instanceof Array || optional instanceof String)) ? optional : {};
+    const notString = obj => {
       return ( typeof obj !== 'string' && !(obj instanceof String) );
     };
 
     // Check for required params
-    if ( notString(username) ) {
+    if (notString(username)) {
       throw new TypeError('Username not of type string in MHUser.registerNewUser');
     }
 
-    if ( notString(password) ) {
+    if (notString(password)) {
       throw new TypeError('Password not of type string in MHUser.registerNewUser');
     }
 
-    if ( notString(email) ) {
+    if (notString(email)) {
       throw new TypeError('Email not of type string in MHUser.registerNewUser');
     }
 
-    if ( notString(firstName) ) {
+    if (notString(firstName)) {
       throw new TypeError('First name not of type string in MHUser.registerNewUser');
     }
 
-    if ( notString(lastName) ) {
+    if (notString(lastName)) {
       throw new TypeError('Last name not of type string in MHUser.registerNewUser');
     }
 
@@ -113,7 +113,7 @@ export default class MHUser extends MHObject {
   * Fetches the settings for the current logged in user.
   */
   static fetchSettings(mhid) {
-    if ( !mhid || (typeof mhid !== 'string' && !(mhid instanceof String)) ) {
+    if (!mhid || (typeof mhid !== 'string' && !(mhid instanceof String))) {
       throw new TypeError('mhid must be type string in MHUser.fetchSettings');
     }
     var path = MHUser.rootEndpoint +'/'+mhid+'/settings/internal';
@@ -139,7 +139,7 @@ export default class MHUser extends MHObject {
   * Fetches the settings for the current logged in user.
   */
   static fetchSourceSettings(mhid) {
-    if ( !mhid || (typeof mhid !== 'string' && !(mhid instanceof String)) ) {
+    if (!mhid || (typeof mhid !== 'string' && !(mhid instanceof String))) {
       throw new TypeError('mhid must be type string in MHUser.fetchSourceSettings');
     }
     var path = MHUser.rootEndpoint +'/'+mhid+'/settings/sources';
@@ -159,8 +159,6 @@ export default class MHUser extends MHObject {
       return false;
     });
   }
-
-
 
   /**
   * updateSettings(mhid,updates)
@@ -185,15 +183,15 @@ export default class MHUser extends MHObject {
   * }
   * @returns {Promise}
   */
-  static updateSettings(mhid,updates) {
-    if ( updates === null || typeof updates === 'string' || Array.isArray(updates) ) {
+  static updateSettings(mhid, updates) {
+    if (updates === null || typeof updates === 'string' || Array.isArray(updates)) {
       throw new TypeError('Update data parameter must be of type object');
     }
     if (updates.operation === null || updates.property === null || updates.value === null) {
       throw new TypeError('Updates must include operation, property, and value as parameters.');
     }
     var path = MHUser.rootEndpoint +'/'+mhid+'/settings/internal/update';
-    console.log(path,updates);
+    console.log(path, updates);
     return houndRequest({
       method          : 'PUT',
       endpoint        : path,
@@ -210,7 +208,7 @@ export default class MHUser extends MHObject {
   *
   */
   static validateUsername(username) {
-    if ( !username || (typeof username !== 'string' && !(username instanceof String)) ) {
+    if (!username || (typeof username !== 'string' && !(username instanceof String))) {
       throw new TypeError('Username must be type string in MHUser.validateUsername');
     }
     var path = MHUser.rootEndpoint + '/validate/username/' + encodeURIComponent(username);
@@ -225,9 +223,10 @@ export default class MHUser extends MHObject {
         return response;
     })
     .catch(function(error) {
-      if ( error.xhr.status === 406 ) {
+      if (error.xhr.status === 406) {
         console.error('The username ' + username + ' is already taken.');
-      } else {
+      }
+else {
         console.log('error in validate username: ', error.error.message);
         console.error(error.error.stack);
       }
@@ -239,7 +238,7 @@ export default class MHUser extends MHObject {
   *
   */
   static validateEmail(email) {
-    if ( !email || (typeof email !== 'string' && !(email instanceof String)) ) {
+    if (!email || (typeof email !== 'string' && !(email instanceof String))) {
       throw new TypeError('Email must be type string in MHUser.validateEmail');
     }
     var path = MHUser.rootEndpoint + '/validate/email/' + encodeURIComponent(email);
@@ -255,9 +254,10 @@ export default class MHUser extends MHObject {
       return response;
     })
     .catch(function(error) {
-      if ( error.xhr.status === 406 ) {
+      if (error.xhr.status === 406) {
         console.error('The email ' + email + ' is already registered.');
-      } else {
+      }
+else {
         console.log('error in validate username: ', error.error.message);
         console.error(error.error.stack);
       }
@@ -271,7 +271,7 @@ export default class MHUser extends MHObject {
   *
   */
   static forgotUsernameWithEmail(email) {
-    if ( !email || (typeof email !== 'string' && !(email instanceof String)) ) {
+    if (!email || (typeof email !== 'string' && !(email instanceof String))) {
       throw new TypeError('Email must be type string in MHUser.forgotUsernameWithEmail');
     }
     var path = MHUser.rootEndpoint + '/forgotusername',
@@ -292,12 +292,13 @@ export default class MHUser extends MHObject {
       return response;
     })
     .catch(function(error) {
-      if ( error.xhr.status === 400 ) {
+      if (error.xhr.status === 400) {
         console.error('The email ' + email + ' is missing or an invalid argument.');
       }
-      else if ( error.xhr.status === 404 ) {
+      else if (error.xhr.status === 404) {
         console.error('The user with the email address ' + email + ' was not found.');
-      } else {
+      }
+else {
         console.log('error in new forgotUsernameWithEmail: ', error.error.message);
         console.error(error.error.stack);
       }
@@ -311,7 +312,7 @@ export default class MHUser extends MHObject {
   *
   */
   static forgotPasswordWithEmail(email) {
-    if ( !email || (typeof email !== 'string' && !(email instanceof String)) ) {
+    if (!email || (typeof email !== 'string' && !(email instanceof String))) {
       throw new TypeError('Email must be type string in MHUser.forgotPasswordWithEmail');
     }
     var path = MHUser.rootEndpoint + '/forgotpassword',
@@ -330,12 +331,13 @@ export default class MHUser extends MHObject {
       return response;
     })
     .catch(function(error) {
-      if ( error.xhr.status === 400 ) {
+      if (error.xhr.status === 400) {
         console.error('The email ' + email + ' is missing or an invalid argument.');
       }
-      else if ( error.xhr.status === 404 ) {
+      else if (error.xhr.status === 404) {
         console.error('The user with the email address ' + email + ' was not found.');
-      } else {
+      }
+else {
         console.log('error in new forgotPasswordWithEmail: ', error.error.message);
         console.error(error.error.stack);
       }
@@ -349,7 +351,7 @@ export default class MHUser extends MHObject {
   *
   */
   static forgotPasswordWithUsername(username) {
-    if ( !username || (typeof username !== 'string' && !(username instanceof String)) ) {
+    if (!username || (typeof username !== 'string' && !(username instanceof String))) {
       throw new TypeError('username must be type string in MHUser.forgotPasswordWithUsername');
     }
     var path = MHUser.rootEndpoint + '/forgotpassword',
@@ -368,12 +370,13 @@ export default class MHUser extends MHObject {
       return response;
     })
     .catch(function(error) {
-      if ( error.xhr.status === 400 ) {
+      if (error.xhr.status === 400) {
         console.error('The username ' + username + ' is missing or an invalid argument.');
       }
-      else if ( error.xhr.status === 404 ) {
+      else if (error.xhr.status === 404) {
         console.error('The user ' + username + ' was not found.');
-      } else {
+      }
+else {
         console.log('error in forgotPasswordWithUsername: ', error.error.message);
         console.error(error.error.stack);
       }
@@ -388,10 +391,10 @@ export default class MHUser extends MHObject {
   */
   static newPassword(password,ticket) {
 
-    if ( !password || (typeof password !== 'string' && !(password instanceof String)) ) {
+    if (!password || (typeof password !== 'string' && !(password instanceof String))) {
       throw new TypeError('password must be type string in MHUser.newPassword');
     }
-    if ( !ticket || (typeof ticket !== 'string' && !(ticket instanceof String)) ) {
+    if (!ticket || (typeof ticket !== 'string' && !(ticket instanceof String))) {
       throw new TypeError('ticket must be type string in MHUser.newPassword');
     }
     var path = MHUser.rootEndpoint + '/forgotpassword/finish',
@@ -411,12 +414,13 @@ export default class MHUser extends MHObject {
       return response;
     })
     .catch(function(error) {
-      if ( error.xhr.status === 400 ) {
+      if (error.xhr.status === 400) {
         console.error('The password ' + password + ' is an invalid password.');
       }
-      else if ( error.xhr.status === 404 ) {
+      else if (error.xhr.status === 404) {
         console.error('The ticket ' + ticket + ' was not found.');
-      } else {
+      }
+else {
         console.log('error in newPassword: ', error.error.message);
         console.error(error.error.stack);
       }
@@ -432,10 +436,10 @@ export default class MHUser extends MHObject {
   */
   setPassword(password,newPassword) {
 
-    if ( !password || (typeof password !== 'string' && !(password instanceof String)) ) {
+    if (!password || (typeof password !== 'string' && !(password instanceof String))) {
       throw new TypeError('password must be type string in MHUser.newPassword');
     }
-    if ( !newPassword || (typeof newPassword !== 'string' && !(newPassword instanceof String)) ) {
+    if (!newPassword || (typeof newPassword !== 'string' && !(newPassword instanceof String))) {
       throw new TypeError('newPassword must be type string in MHUser.newPassword');
     }
     var path = this.subendpoint('updatePassword');
@@ -454,12 +458,13 @@ export default class MHUser extends MHObject {
       return response;
     })
     .catch(function(error) {
-      if ( error.xhr.status === 400 ) {
+      if (error.xhr.status === 400) {
         console.error('The password ' + password + ' is an invalid password.');
       }
-      else if ( error.xhr.status === 404 ) {
+      else if (error.xhr.status === 404) {
         console.error('The newPassword ' + newPassword + ' was not found.');
-      } else {
+      }
+else {
         console.log('error in setPassword: ', error.error.message);
         console.error(error.error.stack);
       }
@@ -473,16 +478,16 @@ export default class MHUser extends MHObject {
   */
   setProfileImage(image) {
     log('in setProfileImage with image: ', image);
-    if ( !image ) {
+    if (!image) {
       throw new TypeError('No Image passed to setProfileImage');
       //return Promise.resolve(null);
     }
-    if ( !(image instanceof Blob || image instanceof File) ) {
+    if (!(image instanceof Blob || image instanceof File)) {
       throw new TypeError('Image was not of type Blob or File.');
     }
 
     // If not current user throw error
-    if ( !this.isCurrentUser ) {
+    if (!this.isCurrentUser) {
       //throw new NoMHSessionError('No valid user session. Please log in to change profile picture');
       throw (function() {
         var NoMHSessionError = function(message) {
@@ -533,10 +538,10 @@ export default class MHUser extends MHObject {
   *
   */
   static fetchByUsername(username, view='full', force=false) {
-    if ( !username || (typeof username !== 'string' && !(username instanceof String)) ) {
+    if (!username || (typeof username !== 'string' && !(username instanceof String))) {
       throw new TypeError('Username not of type String in fetchByUsername');
     }
-    if ( MHObject.getPrefixFromMhid(username) != null ) {
+    if (MHObject.getPrefixFromMhid(username) != null) {
       throw new TypeError('Passed mhid to fetchByUsername, please use MHObject.fetchByMhid for this request.');
     }
     if (view === null || view === undefined) {
@@ -546,7 +551,7 @@ export default class MHUser extends MHObject {
     log('in fetchByUsername, looking for: ' + username);
 
     // Check LRU for altId === username
-    if ( !force && mhidLRU.hasAltId(username) ) {
+    if (!force && mhidLRU.hasAltId(username)) {
       return Promise.resolve(mhidLRU.getByAltId(username));
     }
 
@@ -648,11 +653,11 @@ export default class MHUser extends MHObject {
   * @return { Promise }
   *
   */
-  static linkService(serv,succ,fail) {
+  static linkService(serv, succ, fail) {
 
-    var service = serv || null,
-    success = succ || 'https://www.mediahound.com/',
-    failure = fail || 'https://www.mediahound.com/';
+    const service = serv || null;
+    const success = succ || 'https://www.mediahound.com/';
+    const failure = fail || 'https://www.mediahound.com/';
 
     if (service === null) {
       console.warn('No service provided, aborting. First argument must include service name i.e. \'facebook\' or \'twitter\'.');

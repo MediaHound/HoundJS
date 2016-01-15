@@ -51,7 +51,8 @@ export default class MHCache {
       // link previous tail to the new tail (entry)
       this.tail.newer = entry;
       entry.older = this.tail;
-    } else {
+    }
+else {
       // we're first in -- yay
       this.head = entry;
     }
@@ -60,7 +61,8 @@ export default class MHCache {
     if (this.size === this.limit) {
       // we hit the limit -- remove the head
       return this.shift();
-    } else {
+    }
+else {
       // increase the size counter
       this.size++;
     }
@@ -68,10 +70,10 @@ export default class MHCache {
 
   // convenience for putting an MHObject
   putMHObj(mhObj) {
-    if ( mhObj && mhObj.metadata.mhid && mhObj.metadata.username ) {
+    if (mhObj && mhObj.metadata.mhid && mhObj.metadata.username) {
       return this.put(mhObj.metadata.mhid, mhObj, mhObj.metadata.username);
     }
-    if ( mhObj && mhObj.metadata.mhid ) {
+    if (mhObj && mhObj.metadata.mhid) {
       return this.put(mhObj.metadata.mhid, mhObj, mhObj.metadata.altId);
     }
   }
@@ -97,7 +99,8 @@ export default class MHCache {
       if (this.head.newer) {
         this.head = this.head.newer;
         this.head.older = undefined;
-      } else {
+      }
+else {
         this.head = undefined;
       }
       // Remove last strong reference to <entry> and remove links from the purged
@@ -154,8 +157,8 @@ export default class MHCache {
    */
   getByAltId(altId) {
     var entry = this.tail;
-    while(entry) {
-      if ( entry.altId === altId) {
+    while (entry) {
+      if (entry.altId === altId) {
         log('found altId ' + altId + ', getting from cache');
         return this.get(entry.key);
       }
@@ -187,8 +190,8 @@ export default class MHCache {
    */
   hasAltId(altId) {
     var entry = this.tail;
-    while(entry) {
-      if ( entry.altId === altId ) {
+    while (entry) {
+      if (entry.altId === altId) {
         return true;
       }
       entry = entry.older;
@@ -208,17 +211,20 @@ export default class MHCache {
       // link the older entry with the newer entry
       entry.older.newer = entry.newer;
       entry.newer.older = entry.older;
-    } else if (entry.newer) {
+    }
+else if (entry.newer) {
       // remove the link to us
       entry.newer.older = undefined;
       // link the newer entry to head
       this.head = entry.newer;
-    } else if (entry.older) {
+    }
+else if (entry.older) {
       // remove the link to us
       entry.older.newer = undefined;
       // link the newer entry to head
       this.tail = entry.older;
-    } else {
+    }
+else {
       this.head = this.tail = undefined;
     }
 
@@ -243,7 +249,7 @@ export default class MHCache {
   }
 
   forEach(callback) {
-    if ( typeof callback === 'function' ) {
+    if (typeof callback === 'function') {
       var entry = this.head,
           index = 0;
       while (entry) {
@@ -263,14 +269,15 @@ export default class MHCache {
    *
    */
   saveToLocalStorage(storageKey='mhLocalCache') {
-    var arr = [],
-        entry = this.head,
-        replacer = function(key, value) {
-          if ( (/promise|request/gi).test(key) ) {
-            return;
-          }
-          return value;
-        };
+    const arr = [];
+    let entry = this.head;
+    const replacer = function(key, value) {
+      if ((/promise|request/gi).test(key)) {
+        return;
+      }
+      return value;
+    };
+
     log('saving to localStorage');
     while (entry) {
       log('adding to arry: ', JSON.stringify(entry.value, replacer));
@@ -286,19 +293,20 @@ export default class MHCache {
    * @param {string='mhLocalCache'} storageKey
    */
   restoreFromLocalStorage(storageKey='mhLocalCache') {
-    var MHObject = require('../base/MHObject.js').default;
+    const MHObject = require('../base/MHObject.js').default;
     //console.log('circular dep: ', MHObject);
 
-    if ( !localStorage || typeof localStorage[storageKey] === 'undefined' ) {
+    if (!localStorage || typeof localStorage[storageKey] === 'undefined') {
       log('nothing stored');
       return;
     }
-    var i = 0, curr,
-        stored = JSON.parse(localStorage[storageKey]);
+    let i = 0;
+    let curr;
+    conststored = JSON.parse(localStorage[storageKey]);
 
-    for( ; i < stored.length ; i++ ) {
+    for ( ; i < stored.length ; i++) {
       curr = MHObject.create(stored[i]);
-      if ( curr && !this.has(curr.metadata.mhid) ) {
+      if (curr && !this.has(curr.metadata.mhid)) {
         log('adding to cache: ', curr);
         this.putMHObj(curr);
       }

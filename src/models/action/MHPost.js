@@ -14,14 +14,13 @@ export default class MHPost extends MHAction {
    * @param {string} message - the message for this new post
    */
   static createWithMessage(message, mentions, primaryMention) {
-    if ( !message ||
+    if (!message ||
         !mentions ||
         !primaryMention ||
         typeof message !== 'string' ||
         !Array.isArray(mentions) ||
         !mentions.every(x => x instanceof MHObject) ||
-        !(primaryMention instanceof MHObject) )
-    {
+        !(primaryMention instanceof MHObject)) {
       throw new TypeError('Can\'t create post without message string, mentions array, and primary mention object.');
     }
 

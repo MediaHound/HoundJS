@@ -3,7 +3,7 @@ var xhrc;
 
 // Use XMLHttpRequest from a browser or shim it in Ndoe with xmlhttprequest-cookie.
 if (typeof window !== 'undefined') {
-    if ( !window.XMLHttpRequest || !('withCredentials' in new XMLHttpRequest()) ) {
+    if (!window.XMLHttpRequest || !('withCredentials' in new XMLHttpRequest())) {
       throw new Error('No XMLHttpRequest 2 Object found, please update your browser.');
     }
     else {
@@ -69,25 +69,25 @@ const promiseRequest = args => {
 
 
   // Check for url
-  if ( url === null ) {
+  if (url === null) {
     throw new TypeError('url was null or undefined in arguments object', 'promiseRequest.js', 70);
   }
 
   // Add params
-  if ( params !== null ) {
+  if (params !== null) {
     // If the URL already contains a ?, then we won't add one
     if (url.indexOf('?') === -1) {
       url += '?';
     }
-    for( prop in params ) {
-      if ( params.hasOwnProperty(prop) ) {
-        if ( url[url.length-1] !== '?' ) {
+    for ( prop in params) {
+      if (params.hasOwnProperty(prop)) {
+        if (url[url.length-1] !== '?') {
           url += '&';
         }
-        if ( typeof params[prop] === 'string' || params[prop] instanceof String ) {
+        if (typeof params[prop] === 'string' || params[prop] instanceof String) {
           url += encodeURIComponent(prop) + '=' + extraEncode(params[prop]).replace('%20', '+');
         }
-        else if (Array.isArray(params[prop]) || params[prop] instanceof Array ) {
+        else if (Array.isArray(params[prop]) || params[prop] instanceof Array) {
           for (var p of params[prop]) {
             url += encodeURIComponent(prop) + '=' + extraEncode(p).replace('%20', '+');
             url += '&';
@@ -106,28 +106,31 @@ const promiseRequest = args => {
   }
 
   // Stringify Data
-  if ( data ) {
-    if ( typeof data === 'string'    ||
+  if (data) {
+    if (typeof data === 'string'    ||
         data instanceof String      ||
         data instanceof ArrayBuffer
-    ) {
+   ) {
       // do nothing
-    } else if ( typeof FormData !== 'undefined' && data instanceof FormData) {
+    }
+else if (typeof FormData !== 'undefined' && data instanceof FormData) {
       // do nothing
-    } else if ( typeof Blob !== 'undefined' && data instanceof Blob) {
+    }
+else if (typeof Blob !== 'undefined' && data instanceof Blob) {
       // do nothing
-    } else {
+    }
+else {
       if (args.useForms) {
         var dataUrl = '';
-        for( prop in data ) {
-          if ( data.hasOwnProperty(prop) ) {
-            if ( dataUrl.length !== 0 ) {
+        for ( prop in data) {
+          if (data.hasOwnProperty(prop)) {
+            if (dataUrl.length !== 0) {
               dataUrl += '&';
             }
-            if ( typeof data[prop] === 'string' || data[prop] instanceof String ) {
+            if (typeof data[prop] === 'string' || data[prop] instanceof String) {
               dataUrl += prop + '=' +data[prop];
             }
-            else if (Array.isArray(data[prop]) || data[prop] instanceof Array ) {
+            else if (Array.isArray(data[prop]) || data[prop] instanceof Array) {
               for (var p2 of data[prop]) {
                 dataUrl += prop + '=' + p2;
                 dataUrl += '&';
@@ -144,21 +147,23 @@ const promiseRequest = args => {
         }
         data = dataUrl;
 
-        if ( headers === null ) {
+        if (headers === null) {
           headers = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
           };
-        } else if ( !headers['Content-Type'] && !headers['content-type'] && !headers['Content-type'] && !headers['content-Type'] ) {
+        }
+else if (!headers['Content-Type'] && !headers['content-type'] && !headers['Content-type'] && !headers['content-Type']) {
           headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=utf-8';
         }
       }
       else {
         data = JSON.stringify(data);
-        if ( headers === null ) {
+        if (headers === null) {
           headers = {
             'Content-Type': 'application/json'
           };
-        } else if ( !headers['Content-Type'] && !headers['content-type'] && !headers['Content-type'] && !headers['content-Type'] ) {
+        }
+else if (!headers['Content-Type'] && !headers['content-type'] && !headers['Content-type'] && !headers['content-Type']) {
           headers['Content-Type'] = 'application/json';
         }
       }
@@ -172,9 +177,9 @@ const promiseRequest = args => {
   xhr.withCredentials = withCreds;
 
   // Set Headers
-  if ( headers !== null ) {
-    for( prop in headers ) {
-      if ( headers.hasOwnProperty(prop) ) {
+  if (headers !== null) {
+    for ( prop in headers) {
+      if (headers.hasOwnProperty(prop)) {
         xhr.setRequestHeader(prop, headers[prop]);
       }
     }
@@ -184,27 +189,32 @@ const promiseRequest = args => {
   return new Promise(function(resolve, reject) {
 
     xhr.onreadystatechange = function() {
-      if ( this.readyState === 4 ) {
+      if (this.readyState === 4) {
         // Done
-        if ( this.status >= 200 && this.status < 300 ) {
+        if (this.status >= 200 && this.status < 300) {
           resolve(this);
-        } else {
+        }
+else {
           //console.log(this);
           reject({
             error: new Error('Request failed with status: ' + this.status + ', ' + this.statusText),
             'xhr': this
           });
         }
-      } else if ( this.readyState === 3 ) {
+      }
+else if (this.readyState === 3) {
         // Loading
-        if ( typeof onprogress === 'function' ) {
+        if (typeof onprogress === 'function') {
           onprogress(this.responseText);
         }
-      } else if ( this.readyState === 2 ) {
+      }
+else if (this.readyState === 2) {
         // Headers Received
-      } else if ( this.readyState === 1 ) {
+      }
+else if (this.readyState === 1) {
         // Request Open
-      } else if ( this.readyState === 0 ) {
+      }
+else if (this.readyState === 0) {
         // Unset ie, not open
       }
     };
@@ -214,7 +224,7 @@ const promiseRequest = args => {
     }, false);
 
     // Send Request
-    if ( data !== null ) {
+    if (data !== null) {
       xhr.send(data);
     }
     else {

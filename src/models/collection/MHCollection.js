@@ -55,7 +55,7 @@ export default class MHCollection extends MHObject {
         return MHObject.fetchByMhid(response.metadata.mhid);
       })
       .then(function(newCollection) {
-        if ( MHLoginSession.openSession ) {
+        if (MHLoginSession.openSession) {
           MHLoginSession.currentUser.fetchOwnedCollections('full',12,true);
         }
         return newCollection;
@@ -91,7 +91,7 @@ export default class MHCollection extends MHObject {
       return MHObject.fetchByMhid(response.metadata.mhid);
     })
     .then(function(newCollection) {
-      if ( MHLoginSession.openSession ) {
+      if (MHLoginSession.openSession) {
         MHLoginSession.currentUser.fetchOwnedCollections('full',12,true);
       }
       return newCollection;
@@ -136,16 +136,16 @@ export default class MHCollection extends MHObject {
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
   changeContents(contents, sub) {
-    if ( !Array.isArray(contents) ) {
+    if (!Array.isArray(contents)) {
       throw new TypeError('Contents must be an array in changeContents');
     }
-    if ( typeof sub !== 'string' || (sub !== 'add' && sub !== 'remove') ) {
+    if (typeof sub !== 'string' || (sub !== 'add' && sub !== 'remove')) {
       throw new TypeError('Subendpoint must be add or remove');
     }
 
     var path = this.subendpoint(sub),
         mhids = contents.map(v => {
-          if ( v instanceof MHObject) {
+          if (v instanceof MHObject) {
             if (!(v instanceof MHAction)) {
               return v.mhid;
             }
@@ -153,7 +153,8 @@ export default class MHCollection extends MHObject {
               console.error('MHActions including like, favorite, create, and post cannot be collected. Please resubmit with actual content.');
             }
 
-          } else if ( typeof v === 'string' && MHObject.prefixes.indexOf(MHObject.getPrefixFromMhid(v)) > -1 ) {
+          }
+else if (typeof v === 'string' && MHObject.prefixes.indexOf(MHObject.getPrefixFromMhid(v)) > -1) {
             // TODO double check this if statement
             return v;
           }

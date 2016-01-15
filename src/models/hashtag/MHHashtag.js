@@ -11,7 +11,7 @@ export default class MHHashtag extends MHObject {
     return {
       ...super.jsonProperties,
       metadata: MHHashtagMetadata
-    }
+    };
   }
 
   /**
@@ -24,7 +24,7 @@ export default class MHHashtag extends MHObject {
   *
   */
   static fetchByName(name, view='full' /*, force=false*/) {
-    if ( !name || (typeof name !== 'string' && !(name instanceof String)) ) {
+    if (!name || (typeof name !== 'string' && !(name instanceof String))) {
       throw new TypeError('Hashtag not of type String in fetchByTag');
     }
 

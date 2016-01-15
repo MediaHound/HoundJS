@@ -89,7 +89,7 @@ var loggedInUser  = null,
 var restoreFromSessionStorage = function() {
   var inStorage = window.sessionStorage.currentUser;
 
-  if ( inStorage ) {
+  if (inStorage) {
     //loggedInUser = MHObject.create(inStorage);
     return true;
   }
@@ -196,7 +196,7 @@ export default class MHLoginSession {
    */
   // static updatedProfileImage(updatedImage) {
   //   console.log('updatedUploadImage: ', updatedUser, updatedUser instanceof MHUser, updatedUser.hasMhid(loggedInUser.mhid));
-  //   if ( !(updatedUser instanceof MHUser) || !updatedUser.hasMhid(loggedInUser.mhid) ) {
+  //   if (!(updatedUser instanceof MHUser) || !updatedUser.hasMhid(loggedInUser.mhid)) {
   //     throw new TypeError('Updated Profile Image must be passed a new MHUser Object that equals the currently logged in user');
   //   }
   //
@@ -235,11 +235,11 @@ export default class MHLoginSession {
    *  @return {Promise<MHUser>} - resolves to MHUser object of logged in user
    */
   static login(username, password) {
-    if ( typeof username !== 'string' && !(username instanceof String) ) {
+    if (typeof username !== 'string' && !(username instanceof String)) {
       throw new TypeError('Username not of type string in MHUser.login');
     }
 
-    if ( typeof password !== 'string' && !(password instanceof String) ) {
+    if (typeof password !== 'string' && !(password instanceof String)) {
       throw new TypeError('Password not of type string in MHUser.login');
     }
 
@@ -322,7 +322,7 @@ export default class MHLoginSession {
     window.sessionStorage.currentUser = null;
 
     currentCookies.forEach(cookie => {
-      if ( cookie.key === 'JSESSIONID' ) {
+      if (cookie.key === 'JSESSIONID') {
         var expires = (new Date(0)).toGMTString();
         document.cookie = `${cookie.key}=${cookie.value}; expires=${expires}; domain=.mediahound.com`;
       }
@@ -362,7 +362,7 @@ export default class MHLoginSession {
       })
       .then(loginMap => {
 
-        if ( typeof window !== 'undefined' && typeof sessionStorage !== 'undefined' && restoreFromSessionStorage()) {
+        if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined' && restoreFromSessionStorage()) {
 
           var cachedUser = JSON.parse(window.sessionStorage.currentUser);
           if (cachedUser.mhid === loginMap.users[0].metadata.mhid ||
@@ -388,7 +388,7 @@ export default class MHLoginSession {
         return loggedInUser;
       })
       .catch(function(error) {
-        if ( error.xhr.status === 401 ) {
+        if (error.xhr.status === 401) {
           console.log('No open MediaHound session');
         }
         return error;

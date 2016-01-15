@@ -12,10 +12,11 @@ export default class MHSocial {
    * @returns {boolean}
    */
   isEqualToMHSocial(otherObj) {
-    for(var prop of Object.keys(this.jsonProperties)) {
-      if ( typeof this[prop] === 'number' && typeof otherObj[prop] === 'number' && this[prop] === otherObj[prop] ) {
+    for (var prop of Object.keys(this.jsonProperties)) {
+      if (typeof this[prop] === 'number' && typeof otherObj[prop] === 'number' && this[prop] === otherObj[prop]) {
         continue;
-      } else if ( !this[prop] && !otherObj[prop] ) {
+      }
+else if (!this[prop] && !otherObj[prop]) {
         continue;
       }
       return false;
@@ -66,12 +67,14 @@ export default class MHSocial {
         break;
     }
 
-    for(var prop of Object.keys(this.jsonProperties)) {
-      if ( prop === toChange ) {
+    for (var prop of Object.keys(this.jsonProperties)) {
+      if (prop === toChange) {
         newArgs[prop] = newValue;
-      } else if ( prop === alsoFlip ) {
+      }
+else if (prop === alsoFlip) {
         newArgs[prop] = !this[prop];
-      } else {
+      }
+else {
         newArgs[prop] = this[prop];
       }
     }

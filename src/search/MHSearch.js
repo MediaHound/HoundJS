@@ -9,7 +9,7 @@ export default class MHSearch {
     if (next) {
       promise = houndRequest({
         method: 'GET',
-        url: next,
+        url: next
       });
     }
     else {

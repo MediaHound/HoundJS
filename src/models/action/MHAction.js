@@ -10,7 +10,7 @@ export default class MHAction extends MHObject {
       metadata: MHActionMetadata,
       primaryOwner: { mapper: MHObject.create },
       primaryMention: { mapper: MHObject.create }
-    }
+    };
   }
 
   static get rootEndpoint() { return 'graph/action'; }
