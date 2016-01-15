@@ -23,7 +23,7 @@ export default class MHUser extends MHObject {
   static get rootEndpoint() { return 'graph/user'; }
 
   get isCurrentUser() {
-    var currentUser = System.get('../../src/models/user/MHLoginSession.js').MHLoginSession.currentUser;
+    const currentUser = require('./MHLoginSession.js').default.currentUser;
     //console.warn('circular dep: (currentUser) ', currentUser);
     return this.isEqualToMHObject(currentUser);
   }

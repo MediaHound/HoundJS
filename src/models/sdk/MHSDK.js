@@ -41,7 +41,7 @@ export default class MHSDK {
   }
 
   static refreshOAuthToken() {
-    var houndRequest = System.get('request/hound-request.js').houndRequest;
+    const houndRequest = require('../../request/hound-request.js').default;
 
     const auth = this.authHeaders();
 

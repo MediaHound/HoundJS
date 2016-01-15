@@ -18,6 +18,8 @@ import MHPost     from './models/action/MHPost.js';
 // Hashtag Models
 import MHHashtag  from './models/hashtag/MHHashtag.js';
 
+import MHImage  from './models/image/MHImage.js';
+
 // User Models
 import MHUser         from './models/user/MHUser.js';
 import MHLoginSession from './models/user/MHLoginSession.js';
@@ -109,6 +111,8 @@ module.exports = {
   MHPost,
 
   MHHashtag,
+
+  MHImage,
 
   MHUser,
   MHLoginSession,

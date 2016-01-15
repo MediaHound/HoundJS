@@ -256,35 +256,35 @@ export default class MHObject {
   //    instanceof only works if the object being checked was created
   //    in the same global scope as the constructor function it is being checked against
   static isMedia(toCheck) {
-    return toCheck instanceof System.get('models/media/MHMedia.js').MHMedia;
+    return toCheck instanceof require('../media/MHMedia.js').default;
   }
 
   static isContributor(toCheck) {
-    return toCheck instanceof System.get('models/contributor/MHContributor.js').MHContributor;
+    return toCheck instanceof require('../contributor/MHContributor.js').default;
   }
 
   static isAction(toCheck) {
-    return toCheck instanceof System.get('models/action/MHAction.js').MHAction;
+    return toCheck instanceof require('../action/MHAction.js').default;
   }
 
   static isUser(toCheck) {
-    return toCheck instanceof System.get('models/user/MHUser.js').MHUser;
+    return toCheck instanceof require('../user/MHUser.js').default;
   }
 
   static isCollection(toCheck) {
-    return toCheck instanceof System.get('models/collection/MHCollection.js').MHCollection;
+    return toCheck instanceof require('../collection/MHCollection.js').default;
   }
 
   static isImage(toCheck) {
-    return toCheck instanceof System.get('models/image/MHImage.js').MHImage;
+    return toCheck instanceof require('../image/MHImage.js').default;
   }
 
   static isTrait(toCheck) {
-    return toCheck instanceof System.get('models/trait/MHTrait.js').MHTrait;
+    return toCheck instanceof require('../trait/MHTrait.js').default;
   }
 
   static isSource(toCheck) {
-    return toCheck instanceof System.get('models/source/MHSource.js').MHSource;
+    return toCheck instanceof require('../source/MHSource.js').default;
   }
 
 
@@ -691,7 +691,7 @@ export default class MHObject {
     }
 
     var finalPromise = promise.then(response => {
-      var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
+      var MHPagedResponse = require('../container/MHPagedResponse.js').default;
       var pagedResponse = new MHPagedResponse(response);
 
       pagedResponse.fetchNextOperation = (newNext => {
@@ -735,7 +735,7 @@ export default class MHObject {
     }
 
     var finalPromise = promise.then(response => {
-      var MHPagedResponse = System.get('models/container/MHPagedResponse.js').MHPagedResponse;
+      var MHPagedResponse = require('../container/MHPagedResponse.js').default;
       var pagedResponse = new MHPagedResponse(response);
 
       pagedResponse.fetchNextOperation = (newNext => {
