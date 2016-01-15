@@ -1,9 +1,19 @@
 
 var _MHAccessToken = null;
+var _MHUserAccessToken = null;
 var _MHClientId = null;
 var _MHClientSecret = null;
 
-var _houndOrigin = 'https://api-v11.mediahound.com/';
+var _houndOrigin = 'https://api.mediahound.com/';
+
+// Use btoa from a browser or shim it in Ndoe with base64.
+var _btoa;
+if(typeof window !== 'undefined'){
+  _btoa = window.btoa;
+}
+else if(typeof window === 'undefined'){
+  _btoa = require("base-64").encode;
+}
 
 export class MHSDK {
 
@@ -26,25 +36,57 @@ export class MHSDK {
     return this.refreshOAuthToken();
   }
 
+  static authHeaders() {
+    return _btoa(_MHClientId + ":" + _MHClientSecret);
+  }
+
   static refreshOAuthToken() {
     var houndRequest = System.get('request/hound-request.js').houndRequest;
+
+    const auth = this.authHeaders();
+
     return houndRequest({
-      endpoint: 'cas/oauth2.0/accessToken',
-      params: {
+      method: 'POST',
+      useForms: true,
+      endpoint: 'security/oauth/token',
+      data: {
         client_id: _MHClientId,
         client_secret: _MHClientSecret,
-        grant_type: 'client_credentials'
+        grant_type: 'client_credentials',
+        scope: 'public_profile'
+      },
+      headers: {
+        Authorization: `Basic ${auth}`
       }
     }).then(function(response) {
-      _MHAccessToken = response.accessToken;
+      _MHAccessToken = response.access_token;
     });
   }
 
   static get MHAccessToken() {
+    if (_MHUserAccessToken) {
+      return _MHUserAccessToken;
+    }
     return _MHAccessToken;
+  }
+
+  static get clientId() {
+    return _MHClientId;
+  }
+
+  static get clientSecret() {
+    return _MHClientSecret;
   }
 
   static get origin() {
     return _houndOrigin;
+  }
+
+  static get apiVersion() {
+    return '1.2';
+  }
+
+  static _setUserAccessToken(accessToken) {
+    _MHUserAccessToken = accessToken;
   }
 }

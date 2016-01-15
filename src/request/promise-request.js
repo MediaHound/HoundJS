@@ -117,13 +117,50 @@ var extraEncode = function(str){
         } else if ( typeof Blob !== 'undefined' && data instanceof Blob){
           // do nothing
         } else {
-          data = JSON.stringify(data);
-          if( headers == null ){
-            headers = {
-              'Content-Type': 'application/json'
-            };
-          } else if( !headers['Content-Type'] && !headers['content-type'] && !headers['Content-type'] && !headers['content-Type'] ){
-            headers['Content-Type'] = 'application/json';
+          if (args.useForms) {
+            var dataUrl = "";
+            for( prop in data ){
+              if( data.hasOwnProperty(prop) ){
+                if( dataUrl.length !== 0 ){
+                  dataUrl += '&';
+                }
+                if( typeof data[prop] === 'string' || data[prop] instanceof String ){
+                  dataUrl += prop + '=' +data[prop];
+                }
+                else if (Array.isArray(data[prop]) || data[prop] instanceof Array ){
+                  for (var p2 of data[prop]) {
+                    dataUrl += prop + '=' + p2;
+                    dataUrl += '&';
+                  }
+
+                  if (data[prop].length > 0) {
+                    dataUrl = dataUrl.slice(0, -1); // Remove last & character
+                  }
+                }
+                else {
+                  dataUrl += prop + '=' + JSON.stringify(data[prop]);
+                }
+              }
+            }
+            data = dataUrl;
+
+            if( headers == null ){
+              headers = {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+              };
+            } else if( !headers['Content-Type'] && !headers['content-type'] && !headers['Content-type'] && !headers['content-Type'] ){
+              headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=utf-8';
+            }
+          }
+          else {
+            data = JSON.stringify(data);
+            if( headers == null ){
+              headers = {
+                'Content-Type': 'application/json'
+              };
+            } else if( !headers['Content-Type'] && !headers['content-type'] && !headers['Content-type'] && !headers['content-Type'] ){
+              headers['Content-Type'] = 'application/json';
+            }
           }
         }
       }
