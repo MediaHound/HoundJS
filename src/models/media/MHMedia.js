@@ -1,19 +1,19 @@
+import MHObject from '../base/MHObject.js';
 
-import { MHObject } from '../base/MHObject.js';
-
-import { MHRelationalPair } from '../container/MHRelationalPair.js';
+import MHRelationalPair from '../container/MHRelationalPair.js';
 import { MHMediaMetadata } from '../meta/MHMetadata.js';
 
-import { houndRequest } from '../../request/hound-request.js';
+import houndRequest from '../../request/hound-request.js';
 
 // MediaHound Media Object
-export class MHMedia extends MHObject {
+export default class MHMedia extends MHObject {
   get jsonProperties() {
-    return Object.assign({}, super.jsonProperties, {
+    return {
+      ...super.jsonProperties,
       metadata: MHMediaMetadata,
       keyContributors: [MHRelationalPair],
       primaryGroup: MHRelationalPair
-    });
+    };
   }
 
   static get rootEndpoint() { return 'graph/media'; }
@@ -26,8 +26,8 @@ export class MHMedia extends MHObject {
   *
   */
 
-  fetchContent(view='full', size=20, force=false){
-    var path = this.subendpoint('content');
+  fetchContent(view='full', size=20, force=false) {
+    const path = this.subendpoint('content');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
@@ -38,8 +38,8 @@ export class MHMedia extends MHObject {
    * @return { Promise } - resolves to
    *
    */
-  fetchSources(view='full', size=20, force=false){
-    var path = this.subendpoint('sources');
+  fetchSources(view='full', size=20, force=false) {
+    const path = this.subendpoint('sources');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
@@ -54,20 +54,20 @@ export class MHMedia extends MHObject {
   *
   */
 
-  fetchContributors(view='full', size=12, force=false){
-    var path = this.subendpoint('contributors');
+  fetchContributors(view='full', size=12, force=false) {
+    const path = this.subendpoint('contributors');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
   fetchIVATrailer() {
-    var path = this.subendpoint('ivaTrailer');
+    const path = this.subendpoint('ivaTrailer');
 
-    var cached = this.cachedResponseForPath(path);
+    const cached = this.cachedResponseForPath(path);
     if (cached) {
       return cached;
     }
 
-    var promise = houndRequest({
+    const promise = houndRequest({
       method: 'GET',
       endpoint: path
     });
@@ -89,13 +89,13 @@ export class MHMedia extends MHObject {
   * @return { houndPagedRequest }  - MediaHound paged request object for this feed
   *
   */
-  fetchRelated(view='full', size=12, force=false){
-    var path = this.subendpoint('related');
+  fetchRelated(view='full', size=12, force=false) {
+    const path = this.subendpoint('related');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
-  static fetchRelatedTo(medias, filters={}, view='full', size=12, force=false){
-    var factors = medias.map(m => {
+  static fetchRelatedTo(medias, filters={}, view='full', size=12, force=false) {
+    const factors = medias.map(m => {
       if (typeof m === 'string' || m instanceof String) {
         return m;
       }
@@ -106,8 +106,8 @@ export class MHMedia extends MHObject {
         return m;
       }
     });
-    var path = this.rootSubendpoint('related');
-    var params = {
+    const path = this.rootSubendpoint('related');
+    const params = {
       factors: JSON.stringify(factors),
       filters: JSON.stringify(filters)
     };
@@ -124,8 +124,8 @@ export class MHMedia extends MHObject {
   *                       If there is no path between the two objects, returns `null`.
   *
   */
-  fetchShortestDistance(otherMhid){
-    var path = this.subendpoint('shortestPath/' + otherMhid);
+  fetchShortestDistance(otherMhid) {
+    const path = this.subendpoint('shortestPath/' + otherMhid);
     return houndRequest({
       method: 'GET',
       endpoint: path

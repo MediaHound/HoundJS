@@ -1,7 +1,6 @@
-
 import { jsonCreateWithArgs } from '../internal/jsonParse.js';
 
-export class MHPagingInfo {
+export default class MHPagingInfo {
   constructor(args) {
     jsonCreateWithArgs(args, this);
   }

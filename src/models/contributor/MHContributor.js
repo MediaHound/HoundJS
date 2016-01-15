@@ -1,14 +1,14 @@
-
-import { MHObject } from '../base/MHObject.js';
+import MHObject from '../base/MHObject.js';
 import { MHContributorMetadata } from '../meta/MHMetadata.js';
 
 // MediaHound Contributor Object
-export class MHContributor extends MHObject {
+export default class MHContributor extends MHObject {
 
   get jsonProperties() {
-    return Object.assign({}, super.jsonProperties, {
+    return {
+      ...super.jsonProperties,
       metadata: MHContributorMetadata
-    });
+    };
   }
 
   /*
@@ -31,7 +31,7 @@ export class MHContributor extends MHObject {
    * TODO DocJS
    */
    fetchMedia(view='full', size=12, force=false) {
-     var path = this.subendpoint('media');
+     const path = this.subendpoint('media');
      return this.fetchPagedEndpoint(path, view, size, force);
    }
 }

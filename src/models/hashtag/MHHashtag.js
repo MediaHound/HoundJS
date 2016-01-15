@@ -1,17 +1,17 @@
-
-import { MHObject } from '../base/MHObject.js';
-import { houndRequest } from '../../request/hound-request.js';
+import MHObject from '../base/MHObject.js';
+import houndRequest from '../../request/hound-request.js';
 import { MHHashtagMetadata } from '../meta/MHMetadata.js';
 
-export class MHHashtag extends MHObject {
+export default class MHHashtag extends MHObject {
 
   static get mhidPrefix()   { return 'mhhtg'; }
   static get rootEndpoint() { return 'graph/hashtag'; }
 
   get jsonProperties() {
-    return Object.assign({}, super.jsonProperties, {
+    return {
+      ...super.jsonProperties,
       metadata: MHHashtagMetadata
-    });
+    };
   }
 
   /**
@@ -23,8 +23,8 @@ export class MHHashtag extends MHObject {
   * @return { Promise } - resolves to the MHUser object
   *
   */
-  static fetchByName(name, view='full' /*, force=false*/){
-    if( !name || (typeof name !== 'string' && !(name instanceof String)) ){
+  static fetchByName(name, view='full' /*, force=false*/) {
+    if (!name || (typeof name !== 'string' && !(name instanceof String))) {
       throw new TypeError('Hashtag not of type String in fetchByTag');
     }
 
@@ -37,13 +37,11 @@ export class MHHashtag extends MHObject {
         view: view
       }
     })
-    .then(function(response){
+    .then(function(response) {
       var newObj = MHObject.create(response);
       return newObj;
     });
   }
 }
 
-(function(){
-  MHObject.registerConstructor(MHHashtag, 'MHHashtag');
-})();
+MHObject.registerConstructor(MHHashtag, 'MHHashtag');

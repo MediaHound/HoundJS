@@ -1,29 +1,29 @@
-
 import { log } from '../internal/debug-helpers.js';
 
-import { MHObject } from '../base/MHObject.js';
-import { MHAction } from '../action/MHAction.js';
-import { MHLoginSession } from '../user/MHLoginSession.js';
+import MHObject from '../base/MHObject.js';
+import MHAction from '../action/MHAction.js';
+import MHLoginSession from '../user/MHLoginSession.js';
 import { MHCollectionMetadata } from '../meta/MHMetadata.js';
 
-import { houndRequest } from '../../request/hound-request.js';
+import houndRequest from '../../request/hound-request.js';
 
 /**
  * @classdesc Mediahound Collection Object (MHCollection) inherits from MHObject
  */
-export class MHCollection extends MHObject {
+export default class MHCollection extends MHObject {
 
   get jsonProperties() {
-    return Object.assign({}, super.jsonProperties, {
+    return {
+      ...super.jsonProperties,
       metadata: MHCollectionMetadata,
       firstContentImage: { mapper: MHObject.create },
       primaryOwner: { mapper: MHObject.create }
-    });
+    };
   }
 
   // Static Mixlist enums
   static get MIXLIST_TYPE_NONE()   { return 'none'; }
-  static get MIXLIST_TYPE_PARTIAL(){ return 'partial'; }
+  static get MIXLIST_TYPE_PARTIAL() { return 'partial'; }
   static get MIXLIST_TYPE_FULL()   { return 'full'; }
 
 
@@ -35,14 +35,14 @@ export class MHCollection extends MHObject {
    * @returns {Promise<MHCollection>} - a Promise that resolves to the newly created MHCollection
    * @static
    */
-  static createWithName(name, description){
+  static createWithName(name, description) {
     var path = this.rootSubendpoint('new');
     var data = {};
 
-    if (name){
+    if (name) {
       data.name = name;
     }
-    if (description){
+    if (description) {
       data.description = description;
     }
 
@@ -51,12 +51,12 @@ export class MHCollection extends MHObject {
         endpoint: path,
         data: data
       })
-      .then(function(response){
+      .then(function(response) {
         return MHObject.fetchByMhid(response.metadata.mhid);
       })
-      .then(function(newCollection){
-        if( MHLoginSession.openSession ){
-          MHLoginSession.currentUser.fetchOwnedCollections("full",12,true);
+      .then(function(newCollection) {
+        if (MHLoginSession.openSession) {
+          MHLoginSession.currentUser.fetchOwnedCollections('full',12,true);
         }
         return newCollection;
       });
@@ -68,18 +68,18 @@ export class MHCollection extends MHObject {
   * @returns {Promise<MHCollection>} - a Promise that resolves to the newly created MHCollection
   * @static
   */
-  editMetaData(name, description){
+  editMetaData(name, description) {
     var path = this.subendpoint('update'),
     data = {};
 
-    if(description){
+    if (description) {
       data = {
-        "name":name,
-        "description":description
+        'name':name,
+        'description':description
       };
     }
-    else if(name){
-      data = { "name":name };
+    else if (name) {
+      data = { 'name':name };
     }
 
     return houndRequest({
@@ -87,12 +87,12 @@ export class MHCollection extends MHObject {
       endpoint: path,
       data: data
     })
-    .then(function(response){
+    .then(function(response) {
       return MHObject.fetchByMhid(response.metadata.mhid);
     })
-    .then(function(newCollection){
-      if( MHLoginSession.openSession ){
-        MHLoginSession.currentUser.fetchOwnedCollections("full",12,true);
+    .then(function(newCollection) {
+      if (MHLoginSession.openSession) {
+        MHLoginSession.currentUser.fetchOwnedCollections('full',12,true);
       }
       return newCollection;
     });
@@ -101,7 +101,7 @@ export class MHCollection extends MHObject {
    * @param {MHMedia} - a MHMedia object to add to this collection
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
-  addContent(content){
+  addContent(content) {
     return this.addContents([content]);
   }
 
@@ -109,7 +109,7 @@ export class MHCollection extends MHObject {
    * @param {Array<MHMedia>} - an Array of MHMedia objects to add to this collection
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
-  addContents(contents){
+  addContents(contents) {
     return this.changeContents(contents, 'add');
   }
 
@@ -117,7 +117,7 @@ export class MHCollection extends MHObject {
    * @param {MHMedia} - a MHMedia object to remove from this collection
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
-  removeContent(content){
+  removeContent(content) {
     return this.removeContents([content]);
   }
 
@@ -125,7 +125,7 @@ export class MHCollection extends MHObject {
    * @param {Array<MHMedia>} - an Array of MHMedia objects to remove from this collection
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
-  removeContents(contents){
+  removeContents(contents) {
     return this.changeContents(contents, 'remove');
   }
 
@@ -135,25 +135,26 @@ export class MHCollection extends MHObject {
    * @param {string} sub - the subendpoint string, 'add' or 'remove'
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
-  changeContents(contents, sub){
-    if( !Array.isArray(contents) ){
+  changeContents(contents, sub) {
+    if (!Array.isArray(contents)) {
       throw new TypeError('Contents must be an array in changeContents');
     }
-    if( typeof sub !== 'string' || (sub !== 'add' && sub !== 'remove') ){
+    if (typeof sub !== 'string' || (sub !== 'add' && sub !== 'remove')) {
       throw new TypeError('Subendpoint must be add or remove');
     }
 
     var path = this.subendpoint(sub),
         mhids = contents.map(v => {
-          if( v instanceof MHObject){
-            if(!(v instanceof MHAction)){
+          if (v instanceof MHObject) {
+            if (!(v instanceof MHAction)) {
               return v.mhid;
             }
-            else{
+            else {
               console.error('MHActions including like, favorite, create, and post cannot be collected. Please resubmit with actual content.');
             }
 
-          } else if ( typeof v === 'string' && MHObject.prefixes.indexOf(MHObject.getPrefixFromMhid(v)) > -1 ){
+          }
+else if (typeof v === 'string' && MHObject.prefixes.indexOf(MHObject.getPrefixFromMhid(v)) > -1) {
             // TODO double check this if statement
             return v;
           }
@@ -162,7 +163,7 @@ export class MHCollection extends MHObject {
 
     // invalidate mixlistPromise
     this.mixlistPromise = null;
-    if(mhids.length > -1){
+    if (mhids.length > -1) {
 
       log('content array to be submitted: ', mhids);
 
@@ -174,14 +175,14 @@ export class MHCollection extends MHObject {
         }
       })
       .catch( (err => { this.content = null; throw err; }).bind(this) )
-      .then(function(response){
+      .then(function(response) {
         // fetch social for original passed in mhobjs
         contents.forEach(v => typeof v.fetchSocial === 'function' && v.fetchSocial(true));
         return response;
       }));
 
     }
-    else{
+    else {
       console.error('To add or remove content from a Collection the content array must include at least one MHObject');
     }
 
@@ -191,13 +192,13 @@ export class MHCollection extends MHObject {
    * @param {boolean} force - whether to force a call to the server instead of using the cached ownersPromise
    * @returns {Promise} - a promise that resolves to a list of mhids for the owners of this MHCollection
    */
-  fetchOwners(view='full', size=12, force=false){
-    var path = this.subendpoint('owners');
+  fetchOwners(view='full', size=12, force=false) {
+    const path = this.subendpoint('owners');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
-  fetchContent(view='full', size=12, force=false){
-    var path = this.subendpoint('content');
+  fetchContent(view='full', size=12, force=false) {
+    const path = this.subendpoint('content');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
@@ -205,12 +206,10 @@ export class MHCollection extends MHObject {
    * @param {boolean} force - whether to force a call to the server instead of using the cached mixlistPromise
    * @returns {Promise} - a promise that resolves to the list of mixlist content for this MHCollection
    */
-  fetchMixlist(view='full', size=20, force=false){
-    var path = this.subendpoint('mixlist');
+  fetchMixlist(view='full', size=20, force=false) {
+    const path = this.subendpoint('mixlist');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 }
 
-(function(){
-  MHObject.registerConstructor(MHCollection, 'MHCollection');
-})();
+MHObject.registerConstructor(MHCollection, 'MHCollection');

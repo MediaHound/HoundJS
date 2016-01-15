@@ -1,6 +1,6 @@
 import { jsonCreateWithArgs } from '../internal/jsonParse.js';
 
-export class MHSorting {
+export default class MHSorting {
   constructor(args) {
     jsonCreateWithArgs(args, this);
   }

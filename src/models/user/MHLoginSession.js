@@ -1,19 +1,19 @@
 
 import { log, warn, error } from '../internal/debug-helpers.js';
 
-import { MHObject, mhidLRU } from '../base/MHObject.js';
-import { MHUser } from './MHUser.js';
-import { MHSDK } from '../sdk/MHSDK.js';
+import MHObject, { mhidLRU } from '../base/MHObject.js';
+import MHUser from './MHUser.js';
+import MHSDK from '../sdk/MHSDK.js';
 
-import { houndRequest } from '../../request/hound-request.js';
+import houndRequest from '../../request/hound-request.js';
 
 /* taken from iOS
  *
- *  NSString* const MHLoginSessionUserProfileImageDidChange = @"LoginSessionUserProfileImageDidChange";
+ *  NSString* const MHLoginSessionUserProfileImageDidChange = @'LoginSessionUserProfileImageDidChange';
  *
  */
 
-var makeEvent = function(name, options){
+var makeEvent = function(name, options) {
   var evt;
   options.bubbles     = options.bubbles     || false;
   options.cancelable  = options.cancelable  || false;
@@ -44,7 +44,7 @@ var makeEvent = function(name, options){
  *
  */
 class MHUserLoginEvent {
-  static create(mhUserObj){
+  static create(mhUserObj) {
     return makeEvent('mhUserLogin', {
       bubbles:    false,
       cancelable: false,
@@ -56,7 +56,7 @@ class MHUserLoginEvent {
 }
 
 class MHUserLogoutEvent {
-  static create(mhUserObj){
+  static create(mhUserObj) {
     return makeEvent('mhUserLogout', {
       bubbles:    false,
       cancelable: false,
@@ -68,7 +68,7 @@ class MHUserLogoutEvent {
 }
 
 // class MHSessionUserProfileImageChange {
-//   static create(mhUserObj){
+//   static create(mhUserObj) {
 //     return makeEvent('mhSessionUserProfileImageChange', {
 //       bubbles:    false,
 //       cancelable: false,
@@ -86,10 +86,10 @@ var loggedInUser  = null,
     count         = null;
 
 // Hidden Restore from Storage function
-var restoreFromSessionStorage = function(){
+var restoreFromSessionStorage = function() {
   var inStorage = window.sessionStorage.currentUser;
 
-  if( inStorage ){
+  if (inStorage) {
     //loggedInUser = MHObject.create(inStorage);
     return true;
   }
@@ -98,7 +98,7 @@ var restoreFromSessionStorage = function(){
 
 // MediaHound Login Session Singleton
 /** @class MHLoginSession */
-export class MHLoginSession {
+export default class MHLoginSession {
 
   static loginDialogURLWithRedirectURL(redirectUrl) {
     return MHSDK.origin + MHSDK.apiVersion + `/security/oauth/authorize?client_id=${MHSDK.clientId}&client_secret=${MHSDK.clientSecret}&scope=public_profile&response_type=token&redirect_uri=${redirectUrl}`;
@@ -135,7 +135,7 @@ export class MHLoginSession {
    * @property {MHUser}
    * @static
    */
-  static get currentUser(){
+  static get currentUser() {
     return loggedInUser;
   }
 
@@ -144,7 +144,7 @@ export class MHLoginSession {
    * @property {Boolean}
    * @static
    */
-  static get openSession(){
+  static get openSession() {
     return loggedInUser instanceof MHUser;
   }
 
@@ -152,7 +152,7 @@ export class MHLoginSession {
    * If the currently logged in user has gone through the onboarding process.
    * @property {Boolean|null} onboarded
    */
-  static get onboarded(){
+  static get onboarded() {
     return onboarded;
   }
 
@@ -160,7 +160,7 @@ export class MHLoginSession {
    * If the currently logged in user has access to the application.
    * @property {Boolean|null} access
    */
-  static get access(){
+  static get access() {
     return access;
   }
 
@@ -168,11 +168,11 @@ export class MHLoginSession {
    * The count of users in the system
    * @returns {number}
    */
-  static get count(){
+  static get count() {
     return count;
   }
 
-  static updateCount(){
+  static updateCount() {
     return houndRequest({
         method:   'GET',
         endpoint: MHUser.rootEndpoint + '/count'
@@ -194,10 +194,10 @@ export class MHLoginSession {
    * @param  {MHUser} updatedUser
    * @returns {Boolean}
    */
-  // static updatedProfileImage(updatedImage){
+  // static updatedProfileImage(updatedImage) {
   //   console.log('updatedUploadImage: ', updatedUser, updatedUser instanceof MHUser, updatedUser.hasMhid(loggedInUser.mhid));
-  //   if( !(updatedUser instanceof MHUser) || !updatedUser.hasMhid(loggedInUser.mhid) ){
-  //     throw new TypeError("Updated Profile Image must be passed a new MHUser Object that equals the currently logged in user");
+  //   if (!(updatedUser instanceof MHUser) || !updatedUser.hasMhid(loggedInUser.mhid)) {
+  //     throw new TypeError('Updated Profile Image must be passed a new MHUser Object that equals the currently logged in user');
   //   }
   //
   //   loggedInUser = updatedUser;
@@ -211,7 +211,7 @@ export class MHLoginSession {
   // }
 
   // DEPRECATED: Use MHUser.updateSettings() instead.
-  // static completedOnboarding(){
+  // static completedOnboarding() {
   //   var path = MHUser.rootEndpoint + '/onboard';
   //   return houndRequest({
   //       method            : 'POST',
@@ -234,12 +234,12 @@ export class MHLoginSession {
    *
    *  @return {Promise<MHUser>} - resolves to MHUser object of logged in user
    */
-  static login(username, password){
-    if( typeof username !== 'string' && !(username instanceof String) ){
+  static login(username, password) {
+    if (typeof username !== 'string' && !(username instanceof String)) {
       throw new TypeError('Username not of type string in MHUser.login');
     }
 
-    if( typeof password !== 'string' && !(password instanceof String) ){
+    if (typeof password !== 'string' && !(password instanceof String)) {
       throw new TypeError('Password not of type string in MHUser.login');
     }
 
@@ -257,17 +257,17 @@ export class MHLoginSession {
         headers: {}
       })
       .then(loginMap => {
-        if(!loginMap.Error){
-          return MHObject.fetchByMhid(loginMap.mhid).then(function(mhUser){
+        if (!loginMap.Error) {
+          return MHObject.fetchByMhid(loginMap.mhid).then(function(mhUser) {
             return [loginMap,mhUser];
           });
         }
-        else{
+        else {
           throw new Error(loginMap.Error);
         }
       })
       .then(mhUserMap => {
-        if(mhUserMap[0].access === false){
+        if (mhUserMap[0].access === false) {
 
           mhUserMap[1].settings = {
             onboarded: mhUserMap[0].onboarded,
@@ -276,8 +276,8 @@ export class MHLoginSession {
           return mhUserMap[1];
 
         }
-        else{
-          return MHUser.fetchSettings(mhUserMap[1].mhid).then(function(settings){
+        else {
+          return MHUser.fetchSettings(mhUserMap[1].mhid).then(function(settings) {
             mhUserMap[1].settings = settings;
             return mhUserMap[1];
           });
@@ -289,17 +289,17 @@ export class MHLoginSession {
         onboarded = user.onboarded = user.settings.onboarded;
         loggedInUser = user;
 
-        if(typeof window !== 'undefined'){
+        if (typeof window !== 'undefined') {
           window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         }
-        if(typeof sessionStorage !== 'undefined'){
+        if (typeof sessionStorage !== 'undefined') {
           sessionStorage.currentUser = JSON.stringify(loggedInUser);
         }
 
         log('logging in:',loggedInUser);
         return loggedInUser;
       })
-      .catch(function(error){
+      .catch(function(error) {
         //console.error('Error on MHLoginSession.login', error.error, 'xhr: ', error.xhr);
         throw new Error(error);
       });
@@ -310,7 +310,7 @@ export class MHLoginSession {
    *
    * @returns {Promise} - resolves to user that just logged out.
    */
-  static logout(){
+  static logout() {
     var currentCookies = document.cookie.split('; ').map(c => {
       var keyVal = c.split('=');
       return {
@@ -322,14 +322,14 @@ export class MHLoginSession {
     window.sessionStorage.currentUser = null;
 
     currentCookies.forEach(cookie => {
-      if( cookie.key === 'JSESSIONID' ){
+      if (cookie.key === 'JSESSIONID') {
         var expires = (new Date(0)).toGMTString();
         document.cookie = `${cookie.key}=${cookie.value}; expires=${expires}; domain=.mediahound.com`;
       }
     });
 
     // Dispatch logout event
-    if(typeof window !== undefined){
+    if (typeof window !== undefined) {
       window.dispatchEvent(MHUserLogoutEvent.create(loggedInUser));
     }
 
@@ -337,7 +337,7 @@ export class MHLoginSession {
     mhidLRU.removeAll();
 
     return Promise.resolve(loggedInUser)
-      .then(function(mhUser){
+      .then(function(mhUser) {
         loggedInUser  = null;
         access        = false;
         onboarded     = false;
@@ -348,7 +348,7 @@ export class MHLoginSession {
   /**
    * @returns {Promise} - resolves to the user that has an open session.
    */
-  static validateOpenSession(view="full"){
+  static validateOpenSession(view='full') {
     var path = MHUser.rootEndpoint + '/validateSession';
 
     return houndRequest({
@@ -362,11 +362,11 @@ export class MHLoginSession {
       })
       .then(loginMap => {
 
-        if( typeof window !== 'undefined' && typeof sessionStorage !== 'undefined' && restoreFromSessionStorage()){
+        if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined' && restoreFromSessionStorage()) {
 
           var cachedUser = JSON.parse(window.sessionStorage.currentUser);
-          if(cachedUser.mhid === loginMap.users[0].metadata.mhid ||
-             cachedUser.mhid === loginMap.users[0].mhid){
+          if (cachedUser.mhid === loginMap.users[0].metadata.mhid ||
+             cachedUser.mhid === loginMap.users[0].mhid) {
 
                access = cachedUser.settings.access;
                onboarded = cachedUser.settings.onboarded;
@@ -374,12 +374,12 @@ export class MHLoginSession {
 
          }
         }
-        else{
+        else {
           return MHObject.create(loginMap.users[0]);
         }
 
       })
-      .then(function(user){
+      .then(function(user) {
         // loggedInUser.access = access;
         // loggedInUser.onboarded = onboarded;
         loggedInUser = user;
@@ -387,8 +387,8 @@ export class MHLoginSession {
         window.dispatchEvent(MHUserLoginEvent.create(loggedInUser));
         return loggedInUser;
       })
-      .catch(function(error){
-        if( error.xhr.status === 401 ){
+      .catch(function(error) {
+        if (error.xhr.status === 401) {
           console.log('No open MediaHound session');
         }
         return error;

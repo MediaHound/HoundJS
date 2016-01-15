@@ -1,9 +1,8 @@
-
 import { jsonCreateWithArgs } from '../internal/jsonParse.js';
-import { MHSourceFormat } from './MHSourceFormat.js';
+import MHSourceFormat from './MHSourceFormat.js';
 
 // MediaHound SourceMethod Object
-export class MHSourceMethod {
+export default class MHSourceMethod {
   constructor(args) {
     jsonCreateWithArgs(args, this);
   }

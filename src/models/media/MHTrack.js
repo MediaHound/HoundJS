@@ -1,13 +1,10 @@
-
-import { MHObject } from '../base/MHObject.js';
-import { MHMedia } from './MHMedia.js';
+import MHObject from '../base/MHObject.js';
+import MHMedia from './MHMedia.js';
 
 // MediaHound Track Object
-export class MHTrack extends MHMedia {
+export default class MHTrack extends MHMedia {
   static get mhidPrefix() { return 'mhsng'; }
 }
 
-(function(){
-  MHObject.registerConstructor(MHTrack, 'MHTrack');
-})();
+MHObject.registerConstructor(MHTrack, 'MHTrack');
 

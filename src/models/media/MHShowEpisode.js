@@ -1,12 +1,9 @@
-
-import { MHObject } from '../base/MHObject.js';
-import { MHMedia } from './MHMedia.js';
+import MHObject from '../base/MHObject.js';
+import MHMedia from './MHMedia.js';
 
 // MediaHound ShowEpisode Object
-export class MHShowEpisode extends MHMedia {
+export default class MHShowEpisode extends MHMedia {
   static get mhidPrefix() { return 'mhsep'; }
 }
 
-(function(){
-  MHObject.registerConstructor(MHShowEpisode, 'MHShowEpisode');
-})();
+MHObject.registerConstructor(MHShowEpisode, 'MHShowEpisode');

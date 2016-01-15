@@ -8,14 +8,14 @@ var _houndOrigin = 'https://api.mediahound.com/';
 
 // Use btoa from a browser or shim it in Ndoe with base64.
 var _btoa;
-if(typeof window !== 'undefined'){
+if (typeof window !== 'undefined') {
   _btoa = window.btoa;
 }
-else if(typeof window === 'undefined'){
-  _btoa = require("base-64").encode;
+else if (typeof window === 'undefined') {
+  _btoa = require('base-64').encode;
 }
 
-export class MHSDK {
+export default class MHSDK {
 
   /**
    * MHSDK.create(clientId, clientSecret)
@@ -37,11 +37,11 @@ export class MHSDK {
   }
 
   static authHeaders() {
-    return _btoa(_MHClientId + ":" + _MHClientSecret);
+    return _btoa(_MHClientId + ':' + _MHClientSecret);
   }
 
   static refreshOAuthToken() {
-    var houndRequest = System.get('request/hound-request.js').houndRequest;
+    const houndRequest = require('../../request/hound-request.js').default;
 
     const auth = this.authHeaders();
 
