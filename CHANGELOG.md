@@ -2,6 +2,11 @@
 
 * No updates in master.
 
+## 0.5.0 (2015-01-15)
+
+* Use Babel for ES2015 transpilation
+* Does not generate a single hound.js file anymore
+
 ## 0.4.0 (2015-01-15)
 
 * API 1.2 support
