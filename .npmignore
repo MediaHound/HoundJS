@@ -1,4 +1,6 @@
-lib
+src
+test
+Images
 .idea
 .DS_Store
 node_modules
