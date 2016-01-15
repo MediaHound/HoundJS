@@ -24,8 +24,8 @@ import { log } from './debug-helpers.js';
 
 var keymapSym = Symbol('keymap');
 
-export class MHCache {
-  constructor(limit){
+export default class MHCache {
+  constructor(limit) {
     // Current size of the cache.
     this.size = 0;
 
@@ -67,11 +67,11 @@ export class MHCache {
   }
 
   // convenience for putting an MHObject
-  putMHObj(mhObj){
-    if( mhObj && mhObj.metadata.mhid && mhObj.metadata.username ){
+  putMHObj(mhObj) {
+    if ( mhObj && mhObj.metadata.mhid && mhObj.metadata.username ) {
       return this.put(mhObj.metadata.mhid, mhObj, mhObj.metadata.username);
     }
-    if( mhObj && mhObj.metadata.mhid ){
+    if ( mhObj && mhObj.metadata.mhid ) {
       return this.put(mhObj.metadata.mhid, mhObj, mhObj.metadata.altId);
     }
   }
@@ -90,8 +90,8 @@ export class MHCache {
    *     return entry;
    *   }
    */
-  shift(){
-    // todo: handle special case when limit == 1
+  shift() {
+    // todo: handle special case when limit === 1
     var entry = this.head;
     if (entry) {
       if (this.head.newer) {
@@ -114,7 +114,7 @@ export class MHCache {
    * Get and register recent use of <key>. Returns the value associated with <key>
    * or undefined if not in cache.
    */
-  get(key){
+  get(key) {
     // First, find our cache entry
     var entry = this[keymapSym][key];
     if (entry === undefined) { return; } // Not cached. Sorry.
@@ -139,7 +139,7 @@ export class MHCache {
     }
     entry.newer = undefined; // D --x
     entry.older = this.tail; // D. --> E
-    if (this.tail){
+    if (this.tail) {
       this.tail.newer = entry; // E. <-- D
     }
     this.tail = entry;
@@ -152,10 +152,10 @@ export class MHCache {
    * @param altId
    * @returns {MHObject|undefined}
    */
-  getByAltId(altId){
+  getByAltId(altId) {
     var entry = this.tail;
-    while(entry){
-      if( entry.altId === altId){
+    while(entry) {
+      if ( entry.altId === altId) {
         log('found altId ' + altId + ', getting from cache');
         return this.get(entry.key);
       }
@@ -165,10 +165,10 @@ export class MHCache {
 
   /**
    * Check if <key> is in the cache without registering recent use. Feasible if
-   * you do not want to change the state of the cache, but only "peek" at it.
+   * you do not want to change the state of the cache, but only 'peek' at it.
    * Returns the entry associated with <key> if found, or undefined if not found.
    */
-  find(key){
+  find(key) {
     return this[keymapSym][key];
   }
 
@@ -176,7 +176,7 @@ export class MHCache {
    * Check if <key> is in the cache without registering recent use.
    * Returns true if key exists.
    */
-  has(key){
+  has(key) {
     return this[keymapSym][key] !== undefined;
   }
 
@@ -185,10 +185,10 @@ export class MHCache {
    * @param altId
    * @returns {boolean}
    */
-  hasAltId(altId){
+  hasAltId(altId) {
     var entry = this.tail;
-    while(entry){
-      if( entry.altId === altId ){
+    while(entry) {
+      if ( entry.altId === altId ) {
         return true;
       }
       entry = entry.older;
@@ -200,7 +200,7 @@ export class MHCache {
    * Remove entry <key> from cache and return its value. Returns undefined if not
    * found.
    */
-  remove(key){
+  remove(key) {
     var entry = this[keymapSym][key];
     if (!entry) { return; }
     delete this[keymapSym][entry.key];
@@ -227,7 +227,7 @@ export class MHCache {
   }
 
   /** Removes all entries */
-  removeAll(){
+  removeAll() {
     // This should be safe, as we never expose strong references to the outside
     this.head = this.tail = undefined;
     this.size = 0;
@@ -238,12 +238,12 @@ export class MHCache {
    * Get all keys stored in keymap
    * Array returned is in an arbitrary order
    */
-  keys(){
+  keys() {
     return Object.keys(this[keymapSym]);
   }
 
-  forEach(callback){
-    if( typeof callback === 'function' ){
+  forEach(callback) {
+    if ( typeof callback === 'function' ) {
       var entry = this.head,
           index = 0;
       while (entry) {
@@ -262,11 +262,11 @@ export class MHCache {
    * objects are JSON.stringiy-ed with promise properties removed
    *
    */
-  saveToLocalStorage(storageKey='mhLocalCache'){
+  saveToLocalStorage(storageKey='mhLocalCache') {
     var arr = [],
         entry = this.head,
-        replacer = function(key, value){
-          if( (/promise|request/gi).test(key) ){
+        replacer = function(key, value) {
+          if ( (/promise|request/gi).test(key) ) {
             return;
           }
           return value;
@@ -285,20 +285,20 @@ export class MHCache {
    * Fill cache localStorage.mhLocalCache
    * @param {string='mhLocalCache'} storageKey
    */
-  restoreFromLocalStorage(storageKey='mhLocalCache'){
+  restoreFromLocalStorage(storageKey='mhLocalCache') {
     var MHObject = System.get('../../src/models/base/MHObject.js').MHObject;
     //console.log('circular dep: ', MHObject);
 
-    if( !localStorage || typeof localStorage[storageKey] === 'undefined' ){
+    if ( !localStorage || typeof localStorage[storageKey] === 'undefined' ) {
       log('nothing stored');
       return;
     }
     var i = 0, curr,
         stored = JSON.parse(localStorage[storageKey]);
 
-    for( ; i < stored.length ; i++ ){
+    for( ; i < stored.length ; i++ ) {
       curr = MHObject.create(stored[i]);
-      if( curr && !this.has(curr.metadata.mhid) ){
+      if ( curr && !this.has(curr.metadata.mhid) ) {
         log('adding to cache: ', curr);
         this.putMHObj(curr);
       }

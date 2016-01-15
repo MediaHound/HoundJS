@@ -1,7 +1,7 @@
 import { jsonCreateWithArgs } from '../internal/jsonParse.js';
-import { MHObject } from '../base/MHObject.js';
+import MHObject from '../base/MHObject.js';
 
-export class MHRelationship {
+export default class MHRelationship {
   constructor(args) {
     jsonCreateWithArgs(args, this);
   }

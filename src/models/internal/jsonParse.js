@@ -1,5 +1,5 @@
 
-var mapValueToType = function(rawValue, type) {
+const mapValueToType = (rawValue, type) => {
   var initialValue = null;
 
   if (typeof type === 'object') {
@@ -45,13 +45,13 @@ var mapValueToType = function(rawValue, type) {
   else if (type === Date) {
     initialValue = new Date(rawValue * 1000);
 
-    if(isNaN(initialValue)) {
+    if (isNaN(initialValue)) {
       initialValue = null;
     }
-    else if(initialValue === 'Invalid Date') {
+    else if (initialValue === 'Invalid Date') {
       initialValue = null;
     }
-    else{
+    else {
       initialValue = new Date(initialValue.valueOf() + initialValue.getTimezoneOffset() * 60000);
     }
   }
@@ -62,7 +62,7 @@ var mapValueToType = function(rawValue, type) {
   return initialValue;
 };
 
-var setPropertyFromArgs = function(args, obj, name, type, optional, merge) {
+const setPropertyFromArgs = (args, obj, name, type, optional, merge) => {
   if (!obj[name]) {
     var rawValue = args[name];
     var convertedValue = mapValueToType(rawValue, type);
@@ -87,10 +87,10 @@ var setPropertyFromArgs = function(args, obj, name, type, optional, merge) {
   }
 };
 
-var jsonParseArgs = function(args, obj, merge) {
+const jsonParseArgs = (args, obj, merge) => {
   var properties = obj.jsonProperties;
   for (var name in properties) {
-    if(properties.hasOwnProperty(name)) {
+    if (properties.hasOwnProperty(name)) {
       var value = properties[name];
 
       var optional = true;
@@ -119,14 +119,14 @@ var jsonParseArgs = function(args, obj, merge) {
   }
 };
 
-export var jsonCreateWithArgs = function(args, obj) {
+export const jsonCreateWithArgs = (args, obj) => {
   jsonParseArgs(args, obj, false);
 };
 
-export var jsonMergeWithArgs = function(args, obj) {
+export const jsonMergeWithArgs = (args, obj) => {
   jsonParseArgs(args, obj, true);
 };
 
-export var jsonCreateFromArrayData = function(arr, type) {
+export const jsonCreateFromArrayData = (arr, type) => {
   return mapValueToType(arr, type);
 };

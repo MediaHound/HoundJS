@@ -1,8 +1,7 @@
-
 import { jsonCreateWithArgs } from '../internal/jsonParse.js';
 
 // MediaHound SourceFormat Object
-export class MHSourceFormat {
+export default class MHSourceFormat {
   constructor(args) {
     jsonCreateWithArgs(args, this);
   }
@@ -18,7 +17,7 @@ export class MHSourceFormat {
     };
   }
 
-  get displayPrice(){
+  get displayPrice() {
     return '$' + this.price;
   }
 }

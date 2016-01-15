@@ -2,11 +2,11 @@
 import { log, warn, error } from '../internal/debug-helpers.js';
 import { jsonCreateWithArgs, jsonMergeWithArgs } from '../internal/jsonParse.js';
 
-import { houndRequest } from '../../request/hound-request.js';
+import houndRequest from '../../request/hound-request.js';
 
-import { MHCache } from '../internal/MHCache.js';
+import MHCache from '../internal/MHCache.js';
 import { MHMetadata } from '../meta/MHMetadata.js';
-import { MHSocial } from '../social/MHSocial.js';
+import MHSocial from '../social/MHSocial.js';
 
 var childrenConstructors = {};
 var __cachedRootResponses = {};
@@ -14,8 +14,8 @@ var __cachedRootResponses = {};
 // Create Cache
 export var mhidLRU = new MHCache(1000);
 
-if(typeof window !== 'undefined'){
-  if( window.location.host === 'local.mediahound.com:2014' ){
+if (typeof window !== 'undefined') {
+  if ( window.location.host === 'local.mediahound.com:2014' ) {
     window.mhidLRU = mhidLRU;
   }
 }
@@ -27,7 +27,7 @@ var lastSocialRequestIdSym = Symbol('lastSocialRequestId'),
 // TODO: editable primary and secondary image properties using Symbols
 
 // Base MediaHound Object
-export class MHObject {
+export default class MHObject {
 
   /** MHObject Constructor
    *  @constructor
@@ -65,11 +65,11 @@ export class MHObject {
   }
 
   /** @property {MHSocial} social */
-  get social(){
+  get social() {
     return this[socialSym] || null;
   }
-  set social(newSocial){
-    if( newSocial instanceof MHSocial ){
+  set social(newSocial) {
+    if ( newSocial instanceof MHSocial ) {
       this[socialSym] = newSocial;
     }
     return this.social;
@@ -83,11 +83,11 @@ export class MHObject {
    *
    * returns null if can't find associated class
    */
-  static create(args, saveToLRU=true){
-    if( args instanceof Array ){
+  static create(args, saveToLRU=true) {
+    if ( args instanceof Array ) {
       log('trying to create MHObject that is new: ' + args);
       //return args.map(MHObject.create); // <-- should probably be this once all MHObjs are done
-      return args.map(function(value){
+      return args.map(function(value) {
         try{
           return MHObject.create(value);
         } catch(e) {
@@ -98,11 +98,11 @@ export class MHObject {
     }
     try{
 
-      if(args.mhid && args.metadata === undefined) {
+      if (args.mhid && args.metadata === undefined) {
         args.metadata = {
-          "mhid": args.mhid,
-          "altId": args.altId,
-          "name": args.name
+          'mhid': args.mhid,
+          'altId': args.altId,
+          'name': args.name
         };
       }
 
@@ -111,12 +111,12 @@ export class MHObject {
       var mhObj;
       //console.log('at start of creating... ',mhid,args);
 
-      if( mhid !== 'undefined' && mhid !== null && args instanceof Object){
+      if ( mhid !== 'undefined' && mhid !== null && args instanceof Object) {
         args.mhid = mhid;
         // check cache
         //log('in create function trying to parseArgs: \n\n' , args);
 
-        if( mhidLRU.has(args.metadata.mhid) || mhidLRU.has(args.mhid) ){
+        if ( mhidLRU.has(args.metadata.mhid) || mhidLRU.has(args.mhid) ) {
           log('getting from cache in create: ' + args.metadata.mhid);
           var foundObject = mhidLRU.get(args.metadata.mhid);
           if (foundObject) {
@@ -129,7 +129,7 @@ export class MHObject {
         log(prefix,new childrenConstructors[prefix](args));
         mhObj = new childrenConstructors[prefix](args);
 
-        // if( prefix === 'mhimg' ){
+        // if ( prefix === 'mhimg' ) {
         //   // bypass cache
         // } else {
         //   log('putting from create');
@@ -141,7 +141,7 @@ export class MHObject {
         }
         return mhObj;
       }
-      else{
+      else {
         mhObj = args;
         //log('creating without a prefix...', mhObj);
         return mhObj;
@@ -151,11 +151,11 @@ export class MHObject {
       //log(err);
       console.log(err);
       console.log(err.stack);
-      if( err instanceof TypeError ) {
-        if( err.message === 'undefined is not a function' ) {
+      if ( err instanceof TypeError ) {
+        if ( err.message === 'undefined is not a function' ) {
           warn('Unknown mhid prefix, see args object: ', args);
         }
-        if( err.message === 'Args was object without mhid!'){
+        if ( err.message === 'Args was object without mhid!') {
           //warn('Incomplete Object passed to create function: ', args);
         }
       }
@@ -174,9 +174,9 @@ export class MHObject {
    * @return { Boolean }                - Success(true) or Fail(false)
    *
    */
-  static registerConstructor(mhClass, mhName){
+  static registerConstructor(mhClass, mhName) {
     // Add class name if function.name is not native
-    // if( mhClass.name === undefined ){
+    // if ( mhClass.name === undefined ) {
     //   mhClass.name = mhClass.toString().match(/function (MH[A-Za-z]*)\(args\)/)[1];
     //   log('shimmed mhClass.name to: ' + mhClass.name);
     // }
@@ -184,7 +184,7 @@ export class MHObject {
     //log('registering constructor: ' + mhClass.name);
 
     var prefix = mhClass.mhidPrefix;
-    if( typeof prefix !== 'undefined' && prefix !== null && !(prefix in childrenConstructors) ){
+    if ( typeof prefix !== 'undefined' && prefix !== null && !(prefix in childrenConstructors) ) {
       Object.defineProperty(childrenConstructors, prefix, {
         configurable: false,
         enumerable: true,
@@ -204,7 +204,7 @@ export class MHObject {
    * Note: This list contains only prefixes of types known to the MHObject.create method
    */
   // List of prefixes known to MHObject through registerConstructor
-  static get prefixes(){
+  static get prefixes() {
     return Object.keys(childrenConstructors);
   }
 
@@ -215,9 +215,9 @@ export class MHObject {
    * @return { String } - a valid MediaHound ID prefix
    *
    */
-  static getPrefixFromMhid(mhid){
-    for( var pfx in childrenConstructors ){
-      if( childrenConstructors.hasOwnProperty(pfx) && (new RegExp('^' + pfx)).test(mhid) ){
+  static getPrefixFromMhid(mhid) {
+    for( var pfx in childrenConstructors ) {
+      if ( childrenConstructors.hasOwnProperty(pfx) && (new RegExp('^' + pfx)).test(mhid) ) {
         return pfx;
       }
     }
@@ -231,9 +231,9 @@ export class MHObject {
    * @return { String } - the class name associated with the prefix
    *
    */
-  static getClassNameFromMhid(mhid){
+  static getClassNameFromMhid(mhid) {
     var pfx = MHObject.getPrefixFromMhid(mhid);
-    if( childrenConstructors[pfx] ){
+    if ( childrenConstructors[pfx] ) {
       return childrenConstructors[pfx].mhName;
     }
     return null;
@@ -246,7 +246,7 @@ export class MHObject {
    *
    * Note: Override at child level
    */
-  static get mhidPrefix(){
+  static get mhidPrefix() {
     return null;
   }
 
@@ -255,67 +255,67 @@ export class MHObject {
   // case:
   //    instanceof only works if the object being checked was created
   //    in the same global scope as the constructor function it is being checked against
-  static isMedia(toCheck){
+  static isMedia(toCheck) {
     return toCheck instanceof System.get('models/media/MHMedia.js').MHMedia;
   }
 
-  static isContributor(toCheck){
+  static isContributor(toCheck) {
     return toCheck instanceof System.get('models/contributor/MHContributor.js').MHContributor;
   }
 
-  static isAction(toCheck){
+  static isAction(toCheck) {
     return toCheck instanceof System.get('models/action/MHAction.js').MHAction;
   }
 
-  static isUser(toCheck){
+  static isUser(toCheck) {
     return toCheck instanceof System.get('models/user/MHUser.js').MHUser;
   }
 
-  static isCollection(toCheck){
+  static isCollection(toCheck) {
     return toCheck instanceof System.get('models/collection/MHCollection.js').MHCollection;
   }
 
-  static isImage(toCheck){
+  static isImage(toCheck) {
     return toCheck instanceof System.get('models/image/MHImage.js').MHImage;
   }
 
-  static isTrait(toCheck){
+  static isTrait(toCheck) {
     return toCheck instanceof System.get('models/trait/MHTrait.js').MHTrait;
   }
 
-  static isSource(toCheck){
+  static isSource(toCheck) {
     return toCheck instanceof System.get('models/source/MHSource.js').MHSource;
   }
 
 
-  static isType(obj){
+  static isType(obj) {
     var type = '';
 
-    if( MHObject.isAction(obj) ){
+    if ( MHObject.isAction(obj) ) {
       type = 'MHAction';
     }
-    else if( MHObject.isMedia(obj) ){
+    else if ( MHObject.isMedia(obj) ) {
       type = 'MHMedia';
     }
-    else if( MHObject.isImage(obj) ){
+    else if ( MHObject.isImage(obj) ) {
       type = 'MHImage';
     }
-    else if( MHObject.isCollection(obj) ){
+    else if ( MHObject.isCollection(obj) ) {
       type = 'MHCollection';
     }
-    else if( MHObject.isUser(obj) ){
+    else if ( MHObject.isUser(obj) ) {
       type = 'MHUser';
     }
-    else if( MHObject.isContributor(obj) ){
+    else if ( MHObject.isContributor(obj) ) {
       type = 'MHContributor';
     }
-    else if( MHObject.isSource(obj) ){
+    else if ( MHObject.isSource(obj) ) {
       type = 'MHSource';
     }
-    else if( MHObject.isTrait(obj) ){
+    else if ( MHObject.isTrait(obj) ) {
       type = 'MHTrait';
     }
-    else{
+    else {
       type = null;
     }
 
@@ -335,7 +335,7 @@ export class MHObject {
       });
   }
 
-  get type(){
+  get type() {
     return MHObject.isType(this);
   }
 
@@ -343,7 +343,7 @@ export class MHObject {
    * This uses the function.name feature which is shimmed if it doesn't exist during the child constructor registration process.
    * @property {string} className - the string class name for this object, ie: MHUser, MHMovie, MHPost, etc.
    */
-  get className(){
+  get className() {
     return this.constructor.mhName;
   }
 
@@ -354,8 +354,8 @@ export class MHObject {
    * @return { Boolean }    - True or False if mhids match
    *
    */
-  isEqualToMHObject(otherObj){
-    if( otherObj && otherObj.metadata.mhid ){
+  isEqualToMHObject(otherObj) {
+    if ( otherObj && otherObj.metadata.mhid ) {
       return this.metadata.mhid === otherObj.metadata.mhid;
     }
     return false;
@@ -369,16 +369,16 @@ export class MHObject {
    * @param {string} mhid - a string mhid to check against this object
    * @returns {boolean}
    */
-  hasMhid(mhid){
-    if( typeof mhid === 'string' || mhid instanceof String ){
+  hasMhid(mhid) {
+    if ( typeof mhid === 'string' || mhid instanceof String ) {
       return this.metadata.mhid === mhid;
     }
     return false;
   }
 
   // TODO Could change as needed
-  toString(){
-    return this.className + " with mhid " + this.metadata.mhid + " and name " + this.mhName;
+  toString() {
+    return this.className + ' with mhid ' + this.metadata.mhid + ' and name ' + this.mhName;
   }
 
   mergeWithData(args) {
@@ -394,24 +394,24 @@ export class MHObject {
    * @return  { Promise       } - resloves to specific MHObject sub class
    *
    */
-  static fetchByMhid(mhid, view='full', force=false){
+  static fetchByMhid(mhid, view='full', force=false) {
 
-    if( typeof mhid !== 'string' && !(mhid instanceof String) ){
+    if ( typeof mhid !== 'string' && !(mhid instanceof String) ) {
       throw TypeError('MHObject.fetchByMhid argument must be type string.');
     }
 
-    if(view === null || view === undefined) {
+    if (view === null || view === undefined) {
       view = 'full';
     }
 
     log('in fetchByMhid, looking for: ', mhid, 'with view = ',view);
 
     // Check LRU for mhid
-    if( !force && mhidLRU.has(mhid) ){
+    if ( !force && mhidLRU.has(mhid) ) {
       return Promise.resolve(mhidLRU.get(mhid));
     }
     // Check LRU for altId
-    if( !force && mhidLRU.hasAltId(mhid) ){
+    if ( !force && mhidLRU.hasAltId(mhid) ) {
       return Promise.resolve(mhidLRU.getByAltId(mhid));
     }
 
@@ -419,7 +419,7 @@ export class MHObject {
         mhClass = childrenConstructors[prefix],
         newObj;
 
-    if( prefix === null || typeof mhClass === 'undefined' ){
+    if ( prefix === null || typeof mhClass === 'undefined' ) {
       warn('Error in MHObject.fetchByMhid', mhid, prefix, mhClass);
       throw Error('Could not find correct class, unknown mhid: ' + mhid);
     }
@@ -433,7 +433,7 @@ export class MHObject {
           view: view
         }
       })
-      .then(function(response){
+      .then(function(response) {
         newObj = MHObject.create(response);
         return newObj;
       });
@@ -452,15 +452,15 @@ export class MHObject {
    * @return  { String } - the endpoint for MediaHound Type of mhid
    *
    */
-  static rootEndpointForMhid(mhid){
-    if( typeof mhid !== 'string' && !(mhid instanceof String) ){
+  static rootEndpointForMhid(mhid) {
+    if ( typeof mhid !== 'string' && !(mhid instanceof String) ) {
       throw new TypeError('Mhid not of type string or undefined in rootEndpointForMhid');
     }
 
     var prefix  = MHObject.getPrefixFromMhid(mhid),
         mhClass = childrenConstructors[prefix];
 
-    if( prefix === null || typeof mhClass === 'undefined' ){
+    if ( prefix === null || typeof mhClass === 'undefined' ) {
       warn('Error in MHObject.rootEndpointForMhid', mhid, prefix, mhClass);
       throw new Error('Could not find correct class, unknown mhid: ' + mhid);
     }
@@ -474,7 +474,7 @@ export class MHObject {
    * @return { String } - ex: 'graph/media/mhmov1000009260'
    *
    */
-  get endpoint(){
+  get endpoint() {
     return this.constructor.rootEndpoint + '/' + this.metadata.mhid;
   }
 
@@ -485,15 +485,15 @@ export class MHObject {
    * @returns { String } - example with ('like'): 'graph/media/mhmov1000009260/like'
    *
    */
-  subendpoint(sub){
-    if( typeof sub !== 'string' && !(sub instanceof String) ){
+  subendpoint(sub) {
+    if ( typeof sub !== 'string' && !(sub instanceof String) ) {
       throw new TypeError('Sub not of type string or undefined in (MHObject).subendpoint.');
     }
     return this.endpoint + '/' + sub;
   }
 
   static rootSubendpoint(sub) {
-    if( typeof sub !== 'string' && !(sub instanceof String) ){
+    if ( typeof sub !== 'string' && !(sub instanceof String) ) {
       throw new TypeError('Sub not of type string or undefined in (MHObject).rootSubendpoint.');
     }
     return this.rootEndpoint + '/' + sub;
@@ -506,10 +506,10 @@ export class MHObject {
    * @return  { Promise }  - Resolves to Social stats as returned by the server
    *
    */
-  fetchSocial(force=false){
+  fetchSocial(force=false) {
     var path = this.subendpoint('social');
 
-    if( !force && this.social instanceof MHSocial ){
+    if ( !force && this.social instanceof MHSocial ) {
       return Promise.resolve(this.social);
     }
     return houndRequest({
@@ -517,7 +517,7 @@ export class MHObject {
         endpoint: path
       })
       .then( (parsed => this.social = new MHSocial(parsed)).bind(this) )
-      .catch(function(err){
+      .catch(function(err) {
         console.warn('fetchSocial:',err);
       });
   }
@@ -533,7 +533,7 @@ export class MHObject {
    * @return { houndPagedRequest }  - MediaHound paged request object for this feed
    *
    */
-  fetchFeed(view='full', size=12, force=false){
+  fetchFeed(view='full', size=12, force=false) {
     var path = this.subendpoint('feed');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
@@ -546,7 +546,7 @@ export class MHObject {
   *
   */
 
-  fetchImages(view='full', size=20, force=false){
+  fetchImages(view='full', size=20, force=false) {
     var path = this.subendpoint('images');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
@@ -557,7 +557,7 @@ export class MHObject {
    * @return { Promise }  - resolves to server response of collections for this MediaHound object
    *
    */
-   fetchCollections(view='full', size=12, force=true){
+   fetchCollections(view='full', size=12, force=true) {
      var path = this.subendpoint('collections');
      return this.fetchPagedEndpoint(path, view, size, force);
    }
@@ -570,7 +570,7 @@ export class MHObject {
   *
   */
 
-  fetchBaseTraits(view='full', size=20, force=false){
+  fetchBaseTraits(view='full', size=20, force=false) {
     var path = this.subendpoint('baseTraits');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
@@ -584,11 +584,11 @@ export class MHObject {
    * @return  { Promise } - resolves to server response of action call
    *
    */
-  takeAction(action){
-    if( typeof action !== 'string' && !(action instanceof String) ){
+  takeAction(action) {
+    if ( typeof action !== 'string' && !(action instanceof String) ) {
       throw new TypeError('Action not of type String or undefined');
     }
-    if( !MHSocial.SOCIAL_ACTIONS.some( a => action === a ) ){
+    if ( !MHSocial.SOCIAL_ACTIONS.some( a => action === a ) ) {
       throw new TypeError('Action is not of an accepted type in mhObj.takeAction');
     }
 
@@ -600,7 +600,7 @@ export class MHObject {
         self      = this;
 
     // Expected outcome
-    if( this.social instanceof MHSocial ){
+    if ( this.social instanceof MHSocial ) {
       this.social = this.social.newWithAction(action);
     }
 
@@ -616,14 +616,14 @@ export class MHObject {
         var newSocial = new MHSocial(socialRes.social);
 
         // only update if this is the last request returning
-        if( this[lastSocialRequestIdSym] === requestId ){
+        if ( this[lastSocialRequestIdSym] === requestId ) {
           self.social = newSocial;
         }
         //log('in take action response, newSocial: ', newSocial);
         return newSocial;
       })
       .catch(err => {
-        if( this[lastSocialRequestIdSym] === requestId ){
+        if ( this[lastSocialRequestIdSym] === requestId ) {
           self.social = original;
         }
         throw err;
@@ -631,7 +631,7 @@ export class MHObject {
   }
 
   responseCacheKeyForPath(path) {
-    return "__cached_" + path;
+    return '__cached_' + path;
   }
 
   cachedResponseForPath(path) {
@@ -645,7 +645,7 @@ export class MHObject {
   }
 
   static rootResponseCacheKeyForPath(path, params) {
-    return "___root_cached_" + path + "_" + JSON.stringify(params, (k, v) => {
+    return '___root_cached_' + path + '_' + JSON.stringify(params, (k, v) => {
       if (k === 'view' || k === 'pageSize' || k === 'access_token') {
         return undefined;
       }

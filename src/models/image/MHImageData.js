@@ -1,8 +1,7 @@
-
 import { jsonCreateWithArgs } from '../internal/jsonParse.js';
 
-export class MHImageData {
-  constructor(args){
+export default class MHImageData {
+  constructor(args) {
     jsonCreateWithArgs(args, this);
   }
 

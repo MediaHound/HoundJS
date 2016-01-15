@@ -1,5 +1,4 @@
-
-import { MHImageData } from '../image/MHImageData.js';
+import MHImageData from '../image/MHImageData.js';
 import { jsonCreateWithArgs } from '../internal/jsonParse.js';
 
 export class MHMetadata {

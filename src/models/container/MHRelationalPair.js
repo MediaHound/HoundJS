@@ -1,10 +1,9 @@
-
-import { MHObject } from '../base/MHObject.js';
-import { MHContext } from './MHContext.js';
+import MHObject from '../base/MHObject.js';
+import MHContext from './MHContext.js';
 import { jsonCreateWithArgs } from '../internal/jsonParse.js';
 
 // MediaHound Relational Pair Object
-export class MHRelationalPair {
+export default class MHRelationalPair {
   constructor(args) {
     jsonCreateWithArgs(args, this);
   }

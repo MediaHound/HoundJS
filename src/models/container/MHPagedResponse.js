@@ -1,9 +1,9 @@
 
 import { jsonCreateWithArgs } from '../internal/jsonParse.js';
-import { MHPagingInfo } from './MHPagingInfo.js';
-import { MHRelationalPair } from './MHRelationalPair.js';
+import MHPagingInfo from './MHPagingInfo.js';
+import MHRelationalPair from './MHRelationalPair.js';
 
-export class MHPagedResponse {
+export default class MHPagedResponse {
   constructor(args) {
     this.cachedNextResponse = null;
     this.fetchNextOperation = null;
@@ -23,7 +23,7 @@ export class MHPagedResponse {
   }
 
   fetchNext() {
-    var cachedResponse = this.cachedNextResponse;
+    const cachedResponse = this.cachedNextResponse;
     if (cachedResponse) {
       return new Promise(function(resolve) {
         resolve(cachedResponse);

@@ -1,9 +1,8 @@
-
-import { MHObject } from '../base/MHObject.js';
-import { MHContributor } from './MHContributor.js';
+import MHObject from '../base/MHObject.js';
+import MHContributor from './MHContributor.js';
 
 // MediaHound Contributor Object
-export class MHFictionalIndividualContributor extends MHContributor {
+export default class MHFictionalIndividualContributor extends MHContributor {
 
   get isIndividual() { return true; }
   get isReal() { return false; }
@@ -11,6 +10,4 @@ export class MHFictionalIndividualContributor extends MHContributor {
   static get mhidPrefix() { return 'mhfic'; }
 }
 
-(function(){
-  MHObject.registerConstructor(MHFictionalIndividualContributor, 'MHFictionalIndividualContributor');
-}());
+MHObject.registerConstructor(MHFictionalIndividualContributor, 'MHFictionalIndividualContributor');

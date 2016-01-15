@@ -1,10 +1,9 @@
-
-import { MHObject } from '../base/MHObject.js';
-import { MHAction } from './MHAction.js';
-import { houndRequest } from '../../request/hound-request.js';
+import MHObject from '../base/MHObject.js';
+import MHAction from './MHAction.js';
+import houndRequest from '../../request/hound-request.js';
 
 // MediaHound Post Object
-export class MHPost extends MHAction {
+export default class MHPost extends MHAction {
 
   static get mhidPrefix() { return 'mhpst'; }
 
@@ -14,8 +13,8 @@ export class MHPost extends MHAction {
    *
    * @param {string} message - the message for this new post
    */
-  static createWithMessage(message, mentions, primaryMention){
-    if( !message ||
+  static createWithMessage(message, mentions, primaryMention) {
+    if ( !message ||
         !mentions ||
         !primaryMention ||
         typeof message !== 'string' ||
@@ -23,11 +22,11 @@ export class MHPost extends MHAction {
         !mentions.every(x => x instanceof MHObject) ||
         !(primaryMention instanceof MHObject) )
     {
-      throw new TypeError("Can't create post without message string, mentions array, and primary mention object.");
+      throw new TypeError('Can\'t create post without message string, mentions array, and primary mention object.');
     }
 
-    var path = this.rootSubendpoint('new'),
-        mentionedMhids = mentions.map(m => m.metadata.mhid);
+    const path = this.rootSubendpoint('new');
+    const mentionedMhids = mentions.map(m => m.metadata.mhid);
 
     return houndRequest({
         method: 'POST',
@@ -46,6 +45,4 @@ export class MHPost extends MHAction {
   }
 }
 
-(function(){
-  MHObject.registerConstructor(MHPost, 'MHPost');
-})();
+MHObject.registerConstructor(MHPost, 'MHPost');

@@ -1,8 +1,7 @@
-
 import { jsonCreateWithArgs } from '../internal/jsonParse.js';
 
 // MediaHound Social Object
-export class MHSocial {
+export default class MHSocial {
   constructor(args) {
     jsonCreateWithArgs(args, this);
   }
@@ -12,11 +11,11 @@ export class MHSocial {
    * @param {MHSocial} otherObj - another MHSocial object to check against
    * @returns {boolean}
    */
-  isEqualToMHSocial(otherObj){
-    for(var prop of Object.keys(this.jsonProperties)){
-      if( typeof this[prop] === 'number' && typeof otherObj[prop] === 'number' && this[prop] === otherObj[prop] ){
+  isEqualToMHSocial(otherObj) {
+    for(var prop of Object.keys(this.jsonProperties)) {
+      if ( typeof this[prop] === 'number' && typeof otherObj[prop] === 'number' && this[prop] === otherObj[prop] ) {
         continue;
-      } else if( !this[prop] && !otherObj[prop] ){
+      } else if ( !this[prop] && !otherObj[prop] ) {
         continue;
       }
       return false;
@@ -30,11 +29,11 @@ export class MHSocial {
    * @param action - MHSocial.ACTION to take on this social object
    * @returns {MHSocial} - A new MHSocial object that represents the expected outcome
    */
-  newWithAction(action){
+  newWithAction(action) {
     var newValue, toChange, alsoFlip,
         newArgs = {};
 
-    switch(action){
+    switch(action) {
       case MHSocial.LIKE:
         toChange = 'likers';
         newValue = this.likers + 1;
@@ -67,10 +66,10 @@ export class MHSocial {
         break;
     }
 
-    for(var prop of Object.keys(this.jsonProperties)){
-      if( prop === toChange ) {
+    for(var prop of Object.keys(this.jsonProperties)) {
+      if ( prop === toChange ) {
         newArgs[prop] = newValue;
-      } else if( prop === alsoFlip ) {
+      } else if ( prop === alsoFlip ) {
         newArgs[prop] = !this[prop];
       } else {
         newArgs[prop] = this[prop];
@@ -88,7 +87,7 @@ export class MHSocial {
   static get UNLIKE() { return 'unlike'; }
 
   static get DISLIKE()  { return 'dislike';   }
-  static get UNDISLIKE(){ return 'undislike'; }
+  static get UNDISLIKE() { return 'undislike'; }
 
   static get FOLLOW()   { return 'follow';   }
   static get UNFOLLOW() { return 'unfollow'; }
@@ -105,8 +104,8 @@ export class MHSocial {
   }
 
   static get POST()   { return 'post';    }
-  static get COLLECT(){ return 'collect'; }
-  static get COMMENT(){ return 'comment'; }
+  static get COLLECT() { return 'collect'; }
+  static get COMMENT() { return 'comment'; }
 
   get jsonProperties() {
     return {
