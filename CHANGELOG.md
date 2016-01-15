@@ -2,6 +2,11 @@
 
 * No updates in master.
 
+## 0.4.0 (2015-01-15)
+
+* API 1.2 support
+* 1.2 OAuth support
+
 ## 0.3.3 (2015-12-1)
 
 * fetchRelatedTo() supports an array of mhids
