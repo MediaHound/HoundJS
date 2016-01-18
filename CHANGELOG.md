@@ -2,6 +2,14 @@
 
 * No updates in master.
 
+## 0.5.3 (2015-01-18)
+
+Fix MHMetadata instances from using Object.assign to using object ... syntax.
+
+## 0.5.2 (2015-01-17)
+
+* Rerelease 
+
 ## 0.5.1 (2015-01-17)
 
 * Fix require() call on Linux for MHMetadata
