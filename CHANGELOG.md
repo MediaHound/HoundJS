@@ -2,6 +2,10 @@
 
 * No updates in master.
 
+## 0.5.1 (2015-01-17)
+
+* Fix require() call on Linux for MHMetadata
+
 ## 0.5.0 (2015-01-15)
 
 * Use Babel for ES2015 transpilation
