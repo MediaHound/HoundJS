@@ -3,7 +3,6 @@ test
 Images
 .idea
 .DS_Store
-node_modules
 *.swp
 *.swo
 *.bak

@@ -2,6 +2,7 @@ lib
 .idea
 .DS_Store
 node_modules
+dist
 *.swp
 *.swo
 *.bak

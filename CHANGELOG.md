@@ -2,9 +2,13 @@
 
 * No updates in master.
 
+## 0.5.4 (2015-01-19)
+
+* Generate a browserified & minified build into `dist/`.
+
 ## 0.5.3 (2015-01-18)
 
-Fix MHMetadata instances from using Object.assign to using object ... syntax.
+* Fix MHMetadata instances from using Object.assign to using object ... syntax.
 
 ## 0.5.2 (2015-01-17)
 
