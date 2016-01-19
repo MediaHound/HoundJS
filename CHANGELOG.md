@@ -2,6 +2,10 @@
 
 * No updates in master.
 
+## 0.5.5 (2015-01-19)
+
+* dist build is wrapped as UMD
+
 ## 0.5.4 (2015-01-19)
 
 * Generate a browserified & minified build into `dist/`.
