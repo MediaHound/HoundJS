@@ -576,6 +576,11 @@ export default class MHObject {
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
+  fetchGraphGenres(view='full', size=20, force=false) {
+    var path = this.subendpoint('graphGenres');
+    return this.fetchPagedEndpoint(path, view, size, force);
+  }
+
   /**
    *
    * mhObj.takeAction(action)

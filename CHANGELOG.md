@@ -2,6 +2,10 @@
 
 * No updates in master.
 
+## 0.5.6 (2015-01-25)
+
+* `fetchGraphGenres()` on media
+
 ## 0.5.5 (2015-01-19)
 
 * dist build is wrapped as UMD
