@@ -36,6 +36,16 @@ export default class MHSDK {
     return this.refreshOAuthToken();
   }
 
+  static configureWithAccessToken(accessToken, origin) {
+    _MHClientId = null;
+    _MHClientSecret = null;
+    if (origin) {
+      _houndOrigin = origin;
+    }
+
+    _MHAccessToken = accessToken;
+  }
+
   static authHeaders() {
     return _btoa(_MHClientId + ':' + _MHClientSecret);
   }
