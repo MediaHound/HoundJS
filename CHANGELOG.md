@@ -2,6 +2,10 @@
 
 * No updates in master.
 
+## 0.5.8 (2016-02-1)
+
+* Dist builds of hound.js include the babel polyfill
+
 ## 0.5.7 (2016-01-28)
 
 * Allow MHSDK configuration directly with an access token

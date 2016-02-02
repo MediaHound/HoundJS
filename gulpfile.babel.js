@@ -59,7 +59,7 @@ gulp.task('build', () => {
 
 // Creates a distribution bundle via browserify
 gulp.task('bundle-dist', () => {
-  return browserify(paths.src.entrypoint, { standalone: 'houndjs' })
+  return browserify([require.resolve('babel-polyfill'), paths.src.entrypoint], { standalone: 'houndjs' })
     .transform(babelify)
     .transform(stripify)
     .transform(uglifyify)
