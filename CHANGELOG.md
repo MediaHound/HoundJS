@@ -2,6 +2,10 @@
 
 * No updates in master.
 
+## 0.5.9 (2016-02-18)
+
+* Expose houndRequest
+
 ## 0.5.8 (2016-02-1)
 
 * Dist builds of hound.js include the babel polyfill
