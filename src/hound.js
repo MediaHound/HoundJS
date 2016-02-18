@@ -92,6 +92,9 @@ import MHSourceMedium from './models/source/MHSourceMedium.js';
 // Search
 import MHSearch from './search/MHSearch.js';
 
+// Request
+import houndRequest from './request/hound-request.js';
+
 
 // We use a commonjs export here so ES5 clients don't have to do:
 // require('houndjs').default
@@ -174,5 +177,7 @@ module.exports = {
   MHSourceMethod,
   MHSourceMedium,
 
-  MHSearch
+  MHSearch,
+
+  houndRequest
 };
