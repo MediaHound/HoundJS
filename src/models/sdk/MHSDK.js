@@ -6,7 +6,7 @@ var _MHClientSecret = null;
 
 var _houndOrigin = 'https://api.mediahound.com/';
 
-// Use btoa from a browser or shim it in Ndoe with base64.
+// Use btoa from a browser or shim it in Node with base64.
 var _btoa;
 if (typeof window !== 'undefined') {
   _btoa = window.btoa;
