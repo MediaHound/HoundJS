@@ -9,8 +9,8 @@ let loggedInUser  = null;
 
 export default class MHLoginSession {
 
-  static loginDialogURLWithRedirectURL(redirectUrl) {
-    return MHSDK.origin + MHSDK.apiVersion + `/security/oauth/authorize?client_id=${MHSDK.clientId}&client_secret=${MHSDK.clientSecret}&scope=public_profile&response_type=token&redirect_uri=${redirectUrl}`;
+  static loginDialogURLWithRedirectURL(redirectUrl, scope='public_profile') {
+    return `${MHSDK.origin}${MHSDK.apiVersion}/security/oauth/authorize?client_id=${MHSDK.clientId}&client_secret=${MHSDK.clientSecret}&scope=${scope}&response_type=token&redirect_uri=${redirectUrl}`;
   }
 
   static loginWithAccessToken(accessToken) {

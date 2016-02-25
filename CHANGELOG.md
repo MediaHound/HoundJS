@@ -2,6 +2,10 @@
 
 * No updates in master.
 
+## 0.5.10 (2016-02-24)
+
+* loginDialogURLWithRedirectURL takes an optional scope parameter
+
 ## 0.5.9 (2016-02-18)
 
 * Expose houndRequest
