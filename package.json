@@ -1,6 +1,6 @@
 {
   "name": "houndjs",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "description": "The MediaHound JavaScript SDK",
   "author": "MediaHound",
   "keywords": [
@@ -49,5 +49,10 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "vinyl-transform": "^1.0.0"
+  },
+  "browser": {
+    "base-64": false,
+    "xmlhttprequest": false,
+    "xmlhttprequest-cookie": false
   }
 }
