@@ -2,6 +2,10 @@
 
 * No updates in master.
 
+## 0.5.12 (2016-03-09)
+
+* fetchLiking() added to MHUser.
+
 ## 0.5.11 (2016-02-25)
 
 * browser builds should not include unnecesarry browser dependencies.

@@ -536,6 +536,11 @@ else {
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
+  fetchLiking(view='full', size=12, force=false) {
+    var path = this.subendpoint('liking');
+    return this.fetchPagedEndpoint(path, view, size, force);
+  }
+
   fetchFollowers(view='full', size=12, force=false) {
     var path = this.subendpoint('followers');
     return this.fetchPagedEndpoint(path, view, size, force);
