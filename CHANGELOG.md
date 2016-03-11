@@ -2,6 +2,10 @@
 
 * No updates in master.
 
+## 0.5.14 (2016-03-11)
+
+* Fix bugs in removing from a collection
+
 ## 0.5.13 (2016-03-11)
 
 * Improved collection support for api v12

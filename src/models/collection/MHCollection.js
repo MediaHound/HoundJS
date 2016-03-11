@@ -121,7 +121,7 @@ export default class MHCollection extends MHObject {
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
   removeContentAtIndex(index) {
-    return this.removeContents([index]);
+    return this.removeContentAtIndexes([index]);
   }
 
   /**
@@ -129,7 +129,7 @@ export default class MHCollection extends MHObject {
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
   removeContentAtIndexes(indexes) {
-    return this.changeContents(null, { operation: 'remove', order: 0, indicies: indexes });
+    return this.changeContents(null, { operation: 'remove', order: 0, indices: indexes });
   }
 
   /**
