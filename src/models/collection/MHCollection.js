@@ -1,5 +1,3 @@
-import { log } from '../internal/debug-helpers.js';
-
 import MHObject from '../base/MHObject.js';
 import MHAction from '../action/MHAction.js';
 import MHLoginSession from '../user/MHLoginSession.js';
@@ -20,12 +18,6 @@ export default class MHCollection extends MHObject {
       primaryOwner: { mapper: MHObject.create }
     };
   }
-
-  // Static Mixlist enums
-  static get MIXLIST_TYPE_NONE()   { return 'none'; }
-  static get MIXLIST_TYPE_PARTIAL() { return 'partial'; }
-  static get MIXLIST_TYPE_FULL()   { return 'full'; }
-
 
   static get mhidPrefix()   { return 'mhcol'; }
   static get rootEndpoint() { return 'graph/collection'; }
@@ -110,23 +102,34 @@ export default class MHCollection extends MHObject {
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
   addContents(contents) {
-    return this.changeContents(contents, 'add');
+    const mhids = contents.map(m => {
+      if (typeof m === 'string' || m instanceof String) {
+        return m;
+      }
+      else if ('metadata' in m) {
+        return m.metadata.mhid;
+      }
+      else {
+        return m;
+      }
+    });
+    return this.changeContents(contents, { operation: 'append', order: 0, ids: mhids });
   }
 
   /**
    * @param {MHMedia} - a MHMedia object to remove from this collection
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
-  removeContent(content) {
-    return this.removeContents([content]);
+  removeContentAtIndex(index) {
+    return this.removeContents([index]);
   }
 
   /**
    * @param {Array<MHMedia>} - an Array of MHMedia objects to remove from this collection
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
-  removeContents(contents) {
-    return this.changeContents(contents, 'remove');
+  removeContentAtIndexes(indexes) {
+    return this.changeContents(null, { operation: 'remove', order: 0, indicies: indexes });
   }
 
   /**
@@ -135,57 +138,16 @@ export default class MHCollection extends MHObject {
    * @param {string} sub - the subendpoint string, 'add' or 'remove'
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
-  changeContents(contents, sub) {
-    if (!Array.isArray(contents)) {
-      throw new TypeError('Contents must be an array in changeContents');
-    }
-    if (typeof sub !== 'string' || (sub !== 'add' && sub !== 'remove')) {
-      throw new TypeError('Subendpoint must be add or remove');
-    }
-
-    var path = this.subendpoint(sub),
-        mhids = contents.map(v => {
-          if (v instanceof MHObject) {
-            if (!(v instanceof MHAction)) {
-              return v.mhid;
-            }
-            else {
-              console.error('MHActions including like, favorite, create, and post cannot be collected. Please resubmit with actual content.');
-            }
-
-          }
-else if (typeof v === 'string' && MHObject.prefixes.indexOf(MHObject.getPrefixFromMhid(v)) > -1) {
-            // TODO double check this if statement
-            return v;
-          }
-          return null;
-        }).filter(v => v !== null);
-
-    // invalidate mixlistPromise
-    this.mixlistPromise = null;
-    if (mhids.length > -1) {
-
-      log('content array to be submitted: ', mhids);
-
-      return (this.content = houndRequest({
-        method: 'PUT',
-        endpoint: path,
-        data: {
-          'content': mhids
-        }
-      })
-      .catch( (err => { this.content = null; throw err; }).bind(this) )
-      .then(function(response) {
-        // fetch social for original passed in mhobjs
-        contents.forEach(v => typeof v.fetchSocial === 'function' && v.fetchSocial(true));
-        return response;
-      }));
-
-    }
-    else {
-      console.error('To add or remove content from a Collection the content array must include at least one MHObject');
-    }
-
+  changeContents(contents, operation) {
+    const path = this.subendpoint('update');
+    return houndRequest({
+      method: 'POST',
+      endpoint: path,
+      data: {
+        operations: [operation],
+        allowDuplicates: true
+      }
+    });
   }
 
   /**
@@ -199,15 +161,6 @@ else if (typeof v === 'string' && MHObject.prefixes.indexOf(MHObject.getPrefixFr
 
   fetchContent(view='full', size=12, force=false) {
     const path = this.subendpoint('content');
-    return this.fetchPagedEndpoint(path, view, size, force);
-  }
-
-  /**
-   * @param {boolean} force - whether to force a call to the server instead of using the cached mixlistPromise
-   * @returns {Promise} - a promise that resolves to the list of mixlist content for this MHCollection
-   */
-  fetchMixlist(view='full', size=20, force=false) {
-    const path = this.subendpoint('mixlist');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 }

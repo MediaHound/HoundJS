@@ -669,7 +669,7 @@ export default class MHObject {
     __cachedRootResponses[cacheKey] = response;
   }
 
-  fetchPagedEndpoint(path, view, size, force, next=null) {
+  fetchPagedEndpoint(path, view, size, force, next=null, params={}) {
     if (!force && !next) {
       var cached = this.cachedResponseForPath(path);
       if (cached) {
@@ -686,13 +686,13 @@ export default class MHObject {
       });
     }
     else {
+      params.pageSize = size;
+      params.view = view;
+
       promise = houndRequest({
         method: 'GET',
         endpoint: path,
-        params: {
-          pageSize: size,
-          view: view
-        }
+        params: params
       });
     }
 

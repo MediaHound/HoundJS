@@ -2,6 +2,10 @@
 
 * No updates in master.
 
+## 0.5.13 (2016-03-11)
+
+* Improved collection support for api v12
+
 ## 0.5.12 (2016-03-09)
 
 * fetchLiking() added to MHUser.

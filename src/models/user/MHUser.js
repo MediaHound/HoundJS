@@ -511,6 +511,11 @@ else {
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
+  fetchOwnedCollectionsByType(subType, view='full', size=12, force=true) {
+    var path = this.subendpoint('ownedCollections');
+    return this.fetchPagedEndpoint(path, view, size, force, null, { subType });
+  }
+
   /**
   * mhObj.fetchSuggested(mhid,force)
   *
