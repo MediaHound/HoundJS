@@ -2,6 +2,10 @@
 
 * No updates in master.
 
+## 0.5.15 (2016-03-14)
+
+* Collections support appendContent() and prependContent()
+
 ## 0.5.14 (2016-03-11)
 
 * Fix bugs in removing from a collection

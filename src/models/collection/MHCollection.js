@@ -89,19 +89,13 @@ export default class MHCollection extends MHObject {
       return newCollection;
     });
   }
-  /**
-   * @param {MHMedia} - a MHMedia object to add to this collection
-   * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
-   */
-  addContent(content) {
-    return this.addContents([content]);
-  }
+
 
   /**
    * @param {Array<MHMedia>} - an Array of MHMedia objects to add to this collection
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
-  addContents(contents) {
+  appendContent(contents) {
     const mhids = contents.map(m => {
       if (typeof m === 'string' || m instanceof String) {
         return m;
@@ -114,6 +108,25 @@ export default class MHCollection extends MHObject {
       }
     });
     return this.changeContents(contents, { operation: 'append', order: 0, ids: mhids });
+  }
+
+  /**
+   * @param {Array<MHMedia>} - an Array of MHMedia objects to add to this collection
+   * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
+   */
+  prependContent(contents) {
+    const mhids = contents.map(m => {
+      if (typeof m === 'string' || m instanceof String) {
+        return m;
+      }
+      else if ('metadata' in m) {
+        return m.metadata.mhid;
+      }
+      else {
+        return m;
+      }
+    });
+    return this.changeContents(contents, { operation: 'prepend', order: 0, ids: mhids });
   }
 
   /**
