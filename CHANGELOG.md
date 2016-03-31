@@ -1,6 +1,7 @@
 ## Master
 
-* No updates in master.
+* User social supported
+* Fix bug in merging of MHObjects
 
 ## 0.5.15 (2016-03-14)
 
