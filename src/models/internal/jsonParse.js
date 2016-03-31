@@ -63,26 +63,24 @@ const mapValueToType = (rawValue, type) => {
 };
 
 const setPropertyFromArgs = (args, obj, name, type, optional, merge) => {
-  if (!obj[name]) {
-    var rawValue = args[name];
-    var convertedValue = mapValueToType(rawValue, type);
+  var rawValue = args[name];
+  var convertedValue = mapValueToType(rawValue, type);
 
-    if (!optional && !convertedValue) {
-      throw TypeError('non-optional field `' + name + '` found null value. Args:', args);
+  if (!optional && !convertedValue) {
+    throw TypeError('non-optional field `' + name + '` found null value. Args:', args);
+  }
+
+  if (convertedValue !== undefined) {
+    if (merge) {
+      obj[name] = convertedValue;
     }
-
-    if (convertedValue !== undefined) {
-      if (merge) {
-        obj[name] = convertedValue;
-      }
-      else {
-        Object.defineProperty(obj, name, {
-          configurable: false,
-          enumerable:   true,
-          writable:     true,
-          value:        convertedValue
-        });
-      }
+    else {
+      Object.defineProperty(obj, name, {
+        configurable: false,
+        enumerable:   true,
+        writable:     true,
+        value:        convertedValue
+      });
     }
   }
 };

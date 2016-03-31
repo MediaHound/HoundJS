@@ -7,6 +7,7 @@ import houndRequest from '../../request/hound-request.js';
 import MHCache from '../internal/MHCache.js';
 import { MHMetadata } from '../meta/MHMetadata.js';
 import MHSocial from '../social/MHSocial.js';
+import MHUserSocial from '../social/MHUserSocial.js';
 
 var childrenConstructors = {};
 var __cachedRootResponses = {};
@@ -60,7 +61,8 @@ export default class MHObject {
       metadata: MHMetadata,
       primaryImage: { mapper: MHObject.create },
       secondaryImage: { mapper: MHObject.create },
-      social: MHSocial
+      social: MHSocial,
+      userSocial: MHUserSocial
     };
   }
 
