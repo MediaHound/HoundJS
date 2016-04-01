@@ -12,7 +12,8 @@ export class MHMetadata {
       altId: String,
       name: String,
       description: String,
-      createdDate: Date
+      createdDate: Date,
+      subType: String
     };
   }
 }

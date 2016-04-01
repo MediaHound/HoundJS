@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.5.17 (2016-04-01)
+
+* `subType` field supported on MHMetadata
+
 ## 0.5.16 (2016-03-31)
 
 * User social supported
