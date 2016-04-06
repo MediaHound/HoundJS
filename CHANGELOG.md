@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.0-beta1 (2016-04-06)
+
+* Bucket support for suggested silos and trait composition
+
 ## 0.5.17 (2016-04-01)
 
 * `subType` field supported on MHMetadata
