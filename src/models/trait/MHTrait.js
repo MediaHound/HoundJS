@@ -11,9 +11,13 @@ export default class MHTrait extends MHObject {
     };
   }
 
-  fetchContent(view='full', size=12, force=false) {
+  fetchContent(view='full', size=12, force=false, filters=null) {
     var path = this.subendpoint('content');
-    return this.fetchPagedEndpoint(path, view, size, force);
+    const params = {};
+    if (filters) {
+      params.filters = filters;
+    }
+    return this.fetchPagedEndpoint(path, view, size, force, null, params);
   }
 
   static CompositionType = {
