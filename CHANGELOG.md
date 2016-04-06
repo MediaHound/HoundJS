@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.0-beta2 (2016-04-06)
+
+* Accept filters on fetchContent() of MHTrait
+
 ## 0.6.0-beta1 (2016-04-06)
 
 * Bucket support for suggested silos and trait composition
