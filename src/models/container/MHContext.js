@@ -1,5 +1,6 @@
 import { jsonCreateWithArgs } from '../internal/jsonParse.js';
 import MHRelationship from './MHRelationship.js';
+import MHRelationalPair from './MHRelationalPair.js';
 import MHSorting from './MHSorting.js';
 import MHSourceMedium from '../source/MHSourceMedium.js';
 
@@ -13,7 +14,8 @@ export default class MHContext {
       consumable: Boolean,
       sorting: MHSorting,
       relationships: [MHRelationship],
-      mediums: [MHSourceMedium]
+      mediums: [MHSourceMedium],
+      difference: [MHRelationalPair]
     };
   }
 }

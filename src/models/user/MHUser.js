@@ -671,6 +671,11 @@ else {
     return this.fetchPagedEndpoint(path, view, size, force);
 
   }
+
+  fetchSuggestedSilos(filters, view='full', size=10) {
+    const path = `graph/silo/${this.metadata.mhid}`;
+    return this.fetchBucketedEndpoint(path, filters, view, size);
+  }
 }
 
 MHObject.registerConstructor(MHUser, 'MHUser');

@@ -15,4 +15,19 @@ export default class MHTrait extends MHObject {
     var path = this.subendpoint('content');
     return this.fetchPagedEndpoint(path, view, size, force);
   }
+
+  static CompositionType = {
+    exact: 'exact',
+    subset: 'subset',
+    superset: 'superset'
+  };
+
+  static fetchComposition(traits, types=null, view='full', size=10) {
+    const path = this.rootSubendpoint('composition');
+    const params = { trait: traits };
+    if (types) {
+      params.type = types;
+    }
+    return this.fetchRootBucketedEndpoint(path, view, size, null, params);
+  }
 }
