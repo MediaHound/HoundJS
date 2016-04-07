@@ -74,7 +74,6 @@ import MHAudience       from './models/trait/MHAudience.js';
 import MHFlag           from './models/trait/MHFlag.js';
 import MHGraphGenre     from './models/trait/MHGraphGenre.js';
 import MHAudioTrait     from './models/trait/MHAudioTrait.js';
-import MHGraphTrait     from './models/trait/MHGraphTrait.js';
 import MHLanguage       from './models/trait/MHLanguage.js';
 import MHSubMood        from './models/trait/MHSubMood.js';
 import MHSuitability    from './models/trait/MHSuitability.js';

@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.0-beta4 (2016-04-07)
+
+* Remove MHGraphTrait
+
 ## 0.6.0-beta3 (2016-04-07)
 
 * New trait categories
