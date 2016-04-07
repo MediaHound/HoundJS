@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.0-beta3 (2016-04-07)
+
+* New trait categories
+
 ## 0.6.0-beta2 (2016-04-06)
 
 * Accept filters on fetchContent() of MHTrait
