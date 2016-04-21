@@ -2,6 +2,13 @@
 
 * No changes in master
 
+## 0.6.0-beta5 (2016-04-21)
+
+* MHObjects are now merged properly when new data with nulls arrives
+* Form encoded POST requests are sent with correct Content-Type
+* Password Grant Flow supported
+* Register new users for Password Grant Flow
+
 ## 0.6.0-beta4 (2016-04-07)
 
 * Remove MHGraphTrait
