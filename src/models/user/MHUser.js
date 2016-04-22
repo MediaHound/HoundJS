@@ -724,12 +724,6 @@ else {
   fetchFacebookFriends(view='full', size=12, force=false) {
     var path = this.subendpoint('settings')+'/facebook/friends';
     return this.fetchPagedEndpoint(path, view, size, force);
-
-  }
-
-  fetchSuggestedSilos(filters, view='full', size=10) {
-    const path = `graph/silo/${this.metadata.mhid}`;
-    return this.fetchBucketedEndpoint(path, filters, view, size);
   }
 }
 

@@ -57,6 +57,8 @@ import MHTrailer            from './models/media/MHTrailer.js';
 
 import MHCollection from './models/collection/MHCollection.js';
 
+import MHSilo from './models/silo/MHSilo.js';
+
 
 // Trait Models
 import MHTrait          from './models/trait/MHTrait.js';
@@ -156,6 +158,8 @@ module.exports = {
   MHTrailer,
 
   MHCollection,
+
+  MHSilo,
 
   MHTrait,
   MHGenre,

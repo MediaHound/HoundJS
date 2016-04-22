@@ -2,6 +2,11 @@
 
 * No changes in master
 
+## 0.6.0-beta6 (2016-04-22)
+
+* New top level silo fetch endpoint
+* Add `liking` to MHSocial
+
 ## 0.6.0-beta5 (2016-04-21)
 
 * MHObjects are now merged properly when new data with nulls arrives
