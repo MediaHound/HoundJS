@@ -172,9 +172,13 @@ export default class MHCollection extends MHObject {
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
-  fetchContent(view='full', size=12, force=false) {
+  fetchContent(view='full', size=12, force=false, filters) {
     const path = this.subendpoint('content');
-    return this.fetchPagedEndpoint(path, view, size, force);
+    const params = {};
+    if (filters) {
+      params.filters = filters;
+    }
+    return this.fetchPagedEndpoint(path, view, size, force, null, params);
   }
 }
 

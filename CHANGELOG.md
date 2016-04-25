@@ -2,6 +2,11 @@
 
 * No changes in master
 
+## 0.6.0-beta7 (2016-04-25)
+
+* Context supports fixed position
+* MHCollection.fetchContent() supports filters
+
 ## 0.6.0-beta6 (2016-04-22)
 
 * New top level silo fetch endpoint

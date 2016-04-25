@@ -13,6 +13,7 @@ export default class MHContext {
     return {
       consumable: Boolean,
       sorting: MHSorting,
+      fixed: MHSorting,
       relationships: [MHRelationship],
       mediums: [MHSourceMedium],
       difference: [MHRelationalPair]
