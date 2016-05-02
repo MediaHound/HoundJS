@@ -145,6 +145,10 @@ export default class MHCollection extends MHObject {
     return this.changeContents(null, { operation: 'remove', order: 0, indices: indexes });
   }
 
+  removeAllContent() {
+    return this.changeContents(null, { operation: 'removeAll', order: 0 });
+  }
+
   /**
    * @private
    * @param {Array<MHMedia>} - an Array of MHMedia objects to add or remove from this collection
