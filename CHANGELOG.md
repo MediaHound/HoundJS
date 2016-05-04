@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.0-beta9 (2016-05-04)
+
+* MHSilo.fetchSuggestedSillos() supports a siloPageSize param
+
 ## 0.6.0-beta8 (2016-05-02)
 
 * MHCollection supports remove all
