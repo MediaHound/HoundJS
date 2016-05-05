@@ -113,6 +113,7 @@ else {
   get jsonProperties() {
     return {
       'likers': Number,
+      'liking': Number,
       'followers': Number,
       'collectors': Number,
       'mentioners': Number,

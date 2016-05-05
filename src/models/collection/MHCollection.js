@@ -145,6 +145,10 @@ export default class MHCollection extends MHObject {
     return this.changeContents(null, { operation: 'remove', order: 0, indices: indexes });
   }
 
+  removeAllContent() {
+    return this.changeContents(null, { operation: 'removeAll', order: 0 });
+  }
+
   /**
    * @private
    * @param {Array<MHMedia>} - an Array of MHMedia objects to add or remove from this collection
@@ -172,9 +176,13 @@ export default class MHCollection extends MHObject {
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
-  fetchContent(view='full', size=12, force=false) {
+  fetchContent(view='full', size=12, force=false, filters) {
     const path = this.subendpoint('content');
-    return this.fetchPagedEndpoint(path, view, size, force);
+    const params = {};
+    if (filters) {
+      params.filters = filters;
+    }
+    return this.fetchPagedEndpoint(path, view, size, force, null, params);
   }
 }
 

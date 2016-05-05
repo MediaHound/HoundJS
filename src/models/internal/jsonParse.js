@@ -70,7 +70,7 @@ const setPropertyFromArgs = (args, obj, name, type, optional, merge) => {
     throw TypeError('non-optional field `' + name + '` found null value. Args:', args);
   }
 
-  if (convertedValue !== undefined) {
+  if (convertedValue !== undefined && convertedValue !== null) {
     if (merge) {
       obj[name] = convertedValue;
     }

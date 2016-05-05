@@ -671,6 +671,77 @@ export default class MHObject {
     __cachedRootResponses[cacheKey] = response;
   }
 
+  fetchBucketedEndpoint(path, filters, view, size, next=null, params={}) {
+    var promise;
+
+    if (next) {
+      promise = houndRequest({
+        method: 'GET',
+        url: next,
+      });
+    }
+    else {
+      params.pageSize = size;
+      params.view = view;
+      if (filters) {
+        params.filters = filters;
+      }
+
+      promise = houndRequest({
+        method: 'GET',
+        endpoint: path,
+        params: params
+      });
+    }
+
+    const finalPromise = promise.then(response => {
+      const MHBucket = require('../container/MHBucket.js').default;
+      const bucket = new MHBucket(response);
+
+      bucket.fetchNextOperation = (newNext => {
+        return this.fetchBucketedEndpoint(path, filters, view, size, newNext);
+      });
+
+      return bucket;
+    });
+
+    return finalPromise;
+  }
+
+  static fetchRootBucketedEndpoint(path, view, size, next=null, params={}) {
+    var promise;
+
+    if (next) {
+      promise = houndRequest({
+        method: 'GET',
+        url: next,
+      });
+    }
+    else {
+      params.pageSize = size;
+      params.view = view;
+
+      promise = houndRequest({
+        method: 'GET',
+        endpoint: path,
+        params: params
+      });
+    }
+
+    const finalPromise = promise.then(response => {
+      const MHBucket = require('../container/MHBucket.js').default;
+      const bucket = new MHBucket(response);
+
+      bucket.fetchNextOperation = (newNext => {
+        return this.fetchRootBucketedEndpoint(path, view, size, newNext, params);
+      });
+
+      return bucket;
+    });
+
+    return finalPromise;
+  }
+
   fetchPagedEndpoint(path, view, size, force, next=null, params={}) {
     if (!force && !next) {
       var cached = this.cachedResponseForPath(path);

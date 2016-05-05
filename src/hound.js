@@ -57,6 +57,8 @@ import MHTrailer            from './models/media/MHTrailer.js';
 
 import MHCollection from './models/collection/MHCollection.js';
 
+import MHSilo from './models/silo/MHSilo.js';
+
 
 // Trait Models
 import MHTrait          from './models/trait/MHTrait.js';
@@ -73,6 +75,11 @@ import MHEra            from './models/trait/MHEra.js';
 import MHAudience       from './models/trait/MHAudience.js';
 import MHFlag           from './models/trait/MHFlag.js';
 import MHGraphGenre     from './models/trait/MHGraphGenre.js';
+import MHAudioTrait     from './models/trait/MHAudioTrait.js';
+import MHLanguage       from './models/trait/MHLanguage.js';
+import MHSubMood        from './models/trait/MHSubMood.js';
+import MHSuitability    from './models/trait/MHSuitability.js';
+import MHType           from './models/trait/MHType.js';
 
 
 // Contributor Models
@@ -151,6 +158,8 @@ module.exports = {
   MHTrailer,
 
   MHCollection,
+
+  MHSilo,
 
   MHTrait,
   MHGenre,

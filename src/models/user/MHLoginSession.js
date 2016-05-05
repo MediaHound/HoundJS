@@ -37,6 +37,34 @@ export default class MHLoginSession {
       });
   }
 
+  static loginWithCredentials(username, password, scope='public_profile') {
+    return houndRequest({
+        method: 'POST',
+        useForms: true,
+        endpoint: 'security/oauth/token',
+        data: {
+          username,
+          password,
+          scope,
+          grant_type: 'password',
+          client_id: MHSDK.clientId,
+          client_secret: MHSDK.clientSecret
+        },
+        headers: {
+          Authorization: `Basic ${MHSDK.authHeaders()}`
+        }
+      }).then(response => {
+        const accessToken = response.access_token;
+
+        if (accessToken) {
+          return this.loginWithAccessToken(accessToken);
+        }
+        else {
+          throw new Error('MHLoginSessionInvalidCredentialsError');
+        }
+      })
+  }
+
   /**
    * The Currently logged in MHUser object
    * @property {MHUser}

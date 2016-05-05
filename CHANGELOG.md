@@ -2,6 +2,47 @@
 
 * No changes in master
 
+## 0.6.0-beta9 (2016-05-04)
+
+* MHSilo.fetchSuggestedSillos() supports a siloPageSize param
+
+## 0.6.0-beta8 (2016-05-02)
+
+* MHCollection supports remove all
+
+## 0.6.0-beta7 (2016-04-25)
+
+* Context supports fixed position
+* MHCollection.fetchContent() supports filters
+
+## 0.6.0-beta6 (2016-04-22)
+
+* New top level silo fetch endpoint
+* Add `liking` to MHSocial
+
+## 0.6.0-beta5 (2016-04-21)
+
+* MHObjects are now merged properly when new data with nulls arrives
+* Form encoded POST requests are sent with correct Content-Type
+* Password Grant Flow supported
+* Register new users for Password Grant Flow
+
+## 0.6.0-beta4 (2016-04-07)
+
+* Remove MHGraphTrait
+
+## 0.6.0-beta3 (2016-04-07)
+
+* New trait categories
+
+## 0.6.0-beta2 (2016-04-06)
+
+* Accept filters on fetchContent() of MHTrait
+
+## 0.6.0-beta1 (2016-04-06)
+
+* Bucket support for suggested silos and trait composition
+
 ## 0.5.17 (2016-04-01)
 
 * `subType` field supported on MHMetadata

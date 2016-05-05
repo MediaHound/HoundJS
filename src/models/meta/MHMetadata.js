@@ -100,5 +100,10 @@ export class MHHashtagMetadata extends MHMetadata {
 }
 
 export class MHTraitMetadata extends MHMetadata {
-
+  get jsonProperties() {
+    return {
+      ...super.jsonProperties,
+      pluralName: String
+    };
+  }
 }

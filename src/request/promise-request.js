@@ -67,7 +67,6 @@ const promiseRequest = args => {
   const onprogress  = args.onprogress       || null;
   const xhr         = new xhrc.XMLHttpRequest();
 
-
   // Check for url
   if (url === null) {
     throw new TypeError('url was null or undefined in arguments object', 'promiseRequest.js', 70);
@@ -152,7 +151,7 @@ else {
             'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
           };
         }
-else if (!headers['Content-Type'] && !headers['content-type'] && !headers['Content-type'] && !headers['content-Type']) {
+        else {
           headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=utf-8';
         }
       }

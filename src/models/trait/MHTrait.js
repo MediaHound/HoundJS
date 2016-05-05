@@ -11,8 +11,27 @@ export default class MHTrait extends MHObject {
     };
   }
 
-  fetchContent(view='full', size=12, force=false) {
+  fetchContent(view='full', size=12, force=false, filters=null) {
     var path = this.subendpoint('content');
-    return this.fetchPagedEndpoint(path, view, size, force);
+    const params = {};
+    if (filters) {
+      params.filters = filters;
+    }
+    return this.fetchPagedEndpoint(path, view, size, force, null, params);
+  }
+
+  static CompositionType = {
+    exact: 'exact',
+    subset: 'subset',
+    superset: 'superset'
+  };
+
+  static fetchComposition(traits, types=null, view='full', size=10) {
+    const path = this.rootSubendpoint('composition');
+    const params = { trait: traits };
+    if (types) {
+      params.type = types;
+    }
+    return this.fetchRootBucketedEndpoint(path, view, size, null, params);
   }
 }

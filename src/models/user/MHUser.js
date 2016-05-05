@@ -27,6 +27,61 @@ export default class MHUser extends MHObject {
     return this.isEqualToMHObject(currentUser);
   }
 
+    /*
+  * Register New User on MediaHound
+  *  Required Params
+  *    username          { String }
+  *    password          { String }
+  *    email             { String }
+  *    firstName         { String }
+  *    lastName          { String }
+  * Returns Promise that resolves to a MHUser object.
+  *
+  */
+  static registerNewUser(username, password, email, firstName, lastName, options = {}) {
+    const path = MHUser.rootEndpoint + '/new';
+    const notString = obj => {
+      return ( typeof obj !== 'string' && !(obj instanceof String) );
+    };
+
+    // Check for required params
+    if (notString(username)) {
+      throw new TypeError('Username not of type string in MHUser.registerNewUser');
+    }
+
+    if (notString(password)) {
+      throw new TypeError('Password not of type string in MHUser.registerNewUser');
+    }
+
+    if (notString(email)) {
+      throw new TypeError('Email not of type string in MHUser.registerNewUser');
+    }
+
+    if (notString(firstName)) {
+      throw new TypeError('First name not of type string in MHUser.registerNewUser');
+    }
+
+    if (notString(lastName)) {
+      throw new TypeError('Last name not of type string in MHUser.registerNewUser');
+    }
+
+    const data = {
+      ...options,
+      username,
+      password,
+      email,
+      firstName,
+      lastName
+    };
+
+    return houndRequest({
+        method: 'POST',
+        endpoint: path,
+        data
+      });
+  }
+
+
   /**
   * fetchSourceSettings(mhid)
   * @param mhid
@@ -669,7 +724,6 @@ else {
   fetchFacebookFriends(view='full', size=12, force=false) {
     var path = this.subendpoint('settings')+'/facebook/friends';
     return this.fetchPagedEndpoint(path, view, size, force);
-
   }
 }
 
