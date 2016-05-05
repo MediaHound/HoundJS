@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.0 (2016-05-05)
+
+* Released 0.6.0
+
 ## 0.6.0-beta9 (2016-05-04)
 
 * MHSilo.fetchSuggestedSillos() supports a siloPageSize param
