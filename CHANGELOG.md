@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.1 (2016-05-06)
+
+* MHCollection.removeByMhid()
+
 ## 0.6.0 (2016-05-05)
 
 * Released 0.6.0

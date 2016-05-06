@@ -145,6 +145,14 @@ export default class MHCollection extends MHObject {
     return this.changeContents(null, { operation: 'remove', order: 0, indices: indexes });
   }
 
+  removeContentByMhid(mhid) {
+    return this.removeContentByMhids([mhid]);
+  }
+
+  removeContentByMhids(mhids) {
+    return this.changeContents(null, { operation: 'remove', order: 0, ids: mhids });
+  }
+
   removeAllContent() {
     return this.changeContents(null, { operation: 'removeAll', order: 0 });
   }
