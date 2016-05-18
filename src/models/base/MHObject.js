@@ -90,7 +90,7 @@ export default class MHObject {
       log('trying to create MHObject that is new: ' + args);
       //return args.map(MHObject.create); // <-- should probably be this once all MHObjs are done
       return args.map(function(value) {
-        try{
+        try {
           return MHObject.create(value);
         } catch(e) {
           error(e);
@@ -98,7 +98,7 @@ export default class MHObject {
         }
       });
     }
-    try{
+    try {
 
       if (args.mhid && args.metadata === undefined) {
         args.metadata = {
@@ -407,7 +407,7 @@ export default class MHObject {
       view = 'full';
     }
 
-    log('in fetchByMhid, looking for: ', mhid, 'with view = ',view);
+    log('in fetchByMhid, looking for: ', mhid, 'with view = ', view);
 
     // Check LRU for mhid
     if (!force && mhidLRU.has(mhid)) {
@@ -521,7 +521,7 @@ export default class MHObject {
       })
       .then( (parsed => this.social = new MHSocial(parsed)).bind(this) )
       .catch(function(err) {
-        console.warn('fetchSocial:',err);
+        console.warn('fetchSocial:', err);
       });
   }
 

@@ -62,7 +62,7 @@ export default class MHLoginSession {
         else {
           throw new Error('MHLoginSessionInvalidCredentialsError');
         }
-      })
+      });
   }
 
   /**
