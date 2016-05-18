@@ -48,7 +48,7 @@ export default class MHCollection extends MHObject {
       })
       .then(function(newCollection) {
         if (MHLoginSession.openSession) {
-          MHLoginSession.currentUser.fetchOwnedCollections('full',12,true);
+          MHLoginSession.currentUser.fetchOwnedCollections('full', 12, true);
         }
         return newCollection;
       });
@@ -84,7 +84,7 @@ export default class MHCollection extends MHObject {
     })
     .then(function(newCollection) {
       if (MHLoginSession.openSession) {
-        MHLoginSession.currentUser.fetchOwnedCollections('full',12,true);
+        MHLoginSession.currentUser.fetchOwnedCollections('full', 12, true);
       }
       return newCollection;
     });
