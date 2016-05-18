@@ -654,7 +654,7 @@ export default class MHObject {
 
   static rootResponseCacheKeyForPath(path, params) {
     return '___root_cached_' + path + '_' + JSON.stringify(params, (k, v) => {
-      if (k === 'view' || k === 'pageSize' || k === 'access_token') {
+      if (k === 'access_token') {
         return undefined;
       }
       return v;
@@ -743,6 +743,9 @@ export default class MHObject {
   }
 
   fetchPagedEndpoint(path, view, size, force, next=null, params={}) {
+    params.pageSize = size;
+    params.view = view;
+
     if (!force && !next) {
       var cached = this.cachedResponseForPath(path);
       if (cached) {
@@ -759,13 +762,10 @@ export default class MHObject {
       });
     }
     else {
-      params.pageSize = size;
-      params.view = view;
-
       promise = houndRequest({
         method: 'GET',
         endpoint: path,
-        params: params
+        params
       });
     }
 
@@ -788,6 +788,9 @@ export default class MHObject {
   }
 
   static fetchRootPagedEndpoint(path, params, view, size, force, next=null) {
+    params.view = view;
+    params.pageSize = size;
+
     if (!force && !next) {
       var cached = this.cachedRootResponseForPath(path, params);
       if (cached) {
@@ -803,13 +806,10 @@ export default class MHObject {
       });
     }
     else {
-      params.view = view;
-      params.pageSize = size;
-
       promise = houndRequest({
         method  : 'GET',
         endpoint: path,
-        params: params
+        params
       });
     }
 
