@@ -1,5 +1,9 @@
 ## Master
 
+* No changes in master
+
+## 0.6.2 (2016-05-20)
+
 * MHObject fetches include the view and pageSize when caching responses
 
 ## 0.6.1 (2016-05-06)
