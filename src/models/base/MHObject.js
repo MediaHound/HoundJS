@@ -638,17 +638,22 @@ export default class MHObject {
       });
   }
 
-  responseCacheKeyForPath(path) {
-    return '__cached_' + path;
+  responseCacheKeyForPath(path, params) {
+    return '__cached_' + path + '_' + JSON.stringify(params, (k, v) => {
+      if (k === 'access_token') {
+        return undefined;
+      }
+      return v;
+    });;
   }
 
-  cachedResponseForPath(path) {
-    var cacheKey = this.responseCacheKeyForPath(path);
+  cachedResponseForPath(path, params) {
+    var cacheKey = this.responseCacheKeyForPath(path, params);
     return this.cachedResponses[cacheKey];
   }
 
-  setCachedResponse(response, path) {
-    var cacheKey = this.responseCacheKeyForPath(path);
+  setCachedResponse(response, path, params) {
+    var cacheKey = this.responseCacheKeyForPath(path, params);
     this.cachedResponses[cacheKey] = response;
   }
 
@@ -747,7 +752,7 @@ export default class MHObject {
     params.view = view;
 
     if (!force && !next) {
-      var cached = this.cachedResponseForPath(path);
+      var cached = this.cachedResponseForPath(path, params);
       if (cached) {
         return cached;
       }
@@ -781,7 +786,7 @@ export default class MHObject {
     });
 
     if (!next) {
-      this.setCachedResponse(finalPromise, path);
+      this.setCachedResponse(finalPromise, path, params);
     }
 
     return finalPromise;
