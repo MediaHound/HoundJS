@@ -12,6 +12,7 @@ export default class MHMedia extends MHObject {
       ...super.jsonProperties,
       metadata: MHMediaMetadata,
       keyContributors: [MHRelationalPair],
+      keyTraits: [MHRelationalPair],
       primaryGroup: MHRelationalPair
     };
   }

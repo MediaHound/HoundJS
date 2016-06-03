@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.4 (2016-06-03)
+
+* keyTraits for all MHMedia
+
 ## 0.6.3 (2016-06-02)
 
 * Cached responses cache based on the params
