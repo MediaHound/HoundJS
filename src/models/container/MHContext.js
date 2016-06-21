@@ -11,6 +11,7 @@ export default class MHContext {
 
   get jsonProperties() {
     return {
+      metadata: Object,
       consumable: Boolean,
       sorting: MHSorting,
       fixed: MHSorting,

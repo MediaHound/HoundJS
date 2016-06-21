@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.5 (2016-06-21)
+
+* Support "metadata" on MHContext
+
 ## 0.6.4 (2016-06-03)
 
 * keyTraits for all MHMedia
