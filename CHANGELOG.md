@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.6 (2016-06-28)
+
+* Support launchInfo and social on MHContext
+
 ## 0.6.5 (2016-06-21)
 
 * Support "metadata" on MHContext

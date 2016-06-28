@@ -17,7 +17,9 @@ export default class MHContext {
       fixed: MHSorting,
       relationships: [MHRelationship],
       mediums: [MHSourceMedium],
-      difference: [MHRelationalPair]
+      difference: [MHRelationalPair],
+      social: Object,
+      launchInfo: Object
     };
   }
 }
