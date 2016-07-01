@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.7 (2016-07-01)
+
+* Promotion support for Silos and Related
+
 ## 0.6.6 (2016-06-28)
 
 * Support launchInfo and social on MHContext
