@@ -40,16 +40,17 @@ export default class MHSearch {
   }
 
   // Static Search Scopes enums
-  static get SCOPE_ALL()         { return 'all'; }
-  static get SCOPE_MOVIE()       { return 'movie'; }
-  static get SCOPE_TRACK()       { return 'track'; }
-  static get SCOPE_ALBUM()       { return 'album'; }
-  static get SCOPE_SHOWSERIES()  { return 'showseries'; }
-  static get SCOPE_SHOWSEASON()  { return 'showseason'; }
-  static get SCOPE_SHOWEPISODE() { return 'showepisode'; }
-  static get SCOPE_BOOK()        { return 'book'; }
-  static get SCOPE_GAME()        { return 'game'; }
-  static get SCOPE_COLLECTION()  { return 'collection'; }
-  static get SCOPE_USER()        { return 'user'; }
-  static get SCOPE_CONTRIBUTOR() { return 'contributor'; }
+  static get SCOPE_ALL()              { return 'all'; }
+  static get SCOPE_MOVIE()            { return 'movie'; }
+  static get SCOPE_TRACK()            { return 'track'; }
+  static get SCOPE_ALBUM()            { return 'album'; }
+  static get SCOPE_SHOWSERIES()       { return 'showseries'; }
+  static get SCOPE_SHOWSEASON()       { return 'showseason'; }
+  static get SCOPE_SHOWEPISODE()      { return 'showepisode'; }
+  static get SCOPE_BOOK()             { return 'book'; }
+  static get SCOPE_GAME()             { return 'game'; }
+  static get SCOPE_COLLECTION()       { return 'collection'; }
+  static get SCOPE_USER()             { return 'user'; }
+  static get SCOPE_CONTRIBUTOR()      { return 'contributor'; }
+  static get SCOPE_BASE_CONTRIBUTOR() { return 'basecontributor'; }
 }
