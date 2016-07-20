@@ -32,7 +32,9 @@ export class MHUserMetadata extends MHMetadata {
     return {
       ...super.jsonProperties,
       username: {type: String, optional: false},
-      email: String
+      email: String,
+      firstName: String,
+      lastName: String
     };
   }
 }

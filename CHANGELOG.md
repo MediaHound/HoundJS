@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.9 (2016-07-20)
+
+* Support firstName and lastName on MHUserMetadata
+
 ## 0.6.8 (2016-07-07)
 
 * Support basecontributor for search
