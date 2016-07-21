@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.10 (2016-07-21)
+
+* MHUser.setPassword throws errors correctly
+
 ## 0.6.9 (2016-07-20)
 
 * Support firstName and lastName on MHUserMetadata

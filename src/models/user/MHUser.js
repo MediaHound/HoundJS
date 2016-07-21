@@ -403,21 +403,7 @@ else {
       }
     })
     .then(function(response) {
-      console.log('valid password: ', response);
       return response;
-    })
-    .catch(function(error) {
-      if (error.xhr.status === 400) {
-        console.error('The password ' + password + ' is an invalid password.');
-      }
-      else if (error.xhr.status === 404) {
-        console.error('The newPassword ' + newPassword + ' was not found.');
-      }
-else {
-        console.log('error in setPassword: ', error.error.message);
-        console.error(error.error.stack);
-      }
-      return false;
     });
   }
   /* TODO: docJS
