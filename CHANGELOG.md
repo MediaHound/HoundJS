@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.11 (2016-08-02)
+
+* MHContributor.fetchMedia supports filters and sort
+
 ## 0.6.10 (2016-07-21)
 
 * MHUser.setPassword throws errors correctly
