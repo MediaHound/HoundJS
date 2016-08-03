@@ -11,11 +11,14 @@ export default class MHTrait extends MHObject {
     };
   }
 
-  fetchContent(view='full', size=12, force=false, filters=null) {
-    var path = this.subendpoint('content');
+  fetchContent(view='full', size=12, force=false, filters=null, sort=null) {
+    const path = this.subendpoint('content');
     const params = {};
     if (filters) {
-      params.filters = filters;
+      params.filters = JSON.stringify(filters);
+    }
+    if (sort) {
+      params.sort = JSON.stringify(sort);
     }
     return this.fetchPagedEndpoint(path, view, size, force, null, params);
   }

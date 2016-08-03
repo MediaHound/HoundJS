@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.12 (2016-08-03)
+
+* MHTrait.fetchContent supports sort
+
 ## 0.6.11 (2016-08-02)
 
 * MHContributor.fetchMedia supports filters and sort
