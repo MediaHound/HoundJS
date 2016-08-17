@@ -486,8 +486,11 @@ else {
     log('in fetchByUsername, looking for: ' + username);
 
     // Check LRU for altId === username
-    if (!force && mhidLRU.hasAltId(username)) {
-      return Promise.resolve(mhidLRU.getByAltId(username));
+    if (!force) {
+      const entryFromCache = mhidLRU.getByAltId(username);
+      if (entryFromCache) {
+        return Promise.resolve(entryFromCache);
+      }
     }
 
     var path = MHUser.rootEndpoint + '/lookup/' + username,

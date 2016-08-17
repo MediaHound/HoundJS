@@ -13,7 +13,7 @@ var childrenConstructors = {};
 var __cachedRootResponses = {};
 
 // Create Cache
-export var mhidLRU = new MHCache(1000);
+export var mhidLRU = new MHCache(3000);
 
 if (typeof window !== 'undefined') {
   if (window.location.host === 'local.mediahound.com:2014') {
@@ -118,12 +118,12 @@ export default class MHObject {
         // check cache
         //log('in create function trying to parseArgs: \n\n' , args);
 
-        if (mhidLRU.has(args.metadata.mhid) || mhidLRU.has(args.mhid)) {
+
+
+        var foundObject = mhidLRU.get(args.metadata.mhid);
+        if (foundObject) {
           log('getting from cache in create: ' + args.metadata.mhid);
-          var foundObject = mhidLRU.get(args.metadata.mhid);
-          if (foundObject) {
-            foundObject.mergeWithData(args);
-          }
+          foundObject.mergeWithData(args);
           return foundObject;
         }
 
@@ -410,12 +410,18 @@ export default class MHObject {
     log('in fetchByMhid, looking for: ', mhid, 'with view = ', view);
 
     // Check LRU for mhid
-    if (!force && mhidLRU.has(mhid)) {
-      return Promise.resolve(mhidLRU.get(mhid));
+    if (!force) {
+      const entryFromCache = mhidLRU.get(mhid);
+      if (entryFromCache) {
+        return Promise.resolve(entryFromCache);
+      }
     }
     // Check LRU for altId
-    if (!force && mhidLRU.hasAltId(mhid)) {
-      return Promise.resolve(mhidLRU.getByAltId(mhid));
+    if (!force) {
+      const entryFromCache = mhidLRU.getByAltId(mhid);
+      if (entryFromCache) {
+        return Promise.resolve(entryFromCache);
+      }
     }
 
     var prefix  = MHObject.getPrefixFromMhid(mhid),

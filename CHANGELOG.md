@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.13 (2016-08-17)
+
+* Fix lookups into mhidLRU so they gurantee success
+
 ## 0.6.12 (2016-08-03)
 
 * MHTrait.fetchContent supports sort
