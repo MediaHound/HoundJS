@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.14 (2016-08-18)
+
+* fetchTopResults() added to MHSearch to get top movies
+
 ## 0.6.14 (2016-08-17)
 
 * Expose keySuitabilities from MHMedia

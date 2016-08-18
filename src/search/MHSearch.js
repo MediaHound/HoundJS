@@ -2,6 +2,41 @@ import houndRequest from '../request/hound-request.js';
 import MHPagedResponse from '../models/container/MHPagedResponse.js';
 
 export default class MHSearch {
+  static fetchTopResults(scope, size=12, next=null) {
+    const path = 'search/top';
+
+    let promise;
+    if (next) {
+      promise = houndRequest({
+        method: 'GET',
+        url: next
+      });
+    }
+    else {
+      const params = {
+        pageSize: size
+      };
+
+      params.types = [scope];
+
+      promise = houndRequest({
+        method  : 'GET',
+        endpoint: path,
+        params
+      });
+    }
+
+    return promise.then(response => {
+      const pagedResponse = new MHPagedResponse(response);
+
+      pagedResponse.fetchNextOperation = (newNext => {
+        return this.fetchTopResults(scope, size, newNext);
+      });
+
+      return pagedResponse;
+    });
+  }
+
   static fetchResultsForSearchTerm(searchTerm, scopes, size=12, next=null) {
     const path = 'search/all/' + houndRequest.extraEncode(searchTerm);
 
