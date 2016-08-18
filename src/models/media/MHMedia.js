@@ -13,6 +13,7 @@ export default class MHMedia extends MHObject {
       metadata: MHMediaMetadata,
       keyContributors: [MHRelationalPair],
       keyTraits: [MHRelationalPair],
+      keySuitabilities: [MHRelationalPair],
       primaryGroup: MHRelationalPair
     };
   }

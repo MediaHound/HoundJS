@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.14 (2016-08-17)
+
+* Expose keySuitabilities from MHMedia
+
 ## 0.6.13 (2016-08-17)
 
 * Fix lookups into mhidLRU so they gurantee success
