@@ -2,7 +2,11 @@
 
 * No changes in master
 
-## 0.6.14 (2016-08-18)
+## 0.6.16 (2016-08-25)
+
+* All collection edit methods take an optional allowDuplicates
+
+## 0.6.15 (2016-08-18)
 
 * fetchTopResults() added to MHSearch to get top movies
 
