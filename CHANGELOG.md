@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.17 (2016-08-29)
+
+* MHObjects now have the MHSocialMetrics field
+
 ## 0.6.16 (2016-08-25)
 
 * All collection edit methods take an optional allowDuplicates
@@ -174,7 +178,7 @@
 
 ## 0.5.2 (2016-01-17)
 
-* Rerelease 
+* Rerelease
 
 ## 0.5.1 (2016-01-17)
 

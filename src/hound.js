@@ -27,6 +27,7 @@ import MHLoginSession from './models/user/MHLoginSession.js';
 // Social Models
 import MHSocial from './models/social/MHSocial.js';
 import MHUserSocial from './models/social/MHUserSocial.js';
+import MHSocialMetrics from './models/social/MHSocialMetrics.js';
 
 // Media Models
 import MHMedia              from './models/media/MHMedia.js';
@@ -130,6 +131,7 @@ module.exports = {
 
   MHSocial,
   MHUserSocial,
+  MHSocialMetrics,
 
   MHMedia,
   MHAlbum,

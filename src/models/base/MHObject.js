@@ -8,6 +8,7 @@ import MHCache from '../internal/MHCache.js';
 import { MHMetadata } from '../meta/MHMetadata.js';
 import MHSocial from '../social/MHSocial.js';
 import MHUserSocial from '../social/MHUserSocial.js';
+import MHSocialMetrics from '../social/MHSocialMetrics.js';
 
 var childrenConstructors = {};
 var __cachedRootResponses = {};
@@ -62,7 +63,8 @@ export default class MHObject {
       primaryImage: { mapper: MHObject.create },
       secondaryImage: { mapper: MHObject.create },
       social: MHSocial,
-      userSocial: MHUserSocial
+      userSocial: MHUserSocial,
+      socialMetrics: MHSocialMetrics
     };
   }
 
