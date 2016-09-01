@@ -1,5 +1,6 @@
 import houndRequest from '../request/hound-request.js';
 import MHPagedResponse from '../models/container/MHPagedResponse.js';
+import MHObject from '../models/base/MHObject.js';
 
 export default class MHSearch {
   static fetchTopResults(scope, size=12, next=null) {
@@ -74,18 +75,30 @@ export default class MHSearch {
     });
   }
 
+  static fetchSegmentedResultsForSearchTerm(searchTerm, scopes, siloPageSize=12, includeAll=true) {
+    const path = 'search/segmented/' + houndRequest.extraEncode(searchTerm);
+
+    const params = { siloPageSize, includeAll };
+
+    if (Array.isArray(scopes)) {
+      params.types = scopes;
+    }
+
+    return MHObject.fetchRootBucketedEndpoint(path, 'full', 12, null, params);
+  }
+
   // Static Search Scopes enums
   static get SCOPE_ALL()              { return 'all'; }
   static get SCOPE_MOVIE()            { return 'movie'; }
   static get SCOPE_TRACK()            { return 'track'; }
   static get SCOPE_ALBUM()            { return 'album'; }
-  static get SCOPE_SHOWSERIES()       { return 'showseries'; }
-  static get SCOPE_SHOWSEASON()       { return 'showseason'; }
-  static get SCOPE_SHOWEPISODE()      { return 'showepisode'; }
+  static get SCOPE_SHOWSERIES()       { return 'showSeries'; }
+  static get SCOPE_SHOWSEASON()       { return 'showSeason'; }
+  static get SCOPE_SHOWEPISODE()      { return 'showEpisode'; }
   static get SCOPE_BOOK()             { return 'book'; }
   static get SCOPE_GAME()             { return 'game'; }
   static get SCOPE_COLLECTION()       { return 'collection'; }
   static get SCOPE_USER()             { return 'user'; }
   static get SCOPE_CONTRIBUTOR()      { return 'contributor'; }
-  static get SCOPE_BASE_CONTRIBUTOR() { return 'basecontributor'; }
+  static get SCOPE_BASE_CONTRIBUTOR() { return 'baseContributor'; }
 }

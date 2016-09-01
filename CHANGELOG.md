@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.18 (2016-09-01)
+
+* Search now supports fetchSegmentedResultsForSearchTerm
+
 ## 0.6.17 (2016-08-29)
 
 * MHObjects now have the MHSocialMetrics field
