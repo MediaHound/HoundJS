@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.20 (2016-09-28)
+
+* Dates are not localized to the current timezone anymore
+
 ## 0.6.19 (2016-09-02)
 
 * MHLoginSession.loginWithAccessToken() forcibly fetches the user
