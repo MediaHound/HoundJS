@@ -338,7 +338,7 @@ else {
   * @return { Promise }
   *
   */
-  static newPassword(password,ticket) {
+  static newPassword(password, ticket) {
 
     if (!password || (typeof password !== 'string' && !(password instanceof String))) {
       throw new TypeError('password must be type string in MHUser.newPassword');
@@ -383,7 +383,7 @@ else {
   * @return { Promise }
   *
   */
-  setPassword(password,newPassword) {
+  setPassword(password, newPassword) {
 
     if (!password || (typeof password !== 'string' && !(password instanceof String))) {
       throw new TypeError('password must be type string in MHUser.newPassword');

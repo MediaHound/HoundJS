@@ -94,7 +94,7 @@ export default class MHObject {
       return args.map(function(value) {
         try {
           return MHObject.create(value);
-        } catch(e) {
+        } catch (e) {
           error(e);
           return value;
         }
@@ -130,7 +130,7 @@ export default class MHObject {
         }
 
         var prefix = MHObject.getPrefixFromMhid(mhid);
-        log(prefix,new childrenConstructors[prefix](args));
+        log(prefix, new childrenConstructors[prefix](args));
         mhObj = new childrenConstructors[prefix](args);
 
         // if (prefix === 'mhimg') {
