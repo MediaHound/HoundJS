@@ -34,7 +34,7 @@ else if (!this[prop] && !otherObj[prop]) {
     var newValue, toChange, alsoFlip,
         newArgs = {};
 
-    switch(action) {
+    switch (action) {
       case MHSocial.LIKE:
         toChange = 'likers';
         newValue = this.likers + 1;

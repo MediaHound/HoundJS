@@ -12,7 +12,7 @@ const mapValueToType = (rawValue, type) => {
             try {
               return mapValueToType(v, innerType);
             }
-            catch(e) {
+            catch (e) {
               console.log(e);
               return v;
             }
