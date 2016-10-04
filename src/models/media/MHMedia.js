@@ -12,6 +12,8 @@ export default class MHMedia extends MHObject {
       ...super.jsonProperties,
       metadata: MHMediaMetadata,
       keyContributors: [MHRelationalPair],
+      keyTraits: [MHRelationalPair],
+      keySuitabilities: [MHRelationalPair],
       primaryGroup: MHRelationalPair
     };
   }
@@ -94,7 +96,7 @@ export default class MHMedia extends MHObject {
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
-  static fetchRelatedTo(medias, filters={}, view='full', size=12, force=false) {
+  static fetchRelatedTo(medias, filters={}, view='full', size=12, force=false, promote) {
     const factors = medias.map(m => {
       if (typeof m === 'string' || m instanceof String) {
         return m;
@@ -111,6 +113,10 @@ export default class MHMedia extends MHObject {
       factors: JSON.stringify(factors),
       filters: JSON.stringify(filters)
     };
+
+    if (promote) {
+      params.promote = JSON.stringify(promote);
+    }
 
     return this.fetchRootPagedEndpoint(path, params, view, size, force);
   }

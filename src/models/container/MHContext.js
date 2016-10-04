@@ -11,12 +11,15 @@ export default class MHContext {
 
   get jsonProperties() {
     return {
+      metadata: Object,
       consumable: Boolean,
       sorting: MHSorting,
       fixed: MHSorting,
       relationships: [MHRelationship],
       mediums: [MHSourceMedium],
-      difference: [MHRelationalPair]
+      difference: [MHRelationalPair],
+      social: Object,
+      launchInfo: Object
     };
   }
 }

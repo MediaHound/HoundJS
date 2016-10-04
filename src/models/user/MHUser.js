@@ -403,21 +403,7 @@ else {
       }
     })
     .then(function(response) {
-      console.log('valid password: ', response);
       return response;
-    })
-    .catch(function(error) {
-      if (error.xhr.status === 400) {
-        console.error('The password ' + password + ' is an invalid password.');
-      }
-      else if (error.xhr.status === 404) {
-        console.error('The newPassword ' + newPassword + ' was not found.');
-      }
-else {
-        console.log('error in setPassword: ', error.error.message);
-        console.error(error.error.stack);
-      }
-      return false;
     });
   }
   /* TODO: docJS
@@ -500,8 +486,11 @@ else {
     log('in fetchByUsername, looking for: ' + username);
 
     // Check LRU for altId === username
-    if (!force && mhidLRU.hasAltId(username)) {
-      return Promise.resolve(mhidLRU.getByAltId(username));
+    if (!force) {
+      const entryFromCache = mhidLRU.getByAltId(username);
+      if (entryFromCache) {
+        return Promise.resolve(entryFromCache);
+      }
     }
 
     var path = MHUser.rootEndpoint + '/lookup/' + username,
@@ -566,7 +555,7 @@ else {
     return this.fetchPagedEndpoint(path, view, size, force);
   }
 
-  fetchOwnedCollectionsByType(subType, view='full', size=12, force=true) {
+  fetchOwnedCollectionsByType(subType, view='full', size=12, force=false) {
     var path = this.subendpoint('ownedCollections');
     return this.fetchPagedEndpoint(path, view, size, force, null, { subType });
   }

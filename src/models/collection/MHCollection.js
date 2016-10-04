@@ -95,7 +95,7 @@ export default class MHCollection extends MHObject {
    * @param {Array<MHMedia>} - an Array of MHMedia objects to add to this collection
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
-  appendContent(contents) {
+  appendContent(contents, allowDuplicates = true) {
     const mhids = contents.map(m => {
       if (typeof m === 'string' || m instanceof String) {
         return m;
@@ -107,14 +107,14 @@ export default class MHCollection extends MHObject {
         return m;
       }
     });
-    return this.changeContents(contents, { operation: 'append', order: 0, ids: mhids });
+    return this.changeContents(contents, { operation: 'append', order: 0, ids: mhids }, allowDuplicates);
   }
 
   /**
    * @param {Array<MHMedia>} - an Array of MHMedia objects to add to this collection
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
-  prependContent(contents) {
+  prependContent(contents, allowDuplicates = true) {
     const mhids = contents.map(m => {
       if (typeof m === 'string' || m instanceof String) {
         return m;
@@ -126,7 +126,7 @@ export default class MHCollection extends MHObject {
         return m;
       }
     });
-    return this.changeContents(contents, { operation: 'prepend', order: 0, ids: mhids });
+    return this.changeContents(contents, { operation: 'prepend', order: 0, ids: mhids }, allowDuplicates);
   }
 
   /**
@@ -145,12 +145,12 @@ export default class MHCollection extends MHObject {
     return this.changeContents(null, { operation: 'remove', order: 0, indices: indexes });
   }
 
-  removeContentByMhid(mhid) {
-    return this.removeContentByMhids([mhid]);
+  removeContentByMhid(mhid, allowDuplicates = true) {
+    return this.removeContentByMhids([mhid], allowDuplicates);
   }
 
-  removeContentByMhids(mhids) {
-    return this.changeContents(null, { operation: 'remove', order: 0, ids: mhids });
+  removeContentByMhids(mhids, allowDuplicates = true) {
+    return this.changeContents(null, { operation: 'remove', order: 0, ids: mhids }, allowDuplicates);
   }
 
   removeAllContent() {
@@ -163,14 +163,14 @@ export default class MHCollection extends MHObject {
    * @param {string} sub - the subendpoint string, 'add' or 'remove'
    * @returns {Promise} - a promise that resolves to the new list of content for this MHCollection
    */
-  changeContents(contents, operation) {
+  changeContents(contents, operation, allowDuplicates = true) {
     const path = this.subendpoint('update');
     return houndRequest({
       method: 'POST',
       endpoint: path,
       data: {
         operations: [operation],
-        allowDuplicates: true
+        allowDuplicates
       }
     });
   }

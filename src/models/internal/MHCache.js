@@ -184,22 +184,6 @@ else {
   }
 
   /**
-   *
-   * @param altId
-   * @returns {boolean}
-   */
-  hasAltId(altId) {
-    var entry = this.tail;
-    while (entry) {
-      if (entry.altId === altId) {
-        return true;
-      }
-      entry = entry.older;
-    }
-    return false;
-  }
-
-  /**
    * Remove entry <key> from cache and return its value. Returns undefined if not
    * found.
    */

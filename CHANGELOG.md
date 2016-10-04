@@ -2,6 +2,78 @@
 
 * No changes in master
 
+## 0.6.20 (2016-09-28)
+
+* Dates are not localized to the current timezone anymore
+
+## 0.6.19 (2016-09-02)
+
+* MHLoginSession.loginWithAccessToken() forcibly fetches the user
+
+## 0.6.18 (2016-09-01)
+
+* Search now supports fetchSegmentedResultsForSearchTerm
+
+## 0.6.17 (2016-08-29)
+
+* MHObjects now have the MHSocialMetrics field
+
+## 0.6.16 (2016-08-25)
+
+* All collection edit methods take an optional allowDuplicates
+
+## 0.6.15 (2016-08-18)
+
+* fetchTopResults() added to MHSearch to get top movies
+
+## 0.6.14 (2016-08-17)
+
+* Expose keySuitabilities from MHMedia
+
+## 0.6.13 (2016-08-17)
+
+* Fix lookups into mhidLRU so they gurantee success
+
+## 0.6.12 (2016-08-03)
+
+* MHTrait.fetchContent supports sort
+
+## 0.6.11 (2016-08-02)
+
+* MHContributor.fetchMedia supports filters and sort
+
+## 0.6.10 (2016-07-21)
+
+* MHUser.setPassword throws errors correctly
+
+## 0.6.9 (2016-07-20)
+
+* Support firstName and lastName on MHUserMetadata
+
+## 0.6.8 (2016-07-07)
+
+* Support basecontributor for search
+
+## 0.6.7 (2016-07-01)
+
+* Promotion support for Silos and Related
+
+## 0.6.6 (2016-06-28)
+
+* Support launchInfo and social on MHContext
+
+## 0.6.5 (2016-06-21)
+
+* Support "metadata" on MHContext
+
+## 0.6.4 (2016-06-03)
+
+* keyTraits for all MHMedia
+
+## 0.6.3 (2016-06-02)
+
+* Cached responses cache based on the params
+
 ## 0.6.2 (2016-05-20)
 
 * MHObject fetches include the view and pageSize when caching responses
@@ -118,7 +190,7 @@
 
 ## 0.5.2 (2016-01-17)
 
-* Rerelease 
+* Rerelease
 
 ## 0.5.1 (2016-01-17)
 

@@ -30,8 +30,15 @@ export default class MHContributor extends MHObject {
   /*
    * TODO DocJS
    */
-   fetchMedia(view='full', size=12, force=false) {
-     const path = this.subendpoint('media');
-     return this.fetchPagedEndpoint(path, view, size, force);
+  fetchMedia(view='full', size=12, force=false, filters=null, sort=null) {
+    const path = this.subendpoint('media');
+    const params = {};
+    if (filters) {
+      params.filters = JSON.stringify(filters);
+    }
+    if (sort) {
+      params.sort = JSON.stringify(sort);
+    }
+    return this.fetchPagedEndpoint(path, view, size, force, null, params);
    }
 }

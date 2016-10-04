@@ -29,7 +29,10 @@ export default class MHLoginSession {
       .then(response => {
         MHSDK._setUserAccessToken(accessToken);
 
-        return MHUser.fetchByUsername(response.user_name);
+        // We need to fetch a forced update here because if the user
+        // was previously fetched it won't have proper view of the user.
+        // Things like `email` are only sent down with the logged-in user context
+        return MHUser.fetchByUsername(response.user_name, 'full', true);
       })
       .then(user => {
         loggedInUser = user;

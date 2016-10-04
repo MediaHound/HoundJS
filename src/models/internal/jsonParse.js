@@ -51,9 +51,6 @@ const mapValueToType = (rawValue, type) => {
     else if (initialValue === 'Invalid Date') {
       initialValue = null;
     }
-    else {
-      initialValue = new Date(initialValue.valueOf() + initialValue.getTimezoneOffset() * 60000);
-    }
   }
   else if (typeof type === 'function') {
     initialValue = (rawValue !== null && rawValue !== undefined) ? new type(rawValue) : null;
