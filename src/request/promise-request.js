@@ -3,15 +3,23 @@ var xhrc;
 
 // Use XMLHttpRequest from a browser or shim it in Ndoe with xmlhttprequest-cookie.
 if (typeof window !== 'undefined') {
-    if (!window.XMLHttpRequest || !('withCredentials' in new XMLHttpRequest())) {
+    if (!window.XMLHttpRequest || !('withCredentials' in new window.XMLHttpRequest())) {
       throw new Error('No XMLHttpRequest 2 Object found, please update your browser.');
     }
     else {
-      xhrc = window;
+      xhrc = window.XMLHttpRequest;
     }
 }
+else if (typeof XMLHttpRequest !== 'undefined') {
+  if (!XMLHttpRequest || !('withCredentials' in new XMLHttpRequest())) {
+    throw new Error('No XMLHttpRequest 2 Object found, please update your browser.');
+  }
+  else {
+    xhrc = XMLHttpRequest;
+  }
+}
 else if (typeof window === 'undefined') {
-  xhrc = require('xmlhttprequest-cookie');
+  xhrc = require('xmlhttprequest-cookie').XMLHttpRequest;
 }
 
 
@@ -65,7 +73,7 @@ const promiseRequest = args => {
   let   headers     = args.headers          || null;
   const withCreds   = (args.withCredentials !== undefined) ? args.withCredentials : true;
   const onprogress  = args.onprogress       || null;
-  const xhr         = new xhrc.XMLHttpRequest();
+  const xhr         = new xhrc();
 
   // Check for url
   if (url === null) {

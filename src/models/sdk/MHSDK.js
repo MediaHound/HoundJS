@@ -11,6 +11,9 @@ var _btoa;
 if (typeof window !== 'undefined') {
   _btoa = window.btoa;
 }
+else if (typeof btoa === 'function') {
+  _btoa = btoa;
+}
 else if (typeof window === 'undefined') {
   _btoa = require('base-64').encode;
 }

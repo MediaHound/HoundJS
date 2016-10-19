@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.6.21 (2016-10-19)
+
+* Supports using houndjs in a WebWorker
+
 ## 0.6.20 (2016-09-28)
 
 * Dates are not localized to the current timezone anymore
