@@ -20,7 +20,7 @@ import uglifyify   from 'uglifyify';
 const paths = {
   src: {
     js: 'src/**/*.js',
-    entrypoint: 'src/hound.js'
+    entrypoint: 'src/v2/hound.js'
   },
 
   dist: {
