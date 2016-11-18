@@ -27,45 +27,6 @@ let _clientId = null;
 let _clientSecret = null;
 let _houndOrigin = null;
 
-export const getAuthHeaders = () => _btoa(`${_clientId}:${_clientSecret}`);
-
-const createFormData = (obj) => {
-  return Object
-    .keys(obj)
-    .reduce((formData, key) => {
-      formData.append(key, obj[key]);
-      return formData;
-    }, new _FormData());
-};
-export const refreshOAuthToken = () => {
-  return fetch(`${getOrigin()}${getApiVersion()}/security/oauth/token`, {
-    method: 'POST',
-    body: createFormData({
-      client_id: _clientId,
-      client_secret: _clientSecret,
-      grant_type: 'client_credentials',
-      scope: 'public_profile'
-    }),
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Basic ${getAuthHeaders()}`
-    }
-  })
-  .then(res => res.json())
-  .then(json => {
-    _accessToken = json.access_token;
-  });
-};
-
-
-export const configure = ({ clientId, clientSecret, origin = 'https://api.mediahound.com/' }) => {
-  _clientId = clientId;
-  _clientSecret = clientSecret;
-  _houndOrigin = origin;
-
-  return refreshOAuthToken();
-};
-
 export const getAccessToken = () => {
   if (_userAccessToken) {
     return _userAccessToken;
@@ -83,4 +44,43 @@ export const getApiVersion = () => '1.2';
 
 export const setUserAccessToken = (accessToken) => {
   _accessToken = accessToken;
+};
+
+export const getAuthHeaders = () => _btoa(`${_clientId}:${_clientSecret}`);
+
+const createFormData = (obj) => {
+  return Object
+    .keys(obj)
+    .reduce((formData, key) => {
+      formData.append(key, obj[key]);
+      return formData;
+    }, new _FormData());
+};
+
+export const refreshOAuthToken = () => {
+  return fetch(`${getOrigin()}${getApiVersion()}/security/oauth/token`, {
+    method: 'POST',
+    body: createFormData({
+      'client_id': _clientId,
+      'client_secret': _clientSecret,
+      'grant_type': 'client_credentials',
+      scope: 'public_profile'
+    }),
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Basic ${getAuthHeaders()}`
+    }
+  })
+  .then(res => res.json())
+  .then(json => {
+    _accessToken = json.access_token;
+  });
+};
+
+export const configure = ({ clientId, clientSecret, origin = 'https://api.mediahound.com/' }) => {
+  _clientId = clientId;
+  _clientSecret = clientSecret;
+  _houndOrigin = origin;
+
+  return refreshOAuthToken();
 };

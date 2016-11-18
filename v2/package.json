@@ -1,0 +1,69 @@
+{
+  "name": "houndjs",
+  "version": "1.0.0",
+  "description": "The MediaHound JavaScript SDK",
+  "main": "dist/hound.js",
+  "repository": {
+    "url": "https://github.com/MediaHound/HoundJS.git",
+    "type": "git"
+  },
+  "author": "MediaHound",
+  "keywords": [
+    "MediaHound",
+    "Media",
+    "Entertainment",
+    "Movies",
+    "Music",
+    "TV"
+  ],
+  "homepage": "https://developer.mediahound.com",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "webpack --progress --watch",
+    "test": "jest"
+  },
+  "dependencies": {
+    "base-64": "^0.1.0",
+    "form-data": "^2.1.2"
+  },
+  "devDependencies": {
+    "babel-core": "^6.18.2",
+    "babel-eslint": "^7.1.1",
+    "babel-jest": "^17.0.2",
+    "babel-loader": "^6.2.8",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",
+    "babel-preset-es2015": "^6.18.0",
+    "dotenv": "^2.0.0",
+    "eslint": "^3.10.2",
+    "eslint-config-mediahound-library": "^1.0.1",
+    "eslint-loader": "^1.6.1",
+    "eslint-plugin-import": "^2.2.0",
+    "isomorphic-fetch": "^2.2.1",
+    "jest-cli": "^17.0.3",
+    "webpack": "v2.1.0-beta.27"
+  },
+  "babel": {
+    "presets": [
+      [
+        "es2015",
+        {
+          "modules": false
+        }
+      ],
+      "babel-preset-stage-1"
+    ],
+    "env": {
+      "test": {
+        "plugins": [
+          "transform-es2015-modules-commonjs"
+        ]
+      }
+    }
+  },
+  "eslintConfig": {
+    "extends": "mediahound-library"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}
