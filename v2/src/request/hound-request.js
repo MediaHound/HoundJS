@@ -1,4 +1,4 @@
-import * as sdk from '../sdk.js';
+import * as sdk from '../sdk/sdk.js';
 
 /**
  * Removes undefined parameters
@@ -46,7 +46,7 @@ const serializeBodyParams = (obj) => {
 
 const houndRequest = ({ method, endpoint, url, params, paramsProper = false }) => {
   // You can either pass a full url or an endpoint
-  let path = url ? url : `${sdk.getOrigin()}${sdk.getApiVersion()}/${endpoint}`;
+  let path = url ? url : `${sdk.details.getRootEndpoint()}/${endpoint}`;
 
   let body;
 
@@ -71,7 +71,7 @@ const houndRequest = ({ method, endpoint, url, params, paramsProper = false }) =
   };
 
   // Set the OAuth access token if the client has configured OAuth.
-  const accessToken = sdk.getAccessToken();
+  const accessToken = sdk.details.getAccessToken();
   if (accessToken) {
     headers.Authorization = `Bearer ${accessToken}`;
   }
