@@ -68,7 +68,14 @@ const refreshOAuthToken = () => {
       Authorization: `Basic ${getAuthHeaders()}`
     }
   })
-  .then(res => res.json())
+  .then(res => {
+    if (!res.ok) {
+      const err = new Error('houndjs Request Failed');
+      err.response = res;
+      throw err;
+    }
+    return res.json();
+  })
   .then(json => {
     _accessToken = json.access_token;
   });
@@ -97,7 +104,14 @@ export const loginWithAccessToken = ({ accessToken }) => {
         Authorization: `Basic ${getAuthHeaders()}`
       }
     })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        const err = new Error('houndjs Request Failed');
+        err.response = res;
+        throw err;
+      }
+      return res.json();
+    })
     .then(json => {
       _accessToken = accessToken;
 
@@ -121,7 +135,14 @@ export const loginWithCredentials = ({ username, password, scope }) => {
         Authorization: `Basic ${getAuthHeaders()}`
       }
     })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        const err = new Error('houndjs Request Failed');
+        err.response = res;
+        throw err;
+      }
+      return res.json();
+    })
     .then(json => {
       const accessToken = json.access_token;
 
