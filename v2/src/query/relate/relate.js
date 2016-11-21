@@ -6,6 +6,7 @@ export default ({ factors, filters, components, pageSize }) => {
     method: 'GET', // TODO: can make this POST
     endpoint: 'graph/relate',
     params: { factors, filters, components, pageSize },
-    paramsProper: true
+    paramsProper: true,
+    responseType: 'pagedResponse'
   });
 };

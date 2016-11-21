@@ -21,7 +21,8 @@ export const all = ({ searchTerm, scopes, pageSize }) => {
     params: {
       pageSize,
       types: Array.isArray(scopes) ? scopes : undefined
-    }
+    },
+    responseType: 'pagedResponse'
   });
 };
 
@@ -33,6 +34,7 @@ export const segmented = ({ searchTerm, scopes, siloPageSize, includeAll = true 
       siloPageSize,
       includeAll,
       types: Array.isArray(scopes) ? scopes : undefined
-    }
+    },
+    responseType: 'silo'
   });
 };

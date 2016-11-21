@@ -8,6 +8,7 @@ export default ({ ids, action }) => {
     endpoint: `graph/action/${action}`,
     params: {
       ids
-    }
+    },
+    responseType: 'json'
   });
 };

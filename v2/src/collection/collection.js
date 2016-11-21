@@ -7,7 +7,8 @@ export const create = ({ name, description }) => {
     params: {
       name,
       description
-    }
+    },
+    responseType: 'json'
   });
 };
 
@@ -18,6 +19,7 @@ export const update = ({ id, operations, allowDuplicates = false }) => {
     params: {
       operations,
       allowDuplicates
-    }
+    },
+    responseType: 'json'
   });
 };

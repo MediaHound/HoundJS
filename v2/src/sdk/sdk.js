@@ -1,3 +1,5 @@
+import basicRequest from '../request/basic-request.js';
+
 // Use btoa from a browser or shim it in Node with base64.
 let _btoa;
 if (typeof window !== 'undefined') {
@@ -8,17 +10,6 @@ else if (typeof btoa === 'function') {
 }
 else if (typeof window === 'undefined') {
   _btoa = require('base-64').encode;
-}
-
-let _FormData;
-if (typeof window !== 'undefined') {
-  _FormData = window.FormData;
-}
-else if (typeof FormData === 'function') {
-  _FormData = FormData;
-}
-else if (typeof window === 'undefined') {
-  _FormData = require('form-data');
 }
 
 let _accessToken = null;
@@ -45,40 +36,22 @@ export const details = {
   getRootEndpoint
 };
 
-const createFormData = (obj) => {
-  return Object
-    .keys(obj)
-    .reduce((formData, key) => {
-      formData.append(key, obj[key]);
-      return formData;
-    }, new _FormData());
-};
-
 const refreshOAuthToken = () => {
-  return fetch(`${getRootEndpoint()}/security/oauth/token`, {
-    method: 'POST',
-    body: createFormData({
-      'client_id': getClientId(),
-      'client_secret': getClientSecret(),
-      'grant_type': 'client_credentials',
-      scope: 'public_profile'
-    }),
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Basic ${getAuthHeaders()}`
-    }
-  })
-  .then(res => {
-    if (!res.ok) {
-      const err = new Error('houndjs Request Failed');
-      err.response = res;
-      throw err;
-    }
-    return res.json();
-  })
-  .then(json => {
-    _accessToken = json.access_token;
-  });
+  return basicRequest({
+      method: 'POST',
+      url: `${getRootEndpoint()}/security/oauth/token`,
+      params: {
+        'client_id': getClientId(),
+        'client_secret': getClientSecret(),
+        'grant_type': 'client_credentials',
+        scope: 'public_profile'
+      },
+      authorization: `Basic ${getAuthHeaders()}`,
+      useForms: true
+    })
+    .then(json => {
+      _accessToken = json.access_token;
+    });
 };
 
 export const configure = ({ clientId, clientSecret, origin = 'https://api.mediahound.com/' }) => {
@@ -94,23 +67,14 @@ export const getLoginDialogURL = ({ redirectUrl, scope }) => {
 };
 
 export const loginWithAccessToken = ({ accessToken }) => {
-  return fetch(`${getRootEndpoint()}/security/oauth/check_token`, {
+  return basicRequest({
       method: 'POST',
-      body: createFormData({
+      url: `${getRootEndpoint()}/security/oauth/check_token`,
+      params: {
         token: accessToken
-      }),
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Basic ${getAuthHeaders()}`
-      }
-    })
-    .then(res => {
-      if (!res.ok) {
-        const err = new Error('houndjs Request Failed');
-        err.response = res;
-        throw err;
-      }
-      return res.json();
+      },
+      authorization: `Basic ${getAuthHeaders()}`,
+      useForms: true
     })
     .then(json => {
       _accessToken = accessToken;
@@ -120,28 +84,19 @@ export const loginWithAccessToken = ({ accessToken }) => {
 };
 
 export const loginWithCredentials = ({ username, password, scope }) => {
-  return fetch(`${getRootEndpoint()}/security/oauth/token`, {
+  return basicRequest({
       method: 'POST',
-      body: createFormData({
+      url: `${getRootEndpoint()}/security/oauth/token`,
+      params: {
         username,
         password,
         scope,
         'grant_type': 'password',
         'client_id': getClientId(),
         'client_secret': getClientSecret()
-      }),
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Basic ${getAuthHeaders()}`
-      }
-    })
-    .then(res => {
-      if (!res.ok) {
-        const err = new Error('houndjs Request Failed');
-        err.response = res;
-        throw err;
-      }
-      return res.json();
+      },
+      authorization: `Basic ${getAuthHeaders()}`,
+      useForms: true
     })
     .then(json => {
       const accessToken = json.access_token;

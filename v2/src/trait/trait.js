@@ -8,6 +8,7 @@ export const comopse = ({ ids, types, components }) => {
       ids,
       types,
       components
-    }
+    },
+    responseType: 'silo'
   });
 };
