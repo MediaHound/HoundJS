@@ -63,7 +63,7 @@ export const configure = ({ clientId, clientSecret, origin = 'https://api.mediah
 };
 
 export const getLoginDialogURL = ({ redirectUrl, scope }) => {
-  return `${getRootEndpoint()}/security/oauth/authorize?client_id=${getClientId()}&client_secret=${getClientSecret}&scope=${scope}&response_type=token&redirect_uri=${redirectUrl}`;
+  return `${getRootEndpoint()}/security/oauth/authorize?client_id=${getClientId()}&client_secret=${getClientSecret()}&scope=${scope}&response_type=token&redirect_uri=${redirectUrl}`;
 };
 
 export const loginWithAccessToken = ({ accessToken }) => {
