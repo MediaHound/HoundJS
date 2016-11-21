@@ -4,11 +4,7 @@ export const comopse = ({ ids, types, components }) => {
   return houndRequest({
     method: 'GET',
     endpoint: 'graph/trait/compose',
-    params: {
-      ids,
-      types,
-      components
-    },
+    params: { ids, types, components },
     responseType: 'silo'
   });
 };

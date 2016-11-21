@@ -4,7 +4,7 @@ export default ({ ids, components, pageSize }) => {
   return houndRequest({
     method: 'GET',
     endpoint: 'graph/object',
-    params: { ids: ids, components, pageSize },
+    params: { ids, components, pageSize },
     responseType: 'pagedResponse'
   });
 };
