@@ -71,4 +71,22 @@ test('relate with an invalid mhid factor should fail', async () => {
   expect(syncFunction).toThrow();
 });
 
-// TODO: test: relate can take a compoonents object
+test('relate can take components', async () => {
+  const res = await relate({
+    factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD'],
+    pageSize: 2,
+    components: ['primaryImage', 'keyContributors']
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content.length).toBe(2);
+
+  for (const { object } of res.content) {
+    expect(object.metadata).toBeDefined();
+    expect(object.primaryImage).toBeDefined();
+    expect(object.primaryImage.metadata).toBeDefined();
+    expect(object.keyContributors).toBeDefined();
+    expect(object.keyContributors.content).toBeDefined();
+    expect(Array.isArray(object.keyContributors.content)).toBe(true);
+  }
+});

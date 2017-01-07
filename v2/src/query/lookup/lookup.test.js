@@ -37,12 +37,13 @@ test('lookup can be paged through', async () => {
 
   expect(res.hasMorePages).toBe(true);
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.length).toBe(10);
+  expect(res.content.length).toBe(10);
 
   const nextRes = await res.next();
 
   expect(Array.isArray(nextRes.content)).toBe(true);
-  expect(nextRes.length).toBe(1);
+  // Requested 11 movies with pageSize of 10, so second page should have 1 movie
+  expect(nextRes.content.length).toBe(1);
   expect(nextRes.hasMorePages).toBe(false);
 });
 

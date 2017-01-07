@@ -42,7 +42,7 @@ const serializeQueryParams = (obj) => {
       const value = filteredObj[k];
       if (value !== undefined) {
         // TODO: Remove this if statement, once ids are handled like other arrays
-        if (k === 'ids' || k === 'types') {
+        if (k === 'types') {
           for (const el of value) {
             const encodedEl = encodeURIComponent(el);
             str.push(`${k}=${encodedEl}`);
@@ -92,7 +92,7 @@ const basicRequest = ({ method, url, params, authorization, paramsProper = false
     }
   }
 
-  // console.log(method, url, body, headers)
+  // console.log(method, url, body, headers);
   return fetch(url, {
       method,
       headers,

@@ -5,6 +5,7 @@ export default ({ ids, components, pageSize }) => {
     method: 'GET',
     endpoint: 'graph/object',
     params: { ids, components, pageSize },
+    paramsProper: true,
     responseType: 'pagedResponse'
   });
 };
