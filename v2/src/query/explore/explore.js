@@ -5,6 +5,7 @@ export default ({ filters, sort, components, pageSize }) => {
     method: 'GET',
     endpoint: 'graph/explore',
     params: { filters, sort, components, pageSize },
+    paramsProper: true,
     responseType: 'pagedResponse'
   });
 };

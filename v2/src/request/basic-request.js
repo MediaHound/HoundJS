@@ -41,7 +41,7 @@ const serializeQueryParams = (obj) => {
     .reduce((str, k) => {
       const value = filteredObj[k];
       if (value !== undefined) {
-        // TODO: Remove this if statement, once ids are handled like other arrays
+        // TODO: Remove this if statement, once types are handled like other arrays
         if (k === 'types') {
           for (const el of value) {
             const encodedEl = encodeURIComponent(el);

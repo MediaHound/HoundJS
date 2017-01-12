@@ -87,4 +87,4 @@ test('looking up an invalid mhid should fail', async () => {
   expect(syncFunction).toThrow();
 });
 
-// TODO: test: lookup can take a compoonents object
+// TODO: test: lookup can take a components object

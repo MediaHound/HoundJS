@@ -16,7 +16,7 @@ let _accessToken = null;
 let _userAccessToken = null;
 let _clientId = null;
 let _clientSecret = null;
-let _houndOrigin = null;
+let _houndOrigin = 'https://api.mediahound.com/';
 
 const getAccessToken = () => _userAccessToken ? _userAccessToken : _accessToken;
 const getClientId = () => _clientId;
@@ -54,10 +54,12 @@ const refreshOAuthToken = () => {
     });
 };
 
-export const configure = ({ clientId, clientSecret, origin = 'https://api.mediahound.com/' }) => {
+export const configure = ({ clientId, clientSecret, origin }) => {
   _clientId = clientId;
   _clientSecret = clientSecret;
-  _houndOrigin = origin;
+  if (origin) {
+    _houndOrigin = origin;
+  }
 
   return refreshOAuthToken();
 };
