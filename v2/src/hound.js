@@ -10,3 +10,5 @@ export takeAction from './action/action.js';
 
 export * as collection from './collection/collection.js';
 export * as trait from './trait/trait.js';
+
+export houndRequest from './request/hound-request.js';
