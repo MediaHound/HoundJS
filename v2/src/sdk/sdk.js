@@ -17,6 +17,7 @@ let _userAccessToken = null;
 let _clientId = null;
 let _clientSecret = null;
 let _houndOrigin = 'https://api.mediahound.com/';
+let _locale = null;
 
 const getAccessToken = () => _userAccessToken ? _userAccessToken : _accessToken;
 const getClientId = () => _clientId;
@@ -63,6 +64,12 @@ export const configure = ({ clientId, clientSecret, origin }) => {
 
   return refreshOAuthToken();
 };
+
+export const setLocale = (locale) => {
+  _locale = locale;
+};
+
+export const getLocale = () => _locale;
 
 export const getLoginDialogURL = ({ redirectUrl, scope }) => {
   return `${getRootEndpoint()}/security/oauth/authorize?client_id=${getClientId()}&client_secret=${getClientSecret()}&scope=${scope}&response_type=token&redirect_uri=${redirectUrl}`;

@@ -62,13 +62,17 @@ const serializeBodyParams = (obj) => {
   return JSON.stringify(filteredParams(obj));
 };
 
-const basicRequest = ({ method, url, params, authorization, paramsProper = false, useForms = false }) => {
+const basicRequest = ({ method, url, params, authorization, paramsProper = false, useForms = false, locale = null }) => {
   const headers = {
     'Accept': 'application/json'
   };
 
   if (authorization) {
     headers.Authorization = authorization;
+  }
+
+  if (locale) {
+    headers['Accept-Language'] = locale;
   }
 
   let body;

@@ -27,13 +27,16 @@ const houndRequest = ({ method, endpoint, url, params, paramsProper = false, res
   // Set the OAuth access token if the client has configured OAuth.
   const accessToken = sdk.details.getAccessToken();
 
+  const locale = sdk.getLocale();
+
   return basicRequest({
       // You can either pass a full url or an endpoint
       url: url ? url : `${sdk.details.getRootEndpoint()}/${endpoint}`,
       method,
       params,
       paramsProper,
-      authorization: accessToken ? `Bearer ${accessToken}` : undefined
+      authorization: accessToken ? `Bearer ${accessToken}` : undefined,
+      locale
     })
     .then(json => {
       if (responseType === 'json') {
