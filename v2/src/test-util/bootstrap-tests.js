@@ -1,4 +1,5 @@
 import 'isomorphic-fetch';
+import 'babel-polyfill';
 import dotenv from 'dotenv';
 
 import { sdk } from '../hound.js';
