@@ -104,7 +104,7 @@ const basicRequest = ({ method, url, params, authorization, paramsProper = false
     })
     .then(res => {
       if (!res.ok) {
-        const err = new Error('houndjs Request Failed');
+        const err = new Error(`houndjs Request Failed: ${res.status} ${res.statusText}`);
         err.response = res;
         throw err;
       }

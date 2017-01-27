@@ -74,7 +74,7 @@ test('lookup can take a pageSize', async () => {
 
   expect(Array.isArray(nextRes.content)).toBe(true);
   expect(nextRes.content.length).toBe(4);
-  expect(nextRes.hasMorePages).toBe(true);
+  expect(nextRes.hasMorePages).toBe(false);
 });
 
 test('looking up an invalid mhid should fail', async () => {
