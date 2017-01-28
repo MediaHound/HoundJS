@@ -1,6 +1,9 @@
 // You are responsible for polyfilling the fetch api.
 import 'isomorphic-fetch';
 
+// You are responsible for providing the babel polyfill.
+import 'babel-polyfill';
+
 import hound from 'houndjs';
 
 const main = async () => {

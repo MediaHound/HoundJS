@@ -7,6 +7,8 @@
 
 ## Testing
 
+You will need to specify environment variables for testing. Copy the `.env.example` file and name it `.env`. Fill in your client id, secret, and API origin like `https://api.mediahound.com/`.
+
 Run `yarn test`
 
 ## Publishing
