@@ -1,6 +1,5 @@
 import * as search from './search.js';
 import bootstrapTests from '../../test-util/bootstrap-tests.js';
-import syncify from '../../test-util/syncify.js';
 
 beforeAll(() => bootstrapTests());
 
