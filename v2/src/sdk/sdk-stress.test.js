@@ -17,12 +17,17 @@ test('configure can be called 50 times at once', async () => {
           clientSecret,
           origin
         })
-        .then(() => true)
-        .catch(err => false)
+        .then(({ accessToken }) => {
+          return { success: true, accessToken };
+        })
+        .catch(err => ({ success: false }))
     );
   }
 
   const values = await Promise.all(promises);
-  const failures = values.filter(v => !v).length;
+  const failures = values.filter(v => !v.success).length;
   expect(failures).toBe(0);
+
+  const allTokensSame = values.every(v => v.accessToken === values[0].accessToken);
+  expect(allTokensSame).toBe(true);
 });

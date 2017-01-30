@@ -51,10 +51,25 @@ const refreshOAuthToken = () => {
       useForms: true
     })
     .then(json => {
-      _accessToken = json.access_token;
+      const accessToken = json.access_token;
+
+      // Save the access to use globally.
+      _accessToken = accessToken;
+
+      return { accessToken };
     });
 };
 
+/**
+ * Authenticates with the Mediahound API using a Client Id/Secret.
+ * You must invoke this function before calling any other houndjs api.
+ * @param origin Optional url to the MediaHound API. By default this is
+ *   'https://api.mediahound.com/'. You typically should omit this parameter.
+ *
+ * @return A promise that resolves when configuration is complete.
+ *   Any houndjs api calls must be invoked after this promise resolves.
+ *   The promise resolves with { accessToken }.
+ */
 export const configure = ({ clientId, clientSecret, origin }) => {
   _clientId = clientId;
   _clientSecret = clientSecret;
