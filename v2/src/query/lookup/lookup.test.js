@@ -4,6 +4,13 @@ import syncify from '../../test-util/syncify.js';
 
 beforeAll(() => bootstrapTests());
 
+const expectImageFilledOut = (image) => {
+  expect(image).toBeDefined();
+  expect(image.width).toBeGreaterThan(0);
+  expect(image.height).toBeGreaterThan(0);
+  expect(image.url).toMatch(/^https:\/\/images\.mediahound\.com\//);
+};
+
 test('lookup is exported as a function', () => {
   expect(typeof lookup === 'function').toBe(true);
 });
@@ -87,4 +94,74 @@ test('looking up an invalid mhid should fail', async () => {
   expect(syncFunction).toThrow();
 });
 
-// TODO: test: lookup can take a components object
+test('lookup takes simple components', async () => {
+  const res = await lookup({
+    ids: ['mhmov-gladiator'],
+    components: [
+      'primaryImage'
+    ]
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content.length).toBe(1);
+
+  const firstPair = res.content[0];
+  expect(firstPair).toBeDefined();
+
+  const { object, context } = firstPair;
+  expect(context).toEqual({});
+  expect(object).toBeDefined();
+
+  const { metadata } = object;
+  expect(metadata).toBeDefined();
+  expect(metadata.name).toBe('Gladiator');
+  expect(metadata.altId).toBe('mhmov-gladiator');
+  expect(metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
+
+  const { primaryImage } = object;
+  expect(primaryImage).toBeDefined();
+  expect(primaryImage.metadata).toBeDefined();
+  expect(primaryImage.metadata.mhid).toMatch(/^mhimg/);
+  expect(primaryImage.metadata.isDefault).toBe(false);
+  expectImageFilledOut(primaryImage.metadata.original);
+  expectImageFilledOut(primaryImage.metadata.large);
+  expectImageFilledOut(primaryImage.metadata.medium);
+  expectImageFilledOut(primaryImage.metadata.small);
+  expectImageFilledOut(primaryImage.metadata.thumbnail);
+});
+
+test('lookup takes an object components', async () => {
+  const res = await lookup({
+    ids: ['mhmov-gladiator'],
+    components: [
+      { name: 'primaryImage' }
+    ]
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content.length).toBe(1);
+
+  const firstPair = res.content[0];
+  expect(firstPair).toBeDefined();
+
+  const { object, context } = firstPair;
+  expect(context).toEqual({});
+  expect(object).toBeDefined();
+
+  const { metadata } = object;
+  expect(metadata).toBeDefined();
+  expect(metadata.name).toBe('Gladiator');
+  expect(metadata.altId).toBe('mhmov-gladiator');
+  expect(metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
+
+  const { primaryImage } = object;
+  expect(primaryImage).toBeDefined();
+  expect(primaryImage.metadata).toBeDefined();
+  expect(primaryImage.metadata.mhid).toMatch(/^mhimg/);
+  expect(primaryImage.metadata.isDefault).toBe(false);
+  expectImageFilledOut(primaryImage.metadata.original);
+  expectImageFilledOut(primaryImage.metadata.large);
+  expectImageFilledOut(primaryImage.metadata.medium);
+  expectImageFilledOut(primaryImage.metadata.small);
+  expectImageFilledOut(primaryImage.metadata.thumbnail);
+});
