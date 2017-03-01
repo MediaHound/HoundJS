@@ -4,7 +4,7 @@ import syncify from '../../test-util/syncify.js';
 
 beforeAll(() => bootstrapTests());
 
-const expectImageFilledOut = (image) => {
+const expectImageFormatFilledOut = (image) => {
   expect(image).toBeDefined();
   expect(image.width).toBeGreaterThan(0);
   expect(image.height).toBeGreaterThan(0);
@@ -123,11 +123,11 @@ test('lookup takes simple components', async () => {
   expect(primaryImage.metadata).toBeDefined();
   expect(primaryImage.metadata.mhid).toMatch(/^mhimg/);
   expect(primaryImage.metadata.isDefault).toBe(false);
-  expectImageFilledOut(primaryImage.metadata.original);
-  expectImageFilledOut(primaryImage.metadata.large);
-  expectImageFilledOut(primaryImage.metadata.medium);
-  expectImageFilledOut(primaryImage.metadata.small);
-  expectImageFilledOut(primaryImage.metadata.thumbnail);
+  expectImageFormatFilledOut(primaryImage.metadata.original);
+  expectImageFormatFilledOut(primaryImage.metadata.large);
+  expectImageFormatFilledOut(primaryImage.metadata.medium);
+  expectImageFormatFilledOut(primaryImage.metadata.small);
+  expectImageFormatFilledOut(primaryImage.metadata.thumbnail);
 });
 
 test('lookup takes an object components', async () => {
@@ -159,9 +159,9 @@ test('lookup takes an object components', async () => {
   expect(primaryImage.metadata).toBeDefined();
   expect(primaryImage.metadata.mhid).toMatch(/^mhimg/);
   expect(primaryImage.metadata.isDefault).toBe(false);
-  expectImageFilledOut(primaryImage.metadata.original);
-  expectImageFilledOut(primaryImage.metadata.large);
-  expectImageFilledOut(primaryImage.metadata.medium);
-  expectImageFilledOut(primaryImage.metadata.small);
-  expectImageFilledOut(primaryImage.metadata.thumbnail);
+  expectImageFormatFilledOut(primaryImage.metadata.original);
+  expectImageFormatFilledOut(primaryImage.metadata.large);
+  expectImageFormatFilledOut(primaryImage.metadata.medium);
+  expectImageFormatFilledOut(primaryImage.metadata.small);
+  expectImageFormatFilledOut(primaryImage.metadata.thumbnail);
 });

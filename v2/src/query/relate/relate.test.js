@@ -8,9 +8,68 @@ test('relate is exported as a function', () => {
   expect(typeof relate === 'function').toBe(true);
 });
 
-test('relate takes a factors array', async () => {
+test('relate takes a simple single-item factors array', async () => {
   const res = await relate({
     factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD']
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+});
+
+test('relate takes an advanced single-item factors array', async () => {
+  const res = await relate({
+    factors: [
+      {
+        'mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD': { weight: 1 }
+      }
+    ]
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+});
+
+test('relate takes a simple multi-item factors array', async () => {
+  const res = await relate({
+    factors: [
+      'mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD',
+      'mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'
+    ]
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+});
+
+test.only('relate takes an advanced muli-item factors array', async () => {
+  const res = await relate({
+    factors: [
+      {
+        'mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD': { weight: 1 }
+      },
+      {
+        'mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8': { weight: 2 }
+      }
+    ]
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+});
+
+test('relate takes an advanced mulit-item factors array with boostOnly', async () => {
+  const res = await relate({
+    factors: [
+      {
+        'mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD': {
+          weight: 1,
+          boostOnly: false
+        }
+      },
+      {
+        'mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8': {
+          weight: 2,
+          boostOnly: true
+        }
+      }
+    ]
   });
 
   expect(Array.isArray(res.content)).toBe(true);
