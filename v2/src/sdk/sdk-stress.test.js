@@ -4,7 +4,7 @@ import syncify from '../test-util/syncify.js';
 
 beforeAll(() => bootstrapTests({ autoConfigure: false }));
 
-test('configure can be called 50 times at once', async () => {
+test.skip('configure can be called 50 times at once', async () => {
   const clientId = process.env.HOUNDJS_TEST_CLIENT_ID;
   const clientSecret = process.env.HOUNDJS_TEST_CLIENT_SECRET;
   const origin = process.env.HOUNDJS_TEST_ORIGIN;

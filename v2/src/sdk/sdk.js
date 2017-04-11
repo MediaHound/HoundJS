@@ -23,7 +23,7 @@ const getAccessToken = () => _userAccessToken ? _userAccessToken : _accessToken;
 const getClientId = () => _clientId;
 const getClientSecret = () => _clientSecret;
 const getOrigin = () => _houndOrigin;
-const getApiVersion = () => '1.2';
+const getApiVersion = () => '1.3';
 const getAuthHeaders = () => _btoa(`${_clientId}:${_clientSecret}`);
 const getRootEndpoint = () => `${getOrigin()}${getApiVersion()}`;
 

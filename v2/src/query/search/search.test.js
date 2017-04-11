@@ -19,7 +19,7 @@ test('search.all takes a searchTerm, scopes and pageSize', async () => {
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content.length).toBe(5);
+  expect(res.content).toHaveLength(5);
   expect(res.hasMorePages).toBe(true);
 
   for (const { object, context } of res.content) {
@@ -29,7 +29,7 @@ test('search.all takes a searchTerm, scopes and pageSize', async () => {
   const nextRes = await res.next();
 
   expect(Array.isArray(nextRes.content)).toBe(true);
-  expect(nextRes.content.length).toBe(5);
+  expect(nextRes.content).toHaveLength(5);
   expect(nextRes.hasMorePages).toBe(true);
 
   for (const { object, context } of nextRes.content) {
@@ -47,14 +47,14 @@ test('search.segmented takes a searchTerm, scopes, siloPageSize, and includeAll'
 
   expect(res.hasMorePages).toBe(false);
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content.length).toBe(3); // Movies, ShowSeries, and All
+  expect(res.content).toHaveLength(3); // Movies, ShowSeries, and All
 
   const innerTypes = res.content.map(innerRes => innerRes.type);
   expect(innerTypes).toEqual(['all', 'movie', 'showSeries']);
 
   for (const innerRes of res.content) {
     expect(Array.isArray(innerRes.content)).toBe(true);
-    expect(innerRes.content.length).toBe(6);
+    expect(innerRes.content).toHaveLength(6);
 
     if (innerRes.type === 'movie') {
       for (const { object, context } of innerRes.content) {
@@ -73,7 +73,7 @@ test('search.segmented takes a searchTerm, scopes, siloPageSize, and includeAll'
     const secondPageRes = await innerRes.next();
 
     expect(Array.isArray(secondPageRes.content)).toBe(true);
-    expect(secondPageRes.content.length).toBe(6);
+    expect(secondPageRes.content).toHaveLength(6);
   }
 });
 
@@ -86,7 +86,7 @@ test('search.segmented supports a false includeAll', async () => {
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content.length).toBe(2); // Movies, ShowSeries, but no All
+  expect(res.content).toHaveLength(2); // Movies, ShowSeries, but no All
 });
 
 test('search.segmented defaults includeAll to true', async () => {
@@ -97,5 +97,5 @@ test('search.segmented defaults includeAll to true', async () => {
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content.length).toBe(3); // Movies, ShowSeries, and All
+  expect(res.content).toHaveLength(3); // Movies, ShowSeries, and All
 });

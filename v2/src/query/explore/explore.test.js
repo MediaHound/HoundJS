@@ -1,5 +1,6 @@
 import explore from './explore.js';
 import bootstrapTests from '../../test-util/bootstrap-tests.js';
+import { expectMediaHoundImage } from '../../test-util/expect-image.js';
 
 beforeAll(() => bootstrapTests());
 
@@ -7,15 +8,48 @@ test('explore is exported as a function', () => {
   expect(typeof explore === 'function').toBe(true);
 });
 
-test('explore takes a filters object', async () => {
+test('explore takes a filters object of mhid', async () => {
   const res = await explore({
     filters: {
-      returnType: 'ShowSeries',
-      withContributor: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
+      returnType: { $eq: 'ShowSeries' },
+      contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
     }
   });
 
   expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content).toHaveLength(10); // Default pageSize is 10
+
+  for (const { object, context } of res.content) {
+    expect(object.metadata.mhid.substring(0, 5)).toBe('mhsss');
+  }
+});
+
+test('explore takes a filters object of altId', async () => {
+  const res = await explore({
+    filters: {
+      returnType: { $eq: 'ShowSeries' },
+      contributors: { $eq: 'mhric-george-clooney' }
+    }
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content).toHaveLength(10); // Default pageSize is 10
+
+  for (const { object, context } of res.content) {
+    expect(object.metadata.mhid.substring(0, 5)).toBe('mhsss');
+  }
+});
+
+test('explore takes a filters object of MSI', async () => {
+  const res = await explore({
+    filters: {
+      returnType: { $eq: 'ShowSeries' },
+      contributors: { $eq: 'IMDB::nm0289142' }
+    }
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content).toHaveLength(10); // Default pageSize is 10
 
   for (const { object, context } of res.content) {
     expect(object.metadata.mhid.substring(0, 5)).toBe('mhsss');
@@ -25,41 +59,41 @@ test('explore takes a filters object', async () => {
 test('explore can be paged through', async () => {
   const res = await explore({
     filters: {
-      withContributor: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
+      contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
     }
   });
 
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content).toHaveLength(10); // Default pageSize is 10
   expect(res.hasMorePages).toBe(true);
 
   const nextRes = await res.next();
 
   expect(Array.isArray(nextRes.content)).toBe(true);
+  expect(nextRes.content).toHaveLength(10); // Default pageSize is 10
   expect(nextRes.hasMorePages).toBe(true);
 });
 
 test('explore can take a pageSize', async () => {
   const res = await explore({
     filters: {
-      withContributor: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
+      contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
     },
     pageSize: 3
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content.length).toBe(3);
+  expect(res.content).toHaveLength(3);
   expect(res.hasMorePages).toBe(true);
 
   const nextRes = await res.next();
 
   expect(Array.isArray(nextRes.content)).toBe(true);
-  expect(nextRes.content.length).toBe(3);
+  expect(nextRes.content).toHaveLength(3);
   expect(nextRes.hasMorePages).toBe(true);
 });
 
-// TODO: test: explore can take a compoonents object
-
-
-test('explore takes a sort object: sort by ids - in order', async () => {
+test('explore takes a sort object: sort by ids - in order (mhid)', async () => {
   const res = await explore({
     filters: {
       restrictTo: {
@@ -89,6 +123,70 @@ test('explore takes a sort object: sort by ids - in order', async () => {
   expect(res.content[1].object.metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
   expect(res.content[2].object.metadata.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1');
   expect(res.content[3].object.metadata.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01');
+});
+
+test('explore takes a sort object: sort by ids - in order (altId)', async () => {
+  const res = await explore({
+    filters: {
+      restrictTo: {
+        $in: [
+          'mhmov-her',
+          'mhmov-gladiator',
+          'mhmov-citizen-kane',
+          'mhmov-dodgeball-a-true-underdog-story'
+        ]
+      }
+    },
+    sort: [
+      {
+        type: 'idsOrder',
+        ids: [
+          'mhmov-her',
+          'mhmov-gladiator',
+          'mhmov-citizen-kane',
+          'mhmov-dodgeball-a-true-underdog-story'
+        ]
+      }
+    ]
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content[0].object.metadata.altId).toBe('mhmov-her');
+  expect(res.content[1].object.metadata.altId).toBe('mhmov-gladiator');
+  expect(res.content[2].object.metadata.altId).toBe('mhmov-citizen-kane');
+  expect(res.content[3].object.metadata.altId).toBe('mhmov-dodgeball-a-true-underdog-story');
+});
+
+test('explore takes a sort object: sort by ids - in order (MSI)', async () => {
+  const res = await explore({
+    filters: {
+      restrictTo: {
+        $in: [
+          'IMDB::tt1798709',
+          'IMDB::tt0172495',
+          'IMDB::tt0033467',
+          'IMDB::tt0364725'
+        ]
+      }
+    },
+    sort: [
+      {
+        type: 'idsOrder',
+        ids: [
+          'IMDB::tt1798709',
+          'IMDB::tt0172495',
+          'IMDB::tt0033467',
+          'IMDB::tt0364725'
+        ]
+      }
+    ]
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content[0].object.metadata.altId).toBe('mhmov-her');
+  expect(res.content[1].object.metadata.altId).toBe('mhmov-gladiator');
+  expect(res.content[2].object.metadata.altId).toBe('mhmov-citizen-kane');
+  expect(res.content[3].object.metadata.altId).toBe('mhmov-dodgeball-a-true-underdog-story');
 });
 
 test('explore takes a sort object: sort by ids - in order descending', async () => {
@@ -295,4 +393,184 @@ test('explore takes a sort object: sort by name descending', async () => {
   expect(res.content[1].object.metadata.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1'); // The Notebook
   expect(res.content[2].object.metadata.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'); // Her
   expect(res.content[3].object.metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G'); // Gladiator
+});
+
+test('explore return basic metadata if no components are requested', async () => {
+  const res = await explore({
+    filters: {
+      returnType: { $eq: 'ShowSeries' },
+      contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
+    },
+    pageSize: 2
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content).toHaveLength(2);
+
+  for (const { object } of res.content) {
+    expect(object.metadata).toBeDefined();
+    expect(object.metadata.name).toBeDefined();
+    expect(object.metadata.altId).toBeDefined();
+    expect(object.metadata.mhid).toBeDefined();
+  }
+});
+
+test('explore takes a simple component', async () => {
+  const res = await explore({
+    filters: {
+      returnType: { $eq: 'ShowSeries' },
+      contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
+    },
+    pageSize: 2,
+    components: ['primaryImage']
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content).toHaveLength(2);
+
+  for (const { object } of res.content) {
+    expect(object.metadata).toBeDefined();
+    expect(object.metadata.name).toBeDefined();
+    expect(object.metadata.altId).toBeDefined();
+    expect(object.metadata.mhid).toBeDefined();
+
+    const { primaryImage } = object;
+    expectMediaHoundImage(primaryImage);
+  }
+});
+
+test('explore takes multiple simple components', async () => {
+  const res = await explore({
+    filters: {
+      returnType: { $eq: 'ShowSeries' },
+      contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
+    },
+    pageSize: 2,
+    components: [
+      'primaryImage',
+      'secondaryImage'
+    ]
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content).toHaveLength(2);
+
+  for (const { object } of res.content) {
+    expect(object.metadata).toBeDefined();
+    expect(object.metadata.name).toBeDefined();
+    expect(object.metadata.altId).toBeDefined();
+    expect(object.metadata.mhid).toBeDefined();
+
+    const { primaryImage } = object;
+    expectMediaHoundImage(primaryImage);
+
+    const { secondaryImage } = object;
+    expectMediaHoundImage(secondaryImage);
+  }
+});
+
+test('explore takes an object component', async () => {
+  const res = await explore({
+    filters: {
+      returnType: { $eq: 'ShowSeries' },
+      contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
+    },
+    pageSize: 2,
+    components: [
+      { name: 'primaryImage' }
+    ]
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content).toHaveLength(2);
+
+  for (const { object } of res.content) {
+    expect(object.metadata).toBeDefined();
+    expect(object.metadata.name).toBeDefined();
+    expect(object.metadata.altId).toBeDefined();
+    expect(object.metadata.mhid).toBeDefined();
+
+    const { primaryImage } = object;
+    expectMediaHoundImage(primaryImage);
+  }
+});
+
+test('explore takes multiple object components', async () => {
+  const res = await explore({
+    filters: {
+      returnType: { $eq: 'ShowSeries' },
+      contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
+    },
+    pageSize: 2,
+    components: [
+      { name: 'primaryImage' },
+      { name: 'secondaryImage' }
+    ]
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content).toHaveLength(2);
+
+  for (const { object } of res.content) {
+    expect(object.metadata).toBeDefined();
+    expect(object.metadata.name).toBeDefined();
+    expect(object.metadata.altId).toBeDefined();
+    expect(object.metadata.mhid).toBeDefined();
+
+    const { primaryImage } = object;
+    expectMediaHoundImage(primaryImage);
+
+    const { secondaryImage } = object;
+    expectMediaHoundImage(secondaryImage);
+  }
+});
+
+test('explore ignores unrecognized components', async () => {
+  const res = await explore({
+    filters: {
+      returnType: { $eq: 'ShowSeries' },
+      contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
+    },
+    pageSize: 2,
+    components: [
+      'wrongComponent'
+    ]
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content).toHaveLength(2);
+
+  for (const { object } of res.content) {
+    expect(object.metadata).toBeDefined();
+    expect(object.metadata.name).toBeDefined();
+    expect(object.metadata.altId).toBeDefined();
+    expect(object.metadata.mhid).toBeDefined();
+  }
+});
+
+test('explore ignores unrecognized components but accepts valid ones', async () => {
+  const res = await explore({
+    filters: {
+      returnType: { $eq: 'ShowSeries' },
+      contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
+    },
+    pageSize: 2,
+    components: [
+      'wrongComponent',
+      'primaryImage'
+    ]
+  });
+
+  expect(Array.isArray(res.content)).toBe(true);
+  expect(res.content).toHaveLength(2);
+
+  for (const { object } of res.content) {
+    expect(object.metadata).toBeDefined();
+    expect(object.metadata.name).toBeDefined();
+    expect(object.metadata.altId).toBeDefined();
+    expect(object.metadata.mhid).toBeDefined();
+
+    const { primaryImage } = object;
+    expectMediaHoundImage(primaryImage);
+  }
 });
