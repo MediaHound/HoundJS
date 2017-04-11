@@ -1,6 +1,6 @@
 import houndRequest from '../request/hound-request.js';
 
-export const comopse = ({ ids, types, components }) => {
+export const compose = ({ ids, types, components }) => {
   return houndRequest({
     method: 'GET',
     endpoint: 'graph/trait/compose',

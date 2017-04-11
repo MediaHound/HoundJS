@@ -21,7 +21,7 @@
   "scripts": {
     "dev": "webpack --progress --watch",
     "build": "webpack -p --progress",
-    "test": "jest"
+    "test": "jest -i --coverage"
   },
   "dependencies": {
     "base-64": "^0.1.0",
