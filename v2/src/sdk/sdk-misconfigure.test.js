@@ -24,7 +24,7 @@ test('Sdk queries fail without first configuring: Explore', async () => {
     return explore({
       filters: {
         returnType: 'ShowSeries',
-        withContributor: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
+        contributor: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
       }
     });
   });
