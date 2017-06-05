@@ -126,7 +126,7 @@ export const loginWithCredentials = ({ username, password, scope }) => {
       const accessToken = json.access_token;
 
       if (accessToken) {
-        return loginWithAccessToken(accessToken);
+        return loginWithAccessToken({ accessToken });
       }
       else {
         const err = new Error('houndjs Invalid Credentials');
