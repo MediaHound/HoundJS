@@ -8,15 +8,29 @@ const mapValueToType = (rawValue, type) => {
         var innerType = type[0];
 
         if (rawValue !== null && rawValue !== undefined) {
-          initialValue = rawValue.map( v => {
-            try {
-              return mapValueToType(v, innerType);
-            }
-            catch (e) {
-              console.log(e);
-              return v;
-            }
-          });
+
+          if (rawValue.content && rawValue.content instanceof Array) {
+            initialValue = rawValue.content.map( v => {
+              try {
+                return mapValueToType(v, innerType);
+              }
+              catch (e) {
+                console.log(e);
+                return v;
+              }
+            });
+          }
+          else {
+            initialValue = rawValue.map( v => {
+              try {
+                return mapValueToType(v, innerType);
+              }
+              catch (e) {
+                console.log(e);
+                return v;
+              }
+            });
+          }
         }
       }
       else {
