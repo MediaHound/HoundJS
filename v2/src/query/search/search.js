@@ -1,7 +1,7 @@
 import houndRequest from '../../request/hound-request.js';
 import extraEncode from '../../request/extra-encode.js';
 
-export const all = ({ searchTerm, scopes, pageSize }) => {
+export const all = ({ searchTerm, scopes, pageSize, debug = false }) => {
   return houndRequest({
     method  : 'GET',
     endpoint: `search/all/${extraEncode(searchTerm)}`,
@@ -10,11 +10,12 @@ export const all = ({ searchTerm, scopes, pageSize }) => {
       pageSize,
       types: Array.isArray(scopes) ? scopes : undefined
     },
-    responseType: 'pagedResponse'
+    responseType: 'pagedResponse',
+    debug
   });
 };
 
-export const segmented = ({ searchTerm, scopes, siloPageSize, includeAll = true }) => {
+export const segmented = ({ searchTerm, scopes, siloPageSize, includeAll = true, debug = false }) => {
   return houndRequest({
     method  : 'GET',
     endpoint: `search/segmented/${extraEncode(searchTerm)}`,
@@ -24,6 +25,7 @@ export const segmented = ({ searchTerm, scopes, siloPageSize, includeAll = true 
       includeAll,
       types: Array.isArray(scopes) ? scopes : undefined
     },
-    responseType: 'silo'
+    responseType: 'silo',
+    debug
   });
 };

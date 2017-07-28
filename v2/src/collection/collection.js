@@ -1,6 +1,6 @@
 import houndRequest from '../request/hound-request.js';
 
-export const create = ({ name, description }) => {
+export const create = ({ name, description, debug = false }) => {
   return houndRequest({
     method: 'POST',
     endpoint: 'graph/collection/new',
@@ -8,11 +8,12 @@ export const create = ({ name, description }) => {
       name,
       description
     },
-    responseType: 'json'
+    responseType: 'json',
+    debug
   });
 };
 
-export const update = ({ id, operations, allowDuplicates = false }) => {
+export const update = ({ id, operations, allowDuplicates = false, debug = false }) => {
   return houndRequest({
     method: 'POST',
     endpoint: `graph/collection/${id}/update`,
@@ -20,6 +21,7 @@ export const update = ({ id, operations, allowDuplicates = false }) => {
       operations,
       allowDuplicates
     },
-    responseType: 'json'
+    responseType: 'json',
+    debug
   });
 };

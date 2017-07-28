@@ -23,7 +23,19 @@ const createPagedResponse = ({ json, responseType, generateRequest }) => {
   return payload;
 };
 
-const houndRequest = ({ method, endpoint, url, params, paramsProper = false, responseType }) => {
+const transformResponse = (json, responseType, houndRequest) => {
+  if (responseType === 'json') {
+    return json;
+  }
+  else if (responseType === 'pagedResponse' || responseType === 'silo') {
+    return createPagedResponse({ json, responseType, generateRequest: houndRequest });
+  }
+  else {
+    throw new Error('houndjs Invalid response type set');
+  }
+};
+
+const houndRequest = ({ method, endpoint, url, params, paramsProper = false, responseType, debug = false }) => {
   // Set the OAuth access token if the client has configured OAuth.
   const accessToken = sdk.details.getAccessToken();
 
@@ -36,17 +48,20 @@ const houndRequest = ({ method, endpoint, url, params, paramsProper = false, res
       params,
       paramsProper,
       authorization: accessToken ? `Bearer ${accessToken}` : undefined,
-      locale
+      locale,
+      debug
     })
-    .then(json => {
-      if (responseType === 'json') {
-        return json;
-      }
-      else if (responseType === 'pagedResponse' || responseType === 'silo') {
-        return createPagedResponse({ json, responseType, generateRequest: houndRequest });
+    .then(res => {
+      if (debug) {
+        const { json, ...details } = res;
+
+        return {
+          ...details,
+          response: transformResponse(json, responseType, houndRequest)
+        };
       }
       else {
-        throw new Error('houndjs Invalid response type set');
+        return transformResponse(res, responseType, houndRequest);
       }
     });
 };

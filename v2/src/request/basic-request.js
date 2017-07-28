@@ -62,7 +62,7 @@ const serializeBodyParams = (obj) => {
   return JSON.stringify(filteredParams(obj));
 };
 
-const basicRequest = ({ method, url, params, authorization, paramsProper = false, useForms = false, locale = null }) => {
+const basicRequest = ({ method, url, params, authorization, paramsProper = false, useForms = false, locale = null, debug = false }) => {
   const headers = {
     'Accept': 'application/json'
   };
@@ -97,6 +97,11 @@ const basicRequest = ({ method, url, params, authorization, paramsProper = false
   }
 
   // console.log(method, url, body, headers);
+  let startTime = 0;
+  if (debug && performance) {
+    startTime = performance.now();
+  }
+
   return fetch(url, {
       method,
       headers,
@@ -108,7 +113,21 @@ const basicRequest = ({ method, url, params, authorization, paramsProper = false
         err.response = res;
         throw err;
       }
-      return res.json();
+
+      if (debug && performance) {
+        const endTime = performance.now();
+
+        const responseTime = endTime - startTime;
+
+        return res.json()
+          .then(json => ({
+            json,
+            responseTime
+          }));
+      }
+      else {
+        return res.json();
+      }
     });
 };
 
