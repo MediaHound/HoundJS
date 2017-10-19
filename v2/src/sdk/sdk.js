@@ -14,12 +14,14 @@ else if (typeof window === 'undefined') {
 
 let _accessToken = null;
 let _userAccessToken = null;
+let _username = null;
 let _clientId = null;
 let _clientSecret = null;
 let _houndOrigin = 'https://api.mediahound.com/';
 let _locale = null;
 
 const getAccessToken = () => _userAccessToken ? _userAccessToken : _accessToken;
+const getUsername = () => _username;
 const getClientId = () => _clientId;
 const getClientSecret = () => _clientSecret;
 const getOrigin = () => _houndOrigin;
@@ -29,6 +31,7 @@ const getRootEndpoint = () => `${getOrigin()}${getApiVersion()}`;
 
 export const details = {
   getAccessToken,
+  getUsername,
   getClientId,
   getClientSecret,
   getOrigin,
@@ -101,9 +104,12 @@ export const loginWithAccessToken = ({ accessToken }) => {
       useForms: true
     })
     .then(json => {
-      _accessToken = accessToken;
+      const username = json.user_name;
 
-      return json.user_name;
+      _userAccessToken = accessToken;
+      _username = username;
+
+      return username;
     });
 };
 
