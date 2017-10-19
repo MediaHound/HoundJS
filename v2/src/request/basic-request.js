@@ -81,10 +81,10 @@ const basicRequest = ({ method, url, params, authorization, paramsProper = false
     if (method === 'GET') {
       // TODO: Everything should go to paramsProper soon
       if (paramsProper) {
-        url = `${url}?params=${encodeURIComponent(JSON.stringify(params))}`;
+        url = `${url}?useHimitsu=true&params=${encodeURIComponent(JSON.stringify(params))}`;
       }
       else {
-        url = `${url}?${serializeQueryParams(params)}`;
+        url = `${url}?useHimitsu=true&${serializeQueryParams(params)}`;
       }
     }
     else if (useForms) {
@@ -123,10 +123,17 @@ const basicRequest = ({ method, url, params, authorization, paramsProper = false
           .then(json => ({
             json,
             responseTime
+          }))
+          .catch(err => ({
+            json: null,
+            responseTime
           }));
       }
       else {
-        return res.json();
+        return res.json()
+          .catch(err => ({
+            json: null
+          }));
       }
     });
 };
