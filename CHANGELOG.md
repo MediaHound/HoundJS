@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.7.0 (2017-10-19)
+
+* Upgrade to MediaHound API 1.3
+
 ## 0.6.21 (2016-10-19)
 
 * Supports using houndjs in a WebWorker
