@@ -1,9 +1,6 @@
+example
 src
-test
 Images
 .idea
 .DS_Store
-*.swp
-*.swo
-*.bak
 *.log

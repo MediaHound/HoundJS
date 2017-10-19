@@ -69,7 +69,7 @@ const main = async () => {
 
   await hound.explore({
     filters: {
-      returnType: 'Movie',
+      returnType: { '$eq': 'Movie' },
       withContributor: {
         '$eq': 'mhric-george-clooney'
       }
@@ -117,7 +117,7 @@ const main = async () => {
       { id: 'mhusr-db', weight: 0.5, boostOnly: true }
     ],
     filters: {
-      returnType: 'Movie',
+      returnType: { '$eq': 'Movie' },
       withContributor: {
         '$eq': 'mhric-george-clooney'
       }
