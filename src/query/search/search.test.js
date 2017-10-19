@@ -23,7 +23,7 @@ test('search.all takes a searchTerm, scopes and pageSize', async () => {
   expect(res.hasMorePages).toBe(true);
 
   for (const { object, context } of res.content) {
-    expect(object.metadata.mhid.substring(0, 5)).toBe('mhsss');
+    expect(object.mhid.substring(0, 5)).toBe('mhsss');
   }
 
   const nextRes = await res.next();
@@ -33,7 +33,7 @@ test('search.all takes a searchTerm, scopes and pageSize', async () => {
   expect(nextRes.hasMorePages).toBe(true);
 
   for (const { object, context } of nextRes.content) {
-    expect(object.metadata.mhid.substring(0, 5)).toBe('mhsss');
+    expect(object.mhid.substring(0, 5)).toBe('mhsss');
   }
 });
 
@@ -58,13 +58,13 @@ test('search.segmented takes a searchTerm, scopes, siloPageSize, and includeAll'
 
     if (innerRes.type === 'movie') {
       for (const { object, context } of innerRes.content) {
-        expect(object.metadata.mhid.substring(0, 5)).toBe('mhmov');
+        expect(object.mhid.substring(0, 5)).toBe('mhmov');
       }
     }
 
     if (innerRes.type === 'showSeries') {
       for (const { object, context } of innerRes.content) {
-        expect(object.metadata.mhid.substring(0, 5)).toBe('mhsss');
+        expect(object.mhid.substring(0, 5)).toBe('mhsss');
       }
     }
 

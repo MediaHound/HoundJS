@@ -7,12 +7,12 @@ const expectImageFormatFilledOut = (imageFormat) => {
 
 export const expectMediaHoundImage = (image) => {
   expect(image).toBeDefined();
-  expect(image.metadata).toBeDefined();
-  expect(image.metadata.mhid).toMatch(/^mhimg/);
-  expect(image.metadata.isDefault).toBeDefined();
-  expectImageFormatFilledOut(image.metadata.original);
-  expectImageFormatFilledOut(image.metadata.large);
-  expectImageFormatFilledOut(image.metadata.medium);
-  expectImageFormatFilledOut(image.metadata.small);
-  expectImageFormatFilledOut(image.metadata.thumbnail);
+  expect(image).toBeDefined();
+  expect(image.mhid).toMatch(/^mhimg/);
+  expect(image.isDefault).toBeDefined();
+  expectImageFormatFilledOut(image.original);
+  expectImageFormatFilledOut(image.large);
+  expectImageFormatFilledOut(image.medium);
+  expectImageFormatFilledOut(image.small);
+  expectImageFormatFilledOut(image.thumbnail);
 };

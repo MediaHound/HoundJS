@@ -211,7 +211,7 @@ test('relate takes a filters object with a simple factors array', async () => {
   expect(res.content).toHaveLength(10);
 
   for (const { object, context } of res.content) {
-    expect(object.metadata.mhid.substring(0, 5)).toBe('mhsss');
+    expect(object.mhid.substring(0, 5)).toBe('mhsss');
   }
 });
 
@@ -232,7 +232,7 @@ test('relate takes a filters object with an advanced factors array', async () =>
   expect(res.content).toHaveLength(10);
 
   for (const { object, context } of res.content) {
-    expect(object.metadata.mhid.substring(0, 5)).toBe('mhsss');
+    expect(object.mhid.substring(0, 5)).toBe('mhsss');
   }
 });
 
@@ -286,10 +286,10 @@ test('relate return basic metadata if no components are requested', async () => 
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
   }
 });
 
@@ -304,13 +304,13 @@ test('relate takes a simple component', async () => {
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
 
     const { primaryImage } = object;
-    expectMediaHoundImage(primaryImage);
+    expectMediaHoundImage(primaryImage.object);
   }
 });
 
@@ -328,16 +328,16 @@ test('relate takes multiple simple components', async () => {
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
 
     const { primaryImage } = object;
-    expectMediaHoundImage(primaryImage);
+    expectMediaHoundImage(primaryImage.object);
 
     const { secondaryImage } = object;
-    expectMediaHoundImage(secondaryImage);
+    expectMediaHoundImage(secondaryImage.object);
   }
 });
 
@@ -354,13 +354,13 @@ test('relate takes an object component', async () => {
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
 
     const { primaryImage } = object;
-    expectMediaHoundImage(primaryImage);
+    expectMediaHoundImage(primaryImage.object);
   }
 });
 
@@ -378,16 +378,16 @@ test('relate takes multiple object components', async () => {
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
 
     const { primaryImage } = object;
-    expectMediaHoundImage(primaryImage);
+    expectMediaHoundImage(primaryImage.object);
 
     const { secondaryImage } = object;
-    expectMediaHoundImage(secondaryImage);
+    expectMediaHoundImage(secondaryImage.object);
   }
 });
 
@@ -404,10 +404,10 @@ test('relate ignores unrecognized components', async () => {
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
   }
 });
 
@@ -425,12 +425,12 @@ test('relate ignores unrecognized components but accepts valid ones', async () =
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
 
     const { primaryImage } = object;
-    expectMediaHoundImage(primaryImage);
+    expectMediaHoundImage(primaryImage.object);
   }
 });

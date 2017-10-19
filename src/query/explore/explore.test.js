@@ -20,7 +20,7 @@ test('explore takes a filters object of mhid', async () => {
   expect(res.content).toHaveLength(10); // Default pageSize is 10
 
   for (const { object, context } of res.content) {
-    expect(object.metadata.mhid.substring(0, 5)).toBe('mhsss');
+    expect(object.mhid.substring(0, 5)).toBe('mhsss');
   }
 });
 
@@ -36,7 +36,7 @@ test('explore takes a filters object of altId', async () => {
   expect(res.content).toHaveLength(10); // Default pageSize is 10
 
   for (const { object, context } of res.content) {
-    expect(object.metadata.mhid.substring(0, 5)).toBe('mhsss');
+    expect(object.mhid.substring(0, 5)).toBe('mhsss');
   }
 });
 
@@ -52,7 +52,7 @@ test('explore takes a filters object of MSI', async () => {
   expect(res.content).toHaveLength(10); // Default pageSize is 10
 
   for (const { object, context } of res.content) {
-    expect(object.metadata.mhid.substring(0, 5)).toBe('mhsss');
+    expect(object.mhid.substring(0, 5)).toBe('mhsss');
   }
 });
 
@@ -119,10 +119,10 @@ test('explore takes a sort object: sort by ids - in order (mhid)', async () => {
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content[0].object.metadata.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8');
-  expect(res.content[1].object.metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
-  expect(res.content[2].object.metadata.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1');
-  expect(res.content[3].object.metadata.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01');
+  expect(res.content[0].object.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8');
+  expect(res.content[1].object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
+  expect(res.content[2].object.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1');
+  expect(res.content[3].object.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01');
 });
 
 test('explore takes a sort object: sort by ids - in order (altId)', async () => {
@@ -151,10 +151,10 @@ test('explore takes a sort object: sort by ids - in order (altId)', async () => 
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content[0].object.metadata.altId).toBe('mhmov-her');
-  expect(res.content[1].object.metadata.altId).toBe('mhmov-gladiator');
-  expect(res.content[2].object.metadata.altId).toBe('mhmov-citizen-kane');
-  expect(res.content[3].object.metadata.altId).toBe('mhmov-dodgeball-a-true-underdog-story');
+  expect(res.content[0].object.altId).toBe('mhmov-her');
+  expect(res.content[1].object.altId).toBe('mhmov-gladiator');
+  expect(res.content[2].object.altId).toBe('mhmov-citizen-kane');
+  expect(res.content[3].object.altId).toBe('mhmov-dodgeball-a-true-underdog-story');
 });
 
 test('explore takes a sort object: sort by ids - in order (MSI)', async () => {
@@ -183,10 +183,10 @@ test('explore takes a sort object: sort by ids - in order (MSI)', async () => {
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content[0].object.metadata.altId).toBe('mhmov-her');
-  expect(res.content[1].object.metadata.altId).toBe('mhmov-gladiator');
-  expect(res.content[2].object.metadata.altId).toBe('mhmov-citizen-kane');
-  expect(res.content[3].object.metadata.altId).toBe('mhmov-dodgeball-a-true-underdog-story');
+  expect(res.content[0].object.altId).toBe('mhmov-her');
+  expect(res.content[1].object.altId).toBe('mhmov-gladiator');
+  expect(res.content[2].object.altId).toBe('mhmov-citizen-kane');
+  expect(res.content[3].object.altId).toBe('mhmov-dodgeball-a-true-underdog-story');
 });
 
 test('explore takes a sort object: sort by ids - in order descending', async () => {
@@ -216,10 +216,10 @@ test('explore takes a sort object: sort by ids - in order descending', async () 
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content[0].object.metadata.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01');
-  expect(res.content[1].object.metadata.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1');
-  expect(res.content[2].object.metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
-  expect(res.content[3].object.metadata.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8');
+  expect(res.content[0].object.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01');
+  expect(res.content[1].object.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1');
+  expect(res.content[2].object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
+  expect(res.content[3].object.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8');
 });
 
 test('explore takes a sort object: sort by ids - explicit reverse order', async () => {
@@ -248,10 +248,10 @@ test('explore takes a sort object: sort by ids - explicit reverse order', async 
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content[0].object.metadata.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01');
-  expect(res.content[1].object.metadata.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1');
-  expect(res.content[2].object.metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
-  expect(res.content[3].object.metadata.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8');
+  expect(res.content[0].object.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01');
+  expect(res.content[1].object.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1');
+  expect(res.content[2].object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
+  expect(res.content[3].object.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8');
 });
 
 test('explore takes a sort object: sort by ids - partial with name fallback', async () => {
@@ -283,10 +283,10 @@ test('explore takes a sort object: sort by ids - partial with name fallback', as
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content[0].object.metadata.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1');
-  expect(res.content[1].object.metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
-  expect(res.content[2].object.metadata.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01'); // troy
-  expect(res.content[3].object.metadata.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'); // her
+  expect(res.content[0].object.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1');
+  expect(res.content[1].object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
+  expect(res.content[2].object.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01'); // troy
+  expect(res.content[3].object.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'); // her
 });
 
 test('explore takes a sort object: sort by releaseDate', async () => {
@@ -309,9 +309,9 @@ test('explore takes a sort object: sort by releaseDate', async () => {
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content[0].object.metadata.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'); // Her 2013
-  expect(res.content[1].object.metadata.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1'); // The Notebook 2004
-  expect(res.content[2].object.metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G'); // Gladiator 2000
+  expect(res.content[0].object.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'); // Her 2013
+  expect(res.content[1].object.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1'); // The Notebook 2004
+  expect(res.content[2].object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G'); // Gladiator 2000
 });
 
 test('explore takes a sort object: sort by releaseDate ascending', async () => {
@@ -335,9 +335,9 @@ test('explore takes a sort object: sort by releaseDate ascending', async () => {
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content[0].object.metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G'); // Gladiator 2000
-  expect(res.content[1].object.metadata.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1'); // The Notebook 2004
-  expect(res.content[2].object.metadata.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'); // Her 2013
+  expect(res.content[0].object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G'); // Gladiator 2000
+  expect(res.content[1].object.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1'); // The Notebook 2004
+  expect(res.content[2].object.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'); // Her 2013
 });
 
 test('explore takes a sort object: sort by name', async () => {
@@ -361,10 +361,10 @@ test('explore takes a sort object: sort by name', async () => {
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content[0].object.metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G'); // Gladiator
-  expect(res.content[1].object.metadata.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'); // Her
-  expect(res.content[2].object.metadata.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1'); // The Notebook
-  expect(res.content[3].object.metadata.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01'); // Troy
+  expect(res.content[0].object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G'); // Gladiator
+  expect(res.content[1].object.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'); // Her
+  expect(res.content[2].object.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1'); // The Notebook
+  expect(res.content[3].object.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01'); // Troy
 });
 
 test('explore takes a sort object: sort by name descending', async () => {
@@ -389,10 +389,10 @@ test('explore takes a sort object: sort by name descending', async () => {
   });
 
   expect(Array.isArray(res.content)).toBe(true);
-  expect(res.content[0].object.metadata.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01'); // Troy
-  expect(res.content[1].object.metadata.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1'); // The Notebook
-  expect(res.content[2].object.metadata.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'); // Her
-  expect(res.content[3].object.metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G'); // Gladiator
+  expect(res.content[0].object.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01'); // Troy
+  expect(res.content[1].object.mhid).toBe('mhmovmhmrIfMxv8U3zZaAq7wDRK5WuG5h0hdUpInVrM1'); // The Notebook
+  expect(res.content[2].object.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'); // Her
+  expect(res.content[3].object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G'); // Gladiator
 });
 
 test('explore return basic metadata if no components are requested', async () => {
@@ -408,10 +408,9 @@ test('explore return basic metadata if no components are requested', async () =>
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
   }
 });
 
@@ -429,13 +428,12 @@ test('explore takes a simple component', async () => {
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
 
     const { primaryImage } = object;
-    expectMediaHoundImage(primaryImage);
+    expectMediaHoundImage(primaryImage.object);
   }
 });
 
@@ -456,16 +454,15 @@ test('explore takes multiple simple components', async () => {
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
 
     const { primaryImage } = object;
-    expectMediaHoundImage(primaryImage);
+    expectMediaHoundImage(primaryImage.object);
 
     const { secondaryImage } = object;
-    expectMediaHoundImage(secondaryImage);
+    expectMediaHoundImage(secondaryImage.object);
   }
 });
 
@@ -485,13 +482,12 @@ test('explore takes an object component', async () => {
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
 
     const { primaryImage } = object;
-    expectMediaHoundImage(primaryImage);
+    expectMediaHoundImage(primaryImage.object);
   }
 });
 
@@ -512,16 +508,15 @@ test('explore takes multiple object components', async () => {
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
 
     const { primaryImage } = object;
-    expectMediaHoundImage(primaryImage);
+    expectMediaHoundImage(primaryImage.object);
 
     const { secondaryImage } = object;
-    expectMediaHoundImage(secondaryImage);
+    expectMediaHoundImage(secondaryImage.object);
   }
 });
 
@@ -541,10 +536,9 @@ test('explore ignores unrecognized components', async () => {
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
   }
 });
 
@@ -565,12 +559,11 @@ test('explore ignores unrecognized components but accepts valid ones', async () 
   expect(res.content).toHaveLength(2);
 
   for (const { object } of res.content) {
-    expect(object.metadata).toBeDefined();
-    expect(object.metadata.name).toBeDefined();
-    expect(object.metadata.altId).toBeDefined();
-    expect(object.metadata.mhid).toBeDefined();
+    expect(object.name).toBeDefined();
+    expect(object.altId).toBeDefined();
+    expect(object.mhid).toBeDefined();
 
     const { primaryImage } = object;
-    expectMediaHoundImage(primaryImage);
+    expectMediaHoundImage(primaryImage.object);
   }
 });

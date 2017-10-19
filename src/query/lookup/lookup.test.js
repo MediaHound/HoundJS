@@ -284,11 +284,9 @@ test('lookup returns basic metadata if no components are requested', async () =>
   expect(context).toEqual({});
   expect(object).toBeDefined();
 
-  const { metadata } = object;
-  expect(metadata).toBeDefined();
-  expect(metadata.name).toBe('Gladiator');
-  expect(metadata.altId).toBe('mhmov-gladiator');
-  expect(metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
+  expect(object.name).toBe('Gladiator');
+  expect(object.altId).toBe('mhmov-gladiator');
+  expect(object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
 });
 
 test('lookup takes a simple component', async () => {
@@ -309,14 +307,12 @@ test('lookup takes a simple component', async () => {
   expect(context).toEqual({});
   expect(object).toBeDefined();
 
-  const { metadata } = object;
-  expect(metadata).toBeDefined();
-  expect(metadata.name).toBe('Gladiator');
-  expect(metadata.altId).toBe('mhmov-gladiator');
-  expect(metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
+  expect(object.name).toBe('Gladiator');
+  expect(object.altId).toBe('mhmov-gladiator');
+  expect(object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
 
   const { primaryImage } = object;
-  expectMediaHoundImage(primaryImage);
+  expectMediaHoundImage(primaryImage.object);
 });
 
 test('lookup takes multiple simple components', async () => {
@@ -338,17 +334,15 @@ test('lookup takes multiple simple components', async () => {
   expect(context).toEqual({});
   expect(object).toBeDefined();
 
-  const { metadata } = object;
-  expect(metadata).toBeDefined();
-  expect(metadata.name).toBe('Gladiator');
-  expect(metadata.altId).toBe('mhmov-gladiator');
-  expect(metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
+  expect(object.name).toBe('Gladiator');
+  expect(object.altId).toBe('mhmov-gladiator');
+  expect(object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
 
   const { primaryImage } = object;
-  expectMediaHoundImage(primaryImage);
+  expectMediaHoundImage(primaryImage.object);
 
   const { secondaryImage } = object;
-  expectMediaHoundImage(secondaryImage);
+  expectMediaHoundImage(secondaryImage.object);
 });
 
 test('lookup takes a single object component', async () => {
@@ -369,14 +363,12 @@ test('lookup takes a single object component', async () => {
   expect(context).toEqual({});
   expect(object).toBeDefined();
 
-  const { metadata } = object;
-  expect(metadata).toBeDefined();
-  expect(metadata.name).toBe('Gladiator');
-  expect(metadata.altId).toBe('mhmov-gladiator');
-  expect(metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
+  expect(object.name).toBe('Gladiator');
+  expect(object.altId).toBe('mhmov-gladiator');
+  expect(object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
 
   const { primaryImage } = object;
-  expectMediaHoundImage(primaryImage);
+  expectMediaHoundImage(primaryImage.object);
 });
 
 test('lookup takes multiple object components', async () => {
@@ -398,17 +390,15 @@ test('lookup takes multiple object components', async () => {
   expect(context).toEqual({});
   expect(object).toBeDefined();
 
-  const { metadata } = object;
-  expect(metadata).toBeDefined();
-  expect(metadata.name).toBe('Gladiator');
-  expect(metadata.altId).toBe('mhmov-gladiator');
-  expect(metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
+  expect(object.name).toBe('Gladiator');
+  expect(object.altId).toBe('mhmov-gladiator');
+  expect(object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
 
   const { primaryImage } = object;
-  expectMediaHoundImage(primaryImage);
+  expectMediaHoundImage(primaryImage.object);
 
   const { secondaryImage } = object;
-  expectMediaHoundImage(secondaryImage);
+  expectMediaHoundImage(secondaryImage.object);
 });
 
 test('lookup ignores unrecognized components', async () => {
@@ -429,11 +419,9 @@ test('lookup ignores unrecognized components', async () => {
   expect(context).toEqual({});
   expect(object).toBeDefined();
 
-  const { metadata } = object;
-  expect(metadata).toBeDefined();
-  expect(metadata.name).toBe('Gladiator');
-  expect(metadata.altId).toBe('mhmov-gladiator');
-  expect(metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
+  expect(object.name).toBe('Gladiator');
+  expect(object.altId).toBe('mhmov-gladiator');
+  expect(object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
 });
 
 test('lookup ignores unrecognized components but accepts valid ones', async () => {
@@ -455,12 +443,10 @@ test('lookup ignores unrecognized components but accepts valid ones', async () =
   expect(context).toEqual({});
   expect(object).toBeDefined();
 
-  const { metadata } = object;
-  expect(metadata).toBeDefined();
-  expect(metadata.name).toBe('Gladiator');
-  expect(metadata.altId).toBe('mhmov-gladiator');
-  expect(metadata.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
+  expect(object.name).toBe('Gladiator');
+  expect(object.altId).toBe('mhmov-gladiator');
+  expect(object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G');
 
   const { primaryImage } = object;
-  expectMediaHoundImage(primaryImage);
+  expectMediaHoundImage(primaryImage.object);
 });

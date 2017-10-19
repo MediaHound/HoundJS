@@ -47,7 +47,7 @@ const main = async () => {
   });
 
   await hound.collection.update({
-    id: resultC.metadata.mhid,
+    id: resultC.mhid,
     operations: [
       { operation: 'prepend', order: 0, ids: ['mhmov-gladiator'] }
     ],
