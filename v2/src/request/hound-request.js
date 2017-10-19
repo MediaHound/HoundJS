@@ -6,8 +6,20 @@ const createPagedResponse = ({ json, responseType, generateRequest }) => {
 
   const hasMorePages = !!(pagingInfo && pagingInfo.next);
 
+  let finalizedContent;
+  if (responseType === 'pagedResponse') {
+    finalizedContent = content;
+  }
+  else if (content) {
+    finalizedContent = content.map(c => createPagedResponse({ json: c, responseType: 'pagedResponse', generateRequest }));
+  }
+  else {
+    // If we get back no content array.
+    finalizedContent = [];
+  }
+
   const payload = {
-    content: responseType === 'pagedResponse' ? content : content.map(c => createPagedResponse({ json: c, responseType: 'pagedResponse', generateRequest })),
+    content: finalizedContent,
     hasMorePages,
     ...rest
   };
@@ -24,7 +36,10 @@ const createPagedResponse = ({ json, responseType, generateRequest }) => {
 };
 
 const transformResponse = (json, responseType, houndRequest) => {
-  if (responseType === 'json') {
+  if (responseType === 'none') {
+    return null;
+  }
+  else if (responseType === 'json') {
     return json;
   }
   else if (responseType === 'pagedResponse' || responseType === 'silo') {
