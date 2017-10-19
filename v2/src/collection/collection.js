@@ -1,12 +1,13 @@
 import houndRequest from '../request/hound-request.js';
 
-export const create = ({ name, description, debug = false }) => {
+export const create = ({ name, description, content, debug = false }) => {
   return houndRequest({
     method: 'POST',
     endpoint: 'graph/collection/new',
     params: {
       name,
-      description
+      description,
+      content
     },
     responseType: 'json',
     debug
@@ -21,7 +22,7 @@ export const update = ({ id, operations, allowDuplicates = false, debug = false 
       operations,
       allowDuplicates
     },
-    responseType: 'json',
+    responseType: 'none',
     debug
   });
 };
