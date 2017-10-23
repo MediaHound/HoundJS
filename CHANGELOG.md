@@ -6,6 +6,10 @@
 
 * Upgrade to MediaHound API 1.3
 
+## 0.6.22 (2017-6-14)
+
+* Support new model for Paged Response as components
+
 ## 0.6.21 (2016-10-19)
 
 * Supports using houndjs in a WebWorker
