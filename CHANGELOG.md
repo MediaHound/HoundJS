@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.7.0 (2017-10-19)
+
+* Upgrade to MediaHound API 1.3
+
 ## 0.6.22 (2017-6-14)
 
 * Support new model for Paged Response as components

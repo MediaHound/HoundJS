@@ -1,127 +1,84 @@
+import * as sdk from '../sdk/sdk.js';
+import basicRequest from './basic-request.js';
 
-// import { log } from '../models/internal/debug-helpers.js';
+const createPagedResponse = ({ json, responseType, generateRequest }) => {
+  const { content, pagingInfo, ...rest } = json;
 
-import promiseRequest from './promise-request.js';
+  const hasMorePages = !!(pagingInfo && pagingInfo.next);
 
-import MHSDK from '../models/sdk/MHSDK.js';
+  let finalizedContent;
+  if (responseType === 'pagedResponse') {
+    finalizedContent = content;
+  }
+  else if (content) {
+    finalizedContent = content.map(c => createPagedResponse({ json: c, responseType: 'pagedResponse', generateRequest }));
+  }
+  else {
+    // If we get back no content array.
+    finalizedContent = [];
+  }
 
-const extraEncode = promiseRequest.extraEncode;
-const defaults = {
-  headers: {
-    'Accept':'application/json'
-  },
-  withCredentials: true
+  const payload = {
+    content: finalizedContent,
+    hasMorePages,
+    ...rest
+  };
+
+  if (hasMorePages) {
+    payload.next = () => generateRequest({
+      method: 'GET',
+      url: pagingInfo.next,
+      responseType
+    });
+  }
+
+  return payload;
 };
 
-const responseThen = response => {
-  if (response) {
-    if (response.responseText !== null && response.responseText !== '') {
-      try {
-        return JSON.parse(response.responseText);
-      }
-      catch (e) {
-        return response.responseText;
-      }
-    }
-    if (response.response !== null && typeof response.response === 'string' && response.response !== '') {
-      try {
-        return JSON.parse(response.response);
-      }
-      catch (e) {
-        return response.response;
-      }
-    }
-    return response.status;
+const transformResponse = (json, responseType, houndRequest) => {
+  if (responseType === 'none') {
+    return null;
   }
-  return response;
+  else if (responseType === 'json') {
+    return json;
+  }
+  else if (responseType === 'pagedResponse' || responseType === 'silo') {
+    return createPagedResponse({ json, responseType, generateRequest: houndRequest });
+  }
+  else {
+    throw new Error('houndjs Invalid response type set');
+  }
 };
 
-const houndRequest = args => {
-  // Passed through to promiseRequest
-  //  method
-  //  params
-  //  data
-  //  headers
-  //  withCredentials
-  //  onprogress or onProgress
-  //
-  // Unique
-  //  endpoint -- {String} api endpoint to pass as url to promiseRequest
-  //
-  // Overwrites
-  //  url
-
-  // If args doesn't exist throw TypeError
-  if (!args) {
-    throw new TypeError('Arguments not specified for houndRequest', 'houndRequest.js', 27);
-  }
-  //log('args before defaults: ', JSON.stringify(args));
-
-  // Enforce capitals for method
-  if (typeof args.method === 'string' && (/[a-z]/).test(args.method)) {
-    args.method = args.method.toUpperCase();
-  }
-
-  // Set/Add defaults for POST requests
-  if (args.method && args.method === 'POST') {
-    defaults.withCredentials = true;
-  }
-
-  // Set args.url via args.endpoint
-  //  delete endpoint from args
-  if (args.endpoint) {
-    // houndOrigin defined in hound-origin.js before import, must be fully qualified domain name
-    args.url = MHSDK.origin + MHSDK.apiVersion + '/' + args.endpoint;
-    delete args.endpoint;
-  }
-
+const houndRequest = ({ method, endpoint, url, params, paramsProper = false, responseType, debug = false }) => {
   // Set the OAuth access token if the client has configured OAuth.
-  if (MHSDK.MHAccessToken) {
-    if (args.params) {
-      if (!args.params.access_token) {
-        args.params.access_token = MHSDK.MHAccessToken;
+  const accessToken = sdk.details.getAccessToken();
+
+  const locale = sdk.getLocale();
+
+  return basicRequest({
+      // You can either pass a full url or an endpoint
+      url: url ? url : `${sdk.details.getRootEndpoint()}/${endpoint}`,
+      method,
+      params,
+      paramsProper,
+      authorization: accessToken ? `Bearer ${accessToken}` : undefined,
+      locale,
+      debug
+    })
+    .then(res => {
+      if (debug) {
+        const { json, ...details } = res;
+
+        return {
+          ...details,
+          response: transformResponse(json, responseType, houndRequest)
+        };
       }
-    }
-    else {
-      args.params = {
-        access_token: MHSDK.MHAccessToken
-      };
-    }
-  }
-
-
-  // Set to defaults or merge
-  //  headers
-  if (!args.headers) {
-    args.headers = defaults.headers;
-  }
-else {
-    // Merge Defaults in
-    var prop;
-    for ( prop in defaults.headers) {
-      if (defaults.headers.hasOwnProperty(prop) && !(prop in args.headers)) {
-        args.headers[prop] = defaults.headers[prop];
+      else {
+        return transformResponse(res, responseType, houndRequest);
       }
-    }
-  }
-
-  // withCredentials
-  if (args.withCredentials === null) {
-    args.withCredentials = defaults.withCredentials;
-  }
-
-  //log('args after defaults: ', JSON.stringify(args));
-
-  return promiseRequest(args)
-    .then(responseThen);
+    });
 };
-
-Object.defineProperty(houndRequest, 'extraEncode', {
-  configurable  : false,
-  enumerable    : false,
-  get           : function() {
-    return extraEncode;
-  }
-});
 
 export default houndRequest;
