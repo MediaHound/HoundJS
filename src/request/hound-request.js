@@ -50,7 +50,7 @@ const transformResponse = (json, responseType, houndRequest) => {
   }
 };
 
-const houndRequest = ({ method, endpoint, url, params, paramsProper = false, responseType, debug = false }) => {
+const houndRequest = ({ method, endpoint, url, params, paramsProper = false, responseType, debug = false, useHimitsu = true }) => {
   // Set the OAuth access token if the client has configured OAuth.
   const accessToken = sdk.details.getAccessToken();
 
@@ -64,7 +64,8 @@ const houndRequest = ({ method, endpoint, url, params, paramsProper = false, res
       paramsProper,
       authorization: accessToken ? `Bearer ${accessToken}` : undefined,
       locale,
-      debug
+      debug,
+      useHimitsu
     })
     .then(res => {
       if (debug) {

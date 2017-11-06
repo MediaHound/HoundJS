@@ -1,6 +1,7 @@
 import explore from './explore.js';
 import bootstrapTests from '../../test-util/bootstrap-tests.js';
 import { expectMediaHoundImage } from '../../test-util/expect-image.js';
+import himOGTest from '../../test-util/himOGTest.js';
 
 beforeAll(() => bootstrapTests());
 
@@ -8,12 +9,13 @@ test('explore is exported as a function', () => {
   expect(typeof explore === 'function').toBe(true);
 });
 
-test('explore takes a filters object of mhid', async () => {
+himOGTest('explore takes a filters object of mhid', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       returnType: { $eq: 'ShowSeries' },
       contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
-    }
+    },
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -24,12 +26,13 @@ test('explore takes a filters object of mhid', async () => {
   }
 });
 
-test('explore takes a filters object of altId', async () => {
+himOGTest('explore takes a filters object of altId', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       returnType: { $eq: 'ShowSeries' },
       contributors: { $eq: 'mhric-george-clooney' }
-    }
+    },
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -40,12 +43,13 @@ test('explore takes a filters object of altId', async () => {
   }
 });
 
-test('explore takes a filters object of MSI', async () => {
+himOGTest('explore takes a filters object of MSI', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       returnType: { $eq: 'ShowSeries' },
       contributors: { $eq: 'IMDB::nm0289142' }
-    }
+    },
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -56,11 +60,12 @@ test('explore takes a filters object of MSI', async () => {
   }
 });
 
-test('explore can be paged through', async () => {
+himOGTest('explore can be paged through', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
-    }
+    },
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -74,12 +79,13 @@ test('explore can be paged through', async () => {
   expect(nextRes.hasMorePages).toBe(true);
 });
 
-test('explore can take a pageSize', async () => {
+himOGTest('explore can take a pageSize', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
     },
-    pageSize: 3
+    pageSize: 3,
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -93,7 +99,7 @@ test('explore can take a pageSize', async () => {
   expect(nextRes.hasMorePages).toBe(true);
 });
 
-test('explore takes a sort object: sort by ids - in order (mhid)', async () => {
+himOGTest('explore takes a sort object: sort by ids - in order (mhid)', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       restrictTo: {
@@ -115,7 +121,8 @@ test('explore takes a sort object: sort by ids - in order (mhid)', async () => {
           'mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01'
         ]
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -125,7 +132,7 @@ test('explore takes a sort object: sort by ids - in order (mhid)', async () => {
   expect(res.content[3].object.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01');
 });
 
-test('explore takes a sort object: sort by ids - in order (altId)', async () => {
+himOGTest('explore takes a sort object: sort by ids - in order (altId)', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       restrictTo: {
@@ -147,7 +154,8 @@ test('explore takes a sort object: sort by ids - in order (altId)', async () => 
           'mhmov-dodgeball-a-true-underdog-story'
         ]
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -157,7 +165,7 @@ test('explore takes a sort object: sort by ids - in order (altId)', async () => 
   expect(res.content[3].object.altId).toBe('mhmov-dodgeball-a-true-underdog-story');
 });
 
-test('explore takes a sort object: sort by ids - in order (MSI)', async () => {
+himOGTest('explore takes a sort object: sort by ids - in order (MSI)', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       restrictTo: {
@@ -179,7 +187,8 @@ test('explore takes a sort object: sort by ids - in order (MSI)', async () => {
           'IMDB::tt0364725'
         ]
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -189,7 +198,7 @@ test('explore takes a sort object: sort by ids - in order (MSI)', async () => {
   expect(res.content[3].object.altId).toBe('mhmov-dodgeball-a-true-underdog-story');
 });
 
-test('explore takes a sort object: sort by ids - in order descending', async () => {
+himOGTest('explore takes a sort object: sort by ids - in order descending', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       restrictTo: {
@@ -212,7 +221,8 @@ test('explore takes a sort object: sort by ids - in order descending', async () 
         ],
         order: 'descending'
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -222,7 +232,7 @@ test('explore takes a sort object: sort by ids - in order descending', async () 
   expect(res.content[3].object.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8');
 });
 
-test('explore takes a sort object: sort by ids - explicit reverse order', async () => {
+himOGTest('explore takes a sort object: sort by ids - explicit reverse order', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       restrictTo: {
@@ -244,7 +254,8 @@ test('explore takes a sort object: sort by ids - explicit reverse order', async 
           'mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'
         ]
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -254,7 +265,7 @@ test('explore takes a sort object: sort by ids - explicit reverse order', async 
   expect(res.content[3].object.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8');
 });
 
-test('explore takes a sort object: sort by ids - partial with name fallback', async () => {
+himOGTest('explore takes a sort object: sort by ids - partial with name fallback', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       restrictTo: {
@@ -279,7 +290,8 @@ test('explore takes a sort object: sort by ids - partial with name fallback', as
         property: 'metadata.name',
         order: 'descending'
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -289,7 +301,7 @@ test('explore takes a sort object: sort by ids - partial with name fallback', as
   expect(res.content[3].object.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'); // her
 });
 
-test('explore takes a sort object: sort by releaseDate', async () => {
+himOGTest('explore takes a sort object: sort by releaseDate', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       restrictTo: {
@@ -305,7 +317,8 @@ test('explore takes a sort object: sort by releaseDate', async () => {
         type: 'property',
         property: 'metadata.releaseDate'
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -314,7 +327,7 @@ test('explore takes a sort object: sort by releaseDate', async () => {
   expect(res.content[2].object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G'); // Gladiator 2000
 });
 
-test('explore takes a sort object: sort by releaseDate ascending', async () => {
+himOGTest('explore takes a sort object: sort by releaseDate ascending', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       restrictTo: {
@@ -331,7 +344,8 @@ test('explore takes a sort object: sort by releaseDate ascending', async () => {
         property: 'metadata.releaseDate',
         order: 'ascending'
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -340,7 +354,7 @@ test('explore takes a sort object: sort by releaseDate ascending', async () => {
   expect(res.content[2].object.mhid).toBe('mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'); // Her 2013
 });
 
-test('explore takes a sort object: sort by name', async () => {
+himOGTest('explore takes a sort object: sort by name', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       restrictTo: {
@@ -357,7 +371,8 @@ test('explore takes a sort object: sort by name', async () => {
         type: 'property',
         property: 'metadata.name'
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -367,7 +382,7 @@ test('explore takes a sort object: sort by name', async () => {
   expect(res.content[3].object.mhid).toBe('mhmovrdRNaU0J07yE4n87CFzoYjBR6FbQN6jXxxu4D01'); // Troy
 });
 
-test('explore takes a sort object: sort by name descending', async () => {
+himOGTest('explore takes a sort object: sort by name descending', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       restrictTo: {
@@ -385,7 +400,8 @@ test('explore takes a sort object: sort by name descending', async () => {
         property: 'metadata.name',
         order: 'descending'
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -395,13 +411,14 @@ test('explore takes a sort object: sort by name descending', async () => {
   expect(res.content[3].object.mhid).toBe('mhmovPeR81SeVnIPqEFsr36NYUqfqHuXzO9lDuQkq72G'); // Gladiator
 });
 
-test('explore return basic metadata if no components are requested', async () => {
+himOGTest('explore return basic metadata if no components are requested', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       returnType: { $eq: 'ShowSeries' },
       contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
     },
-    pageSize: 2
+    pageSize: 2,
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -414,14 +431,15 @@ test('explore return basic metadata if no components are requested', async () =>
   }
 });
 
-test('explore takes a simple component', async () => {
+himOGTest('explore takes a simple component', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       returnType: { $eq: 'ShowSeries' },
       contributors: { $eq: 'mhricyGERyNVHKy7BNMIZzXBX9dLOWzT4cWdcC6LPUHp' }
     },
     pageSize: 2,
-    components: ['primaryImage']
+    components: ['primaryImage'],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -437,7 +455,7 @@ test('explore takes a simple component', async () => {
   }
 });
 
-test('explore takes multiple simple components', async () => {
+himOGTest('explore takes multiple simple components', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       returnType: { $eq: 'ShowSeries' },
@@ -447,7 +465,8 @@ test('explore takes multiple simple components', async () => {
     components: [
       'primaryImage',
       'secondaryImage'
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -466,7 +485,7 @@ test('explore takes multiple simple components', async () => {
   }
 });
 
-test('explore takes an object component', async () => {
+himOGTest('explore takes an object component', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       returnType: { $eq: 'ShowSeries' },
@@ -475,7 +494,8 @@ test('explore takes an object component', async () => {
     pageSize: 2,
     components: [
       { name: 'primaryImage' }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -491,7 +511,7 @@ test('explore takes an object component', async () => {
   }
 });
 
-test('explore takes multiple object components', async () => {
+himOGTest('explore takes multiple object components', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       returnType: { $eq: 'ShowSeries' },
@@ -501,7 +521,8 @@ test('explore takes multiple object components', async () => {
     components: [
       { name: 'primaryImage' },
       { name: 'secondaryImage' }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -520,7 +541,7 @@ test('explore takes multiple object components', async () => {
   }
 });
 
-test('explore ignores unrecognized components', async () => {
+himOGTest('explore ignores unrecognized components', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       returnType: { $eq: 'ShowSeries' },
@@ -529,7 +550,8 @@ test('explore ignores unrecognized components', async () => {
     pageSize: 2,
     components: [
       'wrongComponent'
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -542,7 +564,7 @@ test('explore ignores unrecognized components', async () => {
   }
 });
 
-test('explore ignores unrecognized components but accepts valid ones', async () => {
+himOGTest('explore ignores unrecognized components but accepts valid ones', async ({ useHimitsu }) => {
   const res = await explore({
     filters: {
       returnType: { $eq: 'ShowSeries' },
@@ -552,7 +574,8 @@ test('explore ignores unrecognized components but accepts valid ones', async () 
     components: [
       'wrongComponent',
       'primaryImage'
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
