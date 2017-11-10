@@ -5,6 +5,7 @@ node_modules
 
 # testing
 coverage
+jest.json
 
 # production
 build
