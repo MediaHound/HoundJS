@@ -62,7 +62,7 @@ const serializeBodyParams = (obj) => {
   return JSON.stringify(filteredParams(obj));
 };
 
-const basicRequest = ({ method, url, params, authorization, paramsProper = false, useForms = false, locale = null, debug = false }) => {
+const basicRequest = ({ method, url, params, authorization, paramsProper = false, useForms = false, locale = null, debug = false, useHimitsu = true }) => {
   const headers = {
     'Accept': 'application/json'
   };
@@ -81,10 +81,10 @@ const basicRequest = ({ method, url, params, authorization, paramsProper = false
     if (method === 'GET') {
       // TODO: Everything should go to paramsProper soon
       if (paramsProper) {
-        url = `${url}?useHimitsu=true&params=${encodeURIComponent(JSON.stringify(params))}`;
+        url = `${url}?useHimitsu=${useHimitsu}&params=${encodeURIComponent(JSON.stringify(params))}`;
       }
       else {
-        url = `${url}?useHimitsu=true&${serializeQueryParams(params)}`;
+        url = `${url}?useHimitsu=${useHimitsu}&${serializeQueryParams(params)}`;
       }
     }
     else if (useForms) {

@@ -2,6 +2,7 @@ import relate from './relate.js';
 import bootstrapTests from '../../test-util/bootstrap-tests.js';
 import syncify from '../../test-util/syncify.js';
 import { expectMediaHoundImage } from '../../test-util/expect-image.js';
+import himOGTest from '../../test-util/himOGTest.js';
 
 beforeAll(() => bootstrapTests());
 
@@ -9,132 +10,143 @@ test('relate is exported as a function', () => {
   expect(typeof relate === 'function').toBe(true);
 });
 
-test('relate takes a simple single-item factors array of mhid', async () => {
+himOGTest('relate takes a simple single-item factors array of mhid', async ({ useHimitsu }) => {
   const res = await relate({
-    factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD']
+    factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD'],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
   expect(res.content).toHaveLength(10); // Default pageSize should be 10
 });
 
-test('relate takes a simple single-item factors array of altId', async () => {
+himOGTest('relate takes a simple single-item factors array of altId', async ({ useHimitsu }) => {
   const res = await relate({
-    factors: ['mhmov-gladiator']
+    factors: ['mhmov-gladiator'],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
   expect(res.content).toHaveLength(10); // Default pageSize should be 10
 });
 
-test('relate takes a simple single-item factors array of MSI', async () => {
+himOGTest('relate takes a simple single-item factors array of MSI', async ({ useHimitsu }) => {
   const res = await relate({
-    factors: ['IMDB::tt0238380']
+    factors: ['IMDB::tt0238380'],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
   expect(res.content).toHaveLength(10); // Default pageSize should be 10
 });
 
-test('relate takes an advanced single-item factors array of mhid', async () => {
+himOGTest('relate takes an advanced single-item factors array of mhid', async ({ useHimitsu }) => {
   const res = await relate({
     factors: [
       {
         id: 'mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD'
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
   expect(res.content).toHaveLength(10); // Default pageSize should be 10
 });
 
-test('relate takes an advanced single-item factors array of altId', async () => {
+himOGTest('relate takes an advanced single-item factors array of altId', async ({ useHimitsu }) => {
   const res = await relate({
     factors: [
       {
         id: 'mhmov-gladiator'
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
   expect(res.content).toHaveLength(10); // Default pageSize should be 10
 });
 
-test('relate takes an advanced single-item factors array of MSI', async () => {
+himOGTest('relate takes an advanced single-item factors array of MSI', async ({ useHimitsu }) => {
   const res = await relate({
     factors: [
       {
         id: 'IMDB::tt0238380'
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
   expect(res.content).toHaveLength(10); // Default pageSize should be 10
 });
 
-test('relate takes an advanced single-item factors array with weight', async () => {
+himOGTest('relate takes an advanced single-item factors array with weight', async ({ useHimitsu }) => {
   const res = await relate({
     factors: [
       {
         id: 'mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD',
         weight: 1
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
   expect(res.content).toHaveLength(10); // Default pageSize should be 10
 });
 
-test('relate takes a simple multi-item factors array of mhid', async () => {
+himOGTest('relate takes a simple multi-item factors array of mhid', async ({ useHimitsu }) => {
   const res = await relate({
     factors: [
       'mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD',
       'mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
 });
 
-test('relate takes a simple multi-item factors array of altId', async () => {
+himOGTest('relate takes a simple multi-item factors array of altId', async ({ useHimitsu }) => {
   const res = await relate({
     factors: [
       'mhmov-gladiator',
       'mhmov-the-notebook'
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
 });
 
-test('relate takes a simple multi-item factors array of MSI', async () => {
+himOGTest('relate takes a simple multi-item factors array of MSI', async ({ useHimitsu }) => {
   const res = await relate({
     factors: [
       'IMDB::tt0238380',
       'IMDB::tt0365748'
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
 });
 
-test('relate takes a simple multi-item factors array of mhid, altId, and MSI', async () => {
+himOGTest('relate takes a simple multi-item factors array of mhid, altId, and MSI', async ({ useHimitsu }) => {
   const res = await relate({
     factors: [
       'mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD',
       'mhmov-her',
       'IMDB::tt0365748'
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
 });
 
-test('relate takes an advanced muli-item factors array', async () => {
+himOGTest('relate takes an advanced muli-item factors array', async ({ useHimitsu }) => {
   const res = await relate({
     factors: [
       {
@@ -143,13 +155,14 @@ test('relate takes an advanced muli-item factors array', async () => {
       {
         id: 'mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8'
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
 });
 
-test('relate takes an advanced muli-item factors array with weights', async () => {
+himOGTest('relate takes an advanced muli-item factors array with weights', async ({ useHimitsu }) => {
   const res = await relate({
     factors: [
       {
@@ -160,13 +173,14 @@ test('relate takes an advanced muli-item factors array with weights', async () =
         id: 'mhmov6VBBM2sP7mkD2kURuZoPQt4INC0spAiz8HUsSL8',
         weight: 2
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
 });
 
-test('relate takes an advanced single-item factors array with boostOnly', async () => {
+himOGTest('relate takes an advanced single-item factors array with boostOnly', async ({ useHimitsu }) => {
   const res = await relate({
     factors: [
       {
@@ -174,13 +188,14 @@ test('relate takes an advanced single-item factors array with boostOnly', async 
         weight: 1,
         boostOnly: false
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
 });
 
-test('relate takes an advanced multi-item factors array with boostOnly', async () => {
+himOGTest('relate takes an advanced multi-item factors array with boostOnly', async ({ useHimitsu }) => {
   const res = await relate({
     factors: [
       {
@@ -193,18 +208,20 @@ test('relate takes an advanced multi-item factors array with boostOnly', async (
         weight: 2,
         boostOnly: true
       }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
 });
 
-test('relate takes a filters object with a simple factors array', async () => {
+himOGTest('relate takes a filters object with a simple factors array', async ({ useHimitsu }) => {
   const res = await relate({
     factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD'],
     filters: {
       returnType: { '$eq': 'ShowSeries' }
-    }
+    },
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -215,7 +232,7 @@ test('relate takes a filters object with a simple factors array', async () => {
   }
 });
 
-test('relate takes a filters object with an advanced factors array', async () => {
+himOGTest('relate takes a filters object with an advanced factors array', async ({ useHimitsu }) => {
   const res = await relate({
     factors: [
       {
@@ -225,7 +242,8 @@ test('relate takes a filters object with an advanced factors array', async () =>
     ],
     filters: {
       returnType: { '$eq': 'ShowSeries' }
-    }
+    },
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -236,9 +254,10 @@ test('relate takes a filters object with an advanced factors array', async () =>
   }
 });
 
-test('relate can be paged through', async () => {
+himOGTest('relate can be paged through', async ({ useHimitsu }) => {
   const res = await relate({
-    factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD']
+    factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD'],
+    useHimitsu
   });
 
   expect(res.hasMorePages).toBe(true);
@@ -249,10 +268,11 @@ test('relate can be paged through', async () => {
   expect(nextRes.hasMorePages).toBe(true);
 });
 
-test('relate can take a pageSize', async () => {
+himOGTest('relate can take a pageSize', async ({ useHimitsu }) => {
   const res = await relate({
     factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD'],
-    pageSize: 3
+    pageSize: 3,
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -266,20 +286,22 @@ test('relate can take a pageSize', async () => {
   expect(nextRes.hasMorePages).toBe(true);
 });
 
-test('relate with an invalid mhid factor should fail', async () => {
+himOGTest('relate with an invalid mhid factor should fail', async ({ useHimitsu }) => {
   const syncFunction = await syncify(() => {
     return relate({
-      factors: ['mhmovWRONGWRONGWRONGWRONGWRONGWRONGWRONGWRON']
+      factors: ['mhmovWRONGWRONGWRONGWRONGWRONGWRONGWRONGWRON'],
+    useHimitsu
     });
   });
 
   expect(syncFunction).toThrow();
 });
 
-test('relate return basic metadata if no components are requested', async () => {
+himOGTest('relate return basic metadata if no components are requested', async ({ useHimitsu }) => {
   const res = await relate({
     factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD'],
-    pageSize: 2
+    pageSize: 2,
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -293,11 +315,12 @@ test('relate return basic metadata if no components are requested', async () => 
   }
 });
 
-test('relate takes a simple component', async () => {
+himOGTest('relate takes a simple component', async ({ useHimitsu }) => {
   const res = await relate({
     factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD'],
     pageSize: 2,
-    components: ['primaryImage']
+    components: ['primaryImage'],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -314,14 +337,15 @@ test('relate takes a simple component', async () => {
   }
 });
 
-test('relate takes multiple simple components', async () => {
+himOGTest('relate takes multiple simple components', async ({ useHimitsu }) => {
   const res = await relate({
     factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD'],
     pageSize: 2,
     components: [
       'primaryImage',
       'secondaryImage'
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -341,13 +365,14 @@ test('relate takes multiple simple components', async () => {
   }
 });
 
-test('relate takes an object component', async () => {
+himOGTest('relate takes an object component', async ({ useHimitsu }) => {
   const res = await relate({
     factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD'],
     pageSize: 2,
     components: [
       { name: 'primaryImage' }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -364,14 +389,15 @@ test('relate takes an object component', async () => {
   }
 });
 
-test('relate takes multiple object components', async () => {
+himOGTest('relate takes multiple object components', async ({ useHimitsu }) => {
   const res = await relate({
     factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD'],
     pageSize: 2,
     components: [
       { name: 'primaryImage' },
       { name: 'secondaryImage' }
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -391,13 +417,14 @@ test('relate takes multiple object components', async () => {
   }
 });
 
-test('relate ignores unrecognized components', async () => {
+himOGTest('relate ignores unrecognized components', async ({ useHimitsu }) => {
   const res = await relate({
     factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD'],
     pageSize: 2,
     components: [
       'wrongComponent'
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
@@ -411,14 +438,15 @@ test('relate ignores unrecognized components', async () => {
   }
 });
 
-test('relate ignores unrecognized components but accepts valid ones', async () => {
+himOGTest('relate ignores unrecognized components but accepts valid ones', async ({ useHimitsu }) => {
   const res = await relate({
     factors: ['mhmovjND8mq6M3RVmfvMpkcAKqYnyScgYVLqk0ITJuCD'],
     pageSize: 2,
     components: [
       'wrongComponent',
       'primaryImage'
-    ]
+    ],
+    useHimitsu
   });
 
   expect(Array.isArray(res.content)).toBe(true);
