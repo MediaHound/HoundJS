@@ -4,3 +4,8 @@ Images
 .idea
 .DS_Store
 *.log
+coverage
+scripts
+.env*
+*.md
+webpack.config.js
