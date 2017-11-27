@@ -15,5 +15,7 @@ Run `yarn test`
 
 To publish an update to the houndjs library:
 
-1. Update the `package.json` version following Semantic Versioning
-2. run `yarn publish`
+1. run `yarn version`
+2. run `yarn build`
+3. run `yarn publish`
+4. run `git push --tags`
