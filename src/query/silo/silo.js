@@ -1,12 +1,13 @@
 import houndRequest from '../../request/hound-request.js';
 
-export default ({ patterns, sharedPatterns, global, silosPerPage, itemsPerSilo, debug = false }) => {
+export default ({ patterns, sharedPatterns, global, silosPerPage, itemsPerSilo, debug = false, useHimitsu = true }) => {
   return houndRequest({
     method: 'GET',
     endpoint: 'graph/silo',
     params: { patterns, sharedPatterns, global, silosPerPage, itemsPerSilo },
     responseType: 'silo',
     debug,
-    paramsProper: true
+    paramsProper: true,
+    useHimitsu
   });
 };

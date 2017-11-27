@@ -1,6 +1,6 @@
 import houndRequest from '../../request/hound-request.js';
 
-export default ({ factors, filters, components, promote, pageSize, debug = false, useHimitsu = true}) => {
+export default ({ factors, filters, components, promote, pageSize, debug = false, useHimitsu = true }) => {
   return houndRequest({
     method: 'GET',
     endpoint: 'graph/relate',
