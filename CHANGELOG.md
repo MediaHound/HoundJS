@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.7.1 (2017-12-05)
+
+* houndRequest can take an accessToken override
+
 ## 0.7.0 (2017-10-19)
 
 * Upgrade to MediaHound API 1.3
