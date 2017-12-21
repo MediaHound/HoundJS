@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.7.2 (2017-12-21)
+
+* Expose relate's config parameter
+
 ## 0.7.1 (2017-12-05)
 
 * houndRequest can take an accessToken override
