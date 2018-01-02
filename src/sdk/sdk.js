@@ -21,6 +21,9 @@ let _houndOrigin = 'https://api.mediahound.com/';
 let _locale = null;
 
 const getAccessToken = () => _userAccessToken ? _userAccessToken : _accessToken;
+const setAccessToken = (accessToken) => {
+  _accessToken = accessToken;
+};
 const getUsername = () => _username;
 const getClientId = () => _clientId;
 const getClientSecret = () => _clientSecret;
@@ -37,7 +40,9 @@ export const details = {
   getOrigin,
   getApiVersion,
   getAuthHeaders,
-  getRootEndpoint
+  getRootEndpoint,
+
+  setAccessToken
 };
 
 const refreshOAuthToken = () => {

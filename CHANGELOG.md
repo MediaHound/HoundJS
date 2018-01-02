@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.7.3 (2018-01-02)
+
+* Expose sdk.details.setAccessToken()
+
 ## 0.7.2 (2017-12-21)
 
 * Expose relate's config parameter
