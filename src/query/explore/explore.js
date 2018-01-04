@@ -1,8 +1,8 @@
 import houndRequest from '../../request/hound-request.js';
 
-export default ({ filters, sort, components, pageSize, debug = false, useHimitsu = true }) => {
+export default ({ filters, sort, components, pageSize, debug = false, method = 'GET', useHimitsu = true }) => {
   return houndRequest({
-    method: 'GET',
+    method,
     endpoint: 'graph/explore',
     params: { filters, sort, components, pageSize },
     paramsProper: true,
