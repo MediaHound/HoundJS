@@ -1,6 +1,6 @@
 {
   "name": "houndjs",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "The MediaHound JavaScript SDK",
   "main": "dist/hound.js",
   "repository": {
