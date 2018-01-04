@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.7.4 (2018-01-04)
+
+* relate() takes a method for either GET or POST
+
 ## 0.7.3 (2018-01-02)
 
 * Expose sdk.details.setAccessToken()
