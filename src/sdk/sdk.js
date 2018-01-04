@@ -28,6 +28,9 @@ const getUsername = () => _username;
 const getClientId = () => _clientId;
 const getClientSecret = () => _clientSecret;
 const getOrigin = () => _houndOrigin;
+const setOrigin = (origin) => {
+  _houndOrigin = origin;
+};
 const getApiVersion = () => '1.3';
 const getAuthHeaders = () => _btoa(`${_clientId}:${_clientSecret}`);
 const getRootEndpoint = () => `${getOrigin()}${getApiVersion()}`;
@@ -41,7 +44,7 @@ export const details = {
   getApiVersion,
   getAuthHeaders,
   getRootEndpoint,
-
+  setOrigin,
   setAccessToken
 };
 

@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.7.6 (2018-01-04)
+
+* Expose sdk.details.setOrigin()
+
 ## 0.7.5 (2018-01-04)
 
 * explore() and silo() takes a method for either GET or POST
