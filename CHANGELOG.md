@@ -2,6 +2,10 @@
 
 * No changes in master
 
+## 0.7.7 (2018-01-18)
+
+* relate() takes a distribution parameter
+
 ## 0.7.6 (2018-01-04)
 
 * Expose sdk.details.setOrigin()
