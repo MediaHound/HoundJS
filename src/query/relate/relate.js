@@ -4,6 +4,7 @@ export default ({
     factors,
     filters,
     components,
+    distribution,
     promote,
     config,
     pageSize,
@@ -14,7 +15,7 @@ export default ({
     return houndRequest({
       method,
       endpoint: 'graph/relate',
-      params: { factors, filters, components, promote, config, pageSize },
+      params: { factors, filters, components, distribution, promote, config, pageSize },
       paramsProper: true,
       responseType: 'pagedResponse',
       debug,
