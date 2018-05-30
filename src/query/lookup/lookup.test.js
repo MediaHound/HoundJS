@@ -254,7 +254,7 @@ test('looking up an invalid altId along with valid altIds should fail', async ()
   expect(syncFunction).toThrow();
 });
 
-test('looking up an invalid MSI along with valid MSIs should fail', async () => {
+test('looking up an invalid MSI along with valid MSIs should return one empty object', async () => {
   const res = await lookup({
     ids: [
       'IMDB::tt0238380',
