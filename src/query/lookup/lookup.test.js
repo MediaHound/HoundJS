@@ -220,14 +220,12 @@ test('looking up an invalid altId should fail', async () => {
   expect(syncFunction).toThrow();
 });
 
-test('looking up an invalid MSI should fail', async () => {
-  const syncFunction = await syncify(() => {
-    return lookup({
-      ids: ['IMDB::WRONG']
-    });
+test('looking up an invalid MSI should return an empty object', async () => {
+  const res = await lookup({
+    ids: ['IMDB::WRONG']
   });
-
-  expect(syncFunction).toThrow();
+  expect(res.content.length).toBe(1);
+  expect(Object.keys(res.content[0]).length === 0)
 });
 
 test('looking up an invalid mhid along with valid mhids should fail', async () => {
@@ -257,16 +255,14 @@ test('looking up an invalid altId along with valid altIds should fail', async ()
 });
 
 test('looking up an invalid MSI along with valid MSIs should fail', async () => {
-  const syncFunction = await syncify(() => {
-    return lookup({
-      ids: [
-        'IMDB::tt0238380',
-        'IMDB::WRONG'
-      ]
-    });
+  const res = await lookup({
+    ids: [
+      'IMDB::tt0238380',
+      'IMDB::WRONG'
+    ]
   });
-
-  expect(syncFunction).toThrow();
+  expect(res.content.length).toBe(2);
+  expect(Object.keys(res.content[1]).length === 0)
 });
 
 test('lookup returns basic metadata if no components are requested', async () => {
